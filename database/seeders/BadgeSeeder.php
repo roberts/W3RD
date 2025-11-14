@@ -17,25 +17,25 @@ class BadgeSeeder extends Seeder
             [
                 'slug' => 'first-win',
                 'name' => 'First Victory',
-                'image_url' => '/badges/first-win.png',
+                'image_id' => null,
                 'condition_json' => ['wins' => 1],
             ],
             [
                 'slug' => 'ten-wins',
                 'name' => 'Rising Star',
-                'image_url' => '/badges/ten-wins.png',
+                'image_id' => null,
                 'condition_json' => ['wins' => 10],
             ],
             [
                 'slug' => 'hundred-wins',
                 'name' => 'Century Club',
-                'image_url' => '/badges/hundred-wins.png',
+                'image_id' => null,
                 'condition_json' => ['wins' => 100],
             ],
             [
                 'slug' => 'streak-master',
                 'name' => 'Streak Master',
-                'image_url' => '/badges/streak-master.png',
+                'image_id' => null,
                 'condition_json' => ['win_streak' => 5],
             ],
         ];

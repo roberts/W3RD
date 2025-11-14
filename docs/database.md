@@ -79,7 +79,7 @@ return new class extends Migration
         Schema::create('avatars', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50)->unique();
-            $table->string('image_url');
+            $table->foreignId('image_id')->nullable()->constrained('images');
             $table->enum('type', ['free', 'premium', 'nft'])->default('free');
             $table->timestamps();
         });

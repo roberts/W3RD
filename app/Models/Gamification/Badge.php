@@ -5,6 +5,7 @@ namespace App\Models\Gamification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
+use DrewRoberts\Media\Models\Image;
 
 class Badge extends Model
 {
@@ -13,7 +14,7 @@ class Badge extends Model
     protected $fillable = [
         'slug',
         'name',
-        'image_url',
+        'image_id',
         'condition_json',
     ];
 
@@ -22,6 +23,11 @@ class Badge extends Model
     ];
 
     // Relationships
+    public function image()
+    {
+        return $this->belongsTo(Image::class);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_badge')

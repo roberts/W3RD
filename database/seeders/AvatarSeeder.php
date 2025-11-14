@@ -14,11 +14,11 @@ class AvatarSeeder extends Seeder
     public function run(): void
     {
         $avatars = [
-            ['name' => 'Default 1', 'image_url' => '/avatars/default-1.png', 'type' => 'free'],
-            ['name' => 'Default 2', 'image_url' => '/avatars/default-2.png', 'type' => 'free'],
-            ['name' => 'Default 3', 'image_url' => '/avatars/default-3.png', 'type' => 'free'],
-            ['name' => 'Default 4', 'image_url' => '/avatars/default-4.png', 'type' => 'free'],
-            ['name' => 'Default 5', 'image_url' => '/avatars/default-5.png', 'type' => 'free'],
+            ['name' => 'Default 1', 'image_id' => null, 'type' => 'free'],
+            ['name' => 'Default 2', 'image_id' => null, 'type' => 'free'],
+            ['name' => 'Default 3', 'image_id' => null, 'type' => 'free'],
+            ['name' => 'Default 4', 'image_id' => null, 'type' => 'free'],
+            ['name' => 'Default 5', 'image_id' => null, 'type' => 'free'],
         ];
 
         foreach ($avatars as $avatar) {

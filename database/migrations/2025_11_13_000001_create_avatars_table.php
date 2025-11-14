@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AvatarType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,8 +12,8 @@ return new class extends Migration
         Schema::create('avatars', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50)->unique();
-            $table->string('image_url');
-            $table->enum('type', ['free', 'premium', 'nft'])->default('free');
+            $table->foreignId('image_id')->nullable()->constrained('images');
+            $table->string('type')->default(AvatarType::FREE->value);
             $table->timestamps();
         });
     }

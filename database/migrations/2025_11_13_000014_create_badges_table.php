@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('slug', 50)->unique();
             $table->string('name', 100);
-            $table->string('image_url');
+            $table->foreignId('image_id')->nullable()->constrained('images');
             $table->json('condition_json')->comment('Unlock criteria, e.g., {"wins": 10}');
             $table->timestamps();
         });

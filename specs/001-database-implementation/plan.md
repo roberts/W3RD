@@ -88,7 +88,7 @@ return new class extends Migration
         Schema::create('avatars', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50)->unique();
-            $table->string('image_url');
+            $table->foreignId('image_id')->nullable()->constrained('images');
             $table->enum('type', ['free', 'premium', 'nft'])->default('free');
             $table->timestamps();
         });
@@ -100,7 +100,7 @@ return new class extends Migration
 **Key Features**:
 - Unique name constraint
 - Type categorization (free/premium/nft)
-- Image URL for avatar display
+- Foreign key to images table from drewroberts/media package
 
 ---
 
@@ -947,6 +947,7 @@ namespace App\Models\Content;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
+use DrewRoberts\Media\Models\Image;
 
 class Avatar extends Model
 {
@@ -954,7 +955,7 @@ class Avatar extends Model
 
     protected $fillable = [
         'name',
-        'image_url',
+        'image_id',
         'type',
     ];
 
@@ -963,6 +964,11 @@ class Avatar extends Model
     ];
 
     // Relationships
+    public function image()
+    {
+        return $this->belongsTo(Image::class);
+    }
+
     public function users()
     {
         return $this->hasMany(User::class);

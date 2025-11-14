@@ -6,7 +6,7 @@ Here are the detailed model definitions, organized by domain, ready for implemen
 
 ## 💻 Core Identity & Access Models
 
-These models handle all entities related to users, agents, and access interfaces under a unified architecture.
+These models handle all entities related to users, agents, and access clients under a unified architecture.
 
 ### 1. `App\Models\Auth\User.php`
 
@@ -114,7 +114,7 @@ class Agent extends Model
 // ... (content largely unchanged, but the agents() relationship can be removed)
 ```
 
-### 4. `App\Models\Access\Interface.php`
+### 4. `App\Models\Access\Client.php`
 ```php
 <?php
 // ... (content unchanged)

@@ -80,7 +80,7 @@ Resources are the heart of Filament, providing full CRUD functionality for your 
     *   **`ProductResource` (for Store):** CRUD for managing the cosmetic items available for purchase.
 
 *   **Platform Integrity**
-    *   **`InterfaceResource`:** A critical but simple CRUD for managing the `interfaces` table. This allows admins to issue, view, and revoke the `X-Interface-Key` for different frontend applications.
+    *   **`ClientResource`:** A critical but simple CRUD for managing the `clients` table. This allows admins to issue, view, and revoke the `X-Client-Key` for different frontend applications.
 
 ---
 

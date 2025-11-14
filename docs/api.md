@@ -10,18 +10,18 @@ All endpoints use the base path `/v1/`.
 
 * **Required Headers for Authorization:**
     * `Authorization: Bearer [Sanctum User Token]`
-    * `X-Interface-Key: [API Key from Interfaces table]` (For application authorization)
+    * `X-Client-Key: [API Key from clients table]` (For application authorization)
 
 ### 1. 🔑 Identity & Core Access
 
 | Resource | HTTP Method | Endpoint | Purpose | Auth Requirements |
 | :--- | :--- | :--- | :--- | :--- |
-| **Sessions** | `POST` | `/v1/sessions` | **User Login.** Authenticates credentials and returns a Sanctum API token. | `X-Interface-Key` Only |
-| **Sessions** | `DELETE` | `/v1/sessions` | **User Logout.** Revokes the current API token. | Bearer + Interface Key |
-| **User** | `GET` | `/v1/user` | Retrieve the currently authenticated user's profile and plan status. | Bearer + Interface Key |
-| **User** | `PATCH` | `/v1/user` | Update user profile data (name, password, avatar choice). | Bearer + Interface Key |
-| **Avatars** | `GET` | `/v1/avatars` | List all available **Avatar** assets (free, premium, NFT). | Bearer + Interface Key |
-| **Agents** | `GET` | `/v1/agents` | List available AI/Local **Agent** profiles (for matchmaking setup). | Bearer + Interface Key |
+| **Sessions** | `POST` | `/v1/sessions` | **User Login.** Authenticates credentials and returns a Sanctum API token. | `X-Client-Key` Only |
+| **Sessions** | `DELETE` | `/v1/sessions` | **User Logout.** Revokes the current API token. | Bearer + Client Key |
+| **User** | `GET` | `/v1/user` | Retrieve the currently authenticated user's profile and plan status. | Bearer + Client Key |
+| **User** | `PATCH` | `/v1/user` | Update user profile data (name, password, avatar choice). | Bearer + Client Key |
+| **Avatars** | `GET` | `/v1/avatars` | List all available **Avatar** assets (free, premium, NFT). | Bearer + Client Key |
+| **Agents** | `GET` | `/v1/agents` | List available AI/Local **Agent** profiles (for matchmaking setup). | Bearer + Client Key |
 
 ---
 
@@ -31,12 +31,12 @@ These endpoints handle the creation of matches and the execution of moves, relyi
 
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
-| **Games** | `GET` | `/v1/games` | List all available **Game** blueprints (`validate-four`, `hearts`). | Bearer + Interface Key |
-| **Matches** | `POST` | `/v1/matches` | **CREATE** a new match. Triggers the **Strike/Quota check**. Body specifies `game_slug` and initial `players`. | Bearer + Interface Key |
-| **Matches** | `GET` | `/v1/matches` | List the authenticated user's active and recent finished matches. | Bearer + Interface Key |
-| **Match** | `GET` | `/v1/matches/{ulid}` | Retrieve the current **Match state** (`game_state` JSON) by its public **ULID**. | Bearer + Interface Key |
-| **Moves** | `POST` | `/v1/matches/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Interface Key |
-| **Moves** | `GET` | `/v1/matches/{ulid}/moves` | Retrieve the full **Move** history for the match (for replay). | Bearer + Interface Key |
+| **Games** | `GET` | `/v1/games` | List all available **Game** blueprints (`validate-four`, `hearts`). | Bearer + Client Key |
+| **Matches** | `POST` | `/v1/matches` | **CREATE** a new match. Triggers the **Strike/Quota check**. Body specifies `game_slug` and initial `players`. | Bearer + Client Key |
+| **Matches** | `GET` | `/v1/matches` | List the authenticated user's active and recent finished matches. | Bearer + Client Key |
+| **Match** | `GET` | `/v1/matches/{ulid}` | Retrieve the current **Match state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
+| **Moves** | `POST` | `/v1/matches/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
+| **Moves** | `GET` | `/v1/matches/{ulid}/moves` | Retrieve the full **Move** history for the match (for replay). | Bearer + Client Key |
 
 ---
 
@@ -46,10 +46,10 @@ These endpoints manage plan status, quotas, and handle external payment confirma
 
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
-| **Subscription** | `GET` | `/v1/billing/subscription` | Retrieve user's current plan level (Member, Master) and renewal details. | Bearer + Interface Key |
-| **Quotas** | `GET` | `/v1/billing/quotas` | Retrieve user's current limits for **Strikes** (daily losses) and **Quotas** (monthly matches). | Bearer + Interface Key |
-| **Web/Stripe** | `POST` | `/v1/billing/subscribe` | Initiate a new subscription or plan change (returns a Cashier/Stripe checkout URL). | Bearer + Interface Key |
-| **Mobile** | `POST` | `/v1/billing/mobile/verify` | **Receipt Verification.** Receives purchase token from iOS/Android app to verify with Apple/Google and update local subscription. | Bearer + Interface Key |
+| **Subscription** | `GET` | `/v1/billing/subscription` | Retrieve user's current plan level (Member, Master) and renewal details. | Bearer + Client Key |
+| **Quotas** | `GET` | `/v1/billing/quotas` | Retrieve user's current limits for **Strikes** (daily losses) and **Quotas** (monthly matches). | Bearer + Client Key |
+| **Web/Stripe** | `POST` | `/v1/billing/subscribe` | Initiate a new subscription or plan change (returns a Cashier/Stripe checkout URL). | Bearer + Client Key |
+| **Mobile** | `POST` | `/v1/billing/mobile/verify` | **Receipt Verification.** Receives purchase token from iOS/Android app to verify with Apple/Google and update local subscription. | Bearer + Client Key |
 | **Mobile** | `POST` | `/v1/billing/mobile/webhook` | Receives server-to-server **renewal/cancellation** webhooks from Apple/Google. | None (Vendor Auth) |
 | **Telegram** | `POST` | `/v1/billing/telegram/webhook` | Receives **payment confirmation** from the payment provider used within the Telegram interface. | None (Vendor Auth) |
 | **Stripe** | `POST` | `/v1/stripe/webhook` | General **Stripe Webhook** for core Laravel Cashier events. | None (Vendor Auth) |
@@ -63,7 +63,7 @@ Here is the comprehensive recap of all **GamerProtocol.io** API endpoints, detai
 
 ### I. Identity & Core Access
 
-All requests require `Authorization: Bearer [User Token]` and `X-Interface-Key`, unless noted.
+All requests require `Authorization: Bearer [User Token]` and `X-Client-Key`, unless noted.
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |

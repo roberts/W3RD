@@ -15,12 +15,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('agent_id')->nullable()->unique()->constrained('agents');
+            $table->foreignId('agent_id')->nullable()->unique()->index()->constrained('agents');
             $table->rememberToken();
             $table->timestamps();
 
-            // Foreign key for avatar
-            $table->foreignId('avatar_id')->nullable()->constrained('avatars');
+            // Avatar reference (no constraint, will be added later)
+            $table->unsignedBigInteger('avatar_id')->nullable()->index();
 
             // Laravel Cashier fields
             $table->string('stripe_id')->nullable()->index();

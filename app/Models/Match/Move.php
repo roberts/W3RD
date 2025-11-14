@@ -24,7 +24,7 @@ class Move extends Model
     // Relationships
     public function match()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(\App\Models\Match\Match::class);
     }
 
     public function player()

@@ -5,8 +5,6 @@ namespace App\Models\Match;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
-use App\Models\Match\Match;
-use App\Models\Match\Move;
 
 class Player extends Model
 {
@@ -27,7 +25,7 @@ class Player extends Model
     // Relationships
     public function match()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(\App\Models\Match\Match::class);
     }
 
     public function user()

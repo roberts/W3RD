@@ -4,7 +4,6 @@ namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Match\Match;
 
 class Game extends Model
 {
@@ -23,6 +22,6 @@ class Game extends Model
     // Relationships
     public function matches()
     {
-        return $this->hasMany(Match::class, 'game_slug', 'slug');
+        return $this->hasMany(\App\Models\Match\Match::class, 'game_slug', 'slug');
     }
 }

@@ -1,418 +1,104 @@
-## 1\. Polymorphic Logic Contract
+This document outlines the architecture for creating, scheduling, and deploying AI Agents within the GamerProtocol.io API. The core principle is that **every Agent is a `User`** with a special, attached `Agent` profile.
 
-The core structure remains the same but emphasizes the generic nature of the contract.
+---
 
-### A. Agent Strategy Contract (PHP)
+## 💾 I. Database & Model Structure
 
-This contract defines the local algorithm implementations.
-
-**`app/Services/Game/Agents/AgentStrategyContract.php`**
-
-```php
-<?php
-
-namespace App\Services\Game\Agents;
-
-interface AgentStrategyContract
-{
-    /** Calculates the next move based purely on the current game state. */
-    public function calculateMove(array $gameState, int $playerValue): array;
-}
-```
-
-### B. External Agent Contract (API)
-
-The contract for logic involving external network calls.
-
-**`app/Services/Game/Agents/ExternalAgentContract.php`**
-
-```php
-<?php
-
-namespace App\Services\Game\Agents;
-
-interface ExternalAgentContract
-{
-    /** Calls a third-party API to get the next move. */
-    public function requestMove(array $gameState, string $matchId): array;
-}
-```
-
------
-
-## 2\. 🤖 Agent Implementations (Minimax & Heuristic)
-
-These classes are named to reflect their function as **strategies** for the **Agent** resource.
-
-| Service | Purpose | Logic Used |
-| :--- | :--- | :--- |
-| `app/Services/Game/Agents/ValidateFourMinimax.php` | Calculates the optimal move for Connect Four. | **Minimax Search** (implements `AgentStrategyContract`) |
-| `app/Services/Game/Agents/CheckersHeuristic.php` | Calculates moves for Checkers. | **Heuristic Search** (implements `AgentStrategyContract`) |
-
------
-
-## 3\. 🌐 External Agent Adapter
-
-This adapter correctly uses the term `Agent` and handles the external network communication.
-
-**`app/Services/Game/Agents/ExternalAgentAdapter.php`**
-
-```php
-<?php
-
-namespace App\Services\Game\Agents;
-
-use GuzzleHttp\Client; // Requires guzzlehttp/guzzle
-// implements ExternalAgentContract...
-
-class ExternalAgentAdapter implements ExternalAgentContract
-{
-    protected Client $client;
-
-    public function __construct()
-    {
-        // ... Guzzle client initialization using configs ...
-    }
-
-    public function requestMove(array $gameState, string $matchId): array
-    {
-        // ... API formatting, Guzzle call, and response parsing logic ...
-        
-        return $this->parseResponse($response);
-    }
-}
-```
-
------
-
-## 4\. 🔗 The Unified Game Service Router
-
-The main game service is the router, selecting the correct **Agent Strategy** based on the database configuration.
-
-**`app/Services/Game/Handlers/ValidateFourService.php`**
-
-```php
-// ... within the ValidateFourService class ...
-
-public function getAIMove(Match $match): array
-{
-    // ... logic to retrieve the Agent model instance ...
-    $agent = $agentPlayer->playable; 
-
-    // Case A: Internal Agent Strategy
-    if ($agent->agent_type === 'ai' && $agent->ai_logic_path) {
-        // Correctly loads the internal strategy class name (e.g., ValidateFourMinimax)
-        $strategyClass = $agent->ai_logic_path; 
-        $strategy = new $strategyClass(); 
-        
-        // Executes the internal PHP algorithm
-        return $strategy->calculateMove($match->game_state, $agentPlayer->position_id);
-    }
-    
-    // Case B: External Agent Strategy
-    if ($agent->agent_type === 'external_api') {
-        // Uses the external adapter
-        $adapter = new ExternalAgentAdapter();
-        
-        // Executes the Guzzle HTTP call
-        return $adapter->requestMove($match->game_state, $match->ulid);
-    }
-
-    throw new \Exception("Agent type not supported.");
-}
-```
-
------
-
-## 🤖 Agent Logic Implementations
-
-This structure outlines the core files needed for your deterministic opponent logic, adhering to the **Agent Strategy Pattern** and the **Service-Oriented Architecture** within your Laravel application.
-
-The files contain the complex algorithms but remain decoupled from the Laravel `Request` and `Match` model, making them easy to test.
-
-### 1\. `app/Services/Game/Agents/ValidateFourMinimax.php`
-
-This service implements the logic for **Validate Four (Connect Four)**, which uses the **Minimax algorithm with Alpha-Beta Pruning** to efficiently find the optimal column.
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Services\Game\Agents;
-
-use App\Services\Game\Agents\AgentStrategyContract;
-
-final class ValidateFourMinimax implements AgentStrategyContract
-{
-    private const ROW_COUNT = 6;
-    private const COLUMN_COUNT = 7;
-    private const WINNING_SCORE = 100000000000000; // Arbitrarily high value
-
-    /**
-     * Calculates the best column for the current player using Minimax.
-     *
-     * @param array $gameState The array representation of the 6x7 board.
-     * @param int $playerValue The value representing the AI player (e.g., 1 or 2).
-     * @return array The move details (e.g., ['column' => 3]).
-     */
-    public function calculateMove(array $gameState, int $playerValue): array
-    {
-        // Difficulty level (depth) is typically injected or set by the calling service.
-        // For this example, we assume a default depth based on the Agent tier.
-        $depth = 5; 
-        
-        $board = $gameState['board'] ?? []; // The 6x7 grid array
-        
-        // The main minimax function returns the best score and the best column.
-        [$score, $column] = $this->minimax($board, $depth, -INF, INF, true, $playerValue);
-        
-        return ['column' => $column];
-    }
-
-    /**
-     * The core Minimax implementation with Alpha-Beta Pruning.
-     * * @param array $board The current board state.
-     * @param int $depth The remaining search depth.
-     * @param float $alpha The alpha value (maximizer's best score found so far).
-     * @param float $beta The beta value (minimizer's best score found so far).
-     * @param bool $maximizingPlayer True if it's the maximizer's turn (AI).
-     * @param int $aiPlayerValue The piece value of the AI.
-     * @return array [score, column]
-     */
-    private function minimax(array $board, int $depth, float $alpha, float $beta, bool $maximizingPlayer, int $aiPlayerValue): array
-    {
-        $opponentValue = ($aiPlayerValue === 1) ? 2 : 1;
-        $validLocations = $this->getValidLocations($board);
-        
-        // Base case: Check for terminal nodes (win, draw, or max depth reached)
-        if ($depth === 0 || $this->isWinningMove($board, $aiPlayerValue) || $this->isWinningMove($board, $opponentValue) || empty($validLocations)) {
-            if ($this->isWinningMove($board, $aiPlayerValue)) {
-                return [self::WINNING_SCORE * $depth, -1];
-            }
-            if ($this->isWinningMove($board, $opponentValue)) {
-                return [-self::WINNING_SCORE * $depth, -1];
-            }
-            return [0, -1]; // Draw or depth cut-off
-        }
-
-        if ($maximizingPlayer) {
-            $value = -INF;
-            $column = $validLocations[array_rand($validLocations)]; // Default move
-            
-            foreach ($validLocations as $col) {
-                // Simulate move
-                $tempBoard = $this->simulateMove($board, $col, $aiPlayerValue);
-                
-                // Recursive call (switching to minimizing player)
-                $score = $this->minimax($tempBoard, $depth - 1, $alpha, $beta, false, $aiPlayerValue)[0];
-                
-                if ($score > $value) {
-                    $value = $score;
-                    $column = $col;
-                }
-                $alpha = max($alpha, $value);
-                
-                // Alpha-Beta Pruning
-                if ($alpha >= $beta) {
-                    break;
-                }
-            }
-            return [$value, $column];
-
-        } else { // Minimizing player (Opponent/Human)
-            $value = INF;
-            $column = $validLocations[array_rand($validLocations)];
-            
-            foreach ($validLocations as $col) {
-                $tempBoard = $this->simulateMove($board, $col, $opponentValue);
-                
-                // Recursive call (switching to maximizing player)
-                $score = $this->minimax($tempBoard, $depth - 1, $alpha, $beta, true, $aiPlayerValue)[0];
-                
-                if ($score < $value) {
-                    $value = $score;
-                    $column = $col;
-                }
-                $beta = min($beta, $value);
-                
-                // Alpha-Beta Pruning
-                if ($alpha >= $beta) {
-                    break;
-                }
-            }
-            return [$value, $column];
-        }
-    }
-
-    // --- Board Utility Functions (Must be implemented) ---
-    private function getValidLocations(array $board): array { /* ... logic ... */ }
-    private function simulateMove(array $board, int $col, int $piece): array { /* ... logic ... */ }
-    private function isWinningMove(array $board, int $piece): bool { /* ... logic ... */ }
-    // Note: A full implementation would also include a static 'evaluateWindow' heuristic
-    // for scoring non-terminal nodes, which is crucial for depth cutoffs.
-}
-```
-
------
-
-### 2\. `app/Services/Game/Agents/CheckersHeuristic.php`
-
-This service handles **Checkers**, relying on a complex **Heuristic Evaluation Function** to score board positions, as the game tree is too large for deep searching.
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Services\Game\Agents;
-
-use App\Services\Game\Agents\AgentStrategyContract;
-
-final class CheckersHeuristic implements AgentStrategyContract
-{
-    private const MAX_DEPTH = 5; // Search depth for Checkers is shallower
-
-    /**
-     * Calculates the best move using a Heuristic-weighted Minimax search.
-     *
-     * @param array $gameState The array representation of the board pieces/positions.
-     * @param int $playerValue The value representing the AI player.
-     * @return array The move details (e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']).
-     */
-    public function calculateMove(array $gameState, int $playerValue): array
-    {
-        // This method would call a Minimax function, but instead of checking for
-        // a perfect win/loss at depth 0, it calls the static heuristic function.
-        
-        $bestMove = $this->runMinimaxHeuristic($gameState, self::MAX_DEPTH, $playerValue);
-        
-        return $bestMove;
-    }
-
-    /**
-     * Statically evaluates a board position by calculating a score.
-     * This score guides the Minimax algorithm when it hits the search depth limit.
-     *
-     * @param array $boardState The current board state array.
-     * @param int $pieceValue The piece value of the player being evaluated.
-     * @return int The calculated score.
-     */
-    private function evaluateBoard(array $boardState, int $pieceValue): int
-    {
-        $score = 0;
-        $opponentValue = ($pieceValue === 1) ? 2 : 1;
-        
-        // --- 1. Material Balance (Dominant Feature) ---
-        // Kings are worth significantly more than regular pieces.
-        $myPieces = $this->countPieces($boardState, $pieceValue);
-        $opponentPieces = $this->countPieces($boardState, $opponentValue);
-        
-        $myKings = $this->countKings($boardState, $pieceValue);
-        $opponentKings = $this->countKings($boardState, $opponentValue);
-        
-        // Weighted Sum (The weight of King is typically 2-3x a normal piece)
-        $score += ($myPieces * 100) - ($opponentPieces * 100);
-        $score += ($myKings * 150) - ($opponentKings * 150);
-        
-        // --- 2. Positional Advantage (Mid-Game Feature) ---
-        // Encourage moving pieces toward the center and the opponent's back rank.
-        $score += $this->calculateCenterControl($boardState, $pieceValue) * 10;
-        
-        // --- 3. Safety/Defense (Mid-Game Feature) ---
-        // Penalize exposed pieces; reward protected pieces.
-        $score -= $this->countExposedPieces($boardState, $pieceValue) * 5;
-        
-        // --- 4. Kinging Potential (End-Game Feature) ---
-        // Reward pieces that are close to the opponent's back rank.
-        $score += $this->calculatePromotionDistance($boardState, $pieceValue) * 8;
-        
-        return $score;
-    }
-    
-    // --- Minimax & Utility Functions (Similar to ValidateFourMinimax, but uses evaluateBoard) ---
-    private function runMinimaxHeuristic(array $gameState, int $depth, int $playerValue): array { /* ... logic ... */ return []; }
-    private function countPieces(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
-    private function countKings(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
-    private function calculateCenterControl(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
-    private function countExposedPieces(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
-    private function calculatePromotionDistance(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
-}
-```
-
-You've introduced a critical change: **Agents are active for the entire hour window and can play multiple matches sequentially, but only one match at a time.**
-
-This makes the Agent behavior much more realistic and requires a simpler state check than limiting them to a single game per day.
-
-Here is the revised structure and logic to handle this new Agent availability model within the **GamerProtocol.io** API.
-
------
-
-## 💾 I. Database Changes for Agent State
-
-The boolean flag is replaced with a temporary state check.
+This approach uses a one-to-one relationship between `users` and `agents`, providing a clean separation of concerns while maintaining a unified player identity.
 
 | Table | Column | Data Type | Purpose |
 | :--- | :--- | :--- | :--- |
-| **`Agent`** | `available_hour_est` | `TINYINT` | The specific hour of the day (0-23) the agent is available to be deployed. **(Unchanged)** |
-| **`User`** | (No changes needed) | | The Agent's associated `User` model handles their profile. |
-| **`Match`** | `current_turn_player_id` | `BIGINT` | **CRUCIAL:** Used to check if the Agent is currently in the middle of a match. |
+| **`users`** | `id` | `BIGINT` | Primary key for all players. |
+| | `username` | `VARCHAR` | Unique handle for login and identification. |
+| | `agent_id` | `BIGINT` (nullable, unique) | **The Link.** A foreign key to the `agents` table. If not `NULL`, this user is a bot. |
+| **`agents`** | `id` | `BIGINT` | Primary key for the agent profile. |
+| | `ai_logic_path` | `VARCHAR` | The class path to the AI strategy (e.g., `ValidateFourMinimax::class`). |
+| | `available_hour_est` | `TINYINT` | The hour (0-23) the agent is available to play. |
 
------
+---
 
 ## 💻 II. Agent Scheduling & Availability Logic
 
-The logic now focuses on two main checks: **Is it the right hour?** and **Is the agent currently busy?**
+The logic focuses on finding a `User` who is an agent and is not currently busy.
 
-### A. The Core Scheduling Service (Revised)
+### A. The Core Scheduling Service
 
-The service is now the definitive source for finding an available, non-busy Agent within the current time window.
+A service class is responsible for finding an available agent.
 
 **`app/Services/Agents/SchedulingService.php`**
 
 | Method | Logic |
 | :--- | :--- |
-| **`findAvailableAgent(string $gameSlug): ?User`** | 1. **Determine Current Hour (EST):** Get the current hour (0-23) in the `America/New_York` timezone. 2. **Query for Eligible Agents:** Find a `User` marked as an Agent (`is_agent = true`) where: **`available_hour_est = current_hour_est`**. 3. **Filter for Busy Status:** **Filter out Agents** who are currently active in any other match. This is done by checking the `matches` table. 4. **Return:** Return the first available, non-busy Agent's `User` model, otherwise return `null`. |
-| **`isAgentBusy(User $agentUser): bool`** | This is the core check. Returns `true` if the Agent is currently listed as a **`Player`** in any **`Match`** with a **`status`** of **`active`** or **`pending`**. |
+| **`findAvailableAgent(string $gameSlug): ?User`** | 1. **Get Current Hour (EST):** Determine the current hour (0-23) in the `America/New_York` timezone. 2. **Query for Eligible Agents:** Find a `User` where `agent_id` is NOT NULL. Join with the `agents` table to filter where `available_hour_est` matches the current hour. 3. **Filter for Busy Status:** From the eligible agents, filter out any who are currently in an active or pending match using the `isAgentBusy()` method. 4. **Return:** Return the first available, non-busy `User` model, or `null`. |
+| **`isAgentBusy(User $agentUser): bool`** | Checks if the agent's `user_id` is present in the `players` table for any match with a status of `active` or `pending`. |
 
 ### B. Busy Check Logic Detail
 
-The `isAgentBusy` method needs to query the `matches` table effectively:
+The `isAgentBusy` method uses a simple and efficient query.
 
 ```php
-// Logic inside SchedulingService::isAgentBusy($agentUser)
+// Logic inside SchedulingService::isAgentBusy(User $agentUser)
 
 $isBusy = Match::whereIn('status', ['active', 'pending'])
-    // Check if the agent is a player in any active/pending match
+    // Check if the agent's user_id is in any active/pending match
     ->whereHas('players', function ($query) use ($agentUser) {
-        $query->where('playable_id', $agentUser->id)
-              ->where('playable_type', App\Models\Auth\User::class); 
+        $query->where('user_id', $agentUser->id);
     })
     ->exists();
 
 return $isBusy;
 ```
 
------
+---
 
-## 🔗 III. API Integration (`POST /v1/matches`)
+## 🔗 III. API & Game Service Integration
 
-The controller logic simplifies as you no longer need to deactivate the Agent after the match starts. The Agent becomes available for the next match as soon as the current one is marked `finished`.
+### A. Match Creation (`POST /v1/matches`)
 
-1.  **Match Creation Request:** User sends `POST /v1/matches` asking for a game against an Agent.
-2.  **Controller Action:** The `MatchController` calls the scheduling service:
-    ```php
-    // In MatchController::store() method
-    $agentUser = $schedulingService->findAvailableAgent($request->game_slug);
+The controller uses the scheduling service to find an opponent.
 
-    if ($agentUser) {
-        // Agent found and is free (not busy in another match)
-        $match = $this->createMatch($request->game_slug, $user, $agentUser);
-        // NO DEACTIVATION STEP NEEDED
-    } else {
-        // No Agent found for this hour OR all available Agents are currently busy.
-        // Return a message or queue the request.
+```php
+// In MatchController::store()
+$agentUser = $schedulingService->findAvailableAgent($request->game_slug);
+
+if ($agentUser) {
+    // Agent found, create the match with the human user and the agent user.
+    $match = $this->createMatch($request->game_slug, auth()->user(), $agentUser);
+} else {
+    // No agent is available at this time.
+    return response()->json(['message' => 'No agents are available right now.'], 404);
+}
+```
+
+### B. AI Move Generation (`getAIMove` method)
+
+The game service uses the agent's profile to determine which AI logic to execute.
+
+```php
+// In a Game Service like ValidateFourService.php...
+public function getAIMove(Match $match): array
+{
+    // Get the Player model for the current turn
+    $currentPlayer = $match->players()->where('position_id', $match->turn_number)->first();
+    
+    // Get the associated User model
+    $agentUser = $currentPlayer->user;
+
+    // Check if the user is an agent and has a logic path
+    if ($agentUser->isAgent() && $agentUser->agent->ai_logic_path) {
+        // Get the attached Agent profile
+        $agentProfile = $agentUser->agent;
+        
+        // Instantiate the strategy class from the profile
+        $strategyClass = $agentProfile->ai_logic_path;
+        $strategy = new $strategyClass();
+        
+        // Execute the algorithm
+        return $strategy->calculateMove($match->game_state, $currentPlayer->position_id);
     }
-    ```
 
-This structure is robust: the Agent can play **Match A**, finish it, and immediately be available to play **Match B**, provided the current EST hour matches their scheduled availability.
+    throw new \Exception("AI logic not found for this user.");
+}
+```
+
+This unified architecture simplifies relationships, queries, and the overall mental model of the application, providing a robust foundation for all player types.

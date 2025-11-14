@@ -4,12 +4,69 @@ This document outlines the final database migration structure for the **GamerPro
 
 ---
 
-## 💻 Core Identity & Access
+### 1. `create_users_table` (The Central Identity Table)
 
-These migrations establish the foundation for users, agents, and tracking access via different frontends.
+Modifies the default `users` table to serve as the single source of truth for all players (human and AI).
 
-### 1. `create_avatars_table` (Reusable Identity Assets)
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); // Display Name
+            $table->string('username')->unique(); // Unique handle for logins/mentions
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->foreignId('agent_id')->nullable()->unique()->constrained('agents'); // Link to agent profile
+            $table->rememberToken();
+            $table->timestamps();
+            
+            // Foreign key for avatar
+            $table->foreignId('avatar_id')->nullable()->constrained('avatars');
+            
+            // Laravel Cashier fields
+            $table->string('stripe_id')->nullable()->index();
+            $table->string('pm_type')->nullable();
+            $table->string('pm_last_four', 4)->nullable();
+            
+            // Deactivation Field
+            $table->timestamp('deactivated_at')->nullable()->index();
+        });
+    }
+};
+```
+
+### 2. `create_agents_table` (AI Profile)
+
+This table **extends** the `users` table, holding data specific to AI agents.
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('agents', function (Blueprint $table) {
+            $table->id();
+            $table->string('ai_logic_path'); // Class path to the AI strategy
+            $table->tinyInteger('available_hour_est')->nullable();
+            $table->timestamps();
+        });
+    }
+};
+```
+
+### 3. `create_avatars_table` (Reusable Identity Assets)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -28,35 +85,9 @@ return new class extends Migration
         });
     }
 };
-````
-
-### 2\. `create_agents_table` (AI and Local Player Identities)
-
-```php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::create('agents', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
-            $table->enum('agent_type', ['ai', 'local_human', 'anonymous']);
-            $table->foreignId('avatar_id')->nullable()->constrained('avatars');
-            $table->string('ai_logic_path')->nullable();
-            $table->timestamps();
-        });
-    }
-};
 ```
 
-### 3\. `create_interfaces_table` (Frontend Application Keys)
-
-This table defines each unique frontend application accessing the API, allowing for centralized key management and usage tracking.
-
+### 4. `create_interfaces_table` (Frontend Application Keys)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -78,37 +109,7 @@ return new class extends Migration
 };
 ```
 
-### 4\. `update_users_table` (Account Status and Avatar Link)
-
-Modifies the default `users` table to include **subscription** and **deactivation** flags.
-
-```php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('avatar_id')->nullable()->constrained('avatars');
-            // Laravel Cashier fields
-            $table->string('stripe_id')->nullable()->index();
-            $table->string('pm_type')->nullable();
-            $table->string('pm_last_four', 4)->nullable();
-            
-            // Deactivation Field
-            $table->timestamp('deactivated_at')->nullable()->index(); 
-        });
-    }
-};
-```
-
-### 5\. `create_sessions_table` (User Login Log)
-
-Tracks user login events for security and auditing, linking the session to the specific frontend interface used.
-
+### 5. `create_sessions_table` (User Login Log)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -121,10 +122,10 @@ return new class extends Migration
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('interface_id')->constrained('interfaces'); 
+            $table->foreignId('interface_id')->constrained('interfaces');
             $table->string('ip_address', 45)->nullable();
-            $table->string('device_info', 512)->nullable(); 
-            $table->string('token_id', 100)->nullable(); 
+            $table->string('device_info', 512)->nullable();
+            $table->string('token_id', 100)->nullable();
             $table->timestamp('logged_in_at')->useCurrent();
             $table->timestamp('logged_out_at')->nullable();
         });
@@ -136,10 +137,9 @@ return new class extends Migration
 
 ## ♟️ Match, Player, and History Structure
 
-This is the unified core for all games, featuring the public **ULID** and flexible **JSON** state.
+This unified core supports all games and player types.
 
-### 6\. `create_games_table` (Game Blueprints)
-
+### 6. `create_games_table` (Game Blueprints)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -160,10 +160,7 @@ return new class extends Migration
 };
 ```
 
-### 7\. `create_matches_table` (Game Instances)
-
-The central table, using a **ULID** for public API referencing.
-
+### 7. `create_matches_table` (Game Instances)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -175,26 +172,22 @@ return new class extends Migration
     {
         Schema::create('matches', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->unique()->index(); 
-            
-            $table->string('game_slug', 50)->index(); 
+            $table->ulid('ulid')->unique()->index();
+            $table->string('game_slug', 50)->index();
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
             $table->foreignId('created_by_user_id')->nullable()->constrained('users');
-            
-            // winner_id FK set in the next migration after 'players' exists
-            $table->unsignedBigInteger('winner_id')->nullable(); 
-            
+            $table->unsignedBigInteger('winner_id')->nullable();
             $table->integer('turn_number')->default(0);
-            $table->json('game_state'); // Flexible state storage for any game
+            $table->json('game_state');
             $table->timestamps();
         });
     }
 };
 ```
 
-### 8\. `create_players_table` (Match Participants)
+### 8. `create_players_table` (Match Participants)
 
-The **polymorphic** table linking `matches` to either `users` or `agents`.
+A simple pivot table linking `matches` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -207,11 +200,11 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches'); 
-            $table->morphs('playable'); 
+            $table->foreignId('match_id')->constrained('matches');
+            $table->foreignId('user_id')->constrained('users'); // Direct FK to users table
             $table->string('name', 50);
             $table->tinyInteger('position_id')->comment('Turn order, e.g., 1, 2, 3, 4');
-            $table->string('color', 20); 
+            $table->string('color', 20);
             
             $table->unique(['match_id', 'position_id']);
             $table->timestamps();

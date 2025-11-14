@@ -6,11 +6,11 @@ Here are the detailed model definitions, organized by domain, ready for implemen
 
 ## 💻 Core Identity & Access Models
 
-These models handle all entities related to users, agents, and access interfaces.
+These models handle all entities related to users, agents, and access interfaces under a unified architecture.
 
-### 1\. `App\Models\Auth\User.php`
+### 1. `App\Models\Auth\User.php`
 
-Includes the `HasApiTokens` trait (for Sanctum), `Billable` trait (for Cashier), and the custom `HasUuids` for the primary key (assuming you're using default Laravel primary key, which should be **BIGINT** for most databases, but we'll include the necessary foreign key relationships).
+The central model for any player, whether human or AI. It includes traits for authentication and billing, and now links to an optional Agent profile.
 
 ```php
 <?php
@@ -24,27 +24,27 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
 use App\Models\Content\Avatar;
 use App\Models\Match\Player;
+use App\Models\Auth\Agent;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, Billable;
 
-    // The fields you'll allow mass assignment on
     protected $fillable = [
-        'name',
+        'name',         // Display Name
+        'username',     // Unique login/handle
         'email',
         'password',
+        'agent_id',     // Link to the agent profile
         'avatar_id',
         'deactivated_at',
     ];
 
-    // Hidden fields for arrays
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    // Casts for data integrity
     protected $casts = [
         'email_verified_at' => 'datetime',
         'deactivated_at' => 'datetime',
@@ -61,15 +61,27 @@ class User extends Authenticatable
         return $this->hasMany(Session::class);
     }
 
-    // Polymorphic relationship to Match Players
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class);
+    }
+
     public function players()
     {
-        return $this->morphMany(Player::class, 'playable');
+        return $this->hasMany(Player::class);
+    }
+
+    // Helper method to easily check if the user is a bot
+    public function isAgent(): bool
+    {
+        return $this->agent_id !== null;
     }
 }
 ```
 
-### 2\. `App\Models\Auth\Agent.php`
+### 2. `App\Models\Auth\Agent.php`
+
+This model is now a simple "profile" that extends a User, holding only AI-specific data.
 
 ```php
 <?php
@@ -78,173 +90,61 @@ namespace App\Models\Auth;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Content\Avatar;
-use App\Models\Match\Player;
 
 class Agent extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'agent_type',
-        'avatar_id',
         'ai_logic_path',
+        'available_hour_est',
     ];
 
-    // Relationships
-    public function avatar()
-    {
-        return $this->belongsTo(Avatar::class);
-    }
-
-    // Polymorphic relationship to Match Players
-    public function players()
-    {
-        return $this->morphMany(Player::class, 'playable');
-    }
-}
-```
-
-### 3\. `App\Models\Content\Avatar.php`
-
-```php
-<?php
-
-namespace App\Models\Content;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\User;
-use App\Models\Auth\Agent;
-
-class Avatar extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'image_url',
-        'type',
-    ];
-
-    // Relationships
-    public function users()
-    {
-        return $this->hasMany(User::class);
-    }
-
-    public function agents()
-    {
-        return $this->hasMany(Agent::class);
-    }
-}
-```
-
-### 4\. `App\Models\Access\Interface.php`
-
-```php
-<?php
-
-namespace App\Models\Access;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\Session;
-
-class Interface extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'api_key',
-        'platform',
-        'is_active',
-    ];
-
-    // Relationships
-    public function sessions()
-    {
-        return $this->hasMany(Session::class);
-    }
-}
-```
-
-### 5\. `App\Models\Auth\Session.php`
-
-```php
-<?php
-
-namespace App\Models\Auth;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Access\Interface as FrontendInterface; // Use an alias to avoid naming conflict
-
-class Session extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'interface_id',
-        'ip_address',
-        'device_info',
-        'token_id',
-        'logged_out_at',
-    ];
-
-    // Casts
-    protected $casts = [
-        'logged_in_at' => 'datetime',
-        'logged_out_at' => 'datetime',
-    ];
-
-    // Relationships
+    // An Agent profile belongs to exactly one User
     public function user()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function frontendInterface()
-    {
-        return $this->belongsTo(FrontendInterface::class, 'interface_id');
+        return $this->hasOne(User::class);
     }
 }
+```
+
+### 3. `App\Models\Content\Avatar.php`
+```php
+<?php
+// ... (content largely unchanged, but the agents() relationship can be removed)
+```
+
+### 4. `App\Models\Access\Interface.php`
+```php
+<?php
+// ... (content unchanged)
+```
+
+### 5. `App\Models\Auth\Session.php`
+```php
+<?php
+// ... (content unchanged)
 ```
 
 -----
 
 ## ♟️ Match & Game Domain Models
 
-These models define the core gameplay structure, utilizing **ULIDs** and **JSON casting**.
-
-### 6\. `App\Models\Game\Game.php`
-
+### 6. `App\Models\Game\Game.php`
 ```php
 <?php
-
-namespace App\Models\Game;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Game extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'slug',
-        'name',
-        'max_players',
-    ];
-}
+// ... (content unchanged)
 ```
 
-### 7\. `App\Models\Match\Match.php`
+### 7. `App\Models\Match\Match.php`
+```php
+<?php
+// ... (content unchanged)
+```
 
-This is the core model. It uses the `Ulid` trait (which you'll need to install or implement) and casts the crucial `game_state` column.
+### 8. `App\Models\Match\Player.php`
+
+The `Player` model is now greatly simplified, removing the polymorphic relationship.
 
 ```php
 <?php
@@ -254,72 +154,6 @@ namespace App\Models\Match;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
-use Illuminate\Support\Str;
-
-class Match extends Model
-{
-    use HasFactory;
-
-    // Use a custom booting method to automatically generate the ULID
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (empty($model->ulid)) {
-                $model->ulid = (string) Str::ulid();
-            }
-        });
-    }
-
-    protected $fillable = [
-        'ulid',
-        'game_slug',
-        'status',
-        'created_by_user_id',
-        'winner_id',
-        'turn_number',
-        'game_state',
-    ];
-
-    // Cast the JSON column to a PHP array/object
-    protected $casts = [
-        'game_state' => 'array',
-    ];
-
-    // Relationships
-    public function players()
-    {
-        return $this->hasMany(Player::class);
-    }
-
-    public function moves()
-    {
-        return $this->hasMany(Move::class);
-    }
-
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
-    public function winner()
-    {
-        return $this->belongsTo(Player::class, 'winner_id');
-    }
-}
-```
-
-### 8\. `App\Models\Match\Player.php`
-
-The **polymorphic** player model linking participants to their match.
-
-```php
-<?php
-
-namespace App\Models\Match;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class Player extends Model
 {
@@ -327,8 +161,7 @@ class Player extends Model
 
     protected $fillable = [
         'match_id',
-        'playable_id',
-        'playable_type',
+        'user_id', // Direct FK to the users table
         'name',
         'position_id',
         'color',
@@ -340,10 +173,10 @@ class Player extends Model
         return $this->belongsTo(Match::class);
     }
 
-    // Polymorphic relationship - The player's identity (User or Agent)
-    public function playable()
+    // A player is now directly associated with a User
+    public function user()
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class);
     }
 
     public function moves()

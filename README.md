@@ -39,3 +39,6 @@ For full implementation details, refer to the following files in the `/docs` dir
 * **Database Migrations:** [database.md](docs/database.md)
 * **Model Definitions:** [models.md](docs/models.md)
 * **Game Services:** [services.md](docs/services.md)
+* **Admin Panel:** [admin.md](docs/admin.md)
+* **Feature Expansion:** [expansion.md](docs/expansion.md)
+* **Matchmaking:** [matchmaking.md](docs/matchmaking.md)

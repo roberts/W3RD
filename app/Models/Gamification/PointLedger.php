@@ -2,9 +2,9 @@
 
 namespace App\Models\Gamification;
 
+use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\User;
 
 class PointLedger extends Model
 {

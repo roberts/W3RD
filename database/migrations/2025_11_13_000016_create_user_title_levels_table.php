@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_game_levels', function (Blueprint $table) {
+        Schema::create('user_title_levels', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50);
-            
+            $table->string('title_slug', 50);
+
             $table->tinyInteger('level')->default(1);
             $table->integer('xp_current')->default(0)->comment('XP toward next level');
             $table->timestamp('last_played_at')->useCurrent();
-            
-            $table->primary(['user_id', 'game_slug']);
+
+            $table->primary(['user_id', 'title_slug']);
             $table->timestamps();
         });
     }

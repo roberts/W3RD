@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Seed base data
         $this->call([
-            GameSeeder::class,
+            TitleSeeder::class,
             AvatarSeeder::class,
             ClientSeeder::class,
             BadgeSeeder::class,

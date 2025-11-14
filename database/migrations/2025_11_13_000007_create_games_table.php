@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('matches', function (Blueprint $table) {
+        Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique()->index();
-            $table->string('game_slug', 50)->index();
+            $table->string('title_slug', 50)->index();
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
             $table->foreignId('created_by_user_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();

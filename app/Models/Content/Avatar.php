@@ -3,10 +3,10 @@
 namespace App\Models\Content;
 
 use App\Enums\AvatarType;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Avatar extends Model
 {

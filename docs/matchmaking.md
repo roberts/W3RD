@@ -8,7 +8,7 @@ This document details the architecture for an intelligent public matchmaking que
 
 *   **Primary Goal:** Automatically pair users with suitable opponents (human or AI) quickly, while preventing repeat matchups and providing a seamless user experience.
 *   **Core Technology:** **Redis**. Its speed is essential for this real-time feature. We will use three main data structures:
-    1.  **Sorted Sets:** For the main queue, ordered by player level. (`matchmaking:{game_slug}`)
+    1.  **Sorted Sets:** For the main queue, ordered by player level. (`matchmaking:{title_slug}`)
     2.  **Hashes:** To store the timestamp when a user joins the queue. (`matchmaking:timestamps`)
     3.  **Lists:** To maintain a short-term memory of a user's recent opponents. (`recent_opponents:{user_id}`)
 
@@ -21,7 +21,7 @@ This flow is orchestrated by a frequently-run scheduled job (`ProcessMatchmaking
 ### Step 1: User Enters the Queue
 
 *   **Endpoint:** `POST /v1/matchmaking/queue`
-*   **Body:** `{ "game_slug": "validate-four" }`
+*   **Body:** `{ "title_slug": "validate-four" }`
 *   **Logic:**
     1.  The user's `level` for the specified game is retrieved.
     2.  The user is added to the game's sorted set: `ZADD matchmaking:validate-four <user_level> <user_id>`

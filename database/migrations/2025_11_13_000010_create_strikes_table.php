@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('game_slug', 50);
             $table->tinyInteger('strikes_used')->default(0);
             $table->date('strike_date');
-            
+
             $table->unique(['user_id', 'game_slug', 'strike_date']);
             $table->timestamps();
         });

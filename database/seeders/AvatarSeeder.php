@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Content\Avatar;
+use Illuminate\Database\Seeder;
 
 class AvatarSeeder extends Seeder
 {

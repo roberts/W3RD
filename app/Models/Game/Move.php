@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ class Move extends Model
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'player_id',
         'turn_number',
         'move_details',
@@ -22,9 +22,9 @@ class Move extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(\App\Models\Match\Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function player()

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('badge_id')->constrained('badges');
             $table->timestamp('earned_at')->useCurrent();
-            
+
             $table->primary(['user_id', 'badge_id']);
         });
     }

@@ -109,7 +109,10 @@ return new class extends Migration
 };
 ```
 
-### 5. `create_sessions_table` (User Login Log)
+### 5. `create_entries_table` (User Entry Log)
+
+**Purpose:** Tracks each time a user enters the GamerProtocol platform through any client (web, iOS, Android, etc.). This documents frontend access sessions and helps with security monitoring and usage analytics.
+
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -119,7 +122,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('client_id')->constrained('clients');
@@ -139,7 +142,7 @@ return new class extends Migration
 
 This unified core supports all games and player types.
 
-### 6. `create_games_table` (Game Blueprints)
+### 6. `create_titles_table` (Game Title Definitions)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -160,7 +163,7 @@ return new class extends Migration
 };
 ```
 
-### 7. `create_matches_table` (Game Instances)
+### 7. `create_games_table` (Game Instances)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -173,7 +176,7 @@ return new class extends Migration
         Schema::create('matches', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique()->index();
-            $table->string('game_slug', 50)->index();
+            $table->string('title_slug', 50)->index();
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
             $table->foreignId('created_by_user_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
@@ -200,13 +203,13 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('matches');
             $table->foreignId('user_id')->constrained('users'); // Direct FK to users table
             $table->string('name', 50);
             $table->tinyInteger('position_id')->comment('Turn order, e.g., 1, 2, 3, 4');
             $table->string('color', 20);
             
-            $table->unique(['match_id', 'position_id']);
+            $table->unique(['game_id', 'position_id']);
             $table->timestamps();
         });
         
@@ -231,7 +234,7 @@ return new class extends Migration
     {
         Schema::create('moves', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('matches');
             $table->foreignId('player_id')->constrained('players');
             $table->integer('turn_number');
             $table->json('move_details');
@@ -263,11 +266,11 @@ return new class extends Migration
         Schema::create('strikes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50);
+            $table->string('title_slug', 50);
             $table->tinyInteger('strikes_used')->default(0);
             $table->date('strike_date');
             
-            $table->unique(['user_id', 'game_slug', 'strike_date']);
+            $table->unique(['user_id', 'title_slug', 'strike_date']);
             $table->timestamps();
         });
     }
@@ -290,11 +293,11 @@ return new class extends Migration
         Schema::create('quotas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50);
+            $table->string('title_slug', 50);
             $table->integer('matches_started')->default(0);
             $table->date('reset_month'); 
             
-            $table->unique(['user_id', 'game_slug', 'reset_month']);
+            $table->unique(['user_id', 'title_slug', 'reset_month']);
             $table->timestamps();
         });
     }

@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('point_ledgers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            
+
             // Polymorphic relation to source (e.g., Match, Badge)
             $table->morphs('source');
-            
+
             $table->integer('points')->comment('Positive (award) or negative (deduction)');
             $table->string('description', 100);
             $table->timestamps();

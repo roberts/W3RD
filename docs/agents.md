@@ -53,17 +53,17 @@ return $isBusy;
 
 ## 🔗 III. API & Game Service Integration
 
-### A. Match Creation (`POST /v1/matches`)
+### A. Match Creation (`POST /v1/games`)
 
 The controller uses the scheduling service to find an opponent.
 
 ```php
 // In MatchController::store()
-$agentUser = $schedulingService->findAvailableAgent($request->game_slug);
+$agentUser = $schedulingService->findAvailableAgent($request->title_slug);
 
 if ($agentUser) {
     // Agent found, create the match with the human user and the agent user.
-    $match = $this->createMatch($request->game_slug, auth()->user(), $agentUser);
+    $match = $this->createMatch($request->title_slug, auth()->user(), $agentUser);
 } else {
     // No agent is available at this time.
     return response()->json(['message' => 'No agents are available right now.'], 404);

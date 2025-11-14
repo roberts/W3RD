@@ -2,17 +2,17 @@
 
 namespace App\Models\Gamification;
 
+use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\User;
 
-class UserGameLevel extends Model
+class UserTitleLevel extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'game_slug',
+        'title_slug',
         'level',
         'xp_current',
         'last_played_at',
@@ -25,7 +25,8 @@ class UserGameLevel extends Model
     ];
 
     // Composite primary key
-    protected $primaryKey = ['user_id', 'game_slug'];
+    protected $primaryKey = ['user_id', 'title_slug'];
+
     public $incrementing = false;
 
     // Relationships

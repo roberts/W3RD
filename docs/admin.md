@@ -64,7 +64,7 @@ Resources are the heart of Filament, providing full CRUD functionality for your 
 *   **Game & Match Management**
     *   **`GameResource`:** Simple CRUD for managing the available game blueprints (`slug`, `name`, `max_players`).
     *   **`MatchResource`:**
-        *   **Table:** List all matches, showing `ulid`, `game_slug`, players, `status`, and `winner`.
+        *   **Table:** List all matches, showing `ulid`, `title_slug`, players, `status`, and `winner`.
         *   **Custom View:** On the "View" page for a match, create a custom component to render the `game_state` JSON in a readable format (e.g., a visual representation of the board).
         *   **Actions:** Add an action to "Manually Resolve" a stuck match by setting a winner.
 

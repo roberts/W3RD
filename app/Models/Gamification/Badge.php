@@ -2,10 +2,10 @@
 
 namespace App\Models\Gamification;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Badge extends Model
 {

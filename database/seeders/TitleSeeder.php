@@ -2,18 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Title\Title;
 use Illuminate\Database\Seeder;
-use App\Models\Game\Game;
 
-class GameSeeder extends Seeder
+class TitleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $games = [
+        $titles = [
             [
                 'slug' => 'validate-four',
                 'name' => 'Validate Four',
@@ -36,10 +35,10 @@ class GameSeeder extends Seeder
             ],
         ];
 
-        foreach ($games as $game) {
-            Game::updateOrCreate(
-                ['slug' => $game['slug']],
-                $game
+        foreach ($titles as $title) {
+            Title::updateOrCreate(
+                ['slug' => $title['slug']],
+                $title
             );
         }
     }

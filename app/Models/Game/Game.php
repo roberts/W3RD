@@ -1,27 +1,72 @@
 <?php
 
-namespace App\Models\Game;
+namespace App\Models\Match;
 
+use App\Models\Auth\User;
+use App\Models\Title\Title;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $fillable = [
-        'slug',
-        'name',
-        'max_players',
+        'ulid',
+        'title_slug',
+        'status',
+        'created_by_user_id',
+        'winner_id',
+        'turn_number',
+        'game_state',
     ];
 
     protected $casts = [
-        'max_players' => 'integer',
+        'game_state' => 'array',
+        'turn_number' => 'integer',
     ];
 
-    // Relationships
-    public function matches()
+    // Use ULID for route model binding
+    public function getRouteKeyName()
     {
-        return $this->hasMany(\App\Models\Match\Match::class, 'game_slug', 'slug');
+        return 'ulid';
+    }
+
+    // Relationships
+    public function title()
+    {
+        return $this->belongsTo(Title::class, 'title_slug', 'slug');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function winner()
+    {
+        return $this->belongsTo(Player::class, 'winner_id');
+    }
+
+    public function moves()
+    {
+        return $this->hasMany(Move::class);
+    }
+
+    // Helper methods
+    public function isFinished(): bool
+    {
+        return $this->status === 'finished';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }

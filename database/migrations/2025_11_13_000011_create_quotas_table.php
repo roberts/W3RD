@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('game_slug', 50);
             $table->integer('matches_started')->default(0);
             $table->date('reset_month');
-            
+
             $table->unique(['user_id', 'game_slug', 'reset_month']);
             $table->timestamps();
         });

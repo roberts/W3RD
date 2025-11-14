@@ -3,9 +3,9 @@
 namespace App\Models\Access;
 
 use App\Enums\Platform;
+use App\Models\Auth\Entry;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\Session;
 
 class Client extends Model
 {
@@ -24,8 +24,8 @@ class Client extends Model
     ];
 
     // Relationships
-    public function sessions()
+    public function entries()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(Entry::class);
     }
 }

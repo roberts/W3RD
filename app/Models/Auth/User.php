@@ -2,25 +2,23 @@
 
 namespace App\Models\Auth;
 
+use App\Models\Billing\Quota;
+use App\Models\Billing\Strike;
+use App\Models\Content\Avatar;
+use App\Models\Game\Player;
+use App\Models\Gamification\Badge;
+use App\Models\Gamification\GlobalRank;
+use App\Models\Gamification\PointLedger;
+use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
-use App\Models\Content\Avatar;
-use App\Models\Match\Player;
-use App\Models\Auth\Agent;
-use App\Models\Auth\Session;
-use App\Models\Billing\Strike;
-use App\Models\Billing\Quota;
-use App\Models\Gamification\PointLedger;
-use App\Models\Gamification\GlobalRank;
-use App\Models\Gamification\Badge;
-use App\Models\Gamification\UserGameLevel;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, Billable;
+    use Billable, HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -53,9 +51,9 @@ class User extends Authenticatable
         return $this->belongsTo(Agent::class);
     }
 
-    public function sessions()
+    public function entries()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(Entry::class);
     }
 
     public function players()
@@ -89,9 +87,9 @@ class User extends Authenticatable
             ->withPivot('earned_at');
     }
 
-    public function gameLevels()
+    public function titleLevels()
     {
-        return $this->hasMany(UserGameLevel::class);
+        return $this->hasMany(UserTitleLevel::class);
     }
 
     // Helper methods

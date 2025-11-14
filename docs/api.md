@@ -16,8 +16,8 @@ All endpoints use the base path `/v1/`.
 
 | Resource | HTTP Method | Endpoint | Purpose | Auth Requirements |
 | :--- | :--- | :--- | :--- | :--- |
-| **Sessions** | `POST` | `/v1/sessions` | **User Login.** Authenticates credentials and returns a Sanctum API token. | `X-Client-Key` Only |
-| **Sessions** | `DELETE` | `/v1/sessions` | **User Logout.** Revokes the current API token. | Bearer + Client Key |
+| **Entries** | `POST` | `/v1/entries` | **User Login.** Authenticates credentials and returns a Sanctum API token. Records entry to platform. | `X-Client-Key` Only |
+| **Entries** | `DELETE` | `/v1/entries` | **User Logout.** Revokes the current API token and marks entry as logged out. | Bearer + Client Key |
 | **User** | `GET` | `/v1/user` | Retrieve the currently authenticated user's profile and plan status. | Bearer + Client Key |
 | **User** | `PATCH` | `/v1/user` | Update user profile data (name, password, avatar choice). | Bearer + Client Key |
 | **Avatars** | `GET` | `/v1/avatars` | List all available **Avatar** assets (free, premium, NFT). | Bearer + Client Key |
@@ -32,11 +32,11 @@ These endpoints handle the creation of matches and the execution of moves, relyi
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
 | **Games** | `GET` | `/v1/games` | List all available **Game** blueprints (`validate-four`, `hearts`). | Bearer + Client Key |
-| **Matches** | `POST` | `/v1/matches` | **CREATE** a new match. Triggers the **Strike/Quota check**. Body specifies `game_slug` and initial `players`. | Bearer + Client Key |
-| **Matches** | `GET` | `/v1/matches` | List the authenticated user's active and recent finished matches. | Bearer + Client Key |
-| **Match** | `GET` | `/v1/matches/{ulid}` | Retrieve the current **Match state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
-| **Moves** | `POST` | `/v1/matches/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
-| **Moves** | `GET` | `/v1/matches/{ulid}/moves` | Retrieve the full **Move** history for the match (for replay). | Bearer + Client Key |
+| **Games** | `POST` | `/v1/games` | **CREATE** a new match. Triggers the **Strike/Quota check**. Body specifies `title_slug` and initial `players`. | Bearer + Client Key |
+| **Games** | `GET` | `/v1/games` | List the authenticated user's active and recent finished matches. | Bearer + Client Key |
+| **Match** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Match state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
+| **Moves** | `POST` | `/v1/games/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
+| **Moves** | `GET` | `/v1/games/{ulid}/moves` | Retrieve the full **Move** history for the match (for replay). | Bearer + Client Key |
 
 ---
 
@@ -67,8 +67,8 @@ All requests require `Authorization: Bearer [User Token]` and `X-Client-Key`, un
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
-| `/v1/sessions` | `POST` | `email`, `password` | `token` (Bearer), `user` (User profile object) |
-| `/v1/sessions` | `DELETE` | *(None)* | `status: success` (204 No Content) |
+| `/v1/entries` | `POST` | `email`, `password` | `token` (Bearer), `user` (User profile object) |
+| `/v1/entries` | `DELETE` | *(None)* | `status: success` (204 No Content) |
 | `/v1/user` | `GET` | *(None)* | `user` (Full profile, including `avatar_id`, `email`, `deactivated_at`) |
 | `/v1/user` | `PATCH` | `name` (Optional), `password` (Optional) | `user` (Updated profile object) |
 | `/v1/avatars` | `GET` | *(None)* | Array of `avatar` objects (`id`, `name`, `image_url`, `type`) |
@@ -83,11 +83,11 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
 | `/v1/games` | `GET` | *(None)* | Array of `game` objects (`slug`, `name`, `max_players`) |
-| `/v1/matches` | `POST` | `game_slug` (e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `match` (New match object including **`ulid`** and initial **`game_state`** JSON) |
-| `/v1/matches` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `match` objects |
-| `/v1/matches/{ulid}` | `GET` | *(None)* | `match` (Current match object, including **`game_state` JSON** and **`players`** array) |
-| `/v1/matches/{ulid}/moves` | `POST` | **`move_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `move` (The recorded move object) |
-| `/v1/matches/{ulid}/moves` | `GET` | *(None)* | Array of all `move` objects for the match history |
+| `/v1/games` | `POST` | `title_slug` (e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `match` (New match object including **`ulid`** and initial **`game_state`** JSON) |
+| `/v1/games` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `match` objects |
+| `/v1/games/{ulid}` | `GET` | *(None)* | `match` (Current match object, including **`game_state` JSON** and **`players`** array) |
+| `/v1/games/{ulid}/moves` | `POST` | **`move_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `move` (The recorded move object) |
+| `/v1/games/{ulid}/moves` | `GET` | *(None)* | Array of all `move` objects for the match history |
 
 ---
 
@@ -96,11 +96,11 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
 | `/v1/billing/subscription` | `GET` | *(None)* | `subscription` (Plan level, renewal date, status) |
-| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects detailing `game_slug`, `matches_started`, `strikes_used`) |
+| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects detailing `title_slug`, `matches_started`, `strikes_used`) |
 | `/v1/billing/subscribe` | `POST` | `plan_id` ('member' or 'master'), `payment_method_token` (from client-side Stripe) | `checkout_url` or `status: success` |
 | `/v1/billing/mobile/verify` | `POST` | `receipt_data` (App Store or Google Play token), `provider` ('apple' or 'google') | `status: success`, `subscription` (Updated local record) |
 | `/v1/user/stats` | `GET` | *(None)* | `stats` (Object: **`total_points`**, **`global_rank`**, **`wins`**, **`losses`**) |
-| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserGameLevel`** objects (`game_slug`, `level`, `xp_current`) |
+| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserTitleLevel`** objects (`title_slug`, `level`, `xp_current`) |
 | `/v1/user/badges` | `GET` | *(None)* | Array of earned `badge` objects (including `earned_at` timestamp) |
 | `/v1/leaderboard` | `GET` | *(Query params: `limit`, `offset`)* | Array of `user` objects ranked by **`total_points`** |
 | `/v1/games/{slug}/leaderboard` | `GET` | *(Query params: `limit`)* | Array of `user` objects ranked by **Game-Specific Metric** (e.g., win percentage) |
@@ -120,10 +120,10 @@ These endpoints allow users to manage their devices and ensure the API's public 
 
 | Resource | HTTP Method | Endpoint | Purpose | Request Body Data | Response Body Data |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **User Tokens** | `GET` | `/v1/user/tokens` | Lists all active API tokens (sessions) for the current user. | *(None)* | Array of active token objects (`id`, `name`, `last_used_at`) |
-| **User Tokens** | `DELETE` | `/v1/user/tokens/{id}` | Revokes a specific active token/session (e.g., "log out of all other devices"). | *(None)* | `status: success` |
-| **Cleanup** | `POST` | `/v1/matches/{ulid}/forfeit` | Allows the current player to **forfeit/concede** a match. This is faster than waiting for a forced timeout. | *(None)* | `match` (Updated status: `finished`) |
-| **Match** | `DELETE` | `/v1/matches/{ulid}` | **Soft Deletes** an active match. Useful for clearing failed/stuck matchmaking attempts. *Requires specific soft delete logic in your controller.* | *(None)* | `status: success` |
+| **User Tokens** | `GET` | `/v1/user/tokens` | Lists all active API tokens (entries) for the current user. | *(None)* | Array of active token objects (`id`, `name`, `last_used_at`) |
+| **User Tokens** | `DELETE` | `/v1/user/tokens/{id}` | Revokes a specific active token/entry (e.g., "log out of all other devices"). | *(None)* | `status: success` |
+| **Cleanup** | `POST` | `/v1/games/{ulid}/forfeit` | Allows the current player to **forfeit/concede** a match. This is faster than waiting for a forced timeout. | *(None)* | `match` (Updated status: `finished`) |
+| **Match** | `DELETE` | `/v1/games/{ulid}` | **Soft Deletes** an active match. Useful for clearing failed/stuck matchmaking attempts. *Requires specific soft delete logic in your controller.* | *(None)* | `status: success` |
 
 ---
 

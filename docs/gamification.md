@@ -19,7 +19,7 @@
 | `App\Models\Gamification\GlobalRank` | Stores aggregated total points for fast lookup. | `user_id`, `total_points`, `rank`. |
 | `App\Models\Gamification\Badge` | Static definition of all badges available. | `slug`, `name`, `condition_json` (Defines unlock criteria). |
 | `user_badge` | Pivot table linking users to earned badges. | `user_id`, `badge_id`. |
-| **`App\Models\Gamification\UserGameLevel`** | **CRITICAL:** Tracks skill progress per game. | `user_id`, **`game_slug`** (Composite Key), **`level`**, **`xp_current`**, **`last_played_at`** (Required for Decay). |
+| **`App\Models\Gamification\UserTitleLevel`** | **CRITICAL:** Tracks skill progress per game. | `user_id`, **`title_slug`** (Composite Key), **`level`**, **`xp_current`**, **`last_played_at`** (Required for Decay). |
 
 ---
 
@@ -34,7 +34,7 @@ The `GamificationService->processMatchResults(Match $match)` is called immediate
 | Action | Logic | Database Write |
 | :--- | :--- | :--- |
 | **Award Points** | Calculates points based on win/loss/difficulty multipliers. | Writes transaction to **`PointLedger`**. |
-| **Award XP/Level Up** | Calculates XP specific to the `game_slug`. Increments `level` and resets `xp_current` in **`UserGameLevel`**. Updates **`last_played_at`**. | Writes/updates **`UserGameLevel`**. |
+| **Award XP/Level Up** | Calculates XP specific to the `title_slug`. Increments `level` and resets `xp_current` in **`UserTitleLevel`**. Updates **`last_played_at`**. | Writes/updates **`UserTitleLevel`**. |
 | **Check Badges** | Checks user's current stats against all unearned badges defined in the `Badge` table's `condition_json`. | Writes to **`user_badge`** pivot table. |
 
 #### B. Level/Rank Decay Logic (Scheduled Task)
@@ -43,7 +43,7 @@ The decay process must be implemented as a dedicated scheduled task to run outsi
 
 | Task | Schedule | Logic |
 | :--- | :--- | :--- |
-| **Decay Process** | Hourly or Daily (EST) | 1. **Query:** Select all rows from **`UserGameLevel`** where the difference between the current time and **`last_played_at`** is greater than the inactivity threshold (e.g., 7 days). 2. **Execute Decay:** For each stale record, reduce the **`level`** by a defined amount (e.g., 1 level). 3. **Minimal Level:** Ensure the level cannot drop below a specified minimum (e.g., Level 1). |
+| **Decay Process** | Hourly or Daily (EST) | 1. **Query:** Select all rows from **`UserTitleLevel`** where the difference between the current time and **`last_played_at`** is greater than the inactivity threshold (e.g., 7 days). 2. **Execute Decay:** For each stale record, reduce the **`level`** by a defined amount (e.g., 1 level). 3. **Minimal Level:** Ensure the level cannot drop below a specified minimum (e.g., Level 1). |
 | **Ranking Update** | Hourly (EST) | Recalculates all **`GlobalRank`** records by summing the `PointLedger`. |
 
 ---
@@ -53,7 +53,7 @@ The decay process must be implemented as a dedicated scheduled task to run outsi
 | Endpoint | Purpose | Logic Source |
 | :--- | :--- | :--- |
 | `GET /v1/user/stats` | User's profile, including **total points** and all **earned badges**. | `GlobalRank`, `user_badge`. |
-| `GET /v1/user/levels` | Lists the user's current **Level** and **XP** for *every* game they have played. | **`UserGameLevel`**. |
+| `GET /v1/user/levels` | Lists the user's current **Level** and **XP** for *every* game they have played. | **`UserTitleLevel`**. |
 | `GET /v1/leaderboard` | Global ranking based on **Total Points**. | **`GlobalRank`**. |
 | `GET /v1/games/{slug}/leaderboard` | Game-specific ranking (e.g., Win Percentage or Total Wins). | `MatchController` delegates to the respective **Game Service Handler** for query execution. |
 
@@ -130,7 +130,7 @@ return new class extends Migration
             $table->string('slug', 50)->unique(); 
             $table->string('name', 100); 
             $table->string('image_url'); 
-            $table->json('condition_json')->comment('Defines requirements, e.g., {"game_slug": "validate-four", "wins": 10}');
+            $table->json('condition_json')->comment('Defines requirements, e.g., {"title_slug": "validate-four", "wins": 10}');
             $table->timestamps();
         });
     }
@@ -161,7 +161,7 @@ return new class extends Migration
 };
 ```
 
-### 5\. `create_user_game_levels_table` (Game-Specific Levels & Decay)
+### 5\. `create_user_title_levels_table` (Game-Specific Levels & Decay)
 
 This is the table for tracking skill progression and applying the decay logic.
 
@@ -174,15 +174,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_game_levels', function (Blueprint $table) {
+        Schema::create('user_title_levels', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50); // The game being leveled up
+            $table->string('title_slug', 50); // The game being leveled up
             
             $table->tinyInteger('level')->default(1);
             $table->integer('xp_current')->default(0)->comment('XP toward the next level');
             $table->timestamp('last_played_at')->useCurrent(); // CRITICAL for Decay logic
             
-            $table->primary(['user_id', 'game_slug']);
+            $table->primary(['user_id', 'title_slug']);
             $table->timestamps();
         });
     }

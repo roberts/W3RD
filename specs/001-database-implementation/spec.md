@@ -26,7 +26,7 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 - Agents table stores AI-specific data (logic path, availability hours)
 - Avatars can be assigned to any user
 - Clients table manages API keys for different frontend applications
-- Sessions track user logins across different clients
+- Entries table tracks user logins/access across different client frontends
 - All relationships properly defined and testable
 
 **Technical Requirements**:
@@ -72,7 +72,7 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 - Ready for billing service to query and enforce limits
 
 **Technical Requirements**:
-- Composite unique keys on (user_id, game_slug, date/month)
+- Composite unique keys on (user_id, title_slug, date/month)
 - Date handling for EST timezone calculations
 - Integration with Laravel Cashier subscription status
 
@@ -88,7 +88,7 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 - PointLedger provides immutable audit trail for all points
 - GlobalRank caches total points for fast leaderboard queries
 - Badges define achievement criteria in JSON
-- UserGameLevel tracks game-specific skill progression
+- UserTitleLevel tracks game-specific skill progression
 - Daily and monthly summaries enable historical leaderboards
 - Level decay ready to be implemented via last_played_at timestamp
 

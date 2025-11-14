@@ -10,7 +10,7 @@ Here is the draft structure for the central factory and the four game services: 
 
 ### 1\. `app/Services/Game/MatchHandlerFactory.php`
 
-This class takes the `game_slug` and returns the correct handler instance.
+This class takes the `title_slug` and returns the correct handler instance.
 
 ```php
 <?php
@@ -26,7 +26,7 @@ use InvalidArgumentException;
 
 class MatchHandlerFactory
 {
-    // Maps the game_slug to the responsible service class
+    // Maps the title_slug to the responsible service class
     const HANDLERS = [
         'validate-four' => ValidateFourService::class,
         'checkers'      => CheckersService::class,

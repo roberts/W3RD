@@ -13,12 +13,12 @@ Migrations must be run in the following order due to foreign key dependencies:
 2. `2025_11_13_000002_create_agents_table.php` - AI agent profiles
 3. `2025_11_13_000003_create_users_table.php` - Central user identity (depends on avatars, agents)
 4. `2025_11_13_000004_create_clients_table.php` - API client applications
-5. `2025_11_13_000005_create_sessions_table.php` - User session tracking (depends on users, clients)
+5. `2025_11_13_000005_create_entries_table.php` - User entry/login tracking (depends on users, clients)
 
 ### Phase 2: Game Structure (006-009)
 6. `2025_11_13_000006_create_games_table.php` - Game type definitions
-7. `2025_11_13_000007_create_matches_table.php` - Game instances with ULID
-8. `2025_11_13_000008_create_players_table.php` - Match participants (adds winner_id FK back to matches)
+7. `2025_11_13_000007_create_games_table.php` - Game instances with ULID
+8. `2025_11_13_000008_create_players_table.php` - Game participants (adds winner_id FK back to matches)
 9. `2025_11_13_000009_create_moves_table.php` - Move history
 
 ### Phase 3: Billing & Quotas (010-011)
@@ -41,16 +41,16 @@ app/Models/
 ├── Auth/
 │   ├── User.php          - Central user model (human & AI)
 │   ├── Agent.php         - AI agent extension
-│   └── Session.php       - Login session tracking
+│   └── Entry.php         - User entry/login tracking
 ├── Access/
 │   └── Client.php        - API client management
 ├── Content/
 │   └── Avatar.php        - User profile avatars
+├── Title/
+│   └── Title.php          - Game type definitions
 ├── Game/
-│   └── Game.php          - Game type definitions
-├── Match/
-│   ├── Match.php         - Game instance (uses ULID)
-│   ├── Player.php        - Match participants
+│   ├── Game.php         - Game instance (uses ULID)
+│   ├── Player.php        - Game participants
 │   └── Move.php          - Move history
 ├── Billing/
 │   ├── Strike.php        - Free tier tracking
@@ -65,7 +65,7 @@ app/Models/
 ## Key Features
 
 ### ULID for Public IDs
-- Match model uses ULIDs instead of auto-increment IDs for security
+- Game model uses ULIDs instead of auto-increment IDs for security
 - Prevents enumeration attacks on public-facing routes
 
 ### JSON Columns

@@ -56,9 +56,9 @@ class User extends Authenticatable
         return $this->belongsTo(Avatar::class);
     }
 
-    public function sessions()
+    public function entries()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(Entry::class);
     }
 
     public function agent()
@@ -120,7 +120,10 @@ class Agent extends Model
 // ... (content unchanged)
 ```
 
-### 5. `App\Models\Auth\Session.php`
+### 5. `App\Models\Auth\Entry.php`
+
+**Purpose:** Tracks each entry (login session) when a user accesses the GamerProtocol platform through any client frontend.
+
 ```php
 <?php
 // ... (content unchanged)
@@ -130,13 +133,13 @@ class Agent extends Model
 
 ## ♟️ Match & Game Domain Models
 
-### 6. `App\Models\Game\Game.php`
+### 6. `App\Models\Game\Title.php`
 ```php
 <?php
 // ... (content unchanged)
 ```
 
-### 7. `App\Models\Match\Match.php`
+### 7. `App\Models\Match\Game.php`
 ```php
 <?php
 // ... (content unchanged)
@@ -160,7 +163,7 @@ class Player extends Model
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'user_id', // Direct FK to the users table
         'name',
         'position_id',
@@ -201,7 +204,7 @@ class Move extends Model
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'player_id',
         'turn_number',
         'move_details',
@@ -251,7 +254,7 @@ class Strike extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
+        'title_slug',
         'strikes_used',
         'strike_date',
     ];
@@ -288,7 +291,7 @@ class Quota extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
+        'title_slug',
         'matches_started',
         'reset_month',
     ];

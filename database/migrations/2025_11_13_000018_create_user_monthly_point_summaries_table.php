@@ -12,7 +12,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->string('month', 7);
             $table->integer('points_earned')->default(0);
-            
+
             $table->primary(['user_id', 'month']);
             $table->timestamps();
         });

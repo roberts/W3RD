@@ -2,15 +2,16 @@
 
 namespace App\Models\Gamification;
 
+use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\User;
 
 class GlobalRank extends Model
 {
     use HasFactory;
 
     protected $primaryKey = 'user_id';
+
     public $incrementing = false;
 
     protected $fillable = [

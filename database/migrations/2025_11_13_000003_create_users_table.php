@@ -18,15 +18,15 @@ return new class extends Migration
             $table->foreignId('agent_id')->nullable()->unique()->constrained('agents');
             $table->rememberToken();
             $table->timestamps();
-            
+
             // Foreign key for avatar
             $table->foreignId('avatar_id')->nullable()->constrained('avatars');
-            
+
             // Laravel Cashier fields
             $table->string('stripe_id')->nullable()->index();
             $table->string('pm_type')->nullable();
             $table->string('pm_last_four', 4)->nullable();
-            
+
             // Deactivation field
             $table->timestamp('deactivated_at')->nullable()->index();
         });

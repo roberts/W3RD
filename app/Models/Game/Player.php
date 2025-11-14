@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
+use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\User;
 
 class Player extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'user_id',
         'name',
         'position_id',
@@ -23,9 +23,9 @@ class Player extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(\App\Models\Match\Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function user()

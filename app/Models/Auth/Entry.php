@@ -2,11 +2,11 @@
 
 namespace App\Models\Auth;
 
+use App\Models\Access\Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Access\Client;
 
-class Session extends Model
+class Entry extends Model
 {
     use HasFactory;
 

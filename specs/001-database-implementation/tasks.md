@@ -45,24 +45,24 @@ This document contains all tasks for implementing the complete database schema a
 - [x] T008 [P] [US1] Create migration database/migrations/2025_11_13_000002_create_agents_table.php
 - [x] T009 [US1] Create migration database/migrations/2025_11_13_000003_create_users_table.php with Cashier fields
 - [x] T010 [P] [US1] Create migration database/migrations/2025_11_13_000004_create_clients_table.php
-- [x] T011 [US1] Create migration database/migrations/2025_11_13_000005_create_sessions_table.php
+- [x] T011 [US1] Create migration database/migrations/2025_11_13_000005_create_entries_table.php
 
 ### Model Tasks
 
 - [x] T012 [P] [US1] Create Avatar model in app/Models/Content/Avatar.php with relationships
 - [x] T013 [P] [US1] Create Agent model in app/Models/Auth/Agent.php with relationships
 - [x] T014 [US1] Update User model in app/Models/User.php - add Sanctum, Cashier, Billable traits
-- [x] T015 [US1] Add User model relationships (avatar, agent, sessions, players)
+- [x] T015 [US1] Add User model relationships (avatar, agent, entries, players)
 - [x] T016 [US1] Add User model casts (email_verified_at, deactivated_at as datetime)
 - [x] T017 [US1] Add User helper methods (isAgent(), isActive())
 - [x] T018 [P] [US1] Create Client model in app/Models/Access/Client.php with relationships
-- [x] T019 [P] [US1] Create Session model in app/Models/Auth/Session.php with relationships
+- [x] T019 [P] [US1] Create Entry model in app/Models/Auth/Entry.php with relationships
 
 ### Migration Execution
 
 - [ ] T020 [US1] Run migrations for avatars, agents tables
 - [ ] T021 [US1] Run migration for users table (depends on avatars, agents)
-- [ ] T022 [US1] Run migrations for clients, sessions tables (depends on users)
+- [ ] T022 [US1] Run migrations for clients, entries tables (depends on users)
 - [ ] T023 [US1] Verify all foreign key constraints are properly created
 
 ### Model Organization
@@ -72,7 +72,7 @@ This document contains all tasks for implementing the complete database schema a
 - [x] T026 [US1] Update config/auth.php to reference new User model location
 
 **Completion Criteria**: 
-- 5 tables created (avatars, agents, users, clients, sessions)
+- 5 tables created (avatars, agents, users, clients, entries)
 - 5 models with proper relationships and casts
 - All foreign keys working
 - User model supports both human and agent profiles
@@ -87,18 +87,18 @@ This document contains all tasks for implementing the complete database schema a
 
 ### Migration Tasks
 
-- [x] T027 [P] [US2] Create migration database/migrations/2025_11_13_000006_create_games_table.php
-- [x] T028 [US2] Create migration database/migrations/2025_11_13_000007_create_matches_table.php with ULID and JSON game_state
+- [x] T027 [P] [US2] Create migration database/migrations/2025_11_13_000006_create_titles_table.php
+- [x] T028 [US2] Create migration database/migrations/2025_11_13_000007_create_games_table.php with ULID and JSON game_state
 - [x] T029 [US2] Create migration database/migrations/2025_11_13_000008_create_players_table.php with winner_id FK addition
 - [x] T030 [P] [US2] Create migration database/migrations/2025_11_13_000009_create_moves_table.php
 
 ### Model Tasks
 
-- [x] T031 [P] [US2] Create Game model in app/Models/Game/Game.php with relationships
-- [x] T032 [US2] Create Match model in app/Models/Match/Match.php with HasUlids trait
-- [x] T033 [US2] Add Match model casts (game_state as array, turn_number as integer)
-- [x] T034 [US2] Add Match model relationships (game, creator, players, winner, moves)
-- [x] T035 [US2] Override getRouteKeyName() in Match model to use 'ulid'
+- [x] T031 [P] [US2] Create Game model in app/Models/Game/Title.php with relationships
+- [x] T032 [US2] Create Game model in app/Models/Match/Game.php with HasUlids trait
+- [x] T033 [US2] Add Game model casts (game_state as array, turn_number as integer)
+- [x] T034 [US2] Add Game model relationships (game, creator, players, winner, moves)
+- [x] T035 [US2] Override getRouteKeyName() in Game model to use 'ulid'
 - [x] T036 [US2] Add Match helper methods (isFinished(), isActive())
 - [x] T037 [P] [US2] Create Player model in app/Models/Match/Player.php with relationships
 - [x] T038 [P] [US2] Create Move model in app/Models/Match/Move.php with JSON cast
@@ -108,7 +108,7 @@ This document contains all tasks for implementing the complete database schema a
 - [ ] T039 [US2] Run migrations for games, matches tables
 - [ ] T040 [US2] Run migrations for players table (adds winner_id FK to matches)
 - [ ] T041 [US2] Run migration for moves table
-- [ ] T042 [US2] Verify ULID generation works on Match model
+- [ ] T042 [US2] Verify ULID generation works on Game model
 
 **Completion Criteria**:
 - 4 tables created (games, matches, players, moves)
@@ -139,7 +139,7 @@ This document contains all tasks for implementing the complete database schema a
 ### Migration Execution
 
 - [ ] T049 [US3] Run migrations for strikes and quotas tables
-- [ ] T050 [US3] Verify unique constraints on (user_id, game_slug, date/month)
+- [ ] T050 [US3] Verify unique constraints on (user_id, title_slug, date/month)
 
 **Completion Criteria**:
 - 2 tables created (strikes, quotas)
@@ -161,7 +161,7 @@ This document contains all tasks for implementing the complete database schema a
 - [x] T052 [P] [US4] Create migration database/migrations/2025_11_13_000013_create_global_ranks_table.php
 - [x] T053 [P] [US4] Create migration database/migrations/2025_11_13_000014_create_badges_table.php
 - [x] T054 [P] [US4] Create migration database/migrations/2025_11_13_000015_create_user_badge_table.php
-- [x] T055 [P] [US4] Create migration database/migrations/2025_11_13_000016_create_user_game_levels_table.php
+- [x] T055 [P] [US4] Create migration database/migrations/2025_11_13_000016_create_user_title_levels_table.php
 - [x] T056 [P] [US4] Create migration database/migrations/2025_11_13_000017_create_user_daily_point_summaries_table.php
 - [x] T057 [P] [US4] Create migration database/migrations/2025_11_13_000018_create_user_monthly_point_summaries_table.php
 
@@ -170,20 +170,20 @@ This document contains all tasks for implementing the complete database schema a
 - [x] T058 [P] [US4] Create PointLedger model in app/Models/Gamification/PointLedger.php with polymorphic source
 - [x] T059 [P] [US4] Create GlobalRank model in app/Models/Gamification/GlobalRank.php with custom primary key
 - [x] T060 [P] [US4] Create Badge model in app/Models/Gamification/Badge.php with condition_json cast
-- [x] T061 [P] [US4] Create UserGameLevel model in app/Models/Gamification/UserGameLevel.php with composite key
+- [x] T061 [P] [US4] Create UserTitleLevel model in app/Models/Gamification/UserTitleLevel.php with composite key
 - [x] T062 [US4] Add gamification relationships to User model (pointLedgers, globalRank, badges, gameLevels)
 
 ### Migration Execution
 
 - [ ] T063 [US4] Run migrations for point_ledgers, global_ranks, badges tables
-- [ ] T064 [US4] Run migrations for user_badge, user_game_levels tables
+- [ ] T064 [US4] Run migrations for user_badge, user_title_levels tables
 - [ ] T065 [US4] Run migrations for daily and monthly point summaries
 - [ ] T066 [US4] Verify polymorphic relationships work on PointLedger
-- [ ] T067 [US4] Verify composite primary keys work on UserGameLevel
+- [ ] T067 [US4] Verify composite primary keys work on UserTitleLevel
 - [ ] T068 [US4] Verify belongsToMany with pivot works for User badges
 
 **Completion Criteria**:
-- 7 tables created (point_ledgers, global_ranks, badges, user_badge, user_game_levels, summaries)
+- 7 tables created (point_ledgers, global_ranks, badges, user_badge, user_title_levels, summaries)
 - 4 models with proper relationships and casts
 - Polymorphic source working on PointLedger
 - Many-to-many badges relationship working
@@ -196,7 +196,7 @@ This document contains all tasks for implementing the complete database schema a
 
 ### Seeder Tasks
 
-- [x] T069 Create database/seeders/GameSeeder.php for initial games (validate-four, checkers, hearts, spades)
+- [x] T069 Create database/seeders/TitleSeeder.php for initial games (validate-four, checkers, hearts, spades)
 - [x] T070 Create database/seeders/AvatarSeeder.php for free tier avatars
 - [x] T071 Create database/seeders/ClientSeeder.php for web, ios, android clients
 - [x] T072 Create database/seeders/BadgeSeeder.php for initial achievement definitions
@@ -206,7 +206,7 @@ This document contains all tasks for implementing the complete database schema a
 
 - [ ] T074 Run all seeders and verify data is created correctly
 - [ ] T075 Test User model in tinker: create user, assign avatar, check relationships
-- [ ] T076 Test Match model in tinker: create match with ULID, add players, verify game_state JSON
+- [ ] T076 Test Game model in tinker: create match with ULID, add players, verify game_state JSON
 - [ ] T077 Test Agent creation in tinker: create agent profile, link to user, verify isAgent()
 - [ ] T078 Generate database schema diagram documentation
 - [x] T079 Create database/migrations/README.md documenting migration order and dependencies

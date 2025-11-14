@@ -176,6 +176,50 @@ enum GameTitle: string
 }
 ```
 
+### 6b. `App\Enums\ActionType.php`
+
+Action types are defined as PHP enums to provide type safety for game actions across different titles.
+
+```php
+<?php
+
+namespace App\Enums;
+
+enum ActionType: string
+{
+    case DROP_PIECE = 'drop_piece';
+    case MOVE_PIECE = 'move_piece';
+    case PLAY_CARD = 'play_card';
+    case PASS = 'pass';
+    case DRAW_CARD = 'draw_card';
+    case BID = 'bid';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::DROP_PIECE => 'Drop Piece',
+            self::MOVE_PIECE => 'Move Piece',
+            self::PLAY_CARD => 'Play Card',
+            self::PASS => 'Pass',
+            self::DRAW_CARD => 'Draw Card',
+            self::BID => 'Bid',
+        };
+    }
+
+    public function description(): string
+    {
+        return match($this) {
+            self::DROP_PIECE => 'Place a piece on the board (e.g., Connect Four)',
+            self::MOVE_PIECE => 'Move a piece on the board (e.g., Checkers)',
+            self::PLAY_CARD => 'Play a card from hand (e.g., Hearts, Spades)',
+            self::PASS => 'Skip turn or pass',
+            self::DRAW_CARD => 'Draw a card from deck',
+            self::BID => 'Place a bid (e.g., Spades bidding)',
+        };
+    }
+}
+```
+
 ### 7. `App\Models\Game\Game.php`
 
 The Game model uses enum casting for the title_slug field, automatically converting between the database string and the GameTitle enum.
@@ -303,6 +347,7 @@ namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ActionType;
 
 class Action extends Model
 {
@@ -319,8 +364,9 @@ class Action extends Model
         'timestamp_client',
     ];
 
-    // Cast the JSON column
+    // Cast the JSON column and ActionType enum
     protected $casts = [
+        'action_type' => ActionType::class,
         'action_details' => 'array',
         'turn_number' => 'integer',
         'timestamp_client' => 'datetime',

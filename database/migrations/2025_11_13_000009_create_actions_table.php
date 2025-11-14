@@ -15,7 +15,7 @@ return new class extends Migration
             
             // Core Action Data
             $table->integer('turn_number');
-            $table->string('action_type', 50)->index(); // e.g., 'play_card', 'drop_piece', 'pass'
+            $table->string('action_type', 50)->index(); // ActionType enum: drop_piece, move_piece, play_card, pass, draw_card, bid
             $table->json('action_details'); // The core payload of the action
             
             // Validation and Integrity

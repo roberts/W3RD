@@ -4,6 +4,7 @@ namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ActionType;
 
 class Action extends Model
 {
@@ -21,6 +22,7 @@ class Action extends Model
     ];
 
     protected $casts = [
+        'action_type' => ActionType::class,
         'action_details' => 'array',
         'turn_number' => 'integer',
         'timestamp_client' => 'datetime',

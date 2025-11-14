@@ -71,7 +71,7 @@ interface GameServiceContract
      * Processes a player's action, validates it, updates the state, and checks win conditions.
      *
      * @param Game $game The current game model instance.
-     * @param string $actionType The type of action (e.g., 'drop_piece', 'play_card', 'move_piece').
+     * @param string $actionType The ActionType enum value (e.g., 'drop_piece', 'play_card', 'move_piece').
      * @param array $actionDetails The validated data from the client (e.g., ['column' => 3]).
      * @param int $playerId The ID of the player making the action.
      * @return array The new game_state array to be saved.
@@ -115,6 +115,7 @@ namespace App\Services\Game\Handlers;
 use App\Services\Game\GameServiceContract;
 use App\Models\Game\Game;
 use App\Exceptions\InvalidActionException;
+use App\Enums\ActionType;
 
 class ValidateFourService implements GameServiceContract
 {
@@ -124,7 +125,7 @@ class ValidateFourService implements GameServiceContract
         $gameState = $game->game_state;
         $column = $actionDetails['column'] ?? null;
         
-        if ($actionType !== 'drop_piece') {
+        if ($actionType !== ActionType::DROP_PIECE->value) {
             throw new InvalidActionException("Invalid action type for Validate Four.");
         }
         
@@ -163,7 +164,7 @@ class ValidateFourService implements GameServiceContract
         $bestColumn = $this->runMinimax($game->game_state['board'], $depth); 
         
         return [
-            'action_type' => 'drop_piece',
+            'action_type' => ActionType::DROP_PIECE->value,
             'action_details' => ['column' => $bestColumn]
         ];
     }
@@ -196,6 +197,7 @@ namespace App\Services\Game\Handlers;
 use App\Services\Game\GameServiceContract;
 use App\Models\Game\Game;
 use App\Exceptions\InvalidActionException;
+use App\Enums\ActionType;
 
 class CheckersService implements GameServiceContract
 {
@@ -205,7 +207,7 @@ class CheckersService implements GameServiceContract
         // Expects $actionDetails to contain ['from_pos' => 'A1', 'to_pos' => 'B2']
         $gameState = $game->game_state;
         
-        if ($actionType !== 'move_piece') {
+        if ($actionType !== ActionType::MOVE_PIECE->value) {
             throw new InvalidActionException("Invalid action type for Checkers.");
         }
         
@@ -234,7 +236,7 @@ class CheckersService implements GameServiceContract
         $bestMove = $this->runMinimaxWithHeuristic($game->game_state, $difficulty); 
         
         return [
-            'action_type' => 'move_piece',
+            'action_type' => ActionType::MOVE_PIECE->value,
             'action_details' => $bestMove // e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']
         ];
     }

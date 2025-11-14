@@ -421,7 +421,7 @@ return new class extends Migration
 
 **Purpose**: Complete action history for every game with validation tracking  
 **Key Features**:
-- `action_type`: Categorizes action (e.g., 'drop_piece', 'play_card', 'move_piece')
+- `action_type`: ActionType enum (drop_piece, move_piece, play_card, pass, draw_card, bid)
 - `action_details`: JSON column for flexible action data (e.g., `{"column": 3}`, `{"card_id": 42}`)
 - `status`: Tracks validation outcome (success/invalid/error)
 - `error_code`: Nullable error categorization for debugging
@@ -1255,6 +1255,7 @@ namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ActionType;
 
 class Action extends Model
 {
@@ -1272,6 +1273,7 @@ class Action extends Model
     ];
 
     protected $casts = [
+        'action_type' => ActionType::class,
         'action_details' => 'array',
         'turn_number' => 'integer',
         'timestamp_client' => 'datetime',

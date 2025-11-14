@@ -35,7 +35,7 @@ These endpoints handle the creation of games and the execution of actions, relyi
 | **Games** | `POST` | `/v1/games` | **CREATE** a new game. Triggers the **Strike/Quota check**. Body specifies `game_title` (GameTitle enum value) and initial `players`. | Bearer + Client Key |
 | **Games** | `GET` | `/v1/games` | List the authenticated user's active and recent finished games. | Bearer + Client Key |
 | **Games** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Game state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
-| **Actions** | `POST` | `/v1/games/{ulid}/actions` | **EXECUTE** an action. Body contains `action_type` and `action_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
+| **Actions** | `POST` | `/v1/games/{ulid}/actions` | **EXECUTE** an action. Body contains `action_type` (ActionType enum value) and `action_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
 | **Actions** | `GET` | `/v1/games/{ulid}/actions` | Retrieve the full **Action** history for the game (for replay). | Bearer + Client Key |
 
 ---
@@ -86,7 +86,7 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | `/v1/games` | `POST` | `game_title` (GameTitle enum value, e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `game` (New game object including **`ulid`** and initial **`game_state`** JSON) |
 | `/v1/games` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `game` objects |
 | `/v1/games/{ulid}` | `GET` | *(None)* | `game` (Current game object, including **`game_state` JSON** and **`players`** array) |
-| `/v1/games/{ulid}/actions` | `POST` | **`action_type`** (string, e.g., 'play_card', 'drop_piece'), **`action_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `action` (The recorded action object with status and timestamps) |
+| `/v1/games/{ulid}/actions` | `POST` | **`action_type`** (ActionType enum value: 'drop_piece', 'move_piece', 'play_card', 'pass', 'draw_card', 'bid'), **`action_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `action` (The recorded action object with status and timestamps) |
 | `/v1/games/{ulid}/actions` | `GET` | *(None)* | Array of all `action` objects for the game history |
 
 ---

@@ -133,44 +133,121 @@ class Agent extends Model
 
 ## ♟️ Game Domain Models
 
-### 6. `App\Models\Game\Title.php`
+### 6. `App\Enums\GameTitle.php`
 
-The Title model defines available game titles (like chess, checkers, hearts).
+Game titles are defined as PHP enums rather than database records, providing compile-time safety and eliminating database queries.
+
+```php
+<?php
+
+namespace App\Enums;
+
+enum GameTitle: string
+{
+    case VALIDATE_FOUR = 'validate-four';
+    case CHECKERS = 'checkers';
+    case HEARTS = 'hearts';
+    case SPADES = 'spades';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => 'Validate Four',
+            self::CHECKERS => 'Checkers',
+            self::HEARTS => 'Hearts',
+            self::SPADES => 'Spades',
+        };
+    }
+
+    public function maxPlayers(): int
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => 2,
+            self::CHECKERS => 2,
+            self::HEARTS => 4,
+            self::SPADES => 4,
+        };
+    }
+
+    public function slug(): string
+    {
+        return $this->value;
+    }
+}
+```
+
+### 7. `App\Models\Game\Game.php`
+
+The Game model uses enum casting for the title_slug field, automatically converting between the database string and the GameTitle enum.
 
 ```php
 <?php
 
 namespace App\Models\Game;
 
+use App\Enums\GameTitle;
+use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Title extends Model
+class Game extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $fillable = [
-        'slug',
-        'name',
-        'max_players',
+        'ulid',
+        'title_slug',
+        'status',
+        'created_by_user_id',
+        'winner_id',
+        'turn_number',
+        'game_state',
     ];
 
     protected $casts = [
-        'max_players' => 'integer',
+        'title_slug' => GameTitle::class,
+        'game_state' => 'array',
+        'turn_number' => 'integer',
     ];
 
-    // Relationships
-    public function games()
+    public function getRouteKeyName()
     {
-        return $this->hasMany(Game::class, 'title_slug', 'slug');
+        return 'ulid';
+    }
+
+    // Relationships
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function winner()
+    {
+        return $this->belongsTo(Player::class, 'winner_id');
+    }
+
+    public function moves()
+    {
+        return $this->hasMany(Move::class);
+    }
+
+    // Helper methods
+    public function isFinished(): bool
+    {
+        return $this->status === 'finished';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }
-```
-
-### 7. `App\Models\Game\Game.php`
-```php
-<?php
-// ... (content unchanged)
 ```
 
 ### 8. `App\Models\Game\Player.php`
@@ -217,7 +294,7 @@ class Player extends Model
 }
 ```
 
-### 9\. `App\Models\Game\Move.php`
+### 9. `App\Models\Game\Move.php`
 
 ```php
 <?php

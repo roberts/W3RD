@@ -31,8 +31,8 @@ These endpoints handle the creation of games and the execution of moves, relying
 
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
-| **Titles** | `GET` | `/v1/titles` | List all available **Game Titles** (`validate-four`, `hearts`). | Bearer + Client Key |
-| **Games** | `POST` | `/v1/games` | **CREATE** a new game. Triggers the **Strike/Quota check**. Body specifies `title_slug` and initial `players`. | Bearer + Client Key |
+| **Titles** | `GET` | `/v1/titles` | List all available **Game Titles** (returns GameTitle enum values and labels). | Bearer + Client Key |
+| **Games** | `POST` | `/v1/games` | **CREATE** a new game. Triggers the **Strike/Quota check**. Body specifies `game_title` (GameTitle enum value) and initial `players`. | Bearer + Client Key |
 | **Games** | `GET` | `/v1/games` | List the authenticated user's active and recent finished games. | Bearer + Client Key |
 | **Game** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Game state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
 | **Moves** | `POST` | `/v1/games/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
@@ -82,8 +82,8 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
-| `/v1/titles` | `GET` | *(None)* | Array of `title` objects (`slug`, `name`, `max_players`) |
-| `/v1/games` | `POST` | `title_slug` (e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `game` (New game object including **`ulid`** and initial **`game_state`** JSON) |
+| `/v1/titles` | `GET` | *(None)* | Array of game title objects with GameTitle enum values (`value`, `label`, `max_players`) |
+| `/v1/games` | `POST` | `game_title` (GameTitle enum value, e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `game` (New game object including **`ulid`** and initial **`game_state`** JSON) |
 | `/v1/games` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `game` objects |
 | `/v1/games/{ulid}` | `GET` | *(None)* | `game` (Current game object, including **`game_state` JSON** and **`players`** array) |
 | `/v1/games/{ulid}/moves` | `POST` | **`move_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `move` (The recorded move object) |
@@ -96,14 +96,14 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
 | `/v1/billing/subscription` | `GET` | *(None)* | `subscription` (Plan level, renewal date, status) |
-| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects detailing `title_slug`, `games_started`, `strikes_used`) |
+| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects with GameTitle enum values, `games_started`, `strikes_used`) |
 | `/v1/billing/subscribe` | `POST` | `plan_id` ('member' or 'master'), `payment_method_token` (from client-side Stripe) | `checkout_url` or `status: success` |
 | `/v1/billing/mobile/verify` | `POST` | `receipt_data` (App Store or Google Play token), `provider` ('apple' or 'google') | `status: success`, `subscription` (Updated local record) |
 | `/v1/user/stats` | `GET` | *(None)* | `stats` (Object: **`total_points`**, **`global_rank`**, **`wins`**, **`losses`**) |
-| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserTitleLevel`** objects (`title_slug`, `level`, `xp_current`) |
+| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserTitleLevel`** objects (GameTitle enum values, `level`, `xp_current`) |
 | `/v1/user/badges` | `GET` | *(None)* | Array of earned `badge` objects (including `earned_at` timestamp) |
 | `/v1/leaderboard` | `GET` | *(Query params: `limit`, `offset`)* | Array of `user` objects ranked by **`total_points`** |
-| `/v1/titles/{slug}/leaderboard` | `GET` | *(Query params: `limit`)* | Array of `user` objects ranked by **Game Title-Specific Metric** (e.g., win percentage) |
+| `/v1/titles/{game_title}/leaderboard` | `GET` | *(Query params: `limit`)* | Array of `user` objects ranked by **Game Title-Specific Metric** (e.g., win percentage) where game_title is a GameTitle enum value |
 | `/v1/leaderboard/daily/history/{date}` | `GET` | *(None)* | Array of `user` objects ranked by points earned on that specific date |
 
 Based on your current architecture, which includes **Sanctum Authentication**, **Laravel Cashier/Reverb**, **Polymorphic Agents**, and comprehensive **Gamification**, you have covered all core functionalities.

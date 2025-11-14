@@ -31,7 +31,7 @@ The architecture unifies all players, human and AI, under a central `User` model
 *   **`agents` Table:** A "profile" table that extends `users`. It stores AI-specific data, such as `ai_logic_path` (the class path to its strategy) and `available_hour_est`.
 *   **`titles` Table:** Defines available game titles (like validate-four, checkers, hearts) with their slug, name, and max_players.
 *   **`players` Table:** A simple pivot table connecting a `Game` to a `User` via a standard `user_id` foreign key, eliminating polymorphic complexity.
-*   **`games` Table:** The core table for individual game instances, using a `ulid` for public reference and a flexible `game_state` JSON column. It includes `title_slug` to reference which game title is being played and a `last_move_at` timestamp to handle turn timeouts.
+*   **`games` Table:** The core table for individual game instances, using a `ulid` for public reference and a flexible `game_state` JSON column. It includes `title_slug` (storing GameTitle enum values) to reference which game title is being played and a `last_move_at` timestamp to handle turn timeouts.
 *   **`entries` Table:** Tracks each user entry (login session) when accessing the platform through any client, including login/logout timestamps and device info.
 *   **Gamification Tables:** A suite of tables including `point_ledgers`, `global_ranks`, `badges`, `user_badge`, and `user_title_levels` will manage all aspects of the gamification system.
 

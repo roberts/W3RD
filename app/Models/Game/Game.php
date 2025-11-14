@@ -2,6 +2,7 @@
 
 namespace App\Models\Game;
 
+use App\Enums\GameTitle;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,7 @@ class Game extends Model
     ];
 
     protected $casts = [
+        'title_slug' => GameTitle::class,
         'game_state' => 'array',
         'turn_number' => 'integer',
     ];
@@ -33,11 +35,6 @@ class Game extends Model
     }
 
     // Relationships
-    public function title()
-    {
-        return $this->belongsTo(Title::class, 'title_slug', 'slug');
-    }
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

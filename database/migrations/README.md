@@ -15,24 +15,23 @@ Migrations must be run in the following order due to foreign key dependencies:
 4. `2025_11_13_000004_create_clients_table.php` - API client applications
 5. `2025_11_13_000005_create_entries_table.php` - User entry/login tracking (depends on users, clients)
 
-### Phase 2: Game Structure (006-009)
-6. `2025_11_13_000006_create_titles_table.php` - Game title definitions
-7. `2025_11_13_000007_create_games_table.php` - Game instances with ULID
-8. `2025_11_13_000008_create_players_table.php` - Game participants (adds winner_id FK back to games)
-9. `2025_11_13_000009_create_moves_table.php` - Move history
+### Phase 2: Game Structure (006-008)
+6. `2025_11_13_000006_create_games_table.php` - Game instances with ULID
+7. `2025_11_13_000007_create_players_table.php` - Game participants (adds winner_id FK back to games)
+8. `2025_11_13_000008_create_moves_table.php` - Move history
 
-### Phase 3: Billing & Quotas (010-011)
-10. `2025_11_13_000010_create_strikes_table.php` - Free tier loss tracking
-11. `2025_11_13_000011_create_quotas_table.php` - Member tier game limits
+### Phase 3: Billing & Quotas (009-010)
+9. `2025_11_13_000009_create_strikes_table.php` - Free tier loss tracking
+10. `2025_11_13_000010_create_quotas_table.php` - Member tier game limits
 
-### Phase 4: Gamification (012-018)
-12. `2025_11_13_000012_create_point_ledgers_table.php` - Point transaction audit trail
-13. `2025_11_13_000013_create_global_ranks_table.php` - Leaderboard rankings
-14. `2025_11_13_000014_create_badges_table.php` - Achievement definitions
-15. `2025_11_13_000015_create_user_badge_table.php` - User badge ownership
-16. `2025_11_13_000016_create_user_title_levels_table.php` - Game title-specific levels
-17. `2025_11_13_000017_create_user_daily_point_summaries_table.php` - Daily leaderboards
-18. `2025_11_13_000018_create_user_monthly_point_summaries_table.php` - Monthly leaderboards
+### Phase 4: Gamification (011-017)
+11. `2025_11_13_000011_create_point_ledgers_table.php` - Point transaction audit trail
+12. `2025_11_13_000012_create_global_ranks_table.php` - Leaderboard rankings
+13. `2025_11_13_000013_create_badges_table.php` - Achievement definitions
+14. `2025_11_13_000014_create_user_badge_table.php` - User badge ownership
+15. `2025_11_13_000015_create_user_title_levels_table.php` - Game title-specific levels
+16. `2025_11_13_000016_create_user_daily_point_summaries_table.php` - Daily leaderboards
+17. `2025_11_13_000017_create_user_monthly_point_summaries_table.php` - Monthly leaderboards
 
 ## Model Structure
 
@@ -47,7 +46,6 @@ app/Models/
 ├── Content/
 │   └── Avatar.php        - User profile avatars
 ├── Game/
-│   ├── Title.php         - Game title definitions
 │   ├── Game.php          - Game instance (uses ULID)
 │   ├── Player.php        - Game participants
 │   └── Move.php          - Move history
@@ -96,7 +94,7 @@ All migrations omit the `down()` method as per project requirements, focusing on
 ## Seeders
 
 Initial seed data includes:
-- **Game Titles**: Validate Four, Checkers, Hearts, Spades
+- **Game Titles**: Defined as PHP enums (Validate Four, Checkers, Hearts, Spades)
 - **Avatars**: 5 free tier avatars
 - **Clients**: Web, iOS, Android applications
 - **Badges**: First win, 10 wins, 100 wins, 5-win streak
@@ -110,7 +108,7 @@ php artisan db:seed
 
 All migrations have been tested and run successfully. Relationships verified via Laravel Tinker:
 - User → Avatar relationship working
-- Title → Game relationship working
+- Game title enum casting working
 - All models loading correctly
 - Seeders populating data successfully
 

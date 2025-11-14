@@ -140,30 +140,9 @@ return new class extends Migration
 
 ## ♟️ Game, Player, and History Structure
 
-This unified core supports all game titles and player types.
+This unified core supports all game titles and player types. Game titles (Validate Four, Checkers, Hearts, Spades) are defined as PHP enums rather than database records.
 
-### 6. `create_titles_table` (Game Title Definitions)
-```php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::create('titles', function (Blueprint $table) {
-            $table->id();
-            $table->string('slug', 50)->unique();
-            $table->string('name');
-            $table->integer('max_players')->default(2);
-            $table->timestamps();
-        });
-    }
-};
-```
-
-### 7. `create_games_table` (Game Instances)
+### 6. `create_games_table` (Game Instances)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -188,7 +167,7 @@ return new class extends Migration
 };
 ```
 
-### 8. `create_players_table` (Game Participants)
+### 7. `create_players_table` (Game Participants)
 
 A simple pivot table linking `games` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
 
@@ -221,7 +200,7 @@ return new class extends Migration
 };
 ```
 
-### 9\. `create_moves_table` (Game History Log)
+### 8. `create_moves_table` (Game History Log)
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -250,7 +229,7 @@ return new class extends Migration
 
 These tables handle the usage limits for the free and member subscription tiers.
 
-### 10\. `create_strikes_table` (Free Tier Logic)
+### 9. `create_strikes_table` (Free Tier Logic)
 
 Tracks the "3 strikes and out" limit per game per day (EST).
 
@@ -277,7 +256,7 @@ return new class extends Migration
 };
 ```
 
-### 11\. `create_quotas_table` (Member Tier Logic)
+### 10. `create_quotas_table` (Member Tier Logic)
 
 Tracks the "2,000 games per month" quota per game title (EST calendar month).
 

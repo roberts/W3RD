@@ -320,7 +320,7 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique()->index();
-            $table->string('title_slug', 50)->index();
+            $table->string('title_slug', 50)->index(); // Stores GameTitle enum value
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
             $table->foreignId('created_by_user_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
@@ -335,7 +335,7 @@ return new class extends Migration
 **Purpose**: Individual game instances (each time a game title is played)  
 **Key Features**:
 - `ulid`: Public-facing unique identifier (more secure than auto-increment ID)
-- `title_slug`: References which game title is being played
+- `title_slug`: Stores GameTitle enum value (validate-four, checkers, hearts, spades)
 - `game_state`: JSON column for flexible game board/hand storage per game title
 - `winner_id`: Foreign key added in next migration after players table exists
 - Status tracking: pending → active → finished
@@ -443,7 +443,7 @@ return new class extends Migration
         Schema::create('strikes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('title_slug', 50);
+            $table->string('title_slug', 50); // Stores GameTitle enum value
             $table->tinyInteger('strikes_used')->default(0);
             $table->date('strike_date');
             
@@ -481,7 +481,7 @@ return new class extends Migration
         Schema::create('quotas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('title_slug', 50);
+            $table->string('title_slug', 50); // Stores GameTitle enum value
             $table->integer('games_started')->default(0);
             $table->date('reset_month');
             
@@ -660,7 +660,7 @@ return new class extends Migration
     {
         Schema::create('user_title_levels', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users');
-            $table->string('title_slug', 50);
+            $table->string('title_slug', 50); // Stores GameTitle enum value
             
             $table->tinyInteger('level')->default(1);
             $table->integer('xp_current')->default(0)->comment('XP toward next level');
@@ -1133,6 +1133,7 @@ class Game extends Model
     ];
 
     protected $casts = [
+        'title_slug' => GameTitle::class, // Auto-cast to/from GameTitle enum
         'game_state' => 'array',
         'turn_number' => 'integer',
     ];

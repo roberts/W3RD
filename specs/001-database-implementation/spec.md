@@ -44,18 +44,19 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 **So that** new game titles can be added without schema migrations
 
 **Acceptance Criteria**:
-- Titles table defines available game titles (validate-four, checkers, hearts, spades)
+- GameTitle enum defines available game titles (validate-four, checkers, hearts, spades)
 - Games table stores individual game instances using ULIDs for public identification
 - game_state JSON column stores board/hand state for any game title
 - Players table links games to users (simplified from polymorphic)
-- Moves table records complete game history
+- Actions table records complete game history with validation tracking
 - Winner determined via player_id foreign key
 
 **Technical Requirements**:
 - ULID support for secure public IDs
-- JSON casting for game_state and move_details
-- Proper indexing on frequently queried columns (title_slug, status)
+- JSON casting for game_state and action_details
+- Proper indexing on frequently queried columns (title_slug, status, action_type)
 - Support for game status workflow (pending → active → finished)
+- Action validation tracking (status: success/invalid/error)
 
 ---
 
@@ -155,7 +156,7 @@ The following are explicitly excluded from this feature:
 1. Create users (human and agent)
 2. Create games with ULIDs
 3. Add players to games
-4. Record moves with JSON data
+4. Record actions with JSON data and validation tracking
 5. Test all model relationships
 6. Verify constraints and cascades
 

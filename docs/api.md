@@ -27,16 +27,16 @@ All endpoints use the base path `/v1/`.
 
 ### 2. ♟️ Matchmaking & Gameplay
 
-These endpoints handle the creation of games and the execution of moves, relying on your **Game Service Handlers**.
+These endpoints handle the creation of games and the execution of actions, relying on your **Game Service Handlers**.
 
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
 | **Titles** | `GET` | `/v1/titles` | List all available **Game Titles** (returns GameTitle enum values and labels). | Bearer + Client Key |
 | **Games** | `POST` | `/v1/games` | **CREATE** a new game. Triggers the **Strike/Quota check**. Body specifies `game_title` (GameTitle enum value) and initial `players`. | Bearer + Client Key |
 | **Games** | `GET` | `/v1/games` | List the authenticated user's active and recent finished games. | Bearer + Client Key |
-| **Game** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Game state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
-| **Moves** | `POST` | `/v1/games/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
-| **Moves** | `GET` | `/v1/games/{ulid}/moves` | Retrieve the full **Move** history for the game (for replay). | Bearer + Client Key |
+| **Games** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Game state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
+| **Actions** | `POST` | `/v1/games/{ulid}/actions` | **EXECUTE** an action. Body contains `action_type` and `action_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
+| **Actions** | `GET` | `/v1/games/{ulid}/actions` | Retrieve the full **Action** history for the game (for replay). | Bearer + Client Key |
 
 ---
 
@@ -86,8 +86,8 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | `/v1/games` | `POST` | `game_title` (GameTitle enum value, e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `game` (New game object including **`ulid`** and initial **`game_state`** JSON) |
 | `/v1/games` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `game` objects |
 | `/v1/games/{ulid}` | `GET` | *(None)* | `game` (Current game object, including **`game_state` JSON** and **`players`** array) |
-| `/v1/games/{ulid}/moves` | `POST` | **`move_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `move` (The recorded move object) |
-| `/v1/games/{ulid}/moves` | `GET` | *(None)* | Array of all `move` objects for the game history |
+| `/v1/games/{ulid}/actions` | `POST` | **`action_type`** (string, e.g., 'play_card', 'drop_piece'), **`action_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `action` (The recorded action object with status and timestamps) |
+| `/v1/games/{ulid}/actions` | `GET` | *(None)* | Array of all `action` objects for the game history |
 
 ---
 

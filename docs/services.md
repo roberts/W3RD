@@ -68,23 +68,24 @@ use App\Models\Game\Game;
 interface GameServiceContract
 {
     /**
-     * Processes a player's move, validates it, updates the state, and checks win conditions.
+     * Processes a player's action, validates it, updates the state, and checks win conditions.
      *
      * @param Game $game The current game model instance.
-     * @param array $moveData The validated data from the client (e.g., ['column' => 3]).
-     * @param int $playerId The ID of the player making the move.
+     * @param string $actionType The type of action (e.g., 'drop_piece', 'play_card', 'move_piece').
+     * @param array $actionDetails The validated data from the client (e.g., ['column' => 3]).
+     * @param int $playerId The ID of the player making the action.
      * @return array The new game_state array to be saved.
      */
-    public function processMove(Game $game, array $moveData, int $playerId): array;
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array;
 
     /**
-     * Executes the AI algorithm and returns the chosen move details.
+     * Executes the AI algorithm and returns the chosen action details.
      *
      * @param Game $game The current game model instance.
      * @param int $difficulty The depth/complexity level (based on subscription).
-     * @return array The move details (e.g., ['column' => 3]).
+     * @return array ['action_type' => string, 'action_details' => array] The AI's chosen action.
      */
-    public function getAIMove(Game $game, int $difficulty): array;
+    public function getAIAction(Game $game, int $difficulty): array;
 
     /**
      * Determines if the current game state has resulted in a win, loss, or draw.
@@ -113,23 +114,27 @@ namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
 use App\Models\Game\Game;
-use App\Exceptions\InvalidMoveException;
+use App\Exceptions\InvalidActionException;
 
 class ValidateFourService implements GameServiceContract
 {
     // The core function called by the GameController
-    public function processMove(Game $game, array $moveData, int $playerId): array
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array
     {
         $gameState = $game->game_state;
-        $column = $moveData['column'] ?? null;
+        $column = $actionDetails['column'] ?? null;
+        
+        if ($actionType !== 'drop_piece') {
+            throw new InvalidActionException("Invalid action type for Validate Four.");
+        }
         
         if (is_null($column) || !is_numeric($column) || $column < 0 || $column >= 7) {
-            throw new InvalidMoveException("Invalid column specified.");
+            throw new InvalidActionException("Invalid column specified.");
         }
 
         // 1. VALIDATION: Check if the column is already full.
         if ($this->isColumnFull($gameState['board'], $column)) {
-            throw new InvalidMoveException("Column {$column} is full.");
+            throw new InvalidActionException("Column {$column} is full.");
         }
         
         // 2. STATE UPDATE: Drop the piece (using the player's position_id for the value).
@@ -149,7 +154,7 @@ class ValidateFourService implements GameServiceContract
     }
     
     // Placeholder for the Minimax algorithm implementation
-    public function getAIMove(Game $game, int $difficulty): array
+    public function getAIAction(Game $game, int $difficulty): array
     {
         // Difficulty controls the search depth (e.g., 4 for Medium, 8 for Master)
         $depth = $difficulty;
@@ -157,7 +162,10 @@ class ValidateFourService implements GameServiceContract
         // Run Minimax logic on $game->game_state['board']
         $bestColumn = $this->runMinimax($game->game_state['board'], $depth); 
         
-        return ['column' => $bestColumn];
+        return [
+            'action_type' => 'drop_piece',
+            'action_details' => ['column' => $bestColumn]
+        ];
     }
     
     public function checkWin(array $gameState): bool
@@ -187,23 +195,27 @@ namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
 use App\Models\Game\Game;
-use App\Exceptions\InvalidMoveException;
+use App\Exceptions\InvalidActionException;
 
 class CheckersService implements GameServiceContract
 {
     // The core function called by the GameController
-    public function processMove(Game $game, array $moveData, int $playerId): array
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array
     {
-        // Expects $moveData to contain ['from_pos' => 'A1', 'to_pos' => 'B2']
+        // Expects $actionDetails to contain ['from_pos' => 'A1', 'to_pos' => 'B2']
         $gameState = $game->game_state;
         
-        // 1. VALIDATION: Check for legal move (diagonal, jump required, is it a king?).
-        if (!$this->isMoveLegal($gameState['pieces'], $moveData, $playerId)) {
-            throw new InvalidMoveException("Invalid move according to Checkers rules.");
+        if ($actionType !== 'move_piece') {
+            throw new InvalidActionException("Invalid action type for Checkers.");
         }
         
-        // 2. STATE UPDATE: Execute the move and check for 'kinging'.
-        $gameState = $this->executeMove($gameState, $moveData, $playerId);
+        // 1. VALIDATION: Check for legal action (diagonal, jump required, is it a king?).
+        if (!$this->isActionLegal($gameState['pieces'], $actionDetails, $playerId)) {
+            throw new InvalidActionException("Invalid move according to Checkers rules.");
+        }
+        
+        // 2. STATE UPDATE: Execute the action and check for 'kinging'.
+        $gameState = $this->executeAction($gameState, $actionDetails, $playerId);
         
         // 3. WIN CHECK: Check if the opponent has any pieces left.
         if ($this->checkWin($gameState)) {
@@ -216,12 +228,15 @@ class CheckersService implements GameServiceContract
     }
 
     // Placeholder for AI: Minimax combined with complex Heuristic Scoring
-    public function getAIMove(Game $game, int $difficulty): array
+    public function getAIAction(Game $game, int $difficulty): array
     {
         // Heuristic function scores board state (piece count, positional advantage, king count).
         $bestMove = $this->runMinimaxWithHeuristic($game->game_state, $difficulty); 
         
-        return $bestMove; // e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']
+        return [
+            'action_type' => 'move_piece',
+            'action_details' => $bestMove // e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']
+        ];
     }
     
     public function checkWin(array $gameState): bool
@@ -231,8 +246,8 @@ class CheckersService implements GameServiceContract
     }
     
     // --- Internal Helpers ---
-    private function isMoveLegal(array $pieces, array $moveData, int $playerId): bool { /* ... logic ... */ }
-    private function executeMove(array $gameState, array $moveData, int $playerId): array { /* ... logic ... */ }
+    private function isActionLegal(array $pieces, array $actionDetails, int $playerId): bool { /* ... logic ... */ }
+    private function executeAction(array $gameState, array $actionDetails, int $playerId): array { /* ... logic ... */ }
 }
 ```
 

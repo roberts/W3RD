@@ -232,9 +232,9 @@ class Game extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 
     // Helper methods
@@ -287,14 +287,14 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 }
 ```
 
-### 9. `App\Models\Game\Move.php`
+### 9. `App\Models\Game\Action.php`
 
 ```php
 <?php
@@ -304,7 +304,7 @@ namespace App\Models\Game;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Move extends Model
+class Action extends Model
 {
     use HasFactory;
 
@@ -312,12 +312,18 @@ class Move extends Model
         'game_id',
         'player_id',
         'turn_number',
-        'move_details',
+        'action_type',
+        'action_details',
+        'status',
+        'error_code',
+        'timestamp_client',
     ];
 
     // Cast the JSON column
     protected $casts = [
-        'move_details' => 'array',
+        'action_details' => 'array',
+        'turn_number' => 'integer',
+        'timestamp_client' => 'datetime',
     ];
 
     // Relationships

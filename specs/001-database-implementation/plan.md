@@ -51,7 +51,7 @@ Migrations must be run in this specific order due to foreign key dependencies:
 6. `titles` - Standalone, no dependencies
 7. `games` - Depends on: users (partial, winner_id added later)
 8. `players` - Depends on: games, users (also adds winner_id FK to games)
-9. `moves` - Depends on: games, players
+9. `actions` - Depends on: games, players
 
 ### Phase 3: Billing & Quotas (010-011)
 10. `strikes` - Depends on: users
@@ -388,9 +388,9 @@ return new class extends Migration
 
 ---
 
-### Migration 009: `create_moves_table`
+### Migration 009: `create_actions_table`
 
-**File**: `database/migrations/2025_11_13_000009_create_moves_table.php`
+**File**: `database/migrations/2025_11_13_000009_create_actions_table.php`
 
 ```php
 <?php
@@ -403,23 +403,31 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('moves', function (Blueprint $table) {
+        Schema::create('actions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('game_id')->constrained('games');
             $table->foreignId('player_id')->constrained('players');
             $table->integer('turn_number');
-            $table->json('move_details');
+            $table->string('action_type')->index();
+            $table->json('action_details');
+            $table->enum('status', ['success', 'invalid', 'error'])->default('success');
+            $table->string('error_code')->nullable();
+            $table->timestamp('timestamp_client')->nullable();
             $table->timestamps();
         });
     }
 };
 ```
 
-**Purpose**: Complete move history for every game  
+**Purpose**: Complete action history for every game with validation tracking  
 **Key Features**:
-- `move_details`: JSON column for flexible move data (e.g., `{"column": 3}`, `{"card_id": 42}`)
+- `action_type`: Categorizes action (e.g., 'drop_piece', 'play_card', 'move_piece')
+- `action_details`: JSON column for flexible action data (e.g., `{"column": 3}`, `{"card_id": 42}`)
+- `status`: Tracks validation outcome (success/invalid/error)
+- `error_code`: Nullable error categorization for debugging
+- `timestamp_client`: Optional client-side timestamp for latency analysis
 - Enables replay functionality
-- Audit trail for game integrity
+- Audit trail for game integrity and validation tracking
 
 ---
 
@@ -770,7 +778,7 @@ app/Models/
 │   ├── Title.php
 │   ├── Game.php
 │   ├── Player.php
-│   └── Move.php
+│   └── Action.php
 ├── Billing/
 │   ├── Strike.php
 │   └── Quota.php
@@ -1114,9 +1122,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use App\Models\Auth\User;
-use App\Models\Game\Title;
 use App\Models\Game\Player;
-use App\Models\Game\Move;
+use App\Models\Game\Action;
+use App\Enums\GameTitle;
 
 class Game extends Model
 {
@@ -1165,9 +1173,9 @@ class Game extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 
     // Helper methods
@@ -1198,7 +1206,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Move;
+use App\Models\Game\Action;
 
 class Player extends Model
 {
@@ -1227,18 +1235,18 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 }
 ```
 
 ---
 
-### Model 009: `App\Models\Game\Move`
+### Model 009: `App\Models\Game\Action`
 
-**File**: `app/Models/Game/Move.php`
+**File**: `app/Models/Game/Action.php`
 
 ```php
 <?php
@@ -1248,7 +1256,7 @@ namespace App\Models\Game;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Move extends Model
+class Action extends Model
 {
     use HasFactory;
 
@@ -1256,12 +1264,17 @@ class Move extends Model
         'game_id',
         'player_id',
         'turn_number',
-        'move_details',
+        'action_type',
+        'action_details',
+        'status',
+        'error_code',
+        'timestamp_client',
     ];
 
     protected $casts = [
-        'move_details' => 'array',
+        'action_details' => 'array',
         'turn_number' => 'integer',
+        'timestamp_client' => 'datetime',
     ];
 
     // Relationships
@@ -1536,7 +1549,7 @@ The `games` table uses ULIDs instead of auto-increment IDs for public-facing rou
 
 ### 3. **JSON Columns for Flexibility**
 - `games.game_state`: Stores board/hand state without schema changes
-- `moves.move_details`: Flexible move data per game title
+- `actions.action_details`: Flexible action data per game title
 - `badges.condition_json`: Dynamic unlock criteria
 
 ### 4. **Simplified Player Model**

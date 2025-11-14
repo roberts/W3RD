@@ -50,7 +50,7 @@ This document outlines potential new features to expand the GamerProtocol.io API
 *   **Implementation:** The current architecture is already well-suited for this. The key addition is a notification system to alert players when it's their turn.
     1.  **Push Notifications:** Integrate a service like Firebase Cloud Messaging (FCM) or Apple Push Notification Service (APNS).
     2.  **Device Tokens:** Store user device tokens in a `user_devices` table.
-    3.  **Notification Event:** When the `MoveService` processes a move and it's the next player's turn, it dispatches a `NotifyPlayerOfTurn` event.
+    3.  **Notification Event:** When the `ActionService` processes an action and it's the next player's turn, it dispatches a `NotifyPlayerOfTurn` event.
     4.  **Event Listener:** A listener for this event would then use the push notification service to send an alert to the opponent's registered devices.
 
 ---

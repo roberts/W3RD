@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\Title;
+namespace App\Models\Game;
 
-use App\Models\Game\Game;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

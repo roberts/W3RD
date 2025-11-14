@@ -12,12 +12,12 @@ This repository contains the Laravel 12 API backend for the multi-platform game 
 
 ## Key Features and Architectural Concepts
 
-1.  **Domain-Driven Architecture:** Models, Controllers, and Services are organized into distinct domains (**Auth**, **Match**, **Billing**) for maintainability.
+1.  **Domain-Driven Architecture:** Models, Controllers, and Services are organized into distinct domains (**Auth**, **Game**, **Billing**) for maintainability.
     * *See **`models.md`** and **`services.md`** for detailed structures.*
 2.  **Two-Factor Authorization:** Every request requires a **Sanctum Bearer Token** (user authentication) and an **X-Client-Key** (application authorization) found in the `clients` table.
 3.  **Real-Time Gameplay:** **Laravel Reverb** pushes instant game state updates to all subscribed clients.
-4.  **Flexible Game State:** All game boards and hands are stored in the unified **`matches`** table using the **JSON column type** (MySQL 8.0+ required) and Laravel casting, allowing for unlimited game types without schema changes.
-5.  **Usage Metering:** Custom database logic handles complex quotas: **`strikes`** (daily free losses) and **`quotas`** (monthly member matches).
+4.  **Flexible Game State:** All game boards and hands are stored in the unified **`games`** table using the **JSON column type** (MySQL 8.0+ required) and Laravel casting, allowing for unlimited game titles without schema changes.
+5.  **Usage Metering:** Custom database logic handles complex quotas: **`strikes`** (daily free losses) and **`quotas`** (monthly member games).
 
 ## Required Composer Packages
 

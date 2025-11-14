@@ -12,14 +12,14 @@ class Quota extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
-        'matches_started',
+        'title_slug',
+        'games_started',
         'reset_month',
     ];
 
     protected $casts = [
         'reset_month' => 'date',
-        'matches_started' => 'integer',
+        'games_started' => 'integer',
     ];
 
     // Relationships

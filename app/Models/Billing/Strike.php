@@ -12,7 +12,7 @@ class Strike extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
+        'title_slug',
         'strikes_used',
         'strike_date',
     ];

@@ -138,9 +138,9 @@ return new class extends Migration
 
 -----
 
-## ♟️ Match, Player, and History Structure
+## ♟️ Game, Player, and History Structure
 
-This unified core supports all games and player types.
+This unified core supports all game titles and player types.
 
 ### 6. `create_titles_table` (Game Title Definitions)
 ```php
@@ -152,7 +152,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('titles', function (Blueprint $table) {
             $table->id();
             $table->string('slug', 50)->unique();
             $table->string('name');
@@ -173,7 +173,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('matches', function (Blueprint $table) {
+        Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique()->index();
             $table->string('title_slug', 50)->index();
@@ -188,9 +188,9 @@ return new class extends Migration
 };
 ```
 
-### 8. `create_players_table` (Match Participants)
+### 8. `create_players_table` (Game Participants)
 
-A simple pivot table linking `matches` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
+A simple pivot table linking `games` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -203,7 +203,7 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('user_id')->constrained('users'); // Direct FK to users table
             $table->string('name', 50);
             $table->tinyInteger('position_id')->comment('Turn order, e.g., 1, 2, 3, 4');
@@ -214,14 +214,14 @@ return new class extends Migration
         });
         
         // Finalizing the FK after the 'players' table exists
-        Schema::table('matches', function (Blueprint $table) {
+        Schema::table('games', function (Blueprint $table) {
             $table->foreign('winner_id')->references('id')->on('players');
         });
     }
 };
 ```
 
-### 9\. `create_moves_table` (Match History Log)
+### 9\. `create_moves_table` (Game History Log)
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -234,7 +234,7 @@ return new class extends Migration
     {
         Schema::create('moves', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('player_id')->constrained('players');
             $table->integer('turn_number');
             $table->json('move_details');
@@ -279,7 +279,7 @@ return new class extends Migration
 
 ### 11\. `create_quotas_table` (Member Tier Logic)
 
-Tracks the "2,000 matches per month" quota per game (EST calendar month).
+Tracks the "2,000 games per month" quota per game title (EST calendar month).
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -294,7 +294,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->string('title_slug', 50);
-            $table->integer('matches_started')->default(0);
+            $table->integer('games_started')->default(0);
             $table->date('reset_month'); 
             
             $table->unique(['user_id', 'title_slug', 'reset_month']);

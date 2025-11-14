@@ -45,13 +45,13 @@ Migrations must be run in this specific order due to foreign key dependencies:
 2. `agents` - Standalone, no dependencies  
 3. `users` - Depends on: avatars, agents
 4. `clients` - Standalone, no dependencies
-5. `sessions` - Depends on: users, clients
+5. `entries` - Depends on: users, clients
 
 ### Phase 2: Game Structure (006-009)
-6. `games` - Standalone, no dependencies
-7. `matches` - Depends on: users (partial, winner_id added later)
-8. `players` - Depends on: matches, users (also adds winner_id FK to matches)
-9. `moves` - Depends on: matches, players
+6. `titles` - Standalone, no dependencies
+7. `games` - Depends on: users (partial, winner_id added later)
+8. `players` - Depends on: games, users (also adds winner_id FK to games)
+9. `moves` - Depends on: games, players
 
 ### Phase 3: Billing & Quotas (010-011)
 10. `strikes` - Depends on: users
@@ -259,7 +259,7 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Tracks user entries (login sessions) to the GamerProtocol platform through any client frontend. This documents frontend access and helps with security monitoring and usage analytics.  
+**Purpose**: Tracks user entries (login/access entries) to the GamerProtocol platform through any client frontend. This documents frontend access and helps with security monitoring and usage analytics.  
 **Key Features**:
 - Links user to specific client application
 - Tracks IP address and device information
@@ -284,7 +284,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('titles', function (Blueprint $table) {
             $table->id();
             $table->string('slug', 50)->unique();
             $table->string('name');
@@ -295,10 +295,10 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Game type definitions/blueprints  
+**Purpose**: Game title definitions/blueprints (validate-four, checkers, hearts, spades)  
 **Key Features**:
 - `slug`: Unique identifier (e.g., 'validate-four', 'checkers')
-- `max_players`: Maximum players per match
+- `max_players`: Maximum players per game instance
 
 ---
 
@@ -317,7 +317,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('matches', function (Blueprint $table) {
+        Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique()->index();
             $table->string('title_slug', 50)->index();
@@ -332,10 +332,11 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Individual game instances  
+**Purpose**: Individual game instances (each time a game title is played)  
 **Key Features**:
 - `ulid`: Public-facing unique identifier (more secure than auto-increment ID)
-- `game_state`: JSON column for flexible game board/hand storage
+- `title_slug`: References which game title is being played
+- `game_state`: JSON column for flexible game board/hand storage per game title
 - `winner_id`: Foreign key added in next migration after players table exists
 - Status tracking: pending → active → finished
 
@@ -358,7 +359,7 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('user_id')->constrained('users');
             $table->string('name', 50);
             $table->tinyInteger('position_id')->comment('Turn order: 1, 2, 3, 4');
@@ -368,8 +369,8 @@ return new class extends Migration
             $table->timestamps();
         });
         
-        // Add winner_id foreign key to matches table now that players exists
-        Schema::table('matches', function (Blueprint $table) {
+        // Add winner_id foreign key to games table now that players exists
+        Schema::table('games', function (Blueprint $table) {
             $table->foreign('winner_id')->references('id')->on('players');
         });
     }
@@ -379,11 +380,11 @@ return new class extends Migration
 **Purpose**: Game participants pivot table  
 **Key Features**:
 - Direct FK to users table (simplified from polymorphic)
-- `position_id`: Turn order in match
+- `position_id`: Turn order in game
 - `name`: Player display name (may differ from user name)
 - `color`: Visual identifier in game UI
-- Unique constraint ensures no duplicate positions per match
-- **Important**: Adds winner_id FK back to matches table
+- Unique constraint ensures no duplicate positions per game
+- **Important**: Adds winner_id FK back to games table
 
 ---
 
@@ -404,7 +405,7 @@ return new class extends Migration
     {
         Schema::create('moves', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('player_id')->constrained('players');
             $table->integer('turn_number');
             $table->json('move_details');
@@ -414,7 +415,7 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Complete move history for every match  
+**Purpose**: Complete move history for every game  
 **Key Features**:
 - `move_details`: JSON column for flexible move data (e.g., `{"column": 3}`, `{"card_id": 42}`)
 - Enables replay functionality
@@ -455,7 +456,7 @@ return new class extends Migration
 
 **Purpose**: Free tier "3 strikes" daily loss tracking  
 **Key Features**:
-- Tracks losses per game per day (EST timezone)
+- Tracks losses per game title per day (EST timezone)
 - Unique constraint prevents duplicate records
 - `strikes_used`: Count of losses (0-3)
 - Resets daily at midnight EST
@@ -481,7 +482,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->string('title_slug', 50);
-            $table->integer('matches_started')->default(0);
+            $table->integer('games_started')->default(0);
             $table->date('reset_month');
             
             $table->unique(['user_id', 'title_slug', 'reset_month']);
@@ -491,12 +492,12 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Member tier monthly match quota tracking  
+**Purpose**: Member tier monthly game quota tracking  
 **Key Features**:
-- Tracks matches started per game per month (EST timezone)
+- Tracks games started per game title per month (EST timezone)
 - `reset_month`: First day of month (YYYY-MM-01)
 - Unique constraint prevents duplicate records
-- Default limit: 2,000 matches per game per month
+- Default limit: 2,000 games per game title per month
 
 ---
 
@@ -521,7 +522,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             
-            // Polymorphic relation to source (e.g., Match, Badge)
+            // Polymorphic relation to source (e.g., Game, Badge)
             $table->morphs('source');
             
             $table->integer('points')->comment('Positive (award) or negative (deduction)');
@@ -534,7 +535,7 @@ return new class extends Migration
 
 **Purpose**: Immutable audit trail for all point transactions  
 **Key Features**:
-- Polymorphic `source` links to matches, badges, etc.
+- Polymorphic `source` links to games, badges, etc.
 - Supports both positive and negative point adjustments
 - `description`: Human-readable transaction reason
 
@@ -672,9 +673,9 @@ return new class extends Migration
 };
 ```
 
-**Purpose**: Game-specific skill progression and decay tracking  
+**Purpose**: Game title-specific skill progression and decay tracking  
 **Key Features**:
-- Composite primary key: one record per user per game
+- Composite primary key: one record per user per game title
 - `level`: Current skill level (1+)
 - `xp_current`: Progress toward next level
 - `last_played_at`: **CRITICAL** for decay calculations
@@ -765,9 +766,8 @@ app/Models/
 │   └── Client.php
 ├── Content/
 │   └── Avatar.php
-├── Title/
-│   └── Title.php
 ├── Game/
+│   ├── Title.php
 │   ├── Game.php
 │   ├── Player.php
 │   └── Move.php
@@ -798,9 +798,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
 use App\Models\Content\Avatar;
-use App\Models\Match\Player;
+use App\Models\Game\Player;
 use App\Models\Auth\Agent;
-use App\Models\Auth\Session;
+use App\Models\Auth\Entry;
 use App\Models\Billing\Strike;
 use App\Models\Billing\Quota;
 use App\Models\Gamification\PointLedger;
@@ -879,7 +879,7 @@ class User extends Authenticatable
             ->withPivot('earned_at');
     }
 
-    public function gameLevels()
+    public function gameTitleLevels()
     {
         return $this->hasMany(UserTitleLevel::class);
     }
@@ -988,7 +988,7 @@ namespace App\Models\Access;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Auth\Session;
+use App\Models\Auth\Entry;
 
 class Client extends Model
 {
@@ -1019,7 +1019,7 @@ class Client extends Model
 
 **File**: `app/Models/Auth/Entry.php`
 
-**Purpose**: Tracks user entries (login sessions) to the GamerProtocol platform through client frontends.
+**Purpose**: Tracks user entries (login entries) to the GamerProtocol platform through client frontends.
 
 ```php
 <?php
@@ -1064,7 +1064,7 @@ class Entry extends Model
 
 ---
 
-### Model 006: `App\Models\Game\Game`
+### Model 006: `App\Models\Game\Title`
 
 **File**: `app/Models/Game/Title.php`
 
@@ -1075,9 +1075,9 @@ namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Match\Match;
+use App\Models\Game\Game;
 
-class Game extends Model
+class Title extends Model
 {
     use HasFactory;
 
@@ -1092,33 +1092,33 @@ class Game extends Model
     ];
 
     // Relationships
-    public function matches()
+    public function games()
     {
-        return $this->hasMany(Match::class, 'title_slug', 'slug');
+        return $this->hasMany(Game::class, 'title_slug', 'slug');
     }
 }
 ```
 
 ---
 
-### Model 007: `App\Models\Match\Match`
+### Model 007: `App\Models\Game\Game`
 
-**File**: `app/Models/Match/Game.php`
+**File**: `app/Models/Game/Game.php`
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Match\Player;
-use App\Models\Match\Move;
+use App\Models\Game\Title;
+use App\Models\Game\Player;
+use App\Models\Game\Move;
 
-class Match extends Model
+class Game extends Model
 {
     use HasFactory, HasUlids;
 
@@ -1144,9 +1144,9 @@ class Match extends Model
     }
 
     // Relationships
-    public function game()
+    public function title()
     {
-        return $this->belongsTo(Game::class, 'title_slug', 'slug');
+        return $this->belongsTo(Title::class, 'title_slug', 'slug');
     }
 
     public function creator()
@@ -1184,20 +1184,20 @@ class Match extends Model
 
 ---
 
-### Model 008: `App\Models\Match\Player`
+### Model 008: `App\Models\Game\Player`
 
-**File**: `app/Models/Match/Player.php`
+**File**: `app/Models/Game/Player.php`
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Auth\User;
-use App\Models\Match\Match;
-use App\Models\Match\Move;
+use App\Models\Game\Game;
+use App\Models\Game\Move;
 
 class Player extends Model
 {
@@ -1216,9 +1216,9 @@ class Player extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function user()
@@ -1235,14 +1235,14 @@ class Player extends Model
 
 ---
 
-### Model 009: `App\Models\Match\Move`
+### Model 009: `App\Models\Game\Move`
 
-**File**: `app/Models/Match/Move.php`
+**File**: `app/Models/Game/Move.php`
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -1264,9 +1264,9 @@ class Move extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function player()
@@ -1337,13 +1337,13 @@ class Quota extends Model
     protected $fillable = [
         'user_id',
         'title_slug',
-        'matches_started',
+        'games_started',
         'reset_month',
     ];
 
     protected $casts = [
         'reset_month' => 'date',
-        'matches_started' => 'integer',
+        'games_started' => 'integer',
     ];
 
     // Relationships
@@ -1534,8 +1534,8 @@ All migrations omit the `down()` method as requested, focusing on forward-only s
 The `games` table uses ULIDs instead of auto-increment IDs for public-facing routes, providing better security and preventing enumeration attacks.
 
 ### 3. **JSON Columns for Flexibility**
-- `matches.game_state`: Stores board/hand state without schema changes
-- `moves.move_details`: Flexible move data per game type
+- `games.game_state`: Stores board/hand state without schema changes
+- `moves.move_details`: Flexible move data per game title
 - `badges.condition_json`: Dynamic unlock criteria
 
 ### 4. **Simplified Player Model**
@@ -1553,8 +1553,8 @@ All foreign keys use Laravel's default behavior (no explicit cascade). Applicati
 
 ### 7. **Indexed Columns**
 Strategic indexes on:
-- `matches.ulid`: Route lookups
-- `matches.title_slug`: Game filtering
+- `games.ulid`: Route lookups
+- `games.title_slug`: Game title filtering
 - `users.deactivated_at`: Active user queries
 - `global_ranks.total_points`: Leaderboard sorting
 - `user_daily_point_summaries.date`: Historical queries
@@ -1567,7 +1567,7 @@ Strategic indexes on:
 - [ ] Create all 15 model files with relationships
 - [ ] Verify foreign key constraints
 - [ ] Seed initial data:
-  - [ ] Games table (validate-four, checkers, hearts, spades)
+  - [ ] Game titles table (validate-four, checkers, hearts, spades)
   - [ ] Avatars table (free tier avatars)
   - [ ] Clients table (web, ios, android clients)
   - [ ] Badges table (initial achievement definitions)

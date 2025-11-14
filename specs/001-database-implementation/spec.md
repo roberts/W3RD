@@ -26,7 +26,7 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 - Agents table stores AI-specific data (logic path, availability hours)
 - Avatars can be assigned to any user
 - Clients table manages API keys for different frontend applications
-- Entries table tracks user logins/access across different client frontends
+- Entries table tracks user logins/access entries across different client frontends
 - All relationships properly defined and testable
 
 **Technical Requirements**:
@@ -41,21 +41,21 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 **Priority**: P1 (Critical - Blocking)  
 **As a** game developer  
 **I want** a flexible game state storage system using JSON columns  
-**So that** new games can be added without schema migrations
+**So that** new game titles can be added without schema migrations
 
 **Acceptance Criteria**:
-- Games table defines available game types
-- Matches table uses ULIDs for public identification
-- game_state JSON column stores board/hand state
-- Players table links matches to users (simplified from polymorphic)
+- Titles table defines available game titles (validate-four, checkers, hearts, spades)
+- Games table stores individual game instances using ULIDs for public identification
+- game_state JSON column stores board/hand state for any game title
+- Players table links games to users (simplified from polymorphic)
 - Moves table records complete game history
 - Winner determined via player_id foreign key
 
 **Technical Requirements**:
 - ULID support for secure public IDs
 - JSON casting for game_state and move_details
-- Proper indexing on frequently queried columns
-- Support for match status workflow (pending → active → finished)
+- Proper indexing on frequently queried columns (title_slug, status)
+- Support for game status workflow (pending → active → finished)
 
 ---
 
@@ -63,11 +63,11 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 **Priority**: P2 (High)  
 **As a** business owner  
 **I want** to enforce usage limits based on subscription tiers  
-**So that** free users are limited to 3 losses per game per day and members get 2000 matches per game per month
+**So that** free users are limited to 3 losses per game title per day and members get 2000 games per game title per month
 
 **Acceptance Criteria**:
-- Strikes table tracks daily losses per game per user (EST timezone)
-- Quotas table tracks monthly matches per game per user (EST timezone)
+- Strikes table tracks daily losses per game title per user (EST timezone)
+- Quotas table tracks monthly games per game title per user (EST timezone)
 - Unique constraints prevent duplicate records
 - Ready for billing service to query and enforce limits
 
@@ -88,12 +88,12 @@ Implement the complete database schema and Eloquent models for the GamerProtocol
 - PointLedger provides immutable audit trail for all points
 - GlobalRank caches total points for fast leaderboard queries
 - Badges define achievement criteria in JSON
-- UserTitleLevel tracks game-specific skill progression
+- UserTitleLevel tracks game title-specific skill progression
 - Daily and monthly summaries enable historical leaderboards
 - Level decay ready to be implemented via last_played_at timestamp
 
 **Technical Requirements**:
-- Polymorphic relationship for point sources (matches, badges, etc)
+- Polymorphic relationship for point sources (games, badges, etc)
 - Composite primary keys where appropriate
 - JSON casting for badge conditions
 - Strategic indexing for leaderboard queries
@@ -142,7 +142,7 @@ The following are explicitly excluded from this feature:
 - ✅ 18 migrations created and executed successfully
 - ✅ 15 Eloquent models with full relationships
 - ✅ All foreign key constraints working
-- ✅ ULID generation working for matches
+- ✅ ULID generation working for games
 - ✅ JSON casting working for flexible fields
 - ✅ All relationships testable in tinker
 - ✅ Initial seed data loaded
@@ -153,8 +153,8 @@ The following are explicitly excluded from this feature:
 
 **Manual Testing via Tinker**:
 1. Create users (human and agent)
-2. Create matches with ULIDs
-3. Add players to matches
+2. Create games with ULIDs
+3. Add players to games
 4. Record moves with JSON data
 5. Test all model relationships
 6. Verify constraints and cascades
@@ -166,7 +166,7 @@ The following are explicitly excluded from this feature:
 ## Implementation Notes
 
 - Migrations numbered sequentially from 2025_11_13_000001 through 000018
-- Models organized by domain (Auth, Access, Content, Game, Match, Billing, Gamification)
+- Models organized by domain (Auth, Access, Content, Game, Billing, Gamification)
 - User model requires namespace move from app/Models to app/Models/Auth
 - All imports must be updated after User model move
 - Strategic use of parallel execution opportunities (37% of tasks)

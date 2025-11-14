@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use App\Models\Auth\User;
-use App\Models\Title\Title;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

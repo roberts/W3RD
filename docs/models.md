@@ -23,7 +23,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
 use App\Models\Content\Avatar;
-use App\Models\Match\Player;
+use App\Models\Game\Player;
 use App\Models\Auth\Agent;
 
 class User extends Authenticatable
@@ -131,28 +131,56 @@ class Agent extends Model
 
 -----
 
-## ♟️ Match & Game Domain Models
+## ♟️ Game Domain Models
 
 ### 6. `App\Models\Game\Title.php`
+
+The Title model defines available game titles (like chess, checkers, hearts).
+
+```php
+<?php
+
+namespace App\Models\Game;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Title extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'slug',
+        'name',
+        'max_players',
+    ];
+
+    protected $casts = [
+        'max_players' => 'integer',
+    ];
+
+    // Relationships
+    public function games()
+    {
+        return $this->hasMany(Game::class, 'title_slug', 'slug');
+    }
+}
+```
+
+### 7. `App\Models\Game\Game.php`
 ```php
 <?php
 // ... (content unchanged)
 ```
 
-### 7. `App\Models\Match\Game.php`
-```php
-<?php
-// ... (content unchanged)
-```
-
-### 8. `App\Models\Match\Player.php`
+### 8. `App\Models\Game\Player.php`
 
 The `Player` model is now greatly simplified, removing the polymorphic relationship.
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -171,9 +199,9 @@ class Player extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     // A player is now directly associated with a User
@@ -189,12 +217,12 @@ class Player extends Model
 }
 ```
 
-### 9\. `App\Models\Match\Move.php`
+### 9\. `App\Models\Game\Move.php`
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -216,9 +244,9 @@ class Move extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function player()
@@ -292,7 +320,7 @@ class Quota extends Model
     protected $fillable = [
         'user_id',
         'title_slug',
-        'matches_started',
+        'games_started',
         'reset_month',
     ];
 

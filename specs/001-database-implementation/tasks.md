@@ -81,9 +81,9 @@ This document contains all tasks for implementing the complete database schema a
 
 ## Phase 3: Game Structure (14 tasks)
 
-**Goal**: Create tables and models for game definitions, matches, players, and moves.
+**Goal**: Create tables and models for game title definitions, games, players, and moves.
 
-**Story**: [US2] As a system, I need to store flexible game state for multiple game types without schema changes.
+**Story**: [US2] As a system, I need to store flexible game state for multiple game titles without schema changes.
 
 ### Migration Tasks
 
@@ -94,26 +94,26 @@ This document contains all tasks for implementing the complete database schema a
 
 ### Model Tasks
 
-- [x] T031 [P] [US2] Create Game model in app/Models/Game/Title.php with relationships
-- [x] T032 [US2] Create Game model in app/Models/Match/Game.php with HasUlids trait
+- [x] T031 [P] [US2] Create Title model in app/Models/Game/Title.php with relationships
+- [x] T032 [US2] Create Game model in app/Models/Game/Game.php with HasUlids trait
 - [x] T033 [US2] Add Game model casts (game_state as array, turn_number as integer)
-- [x] T034 [US2] Add Game model relationships (game, creator, players, winner, moves)
+- [x] T034 [US2] Add Game model relationships (title, creator, players, winner, moves)
 - [x] T035 [US2] Override getRouteKeyName() in Game model to use 'ulid'
-- [x] T036 [US2] Add Match helper methods (isFinished(), isActive())
-- [x] T037 [P] [US2] Create Player model in app/Models/Match/Player.php with relationships
-- [x] T038 [P] [US2] Create Move model in app/Models/Match/Move.php with JSON cast
+- [x] T036 [US2] Add Game helper methods (isFinished(), isActive())
+- [x] T037 [P] [US2] Create Player model in app/Models/Game/Player.php with relationships
+- [x] T038 [P] [US2] Create Move model in app/Models/Game/Move.php with JSON cast
 
 ### Migration Execution
 
-- [ ] T039 [US2] Run migrations for games, matches tables
-- [ ] T040 [US2] Run migrations for players table (adds winner_id FK to matches)
+- [ ] T039 [US2] Run migrations for titles, games tables
+- [ ] T040 [US2] Run migrations for players table (adds winner_id FK to games)
 - [ ] T041 [US2] Run migration for moves table
 - [ ] T042 [US2] Verify ULID generation works on Game model
 
 **Completion Criteria**:
-- 4 tables created (games, matches, players, moves)
+- 4 tables created (titles, games, players, moves)
 - 4 models with proper relationships
-- ULID working for match public IDs
+- ULID working for game public IDs
 - JSON casting working for game_state and move_details
 
 ---
@@ -206,7 +206,7 @@ This document contains all tasks for implementing the complete database schema a
 
 - [ ] T074 Run all seeders and verify data is created correctly
 - [ ] T075 Test User model in tinker: create user, assign avatar, check relationships
-- [ ] T076 Test Game model in tinker: create match with ULID, add players, verify game_state JSON
+- [ ] T076 Test Game model in tinker: create game with ULID, add players, verify game_state JSON
 - [ ] T077 Test Agent creation in tinker: create agent profile, link to user, verify isAgent()
 - [ ] T078 Generate database schema diagram documentation
 - [x] T079 Create database/migrations/README.md documenting migration order and dependencies
@@ -287,8 +287,8 @@ Since this is database schema implementation, testing will focus on:
    - Helper methods return correct values
 
 3. **Integration Testing**:
-   - Create complete game flow: User → Match → Players → Moves
-   - Create agent: Agent → User → Match
+   - Create complete game flow: User → Game → Players → Moves
+   - Create agent: Agent → User → Game
    - Test gamification: User → PointLedger → GlobalRank
 
 **Testing will be manual via tinker** as specified in Phase 6 validation tasks.
@@ -302,7 +302,7 @@ Since this is database schema implementation, testing will focus on:
 - **Phase 2**: Core Identity ✓
 - **Phase 3**: Game Structure ✓
 
-This MVP allows basic game functionality with users and matches.
+This MVP allows basic game functionality with users and games.
 
 ### Incremental Delivery
 1. **First Increment**: Phases 1-3 (Core gameplay)
@@ -318,7 +318,7 @@ Since migrations have no `down()` methods as requested, rollback requires manual
 ## Notes
 
 - All migrations omit `down()` methods as specified in requirements
-- ULIDs are used for Match public identifiers (security best practice)
+- ULIDs are used for Game public identifiers (security best practice)
 - JSON columns require MySQL 8.0+ 
 - Composite primary keys used where appropriate for natural uniqueness
 - Strategic indexing for performance on high-query columns

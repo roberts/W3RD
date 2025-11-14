@@ -16,21 +16,21 @@ Migrations must be run in the following order due to foreign key dependencies:
 5. `2025_11_13_000005_create_entries_table.php` - User entry/login tracking (depends on users, clients)
 
 ### Phase 2: Game Structure (006-009)
-6. `2025_11_13_000006_create_games_table.php` - Game type definitions
+6. `2025_11_13_000006_create_titles_table.php` - Game title definitions
 7. `2025_11_13_000007_create_games_table.php` - Game instances with ULID
-8. `2025_11_13_000008_create_players_table.php` - Game participants (adds winner_id FK back to matches)
+8. `2025_11_13_000008_create_players_table.php` - Game participants (adds winner_id FK back to games)
 9. `2025_11_13_000009_create_moves_table.php` - Move history
 
 ### Phase 3: Billing & Quotas (010-011)
 10. `2025_11_13_000010_create_strikes_table.php` - Free tier loss tracking
-11. `2025_11_13_000011_create_quotas_table.php` - Member tier match limits
+11. `2025_11_13_000011_create_quotas_table.php` - Member tier game limits
 
 ### Phase 4: Gamification (012-018)
 12. `2025_11_13_000012_create_point_ledgers_table.php` - Point transaction audit trail
 13. `2025_11_13_000013_create_global_ranks_table.php` - Leaderboard rankings
 14. `2025_11_13_000014_create_badges_table.php` - Achievement definitions
 15. `2025_11_13_000015_create_user_badge_table.php` - User badge ownership
-16. `2025_11_13_000016_create_user_game_levels_table.php` - Game-specific levels
+16. `2025_11_13_000016_create_user_title_levels_table.php` - Game title-specific levels
 17. `2025_11_13_000017_create_user_daily_point_summaries_table.php` - Daily leaderboards
 18. `2025_11_13_000018_create_user_monthly_point_summaries_table.php` - Monthly leaderboards
 
@@ -46,10 +46,9 @@ app/Models/
 │   └── Client.php        - API client management
 ├── Content/
 │   └── Avatar.php        - User profile avatars
-├── Title/
-│   └── Title.php          - Game type definitions
 ├── Game/
-│   ├── Game.php         - Game instance (uses ULID)
+│   ├── Title.php         - Game title definitions
+│   ├── Game.php          - Game instance (uses ULID)
 │   ├── Player.php        - Game participants
 │   └── Move.php          - Move history
 ├── Billing/
@@ -59,7 +58,7 @@ app/Models/
     ├── PointLedger.php   - Point transactions
     ├── GlobalRank.php    - Leaderboard data
     ├── Badge.php         - Achievement definitions
-    └── UserGameLevel.php - Game-specific progression
+    └── UserTitleLevel.php - Game title-specific progression
 ```
 
 ## Key Features
@@ -69,30 +68,24 @@ app/Models/
 - Prevents enumeration attacks on public-facing routes
 
 ### JSON Columns
-- `matches.game_state` - Flexible board/hand storage
-- `moves.move_details` - Game-specific move data
+- `games.game_state` - Flexible board/hand storage
+- `moves.move_details` - Game title-specific move data
 - `badges.condition_json` - Dynamic unlock criteria
 
 ### Composite Primary Keys
-- `user_game_levels` - (user_id, game_slug)
+- `user_title_levels` - (user_id, title_slug)
 - `user_badge` - (user_id, badge_id)
-- `strikes` - (user_id, game_slug, strike_date)
-- `quotas` - (user_id, game_slug, reset_month)
+- `strikes` - (user_id, title_slug, strike_date)
+- `quotas` - (user_id, title_slug, reset_month)
 
 ### Laravel Cashier Integration
 - User model includes Stripe billing fields
 - Ready for subscription management
 
 ### Polymorphic Relationships
-- `point_ledgers.source` - Links to matches, badges, etc.
+- `point_ledgers.source` - Links to games, badges, etc.
 
 ## Important Notes
-
-### PHP 8 Reserved Keyword
-The `Match` class name conflicts with PHP 8's match expression. All references use the full namespace:
-```php
-\App\Models\Match\Match::class
-```
 
 ### User Model Location
 User model moved from `App\Models\User` to `App\Models\Auth\User` for better organization. A backward compatibility alias exists in `app/Models/User.php`.
@@ -103,7 +96,7 @@ All migrations omit the `down()` method as per project requirements, focusing on
 ## Seeders
 
 Initial seed data includes:
-- **Games**: Validate Four, Checkers, Hearts, Spades
+- **Game Titles**: Validate Four, Checkers, Hearts, Spades
 - **Avatars**: 5 free tier avatars
 - **Clients**: Web, iOS, Android applications
 - **Badges**: First win, 10 wins, 100 wins, 5-win streak
@@ -117,7 +110,7 @@ php artisan db:seed
 
 All migrations have been tested and run successfully. Relationships verified via Laravel Tinker:
 - User → Avatar relationship working
-- Game → Match relationship working
+- Title → Game relationship working
 - All models loading correctly
 - Seeders populating data successfully
 

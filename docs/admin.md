@@ -45,7 +45,7 @@ The main admin dashboard should provide a high-level overview of the platform's 
 *   **Implementation:** Use Filament Widgets (`php artisan make:filament-widget StatsOverview --stats-overview`).
 *   **Widgets to Create:**
     *   **Stats Overview:** Key metrics like Daily Active Users (DAU), Monthly Active Users (MAU), Total Revenue (This Month), and New Signups (Today).
-    *   **Recent Matches Chart:** A chart showing the number of matches played per day over the last 30 days.
+    *   **Recent Games Chart:** A chart showing the number of games played per day over the last 30 days.
     *   **Recent Users Table:** A table widget showing the latest 10 users who signed up.
 
 ### 3. Resource Management
@@ -61,12 +61,12 @@ Resources are the heart of Filament, providing full CRUD functionality for your 
         *   **Grant Subscription:** A custom action that manually creates a subscription for a user.
         *   **Deactivate/Reactivate:** An action to toggle the `deactivated_at` timestamp.
 
-*   **Game & Match Management**
-    *   **`GameResource`:** Simple CRUD for managing the available game blueprints (`slug`, `name`, `max_players`).
-    *   **`MatchResource`:**
-        *   **Table:** List all matches, showing `ulid`, `title_slug`, players, `status`, and `winner`.
-        *   **Custom View:** On the "View" page for a match, create a custom component to render the `game_state` JSON in a readable format (e.g., a visual representation of the board).
-        *   **Actions:** Add an action to "Manually Resolve" a stuck match by setting a winner.
+*   **Game & Game Management**
+    *   **`TitleResource`:** Simple CRUD for managing the available game title blueprints (`slug`, `name`, `max_players`).
+    *   **`GameResource`:**
+        *   **Table:** List all games, showing `ulid`, `title_slug`, players, `status`, and `winner`.
+        *   **Custom View:** On the "View" page for a game, create a custom component to render the `game_state` JSON in a readable format (e.g., a visual representation of the board).
+        *   **Actions:** Add an action to "Manually Resolve" a stuck game by setting a winner.
 
 *   **Content Management**
     *   **`AvatarResource`:** CRUD for managing avatars. Use the `FileUpload` component to handle image uploads directly to your storage.

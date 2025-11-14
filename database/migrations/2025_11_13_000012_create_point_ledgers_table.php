@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
 
-            // Polymorphic relation to source (e.g., Match, Badge)
+            // Polymorphic relation to source (e.g., Game, Badge)
             $table->morphs('source');
 
             $table->integer('points')->comment('Positive (award) or negative (deduction)');

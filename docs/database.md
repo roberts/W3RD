@@ -79,7 +79,7 @@ return new class extends Migration
         Schema::create('avatars', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50)->unique();
-            $table->string('image_url');
+            $table->foreignId('image_id')->nullable()->constrained('images');
             $table->enum('type', ['free', 'premium', 'nft'])->default('free');
             $table->timestamps();
         });
@@ -109,7 +109,10 @@ return new class extends Migration
 };
 ```
 
-### 5. `create_sessions_table` (User Login Log)
+### 5. `create_entries_table` (User Entry Log)
+
+**Purpose:** Tracks each time a user enters the GamerProtocol platform through any client (web, iOS, Android, etc.). This documents frontend access sessions and helps with security monitoring and usage analytics.
+
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -119,7 +122,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('client_id')->constrained('clients');
@@ -135,11 +138,11 @@ return new class extends Migration
 
 -----
 
-## ♟️ Match, Player, and History Structure
+## ♟️ Game, Player, and History Structure
 
-This unified core supports all games and player types.
+This unified core supports all game titles and player types. Game titles (Validate Four, Checkers, Hearts, Spades) are defined as PHP enums rather than database records.
 
-### 6. `create_games_table` (Game Blueprints)
+### 6. `create_games_table` (Game Instances)
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -151,29 +154,8 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
-            $table->string('slug', 50)->unique();
-            $table->string('name');
-            $table->integer('max_players')->default(2);
-            $table->timestamps();
-        });
-    }
-};
-```
-
-### 7. `create_matches_table` (Game Instances)
-```php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::create('matches', function (Blueprint $table) {
-            $table->id();
             $table->ulid('ulid')->unique()->index();
-            $table->string('game_slug', 50)->index();
+            $table->string('title_slug', 50)->index();
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
             $table->foreignId('created_by_user_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
@@ -185,9 +167,9 @@ return new class extends Migration
 };
 ```
 
-### 8. `create_players_table` (Match Participants)
+### 7. `create_players_table` (Game Participants)
 
-A simple pivot table linking `matches` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
+A simple pivot table linking `games` to `users`. The polymorphic relationship is **removed** for simplicity and performance.
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -200,25 +182,25 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('user_id')->constrained('users'); // Direct FK to users table
             $table->string('name', 50);
             $table->tinyInteger('position_id')->comment('Turn order, e.g., 1, 2, 3, 4');
             $table->string('color', 20);
             
-            $table->unique(['match_id', 'position_id']);
+            $table->unique(['game_id', 'position_id']);
             $table->timestamps();
         });
         
         // Finalizing the FK after the 'players' table exists
-        Schema::table('matches', function (Blueprint $table) {
+        Schema::table('games', function (Blueprint $table) {
             $table->foreign('winner_id')->references('id')->on('players');
         });
     }
 };
 ```
 
-### 9\. `create_moves_table` (Match History Log)
+### 8. `create_actions_table` (Game Action Log)
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -229,12 +211,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('moves', function (Blueprint $table) {
+        Schema::create('actions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches');
+            $table->foreignId('game_id')->constrained('games');
             $table->foreignId('player_id')->constrained('players');
+            
+            // Core Action Data
             $table->integer('turn_number');
-            $table->json('move_details');
+            $table->string('action_type', 50)->index(); // ActionType enum: drop_piece, move_piece, play_card, pass, draw_card, bid
+            $table->json('action_details'); // The core payload of the action
+            
+            // Validation and Integrity
+            $table->enum('status', ['success', 'invalid', 'error'])->default('success');
+            $table->string('error_code', 50)->nullable();
+            
+            // Temporal Data
+            $table->timestamp('timestamp_client')->nullable();
             $table->timestamps();
         });
     }
@@ -247,7 +239,7 @@ return new class extends Migration
 
 These tables handle the usage limits for the free and member subscription tiers.
 
-### 10\. `create_strikes_table` (Free Tier Logic)
+### 9. `create_strikes_table` (Free Tier Logic)
 
 Tracks the "3 strikes and out" limit per game per day (EST).
 
@@ -263,20 +255,20 @@ return new class extends Migration
         Schema::create('strikes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50);
+            $table->string('title_slug', 50);
             $table->tinyInteger('strikes_used')->default(0);
             $table->date('strike_date');
             
-            $table->unique(['user_id', 'game_slug', 'strike_date']);
+            $table->unique(['user_id', 'title_slug', 'strike_date']);
             $table->timestamps();
         });
     }
 };
 ```
 
-### 11\. `create_quotas_table` (Member Tier Logic)
+### 10. `create_quotas_table` (Member Tier Logic)
 
-Tracks the "2,000 matches per month" quota per game (EST calendar month).
+Tracks the "2,000 games per month" quota per game title (EST calendar month).
 
 ```php
 use Illuminate\Database\Migrations\Migration;
@@ -290,11 +282,11 @@ return new class extends Migration
         Schema::create('quotas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('game_slug', 50);
-            $table->integer('matches_started')->default(0);
+            $table->string('title_slug', 50);
+            $table->integer('games_started')->default(0);
             $table->date('reset_month'); 
             
-            $table->unique(['user_id', 'game_slug', 'reset_month']);
+            $table->unique(['user_id', 'title_slug', 'reset_month']);
             $table->timestamps();
         });
     }

@@ -16,17 +16,17 @@ This document outlines potential new features to expand the GamerProtocol.io API
     *   `GET /v1/friends`: List all friends with their current status.
     *   `PATCH /v1/friends/{friendship_id}`: Accept or decline a pending request. Body: `{ "status": "accepted" }`.
     *   `DELETE /v1/friends/{friendship_id}`: Remove a friend or cancel a request.
-*   **Integration:** The `POST /v1/matches` endpoint could be updated to allow `opponent_id` to be a friend's ID, initiating a direct challenge.
+*   **Integration:** The `POST /v1/games` endpoint could be updated to allow `opponent_id` to be a friend's ID, initiating a direct challenge.
 
-### Real-Time Match Chat
+### Real-Time Game Chat
 
-*   **Concept:** Enable players within an active match to send and receive messages in real-time.
+*   **Concept:** Enable players within an active game to send and receive messages in real-time.
 *   **Technology:** This is a perfect use case for the existing **Laravel Reverb** WebSocket server.
 *   **Implementation:**
-    1.  **Private Channel:** Define a private broadcast channel for each match: `private-match.{ulid}`.
-    2.  **Authorization:** In `routes/channels.php`, authorize users to join this channel only if they are a player in that specific match.
-    3.  **New Endpoint:** Create `POST /v1/matches/{ulid}/chat`.
-    4.  **Logic:** This endpoint's controller method would validate the message and then broadcast a `ChatMessageSent` event to the private match channel. All connected clients (players) in that match would receive the message instantly.
+    1.  **Private Channel:** Define a private broadcast channel for each game: `private-game.{ulid}`.
+    2.  **Authorization:** In `routes/channels.php`, authorize users to join this channel only if they are a player in that specific game.
+    3.  **New Endpoint:** Create `POST /v1/games/{ulid}/chat`.
+    4.  **Logic:** This endpoint's controller method would validate the message and then broadcast a `ChatMessageSent` event to the private game channel. All connected clients (players) in that game would receive the message instantly.
 
 ---
 
@@ -36,21 +36,21 @@ This document outlines potential new features to expand the GamerProtocol.io API
 
 *   **Concept:** Allow users to participate in scheduled or on-demand tournaments with a structured bracket system (e.g., single-elimination).
 *   **Database Schema:**
-    *   `tournaments`: `id`, `name`, `game_slug`, `start_time`, `status` (`pending`, `active`, `completed`).
+    *   `tournaments`: `id`, `name`, `title_slug`, `start_time`, `status` (`pending`, `active`, `completed`).
     *   `tournament_participants`: `id`, `tournament_id`, `user_id`.
-    *   `tournament_brackets`: `id`, `tournament_id`, `round`, `match_id`, `player1_id`, `player2_id`, `winner_id`.
+    *   `tournament_brackets`: `id`, `tournament_id`, `round`, `game_id`, `player1_id`, `player2_id`, `winner_id`.
 *   **Logic:**
     *   A service layer would be needed to manage tournament state.
-    *   When a tournament starts, a job would generate the first-round brackets and create the initial `Match` records.
-    *   As each match completes, a listener would update the bracket and, if applicable, create the next-round match for the winner.
+    *   When a tournament starts, a job would generate the first-round brackets and create the initial `Game` records.
+    *   As each game completes, a listener would update the bracket and, if applicable, create the next-round game for the winner.
 
 ### Asynchronous Gameplay (Turn-Based)
 
-*   **Concept:** Support games where players do not need to be online simultaneously (e.g., Chess, turn-based strategy games).
+*   **Concept:** Support game titles where players do not need to be online simultaneously (e.g., Chess, turn-based strategy games).
 *   **Implementation:** The current architecture is already well-suited for this. The key addition is a notification system to alert players when it's their turn.
     1.  **Push Notifications:** Integrate a service like Firebase Cloud Messaging (FCM) or Apple Push Notification Service (APNS).
     2.  **Device Tokens:** Store user device tokens in a `user_devices` table.
-    3.  **Notification Event:** When the `MoveService` processes a move and it's the next player's turn, it dispatches a `NotifyPlayerOfTurn` event.
+    3.  **Notification Event:** When the `ActionService` processes an action and it's the next player's turn, it dispatches a `NotifyPlayerOfTurn` event.
     4.  **Event Listener:** A listener for this event would then use the push notification service to send an alert to the opponent's registered devices.
 
 ---
@@ -69,19 +69,19 @@ This document outlines potential new features to expand the GamerProtocol.io API
         *   `GET /v1/store/products`: List all available items for sale.
         *   `POST /v1/store/purchase`: Initiate a purchase for a specific product.
 
-### Ticket System (Pay-per-Match)
+### Ticket System (Pay-per-Game)
 
-*   **Concept:** Offer an alternative to subscriptions where users can buy a "pack" of matches (e.g., 10 tickets for $1.99). This is a great option for less frequent players.
+*   **Concept:** Offer an alternative to subscriptions where users can buy a "pack" of games (e.g., 10 tickets for $1.99). This is a great option for less frequent players.
 *   **Database:**
     *   A simple `user_tickets` table: `user_id`, `ticket_balance`.
 *   **Logic:**
     1.  **Purchase:** Use the same one-time purchase flow as the In-Game Store to allow users to buy ticket packs.
-    2.  **Usage:** The `QuotaService` (or a similar service that runs before match creation) would be modified. If a user is out of free "strikes" and does not have a subscription, it would check for an available ticket in their balance.
-    3.  **Deduct:** If a ticket is available, it is consumed, and the match is created. If not, the request is denied.
+    2.  **Usage:** The `QuotaService` (or a similar service that runs before game creation) would be modified. If a user is out of free "strikes" and does not have a subscription, it would check for an available ticket in their balance.
+    3.  **Deduct:** If a ticket is available, it is consumed, and the game is created. If not, the request is denied.
 
 ### Party/Group Queuing
 
-*   **Concept:** Allow a party of two or more friends to queue up together for team-based games (e.g., 2v2 Spades).
+*   **Concept:** Allow a party of two or more friends to queue up together for team-based game titles (e.g., 2v2 Spades).
 *   **Implementation:**
     *   **Party System:** A more formal party system would be needed, likely managed in Redis. A party leader would invite friends, and once assembled, the leader could initiate the matchmaking search.
     *   **Matchmaking Logic:** The `ProcessMatchmakingQueue` job would be adapted to look for parties of the correct size instead of individuals. It would then match one party against another.

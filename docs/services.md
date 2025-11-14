@@ -1,16 +1,16 @@
-That's the final piece of your **GamerProtocol.io** API architecture\! The **Service Layer** is where the magic happens, housing all the game-specific logic and algorithms.
+That's the final piece of your **GamerProtocol.io** API architecture\! The **Service Layer** is where the magic happens, housing all the game title-specific logic and algorithms.
 
-As discussed, we'll use a **Service-Oriented Architecture** with a central factory to route traffic to the correct handler. This ensures your `MatchController` remains thin and the game rules are isolated.
+As discussed, we'll use a **Service-Oriented Architecture** with a central factory to route traffic to the correct handler. This ensures your `GameController` remains thin and the game rules are isolated.
 
-Here is the draft structure for the central factory and the four game services: **`ValidateFour`**, **`Checkers`**, **`Hearts`**, and **`Spades`**.
+Here is the draft structure for the central factory and the four game title services: **`ValidateFour`**, **`Checkers`**, **`Hearts`**, and **`Spades`**.
 
 -----
 
 ## 🏭 Central Service Structure
 
-### 1\. `app/Services/Game/MatchHandlerFactory.php`
+### 1\. `app/Services/Game/GameHandlerFactory.php`
 
-This class takes the `game_slug` and returns the correct handler instance.
+This class takes the `title_slug` and returns the correct handler instance.
 
 ```php
 <?php
@@ -21,12 +21,12 @@ use App\Services\Game\Handlers\ValidateFourService;
 use App\Services\Game\Handlers\CheckersService;
 use App\Services\Game\Handlers\HeartsService;
 use App\Services\Game\Handlers\SpadesService;
-use App\Models\Match\Match;
+use App\Models\Game\Game;
 use InvalidArgumentException;
 
-class MatchHandlerFactory
+class GameHandlerFactory
 {
-    // Maps the game_slug to the responsible service class
+    // Maps the title_slug to the responsible service class
     const HANDLERS = [
         'validate-four' => ValidateFourService::class,
         'checkers'      => CheckersService::class,
@@ -35,15 +35,15 @@ class MatchHandlerFactory
     ];
 
     /**
-     * Creates and returns the appropriate service handler for a match.
-     * * @param string $gameSlug
+     * Creates and returns the appropriate service handler for a game.
+     * * @param string $titleSlug
      * @return GameServiceContract
      * @throws InvalidArgumentException
      */
-    public static function create(string $gameSlug): GameServiceContract
+    public static function create(string $titleSlug): GameServiceContract
     {
-        if (!isset(self::HANDLERS[$gameSlug])) {
-            throw new InvalidArgumentException("No handler found for game slug: {$gameSlug}");
+        if (!isset(self::HANDLERS[$titleSlug])) {
+            throw new InvalidArgumentException("No handler found for game title slug: {$titleSlug}");
         }
 
         $handlerClass = self::HANDLERS[$gameSlug];
@@ -56,35 +56,36 @@ class MatchHandlerFactory
 
 ### 2\. `app/Services/Game/GameServiceContract.php`
 
-An interface that all game handlers must implement, ensuring method consistency.
+An interface that all game title handlers must implement, ensuring method consistency.
 
 ```php
 <?php
 
 namespace App\Services\Game;
 
-use App\Models\Match\Match;
+use App\Models\Game\Game;
 
 interface GameServiceContract
 {
     /**
-     * Processes a player's move, validates it, updates the state, and checks win conditions.
+     * Processes a player's action, validates it, updates the state, and checks win conditions.
      *
-     * @param Match $match The current match model instance.
-     * @param array $moveData The validated data from the client (e.g., ['column' => 3]).
-     * @param int $playerId The ID of the player making the move.
+     * @param Game $game The current game model instance.
+     * @param string $actionType The ActionType enum value (e.g., 'drop_piece', 'play_card', 'move_piece').
+     * @param array $actionDetails The validated data from the client (e.g., ['column' => 3]).
+     * @param int $playerId The ID of the player making the action.
      * @return array The new game_state array to be saved.
      */
-    public function processMove(Match $match, array $moveData, int $playerId): array;
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array;
 
     /**
-     * Executes the AI algorithm and returns the chosen move details.
+     * Executes the AI algorithm and returns the chosen action details.
      *
-     * @param Match $match The current match model instance.
+     * @param Game $game The current game model instance.
      * @param int $difficulty The depth/complexity level (based on subscription).
-     * @return array The move details (e.g., ['column' => 3]).
+     * @return array ['action_type' => string, 'action_details' => array] The AI's chosen action.
      */
-    public function getAIMove(Match $match, int $difficulty): array;
+    public function getAIAction(Game $game, int $difficulty): array;
 
     /**
      * Determines if the current game state has resulted in a win, loss, or draw.
@@ -98,9 +99,9 @@ interface GameServiceContract
 
 -----
 
-## 🎲 Game-Specific Handlers
+## 🎲 Game Title-Specific Handlers
 
-These services adhere to the contract and contain the unique rules.
+These services adhere to the contract and contain the unique rules for each game title.
 
 ### 3\. `app/Services/Game/Handlers/ValidateFourService.php`
 
@@ -112,52 +113,60 @@ This service handles the **"Validate Four" (Connect Four)** logic, typically usi
 namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
-use App\Models\Match\Match;
-use App\Exceptions\InvalidMoveException;
+use App\Models\Game\Game;
+use App\Exceptions\InvalidActionException;
+use App\Enums\ActionType;
 
 class ValidateFourService implements GameServiceContract
 {
-    // The core function called by the MatchController
-    public function processMove(Match $match, array $moveData, int $playerId): array
+    // The core function called by the GameController
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array
     {
-        $gameState = $match->game_state;
-        $column = $moveData['column'] ?? null;
+        $gameState = $game->game_state;
+        $column = $actionDetails['column'] ?? null;
+        
+        if ($actionType !== ActionType::DROP_PIECE->value) {
+            throw new InvalidActionException("Invalid action type for Validate Four.");
+        }
         
         if (is_null($column) || !is_numeric($column) || $column < 0 || $column >= 7) {
-            throw new InvalidMoveException("Invalid column specified.");
+            throw new InvalidActionException("Invalid column specified.");
         }
 
         // 1. VALIDATION: Check if the column is already full.
         if ($this->isColumnFull($gameState['board'], $column)) {
-            throw new InvalidMoveException("Column {$column} is full.");
+            throw new InvalidActionException("Column {$column} is full.");
         }
         
         // 2. STATE UPDATE: Drop the piece (using the player's position_id for the value).
-        $pieceValue = $match->players()->find($playerId)->position_id;
+        $pieceValue = $game->players()->find($playerId)->position_id;
         $newBoard = $this->dropPiece($gameState['board'], $column, $pieceValue);
         
         $gameState['board'] = $newBoard;
         
         // 3. WIN CHECK
         if ($this->checkWin($gameState)) {
-            $match->update(['status' => 'finished', 'winner_id' => $playerId]);
+            $game->update(['status' => 'finished', 'winner_id' => $playerId]);
         }
         
         // 4. Update the turn and return the new state
-        $gameState['current_player'] = $this->getNextPlayerId($match, $playerId);
+        $gameState['current_player'] = $this->getNextPlayerId($game, $playerId);
         return $gameState;
     }
     
     // Placeholder for the Minimax algorithm implementation
-    public function getAIMove(Match $match, int $difficulty): array
+    public function getAIAction(Game $game, int $difficulty): array
     {
         // Difficulty controls the search depth (e.g., 4 for Medium, 8 for Master)
         $depth = $difficulty;
         
-        // Run Minimax logic on $match->game_state['board']
-        $bestColumn = $this->runMinimax($match->game_state['board'], $depth); 
+        // Run Minimax logic on $game->game_state['board']
+        $bestColumn = $this->runMinimax($game->game_state['board'], $depth); 
         
-        return ['column' => $bestColumn];
+        return [
+            'action_type' => ActionType::DROP_PIECE->value,
+            'action_details' => ['column' => $bestColumn]
+        ];
     }
     
     public function checkWin(array $gameState): bool
@@ -170,7 +179,7 @@ class ValidateFourService implements GameServiceContract
     private function isColumnFull(array $board, int $column): bool { /* ... logic ... */ }
     private function dropPiece(array $board, int $column, int $pieceValue): array { /* ... logic ... */ }
     private function runMinimax(array $board, int $depth): int { /* ... logic ... */ return 0; }
-    private function getNextPlayerId(Match $match, int $currentPlayerId): int { /* ... logic ... */ return 0; }
+    private function getNextPlayerId(Game $game, int $currentPlayerId): int { /* ... logic ... */ return 0; }
 }
 ```
 
@@ -186,42 +195,50 @@ Checkers uses more complex movement validation (jumps, kinging) and a positional
 namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
-use App\Models\Match\Match;
-use App\Exceptions\InvalidMoveException;
+use App\Models\Game\Game;
+use App\Exceptions\InvalidActionException;
+use App\Enums\ActionType;
 
 class CheckersService implements GameServiceContract
 {
-    // The core function called by the MatchController
-    public function processMove(Match $match, array $moveData, int $playerId): array
+    // The core function called by the GameController
+    public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array
     {
-        // Expects $moveData to contain ['from_pos' => 'A1', 'to_pos' => 'B2']
-        $gameState = $match->game_state;
+        // Expects $actionDetails to contain ['from_pos' => 'A1', 'to_pos' => 'B2']
+        $gameState = $game->game_state;
         
-        // 1. VALIDATION: Check for legal move (diagonal, jump required, is it a king?).
-        if (!$this->isMoveLegal($gameState['pieces'], $moveData, $playerId)) {
-            throw new InvalidMoveException("Invalid move according to Checkers rules.");
+        if ($actionType !== ActionType::MOVE_PIECE->value) {
+            throw new InvalidActionException("Invalid action type for Checkers.");
         }
         
-        // 2. STATE UPDATE: Execute the move and check for 'kinging'.
-        $gameState = $this->executeMove($gameState, $moveData, $playerId);
+        // 1. VALIDATION: Check for legal action (diagonal, jump required, is it a king?).
+        if (!$this->isActionLegal($gameState['pieces'], $actionDetails, $playerId)) {
+            throw new InvalidActionException("Invalid move according to Checkers rules.");
+        }
+        
+        // 2. STATE UPDATE: Execute the action and check for 'kinging'.
+        $gameState = $this->executeAction($gameState, $actionDetails, $playerId);
         
         // 3. WIN CHECK: Check if the opponent has any pieces left.
         if ($this->checkWin($gameState)) {
-            $match->update(['status' => 'finished', 'winner_id' => $playerId]);
+            $game->update(['status' => 'finished', 'winner_id' => $playerId]);
         }
         
         // 4. Update the turn and return the new state
-        $gameState['current_player'] = $this->getNextPlayerId($match, $playerId);
+        $gameState['current_player'] = $this->getNextPlayerId($game, $playerId);
         return $gameState;
     }
 
     // Placeholder for AI: Minimax combined with complex Heuristic Scoring
-    public function getAIMove(Match $match, int $difficulty): array
+    public function getAIAction(Game $game, int $difficulty): array
     {
         // Heuristic function scores board state (piece count, positional advantage, king count).
-        $bestMove = $this->runMinimaxWithHeuristic($match->game_state, $difficulty); 
+        $bestMove = $this->runMinimaxWithHeuristic($game->game_state, $difficulty); 
         
-        return $bestMove; // e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']
+        return [
+            'action_type' => ActionType::MOVE_PIECE->value,
+            'action_details' => $bestMove // e.g., ['from_pos' => 'A1', 'to_pos' => 'B2']
+        ];
     }
     
     public function checkWin(array $gameState): bool
@@ -231,8 +248,8 @@ class CheckersService implements GameServiceContract
     }
     
     // --- Internal Helpers ---
-    private function isMoveLegal(array $pieces, array $moveData, int $playerId): bool { /* ... logic ... */ }
-    private function executeMove(array $gameState, array $moveData, int $playerId): array { /* ... logic ... */ }
+    private function isActionLegal(array $pieces, array $actionDetails, int $playerId): bool { /* ... logic ... */ }
+    private function executeAction(array $gameState, array $actionDetails, int $playerId): array { /* ... logic ... */ }
 }
 ```
 
@@ -248,16 +265,16 @@ Hearts uses complex **Rule-Based Heuristics** due to hidden information.
 namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
-use App\Models\Match\Match;
+use App\Models\Game\Game;
 use App\Exceptions\InvalidMoveException;
 
 class HeartsService implements GameServiceContract
 {
-    // The core function called by the MatchController
-    public function processMove(Match $match, array $moveData, int $playerId): array
+    // The core function called by the GameController
+    public function processMove(Game $game, array $moveData, int $playerId): array
     {
         // Expects $moveData to contain ['card_value' => 43]
-        $gameState = $match->game_state;
+        $gameState = $game->game_state;
         $cardId = $moveData['card_id'] ?? null;
 
         // 1. VALIDATION: Does the player have the card? Are they following suit? Can hearts be broken?
@@ -279,19 +296,19 @@ class HeartsService implements GameServiceContract
         }
         
         if ($this->checkWin($gameState)) {
-            $match->update(['status' => 'finished', 'winner_id' => $this->getGameWinnerId($gameState, $match)]);
+            $game->update(['status' => 'finished', 'winner_id' => $this->getGameWinnerId($gameState, $game)]);
         }
 
         // 5. Update the turn and return the new state
-        $gameState['current_player'] = $this->getNextPlayerId($match, $playerId);
+        $gameState['current_player'] = $this->getNextPlayerId($game, $playerId);
         return $gameState;
     }
 
     // Placeholder for AI: Heuristic and Rule-Based Logic
-    public function getAIMove(Match $match, int $difficulty): array
+    public function getAIMove(Game $game, int $difficulty): array
     {
         // AI relies on scoring possible plays based on risk (taking points) vs. reward.
-        $bestCardId = $this->runHeuristicLogic($match->game_state, $difficulty);
+        $bestCardId = $this->runHeuristicLogic($game->game_state, $difficulty);
         
         return ['card_id' => $bestCardId];
     }
@@ -320,15 +337,15 @@ Spades is similar to Hearts but introduces the **bidding** phase and a focus on 
 namespace App\Services\Game\Handlers;
 
 use App\Services\Game\GameServiceContract;
-use App\Models\Match\Match;
+use App\Models\Game\Game;
 use App\Exceptions\InvalidMoveException;
 
 class SpadesService implements GameServiceContract
 {
-    // The core function called by the MatchController
-    public function processMove(Match $match, array $moveData, int $playerId): array
+    // The core function called by the GameController
+    public function processMove(Game $game, array $moveData, int $playerId): array
     {
-        $gameState = $match->game_state;
+        $gameState = $game->game_state;
         
         // Spades requires a check for the current phase: Bidding or Playing
         if ($gameState['phase'] === 'bidding') {
@@ -353,9 +370,9 @@ class SpadesService implements GameServiceContract
     }
 
     // Placeholder for AI: Bidding is a core part of the AI logic
-    public function getAIMove(Match $match, int $difficulty): array
+    public function getAIMove(Game $game, int $difficulty): array
     {
-        $gameState = $match->game_state;
+        $gameState = $game->game_state;
         
         if ($gameState['phase'] === 'bidding') {
             $bidValue = $this->calculateOptimalBid($gameState, $difficulty);

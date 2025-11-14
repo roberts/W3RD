@@ -39,11 +39,11 @@ The API is a product. Its design directly impacts the end-user experience and th
 1.  **Predictable JSON Responses:** All API responses must adhere to a strict contract.
     *   **Success:** `2xx` responses will return a `{"data": {...}}` structure.
     *   **Client Error:** `4xx` responses will return `{"message": "...", "errors": {...}}` (for validation).
-2.  **ULIDs for Public Identifiers:** All database models exposed to the public via an API endpoint (e.g., Matches, Users) must use a `ulid` field for external identification. Primary integer IDs will not be exposed.
+2.  **ULIDs for Public Identifiers:** All database models exposed to the public via an API endpoint (e.g., Games, Users) must use a `ulid` field for external identification. Primary integer IDs will not be exposed.
 3.  **Dual-Factor Authorization:** Every authenticated request **must** be protected by two layers:
     *   A **Sanctum Bearer Token** to identify the `User`.
     *   An **`X-Interface-Key`** header to identify the `Interface` (the frontend application).
-4.  **Real-Time First:** The user experience must be instant. Client-side polling is forbidden for game state. **Laravel Reverb** will be used to push immediate updates for match state changes, chat messages, and matchmaking status.
+4.  **Real-Time First:** The user experience must be instant. Client-side polling is forbidden for game state. **Laravel Reverb** will be used to push immediate updates for game state changes, chat messages, and matchmaking status.
 
 ---
 

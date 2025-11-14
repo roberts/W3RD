@@ -29,8 +29,8 @@ A service class is responsible for finding an available agent.
 
 | Method | Logic |
 | :--- | :--- |
-| **`findAvailableAgent(string $gameSlug): ?User`** | 1. **Get Current Hour (EST):** Determine the current hour (0-23) in the `America/New_York` timezone. 2. **Query for Eligible Agents:** Find a `User` where `agent_id` is NOT NULL. Join with the `agents` table to filter where `available_hour_est` matches the current hour. 3. **Filter for Busy Status:** From the eligible agents, filter out any who are currently in an active or pending match using the `isAgentBusy()` method. 4. **Return:** Return the first available, non-busy `User` model, or `null`. |
-| **`isAgentBusy(User $agentUser): bool`** | Checks if the agent's `user_id` is present in the `players` table for any match with a status of `active` or `pending`. |
+| **`findAvailableAgent(string $titleSlug): ?User`** | 1. **Get Current Hour (EST):** Determine the current hour (0-23) in the `America/New_York` timezone. 2. **Query for Eligible Agents:** Find a `User` where `agent_id` is NOT NULL. Join with the `agents` table to filter where `available_hour_est` matches the current hour. 3. **Filter for Busy Status:** From the eligible agents, filter out any who are currently in an active or pending game using the `isAgentBusy()` method. 4. **Return:** Return the first available, non-busy `User` model, or `null`. |
+| **`isAgentBusy(User $agentUser): bool`** | Checks if the agent's `user_id` is present in the `players` table for any game with a status of `active` or `pending`. |
 
 ### B. Busy Check Logic Detail
 
@@ -39,8 +39,8 @@ The `isAgentBusy` method uses a simple and efficient query.
 ```php
 // Logic inside SchedulingService::isAgentBusy(User $agentUser)
 
-$isBusy = Match::whereIn('status', ['active', 'pending'])
-    // Check if the agent's user_id is in any active/pending match
+$isBusy = Game::whereIn('status', ['active', 'pending'])
+    // Check if the agent's user_id is in any active/pending game
     ->whereHas('players', function ($query) use ($agentUser) {
         $query->where('user_id', $agentUser->id);
     })
@@ -53,17 +53,17 @@ return $isBusy;
 
 ## 🔗 III. API & Game Service Integration
 
-### A. Match Creation (`POST /v1/matches`)
+### A. Game Creation (`POST /v1/games`)
 
 The controller uses the scheduling service to find an opponent.
 
 ```php
-// In MatchController::store()
-$agentUser = $schedulingService->findAvailableAgent($request->game_slug);
+// In GameController::store()
+$agentUser = $schedulingService->findAvailableAgent($request->title_slug);
 
 if ($agentUser) {
-    // Agent found, create the match with the human user and the agent user.
-    $match = $this->createMatch($request->game_slug, auth()->user(), $agentUser);
+    // Agent found, create the game with the human user and the agent user.
+    $game = $this->createGame($request->title_slug, auth()->user(), $agentUser);
 } else {
     // No agent is available at this time.
     return response()->json(['message' => 'No agents are available right now.'], 404);
@@ -76,10 +76,10 @@ The game service uses the agent's profile to determine which AI logic to execute
 
 ```php
 // In a Game Service like ValidateFourService.php...
-public function getAIMove(Match $match): array
+public function getAIMove(Game $game): array
 {
     // Get the Player model for the current turn
-    $currentPlayer = $match->players()->where('position_id', $match->turn_number)->first();
+    $currentPlayer = $game->players()->where('position_id', $game->turn_number)->first();
     
     // Get the associated User model
     $agentUser = $currentPlayer->user;
@@ -94,7 +94,7 @@ public function getAIMove(Match $match): array
         $strategy = new $strategyClass();
         
         // Execute the algorithm
-        return $strategy->calculateMove($match->game_state, $currentPlayer->position_id);
+        return $strategy->calculateMove($game->game_state, $currentPlayer->position_id);
     }
 
     throw new \Exception("AI logic not found for this user.");

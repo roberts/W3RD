@@ -16,8 +16,8 @@ All endpoints use the base path `/v1/`.
 
 | Resource | HTTP Method | Endpoint | Purpose | Auth Requirements |
 | :--- | :--- | :--- | :--- | :--- |
-| **Sessions** | `POST` | `/v1/sessions` | **User Login.** Authenticates credentials and returns a Sanctum API token. | `X-Client-Key` Only |
-| **Sessions** | `DELETE` | `/v1/sessions` | **User Logout.** Revokes the current API token. | Bearer + Client Key |
+| **Entries** | `POST` | `/v1/entries` | **User Login.** Authenticates credentials and returns a Sanctum API token. Records entry to platform. | `X-Client-Key` Only |
+| **Entries** | `DELETE` | `/v1/entries` | **User Logout.** Revokes the current API token and marks entry as logged out. | Bearer + Client Key |
 | **User** | `GET` | `/v1/user` | Retrieve the currently authenticated user's profile and plan status. | Bearer + Client Key |
 | **User** | `PATCH` | `/v1/user` | Update user profile data (name, password, avatar choice). | Bearer + Client Key |
 | **Avatars** | `GET` | `/v1/avatars` | List all available **Avatar** assets (free, premium, NFT). | Bearer + Client Key |
@@ -27,16 +27,16 @@ All endpoints use the base path `/v1/`.
 
 ### 2. ♟️ Matchmaking & Gameplay
 
-These endpoints handle the creation of matches and the execution of moves, relying on your **Game Service Handlers**.
+These endpoints handle the creation of games and the execution of actions, relying on your **Game Service Handlers**.
 
 | Resource | HTTP Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- | :--- |
-| **Games** | `GET` | `/v1/games` | List all available **Game** blueprints (`validate-four`, `hearts`). | Bearer + Client Key |
-| **Matches** | `POST` | `/v1/matches` | **CREATE** a new match. Triggers the **Strike/Quota check**. Body specifies `game_slug` and initial `players`. | Bearer + Client Key |
-| **Matches** | `GET` | `/v1/matches` | List the authenticated user's active and recent finished matches. | Bearer + Client Key |
-| **Match** | `GET` | `/v1/matches/{ulid}` | Retrieve the current **Match state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
-| **Moves** | `POST` | `/v1/matches/{ulid}/moves` | **EXECUTE** a move. Body contains `move_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
-| **Moves** | `GET` | `/v1/matches/{ulid}/moves` | Retrieve the full **Move** history for the match (for replay). | Bearer + Client Key |
+| **Titles** | `GET` | `/v1/titles` | List all available **Game Titles** (returns GameTitle enum values and labels). | Bearer + Client Key |
+| **Games** | `POST` | `/v1/games` | **CREATE** a new game. Triggers the **Strike/Quota check**. Body specifies `game_title` (GameTitle enum value) and initial `players`. | Bearer + Client Key |
+| **Games** | `GET` | `/v1/games` | List the authenticated user's active and recent finished games. | Bearer + Client Key |
+| **Games** | `GET` | `/v1/games/{ulid}` | Retrieve the current **Game state** (`game_state` JSON) by its public **ULID**. | Bearer + Client Key |
+| **Actions** | `POST` | `/v1/games/{ulid}/actions` | **EXECUTE** an action. Body contains `action_type` (ActionType enum value) and `action_details` (JSON). Triggers validation, state update, and **Reverb broadcast**. | Bearer + Client Key |
+| **Actions** | `GET` | `/v1/games/{ulid}/actions` | Retrieve the full **Action** history for the game (for replay). | Bearer + Client Key |
 
 ---
 
@@ -67,8 +67,8 @@ All requests require `Authorization: Bearer [User Token]` and `X-Client-Key`, un
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
-| `/v1/sessions` | `POST` | `email`, `password` | `token` (Bearer), `user` (User profile object) |
-| `/v1/sessions` | `DELETE` | *(None)* | `status: success` (204 No Content) |
+| `/v1/entries` | `POST` | `email`, `password` | `token` (Bearer), `user` (User profile object) |
+| `/v1/entries` | `DELETE` | *(None)* | `status: success` (204 No Content) |
 | `/v1/user` | `GET` | *(None)* | `user` (Full profile, including `avatar_id`, `email`, `deactivated_at`) |
 | `/v1/user` | `PATCH` | `name` (Optional), `password` (Optional) | `user` (Updated profile object) |
 | `/v1/avatars` | `GET` | *(None)* | Array of `avatar` objects (`id`, `name`, `image_url`, `type`) |
@@ -82,12 +82,12 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
-| `/v1/games` | `GET` | *(None)* | Array of `game` objects (`slug`, `name`, `max_players`) |
-| `/v1/matches` | `POST` | `game_slug` (e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `match` (New match object including **`ulid`** and initial **`game_state`** JSON) |
-| `/v1/matches` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `match` objects |
-| `/v1/matches/{ulid}` | `GET` | *(None)* | `match` (Current match object, including **`game_state` JSON** and **`players`** array) |
-| `/v1/matches/{ulid}/moves` | `POST` | **`move_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `move` (The recorded move object) |
-| `/v1/matches/{ulid}/moves` | `GET` | *(None)* | Array of all `move` objects for the match history |
+| `/v1/titles` | `GET` | *(None)* | Array of game title objects with GameTitle enum values (`value`, `label`, `max_players`) |
+| `/v1/games` | `POST` | `game_title` (GameTitle enum value, e.g., 'validate-four'), `opponent_type` ('agent' or 'user'), `opponent_id` (ID of specific agent/user) | `game` (New game object including **`ulid`** and initial **`game_state`** JSON) |
+| `/v1/games` | `GET` | *(Query params: `status`, `limit`)* | Array of recent/active `game` objects |
+| `/v1/games/{ulid}` | `GET` | *(None)* | `game` (Current game object, including **`game_state` JSON** and **`players`** array) |
+| `/v1/games/{ulid}/actions` | `POST` | **`action_type`** (ActionType enum value: 'drop_piece', 'move_piece', 'play_card', 'pass', 'draw_card', 'bid'), **`action_details`** (JSON, e.g., `{"column": 3}` or `{"card_id": 42}`) | `action` (The recorded action object with status and timestamps) |
+| `/v1/games/{ulid}/actions` | `GET` | *(None)* | Array of all `action` objects for the game history |
 
 ---
 
@@ -96,14 +96,14 @@ Gameplay utilizes the **ULID** for security and relies heavily on **JSON** paylo
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
 | `/v1/billing/subscription` | `GET` | *(None)* | `subscription` (Plan level, renewal date, status) |
-| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects detailing `game_slug`, `matches_started`, `strikes_used`) |
+| `/v1/billing/quotas` | `GET` | *(None)* | `quotas` (Array of objects with GameTitle enum values, `games_started`, `strikes_used`) |
 | `/v1/billing/subscribe` | `POST` | `plan_id` ('member' or 'master'), `payment_method_token` (from client-side Stripe) | `checkout_url` or `status: success` |
 | `/v1/billing/mobile/verify` | `POST` | `receipt_data` (App Store or Google Play token), `provider` ('apple' or 'google') | `status: success`, `subscription` (Updated local record) |
 | `/v1/user/stats` | `GET` | *(None)* | `stats` (Object: **`total_points`**, **`global_rank`**, **`wins`**, **`losses`**) |
-| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserGameLevel`** objects (`game_slug`, `level`, `xp_current`) |
+| `/v1/user/levels` | `GET` | *(None)* | Array of **`UserTitleLevel`** objects (GameTitle enum values, `level`, `xp_current`) |
 | `/v1/user/badges` | `GET` | *(None)* | Array of earned `badge` objects (including `earned_at` timestamp) |
 | `/v1/leaderboard` | `GET` | *(Query params: `limit`, `offset`)* | Array of `user` objects ranked by **`total_points`** |
-| `/v1/games/{slug}/leaderboard` | `GET` | *(Query params: `limit`)* | Array of `user` objects ranked by **Game-Specific Metric** (e.g., win percentage) |
+| `/v1/titles/{game_title}/leaderboard` | `GET` | *(Query params: `limit`)* | Array of `user` objects ranked by **Game Title-Specific Metric** (e.g., win percentage) where game_title is a GameTitle enum value |
 | `/v1/leaderboard/daily/history/{date}` | `GET` | *(None)* | Array of `user` objects ranked by points earned on that specific date |
 
 Based on your current architecture, which includes **Sanctum Authentication**, **Laravel Cashier/Reverb**, **Polymorphic Agents**, and comprehensive **Gamification**, you have covered all core functionalities.
@@ -120,10 +120,10 @@ These endpoints allow users to manage their devices and ensure the API's public 
 
 | Resource | HTTP Method | Endpoint | Purpose | Request Body Data | Response Body Data |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **User Tokens** | `GET` | `/v1/user/tokens` | Lists all active API tokens (sessions) for the current user. | *(None)* | Array of active token objects (`id`, `name`, `last_used_at`) |
-| **User Tokens** | `DELETE` | `/v1/user/tokens/{id}` | Revokes a specific active token/session (e.g., "log out of all other devices"). | *(None)* | `status: success` |
-| **Cleanup** | `POST` | `/v1/matches/{ulid}/forfeit` | Allows the current player to **forfeit/concede** a match. This is faster than waiting for a forced timeout. | *(None)* | `match` (Updated status: `finished`) |
-| **Match** | `DELETE` | `/v1/matches/{ulid}` | **Soft Deletes** an active match. Useful for clearing failed/stuck matchmaking attempts. *Requires specific soft delete logic in your controller.* | *(None)* | `status: success` |
+| **User Tokens** | `GET` | `/v1/user/tokens` | Lists all active API tokens (entries) for the current user. | *(None)* | Array of active token objects (`id`, `name`, `last_used_at`) |
+| **User Tokens** | `DELETE` | `/v1/user/tokens/{id}` | Revokes a specific active token/entry (e.g., "log out of all other devices"). | *(None)* | `status: success` |
+| **Cleanup** | `POST` | `/v1/games/{ulid}/forfeit` | Allows the current player to **forfeit/concede** a game. This is faster than waiting for a forced timeout. | *(None)* | `game` (Updated status: `finished`) |
+| **Game** | `DELETE` | `/v1/games/{ulid}` | **Soft Deletes** an active game. Useful for clearing failed/stuck matchmaking attempts. *Requires specific soft delete logic in your controller.* | *(None)* | `status: success` |
 
 ---
 
@@ -134,7 +134,7 @@ These endpoints improve the user experience and help synchronize data across var
 | Resource | HTTP Method | Endpoint | Purpose | Request Body Data | Response Body Data |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Config** | `GET` | `/v1/config` | Retrieves general platform configuration data (e.g., game rules, max difficulty, maintenance mode status). | *(None)* | `config` (JSON object of non-sensitive config values) |
-| **Notification** | `GET` | `/v1/notifications` | Retrieves user-specific notifications (e.g., "Match X has started," "Badge Y earned"). You would likely use Reverb for real-time, but need an endpoint for history. | *(None)* | Array of `notification` objects |
+| **Notification** | `GET` | `/v1/notifications` | Retrieves user-specific notifications (e.g., "Game X has started," "Badge Y earned"). You would likely use Reverb for real-time, but need an endpoint for history. | *(None)* | Array of `notification` objects |
 | **Notification** | `PATCH` | `/v1/notifications/{id}` | Marks a specific notification as read. | *(None)* | `status: success` |
 | **System Time** | `GET` | `/v1/time` | Returns the current server time and the **EST Timezone** status. **CRITICAL** for clients to calculate quotas/strikes against the midnight EST cutoff. | *(None)* | `timestamp` (UTC), `timezone` (EST), `hour_est` |
 

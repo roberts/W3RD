@@ -23,7 +23,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
 use App\Models\Content\Avatar;
-use App\Models\Match\Player;
+use App\Models\Game\Player;
 use App\Models\Auth\Agent;
 
 class User extends Authenticatable
@@ -56,9 +56,9 @@ class User extends Authenticatable
         return $this->belongsTo(Avatar::class);
     }
 
-    public function sessions()
+    public function entries()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(Entry::class);
     }
 
     public function agent()
@@ -120,7 +120,10 @@ class Agent extends Model
 // ... (content unchanged)
 ```
 
-### 5. `App\Models\Auth\Session.php`
+### 5. `App\Models\Auth\Entry.php`
+
+**Purpose:** Tracks each entry (login session) when a user accesses the GamerProtocol platform through any client frontend.
+
 ```php
 <?php
 // ... (content unchanged)
@@ -128,28 +131,177 @@ class Agent extends Model
 
 -----
 
-## ♟️ Match & Game Domain Models
+## ♟️ Game Domain Models
 
-### 6. `App\Models\Game\Game.php`
+### 6. `App\Enums\GameTitle.php`
+
+Game titles are defined as PHP enums rather than database records, providing compile-time safety and eliminating database queries.
+
 ```php
 <?php
-// ... (content unchanged)
+
+namespace App\Enums;
+
+enum GameTitle: string
+{
+    case VALIDATE_FOUR = 'validate-four';
+    case CHECKERS = 'checkers';
+    case HEARTS = 'hearts';
+    case SPADES = 'spades';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => 'Validate Four',
+            self::CHECKERS => 'Checkers',
+            self::HEARTS => 'Hearts',
+            self::SPADES => 'Spades',
+        };
+    }
+
+    public function maxPlayers(): int
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => 2,
+            self::CHECKERS => 2,
+            self::HEARTS => 4,
+            self::SPADES => 4,
+        };
+    }
+
+    public function slug(): string
+    {
+        return $this->value;
+    }
+}
 ```
 
-### 7. `App\Models\Match\Match.php`
+### 6b. `App\Enums\ActionType.php`
+
+Action types are defined as PHP enums to provide type safety for game actions across different titles.
+
 ```php
 <?php
-// ... (content unchanged)
+
+namespace App\Enums;
+
+enum ActionType: string
+{
+    case DROP_PIECE = 'drop_piece';
+    case MOVE_PIECE = 'move_piece';
+    case PLAY_CARD = 'play_card';
+    case PASS = 'pass';
+    case DRAW_CARD = 'draw_card';
+    case BID = 'bid';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::DROP_PIECE => 'Drop Piece',
+            self::MOVE_PIECE => 'Move Piece',
+            self::PLAY_CARD => 'Play Card',
+            self::PASS => 'Pass',
+            self::DRAW_CARD => 'Draw Card',
+            self::BID => 'Bid',
+        };
+    }
+
+    public function description(): string
+    {
+        return match($this) {
+            self::DROP_PIECE => 'Place a piece on the board (e.g., Connect Four)',
+            self::MOVE_PIECE => 'Move a piece on the board (e.g., Checkers)',
+            self::PLAY_CARD => 'Play a card from hand (e.g., Hearts, Spades)',
+            self::PASS => 'Skip turn or pass',
+            self::DRAW_CARD => 'Draw a card from deck',
+            self::BID => 'Place a bid (e.g., Spades bidding)',
+        };
+    }
+}
 ```
 
-### 8. `App\Models\Match\Player.php`
+### 7. `App\Models\Game\Game.php`
+
+The Game model uses enum casting for the title_slug field, automatically converting between the database string and the GameTitle enum.
+
+```php
+<?php
+
+namespace App\Models\Game;
+
+use App\Enums\GameTitle;
+use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Game extends Model
+{
+    use HasFactory, HasUlids;
+
+    protected $fillable = [
+        'ulid',
+        'title_slug',
+        'status',
+        'created_by_user_id',
+        'winner_id',
+        'turn_number',
+        'game_state',
+    ];
+
+    protected $casts = [
+        'title_slug' => GameTitle::class,
+        'game_state' => 'array',
+        'turn_number' => 'integer',
+    ];
+
+    public function getRouteKeyName()
+    {
+        return 'ulid';
+    }
+
+    // Relationships
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function winner()
+    {
+        return $this->belongsTo(Player::class, 'winner_id');
+    }
+
+    public function actions()
+    {
+        return $this->hasMany(Action::class);
+    }
+
+    // Helper methods
+    public function isFinished(): bool
+    {
+        return $this->status === 'finished';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+}
+```
+
+### 8. `App\Models\Game\Player.php`
 
 The `Player` model is now greatly simplified, removing the polymorphic relationship.
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -160,7 +312,7 @@ class Player extends Model
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'user_id', // Direct FK to the users table
         'name',
         'position_id',
@@ -168,9 +320,9 @@ class Player extends Model
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     // A player is now directly associated with a User
@@ -179,43 +331,51 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 }
 ```
 
-### 9\. `App\Models\Match\Move.php`
+### 9. `App\Models\Game\Action.php`
 
 ```php
 <?php
 
-namespace App\Models\Match;
+namespace App\Models\Game;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ActionType;
 
-class Move extends Model
+class Action extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'match_id',
+        'game_id',
         'player_id',
         'turn_number',
-        'move_details',
+        'action_type',
+        'action_details',
+        'status',
+        'error_code',
+        'timestamp_client',
     ];
 
-    // Cast the JSON column
+    // Cast the JSON column and ActionType enum
     protected $casts = [
-        'move_details' => 'array',
+        'action_type' => ActionType::class,
+        'action_details' => 'array',
+        'turn_number' => 'integer',
+        'timestamp_client' => 'datetime',
     ];
 
     // Relationships
-    public function match()
+    public function game()
     {
-        return $this->belongsTo(Match::class);
+        return $this->belongsTo(Game::class);
     }
 
     public function player()
@@ -251,7 +411,7 @@ class Strike extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
+        'title_slug',
         'strikes_used',
         'strike_date',
     ];
@@ -288,8 +448,8 @@ class Quota extends Model
 
     protected $fillable = [
         'user_id',
-        'game_slug',
-        'matches_started',
+        'title_slug',
+        'games_started',
         'reset_month',
     ];
 

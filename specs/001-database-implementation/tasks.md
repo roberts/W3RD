@@ -1,0 +1,367 @@
+# Implementation Tasks: Database Schema & Models
+
+**Feature**: Database Implementation for GamerProtocol.io API  
+**Branch**: `001-database-implementation`  
+**Generated**: November 13, 2025
+
+---
+
+## Overview
+
+This document contains all tasks for implementing the complete database schema and Eloquent models for the GamerProtocol.io API. The implementation is organized into logical phases that can be completed incrementally, with each phase building upon the previous.
+
+**Total Tasks**: 71  
+**Phases**: 6  
+**Parallel Opportunities**: 35 tasks marked with [P]
+
+---
+
+## Phase 1: Setup & Configuration (6 tasks)
+
+**Goal**: Prepare the Laravel environment for database implementation.
+
+### Tasks
+
+- [x] T001 Verify Laravel 12 is installed and configured in composer.json
+- [x] T002 Verify MySQL 8.0+ connection in config/database.php with JSON support enabled
+- [x] T003 [P] Install and configure Laravel Sanctum for API authentication
+- [x] T004 [P] Install and configure Laravel Cashier for Stripe billing
+- [x] T005 [P] Install and configure Laravel Reverb for WebSocket support
+- [x] T006 Create database/migrations directory structure if not exists
+
+**Completion Criteria**: All dependencies installed, database connection verified, ready for migrations.
+
+---
+
+## Phase 2: Core Identity & Access Layer (18 tasks)
+
+**Goal**: Establish foundational tables for users, agents, authentication, and API access.
+
+**Story**: [US1] As a system, I need a unified user identity system that supports both human players and AI agents.
+
+### Migration Tasks
+
+- [x] T007 [P] [US1] Create migration database/migrations/2025_11_13_000001_create_avatars_table.php
+- [x] T008 [P] [US1] Create migration database/migrations/2025_11_13_000002_create_agents_table.php
+- [x] T009 [US1] Create migration database/migrations/2025_11_13_000003_create_users_table.php with Cashier fields
+- [x] T010 [P] [US1] Create migration database/migrations/2025_11_13_000004_create_clients_table.php
+- [x] T011 [US1] Create migration database/migrations/2025_11_13_000005_create_entries_table.php
+
+### Model Tasks
+
+- [x] T012 [P] [US1] Create Avatar model in app/Models/Content/Avatar.php with relationships
+- [x] T013 [P] [US1] Create Agent model in app/Models/Auth/Agent.php with relationships
+- [x] T014 [US1] Update User model in app/Models/User.php - add Sanctum, Cashier, Billable traits
+- [x] T015 [US1] Add User model relationships (avatar, agent, entries, players)
+- [x] T016 [US1] Add User model casts (email_verified_at, deactivated_at as datetime)
+- [x] T017 [US1] Add User helper methods (isAgent(), isActive())
+- [x] T018 [P] [US1] Create Client model in app/Models/Access/Client.php with relationships
+- [x] T019 [P] [US1] Create Entry model in app/Models/Auth/Entry.php with relationships
+
+### Migration Execution
+
+- [ ] T020 [US1] Run migrations for avatars, agents tables
+- [ ] T021 [US1] Run migration for users table (depends on avatars, agents)
+- [ ] T022 [US1] Run migrations for clients, entries tables (depends on users)
+- [ ] T023 [US1] Verify all foreign key constraints are properly created
+
+### Model Organization
+
+- [x] T024 [US1] Move User model to app/Models/Auth/User.php and update namespace
+- [x] T025 [US1] Update all User model imports throughout the application
+- [x] T026 [US1] Update config/auth.php to reference new User model location
+
+**Completion Criteria**: 
+- 5 tables created (avatars, agents, users, clients, entries)
+- 5 models with proper relationships and casts
+- All foreign keys working
+- User model supports both human and agent profiles
+
+---
+
+## Phase 3: Game Structure (14 tasks)
+
+**Goal**: Create tables and models for game title definitions, games, players, and moves.
+
+**Story**: [US2] As a system, I need to store flexible game state for multiple game titles without schema changes.
+
+### Migration Tasks
+
+- [x] T027 [P] [US2] Create migration database/migrations/2025_11_13_000006_create_titles_table.php
+- [x] T028 [US2] Create migration database/migrations/2025_11_13_000007_create_games_table.php with ULID and JSON game_state
+- [x] T029 [US2] Create migration database/migrations/2025_11_13_000008_create_players_table.php with winner_id FK addition
+- [x] T030 [P] [US2] Create migration database/migrations/2025_11_13_000009_create_moves_table.php
+
+### Model Tasks
+
+- [x] T031 [P] [US2] Create Title model in app/Models/Game/Title.php with relationships
+- [x] T032 [US2] Create Game model in app/Models/Game/Game.php with HasUlids trait
+- [x] T033 [US2] Add Game model casts (game_state as array, turn_number as integer)
+- [x] T034 [US2] Add Game model relationships (title, creator, players, winner, moves)
+- [x] T035 [US2] Override getRouteKeyName() in Game model to use 'ulid'
+- [x] T036 [US2] Add Game helper methods (isFinished(), isActive())
+- [x] T037 [P] [US2] Create Player model in app/Models/Game/Player.php with relationships
+- [x] T038 [P] [US2] Create Move model in app/Models/Game/Move.php with JSON cast
+
+### Migration Execution
+
+- [ ] T039 [US2] Run migrations for titles, games tables
+- [ ] T040 [US2] Run migrations for players table (adds winner_id FK to games)
+- [ ] T041 [US2] Run migration for moves table
+- [ ] T042 [US2] Verify ULID generation works on Game model
+
+**Completion Criteria**:
+- 4 tables created (titles, games, players, moves)
+- 4 models with proper relationships
+- ULID working for game public IDs
+- JSON casting working for game_state and move_details
+
+---
+
+## Phase 4: Billing & Quota System (8 tasks)
+
+**Goal**: Implement usage tracking for free tier (strikes) and member tier (quotas).
+
+**Story**: [US3] As a system, I need to enforce usage limits based on subscription tiers.
+
+### Migration Tasks
+
+- [x] T043 [P] [US3] Create migration database/migrations/2025_11_13_000010_create_strikes_table.php
+- [x] T044 [P] [US3] Create migration database/migrations/2025_11_13_000011_create_quotas_table.php
+
+### Model Tasks
+
+- [x] T045 [P] [US3] Create Strike model in app/Models/Billing/Strike.php with user relationship
+- [x] T046 [P] [US3] Create Quota model in app/Models/Billing/Quota.php with user relationship
+- [x] T047 [US3] Add strikes() relationship to User model
+- [x] T048 [US3] Add quotas() relationship to User model
+
+### Migration Execution
+
+- [ ] T049 [US3] Run migrations for strikes and quotas tables
+- [ ] T050 [US3] Verify unique constraints on (user_id, title_slug, date/month)
+
+**Completion Criteria**:
+- 2 tables created (strikes, quotas)
+- 2 models with proper casts and relationships
+- Unique constraints preventing duplicate records
+- Ready for billing service implementation
+
+---
+
+## Phase 5: Gamification System (18 tasks)
+
+**Goal**: Implement points, ranks, badges, and level progression system.
+
+**Story**: [US4] As a system, I need to track user progression and achievements across all games.
+
+### Migration Tasks
+
+- [x] T051 [P] [US4] Create migration database/migrations/2025_11_13_000012_create_point_ledgers_table.php
+- [x] T052 [P] [US4] Create migration database/migrations/2025_11_13_000013_create_global_ranks_table.php
+- [x] T053 [P] [US4] Create migration database/migrations/2025_11_13_000014_create_badges_table.php
+- [x] T054 [P] [US4] Create migration database/migrations/2025_11_13_000015_create_user_badge_table.php
+- [x] T055 [P] [US4] Create migration database/migrations/2025_11_13_000016_create_user_title_levels_table.php
+- [x] T056 [P] [US4] Create migration database/migrations/2025_11_13_000017_create_user_daily_point_summaries_table.php
+- [x] T057 [P] [US4] Create migration database/migrations/2025_11_13_000018_create_user_monthly_point_summaries_table.php
+
+### Model Tasks
+
+- [x] T058 [P] [US4] Create PointLedger model in app/Models/Gamification/PointLedger.php with polymorphic source
+- [x] T059 [P] [US4] Create GlobalRank model in app/Models/Gamification/GlobalRank.php with custom primary key
+- [x] T060 [P] [US4] Create Badge model in app/Models/Gamification/Badge.php with condition_json cast
+- [x] T061 [P] [US4] Create UserTitleLevel model in app/Models/Gamification/UserTitleLevel.php with composite key
+- [x] T062 [US4] Add gamification relationships to User model (pointLedgers, globalRank, badges, gameLevels)
+
+### Migration Execution
+
+- [ ] T063 [US4] Run migrations for point_ledgers, global_ranks, badges tables
+- [ ] T064 [US4] Run migrations for user_badge, user_title_levels tables
+- [ ] T065 [US4] Run migrations for daily and monthly point summaries
+- [ ] T066 [US4] Verify polymorphic relationships work on PointLedger
+- [ ] T067 [US4] Verify composite primary keys work on UserTitleLevel
+- [ ] T068 [US4] Verify belongsToMany with pivot works for User badges
+
+**Completion Criteria**:
+- 7 tables created (point_ledgers, global_ranks, badges, user_badge, user_title_levels, summaries)
+- 4 models with proper relationships and casts
+- Polymorphic source working on PointLedger
+- Many-to-many badges relationship working
+
+---
+
+## Phase 6: Seeding & Validation (5 tasks)
+
+**Goal**: Populate initial data and validate the complete database schema.
+
+### Seeder Tasks
+
+- [x] T069 Create database/seeders/TitleSeeder.php for initial games (validate-four, checkers, hearts, spades)
+- [x] T070 Create database/seeders/AvatarSeeder.php for free tier avatars
+- [x] T071 Create database/seeders/ClientSeeder.php for web, ios, android clients
+- [x] T072 Create database/seeders/BadgeSeeder.php for initial achievement definitions
+- [x] T073 Update database/seeders/DatabaseSeeder.php to call all seeders
+
+### Validation Tasks
+
+- [ ] T074 Run all seeders and verify data is created correctly
+- [ ] T075 Test User model in tinker: create user, assign avatar, check relationships
+- [ ] T076 Test Game model in tinker: create game with ULID, add players, verify game_state JSON
+- [ ] T077 Test Agent creation in tinker: create agent profile, link to user, verify isAgent()
+- [ ] T078 Generate database schema diagram documentation
+- [x] T079 Create database/migrations/README.md documenting migration order and dependencies
+
+**Completion Criteria**:
+- All tables seeded with initial data
+- All model relationships tested and working
+- Database schema fully validated
+- Documentation complete
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+```
+Phase 1 (Setup)
+    ↓
+Phase 2 (Identity & Access) ← BLOCKING
+    ↓
+Phase 3 (Game Structure)
+    ↓
+Phase 4 (Billing) ← Can run parallel with Phase 5
+    ↓
+Phase 5 (Gamification)
+    ↓
+Phase 6 (Seeding & Validation)
+```
+
+### Migration Execution Order
+
+**CRITICAL**: Migrations must run in numerical order (T007-T057) due to foreign key dependencies.
+
+**Safe Parallel Execution**: Models can be created in parallel once their tables exist:
+- After T022: Can create all Phase 2 models in parallel (T012-T019)
+- After T041: Can create all Phase 3 models in parallel (T031, T037, T038)
+- After T050: Can create Phase 4 models in parallel (T045-T046)
+- After T065: Can create Phase 5 models in parallel (T058-T061)
+
+---
+
+## Parallel Execution Opportunities
+
+### Phase 2: Core Identity (10 parallel tasks)
+- T007, T008, T010 (independent table migrations)
+- T012, T013, T018, T019 (model creation after migrations)
+
+### Phase 3: Game Structure (4 parallel tasks)
+- T027, T030 (independent migrations)
+- T031, T037, T038 (model creation)
+
+### Phase 4: Billing (4 parallel tasks)
+- T043, T044 (both migrations)
+- T045, T046 (both models)
+
+### Phase 5: Gamification (11 parallel tasks)
+- T051-T057 (all 7 migrations are independent)
+- T058-T061 (all 4 models after migrations)
+
+**Total Parallel Tasks**: 29 out of 79 tasks (37%)
+
+---
+
+## Testing Strategy
+
+Since this is database schema implementation, testing will focus on:
+
+1. **Migration Testing**:
+   - Each migration runs without errors
+   - Foreign keys are properly created
+   - Indexes are in place
+   - Unique constraints work
+
+2. **Model Testing**:
+   - Relationships load correctly
+   - Casts work as expected (JSON, datetime, ULID)
+   - Helper methods return correct values
+
+3. **Integration Testing**:
+   - Create complete game flow: User → Game → Players → Moves
+   - Create agent: Agent → User → Game
+   - Test gamification: User → PointLedger → GlobalRank
+
+**Testing will be manual via tinker** as specified in Phase 6 validation tasks.
+
+---
+
+## Implementation Strategy
+
+### MVP Scope (Minimum Viable Product)
+- **Phase 1**: Setup ✓
+- **Phase 2**: Core Identity ✓
+- **Phase 3**: Game Structure ✓
+
+This MVP allows basic game functionality with users and games.
+
+### Incremental Delivery
+1. **First Increment**: Phases 1-3 (Core gameplay)
+2. **Second Increment**: Phase 4 (Billing)
+3. **Third Increment**: Phase 5 (Gamification)
+4. **Final Increment**: Phase 6 (Polish)
+
+### Rollback Strategy
+Since migrations have no `down()` methods as requested, rollback requires manual database cleanup if needed. Document any rollback procedures in database/migrations/README.md.
+
+---
+
+## Notes
+
+- All migrations omit `down()` methods as specified in requirements
+- ULIDs are used for Game public identifiers (security best practice)
+- JSON columns require MySQL 8.0+ 
+- Composite primary keys used where appropriate for natural uniqueness
+- Strategic indexing for performance on high-query columns
+- EST timezone critical for strikes/quotas calculations (implement in application logic)
+
+---
+
+## Completion Checklist
+
+### Phase 1: Setup
+- [x] All dependencies installed
+- [x] Database connection verified
+
+### Phase 2: Core Identity
+- [x] 5 migrations created and run
+- [x] 5 models created with relationships
+- [x] User model moved to Auth namespace
+- [x] All imports updated
+
+### Phase 3: Game Structure  
+- [x] 4 migrations created and run
+- [x] 4 models created with relationships
+- [ ] ULID generation verified
+- [ ] JSON casting verified
+
+### Phase 4: Billing
+- [x] 2 migrations created and run
+- [x] 2 models created with relationships
+- [ ] Unique constraints verified
+
+### Phase 5: Gamification
+- [x] 7 migrations created and run
+- [x] 4 models created with relationships
+- [ ] Polymorphic relationships verified
+- [ ] Composite keys verified
+
+### Phase 6: Seeding & Validation
+- [x] 4 seeders created
+- [ ] All data seeded
+- [ ] All relationships tested in tinker
+- [x] Documentation complete
+
+---
+
+**Generated**: November 13, 2025  
+**Ready for Implementation**: ✓

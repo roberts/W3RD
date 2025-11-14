@@ -1,37 +1,72 @@
 # ♟️ Public Matchmaking Architecture
 
-This document details the architecture for a public matchmaking queue, allowing users to be automatically paired with opponents of similar skill.
+This document details the architecture for an intelligent public matchmaking queue, designed to be fast, fair, and engaging.
 
 ---
 
-## Public Matchmaking Queue
+## 1. Core Concepts & Technology
 
-*   **Concept:** Instead of a user choosing a specific opponent, they can enter a public queue for a specific game. A background process then pairs them with another waiting player, creating a match automatically. This is essential for quick, competitive play.
+*   **Primary Goal:** Automatically pair users with suitable opponents (human or AI) quickly, while preventing repeat matchups and providing a seamless user experience.
+*   **Core Technology:** **Redis**. Its speed is essential for this real-time feature. We will use three main data structures:
+    1.  **Sorted Sets:** For the main queue, ordered by player level. (`matchmaking:{game_slug}`)
+    2.  **Hashes:** To store the timestamp when a user joins the queue. (`matchmaking:timestamps`)
+    3.  **Lists:** To maintain a short-term memory of a user's recent opponents. (`recent_opponents:{user_id}`)
 
-*   **Recommended Technology:** **Redis**. While a database table is feasible, Redis is purpose-built for this kind of fast, in-memory list management and is significantly more performant. We can use a Redis Sorted Set for each game.
+---
 
-*   **Implementation (Using Redis Sorted Sets):**
-    1.  **Data Structure:** For each game, create a sorted set (e.g., `matchmaking:validate-four`).
-        *   **Member:** The `user_id`.
-        *   **Score:** The user's skill rating (Elo score or a simpler metric). This allows for skill-based matchmaking. If no skill rating exists, the score can be the timestamp of when they joined the queue.
-    2.  **New API Endpoints:**
-        *   `POST /v1/matchmaking/queue`: Adds the authenticated user to the queue for a specific game.
-            *   **Body:** `{ "game_slug": "validate-four" }`
-            *   **Logic:** Adds the `user_id` and their current skill rating to the corresponding Redis sorted set.
-        *   `DELETE /v1/matchmaking/queue`: Removes the user from the queue if they cancel.
-            *   **Body:** `{ "game_slug": "validate-four" }`
-            *   **Logic:** Removes the `user_id` from the Redis sorted set.
-    3.  **The Matchmaking Job (The Core Logic):**
-        *   **Type:** A Laravel scheduled job (`php artisan make:job ProcessMatchmakingQueue`) that runs frequently (e.g., every 5-10 seconds).
-        *   **Process:**
-            a. The job iterates through each game's matchmaking queue (e.g., `matchmaking:validate-four`).
-            b. It pulls two players from the set (`ZPOPMIN` or similar command).
-            c. It could optionally look for players within a certain skill rating range to ensure fair matches.
-            d. Once a pair is found, the job removes them from the queue.
-            e. It then calls the existing `MatchService` (or a similar internal service) to create a new `Match` record for these two players.
-            f. Finally, it broadcasts an event via **Laravel Reverb** to both users (e.g., on their private `user.{id}` channel) with the `ulid` of the new match, prompting their frontends to navigate to the game screen.
+## 2. The Matchmaking Flow
 
-*   **Benefits of this Approach:**
-    *   **Fast & Scalable:** Redis is extremely fast for these operations.
-    *   **Decoupled:** The matchmaking logic is contained within a background job, so it doesn't block web requests.
-    *   **Resilient:** If a user closes their app while in the queue, they simply remain in the Redis set until they are matched or a timeout job cleans them up.
+This flow is orchestrated by a frequently-run scheduled job (`ProcessMatchmakingQueue`).
+
+### Step 1: User Enters the Queue
+
+*   **Endpoint:** `POST /v1/matchmaking/queue`
+*   **Body:** `{ "game_slug": "validate-four" }`
+*   **Logic:**
+    1.  The user's `level` for the specified game is retrieved.
+    2.  The user is added to the game's sorted set: `ZADD matchmaking:validate-four <user_level> <user_id>`
+    3.  The user's join time is recorded: `HSET matchmaking:timestamps <user_id> <current_timestamp>`
+
+### Step 2: The Matchmaking Job Executes
+
+The job runs every 5-10 seconds and performs the following logic for each game queue.
+
+1.  **Get a Player:** Fetch the player who has been waiting the longest (`PlayerA`).
+2.  **Check Wait Time:** Retrieve `PlayerA`'s join timestamp.
+3.  **Agent Fallback Logic (Wait > 30s):**
+    *   If `PlayerA` has been waiting over 30 seconds, the system stops looking for human players and immediately seeks an AI opponent.
+    *   It calls `SchedulingService->findAvailableAgent()`, passing a list of excluded user IDs (the player's own ID and their recent opponents).
+    *   If a suitable agent is found, a match is created. The agent's `User` model is used, making it indistinguishable from a human player to the client.
+    *   If no agent is free, `PlayerA` remains in the queue for the next cycle.
+4.  **Human Matchmaking Logic (Wait < 30s):**
+    *   The system fetches `PlayerA`'s recent opponents list from Redis: `LRANGE recent_opponents:{playerA_id} 0 -1`.
+    *   It then searches the queue for another player (`PlayerB`) with a similar level.
+    *   **Validation:** It checks if `PlayerB` is on `PlayerA`'s recent list, and vice-versa. If there's a conflict, it discards `PlayerB` and looks for the next candidate.
+    *   If a valid human opponent is found, they proceed to the "Accept Match" flow.
+
+### Step 3: "Accept Match" Confirmation Flow
+
+To prevent AFK players from starting games, a confirmation step is required.
+
+1.  **Match Found Event:** When a valid pair is identified, the job does **not** create the match. Instead, it dispatches a `MatchFound` event via Reverb to both users.
+2.  **Client-Side Prompt:** Both clients receive the event and display an "Accept Match" prompt with a 10-second countdown.
+3.  **Confirmation:** If a user accepts, the client sends a request to a new endpoint: `POST /v1/matchmaking/accept`. The server uses Redis to track that the user has accepted.
+4.  **Match Creation:** Once the server has received acceptances from **both** users, it finalizes the process:
+    *   Creates the `Match` record in the database.
+    *   Removes both users from the matchmaking queue.
+    *   Updates their `recent_opponents` lists in Redis.
+    *   Broadcasts a `MatchCreated` event with the match details, navigating the clients to the game screen.
+5.  **Failure/Decline:** If one user declines or their 10-second timer expires, they are removed from the queue. The other user is placed back at the front of the queue to find a new opponent on the next job cycle.
+
+---
+
+## 3. Queue Dodge Penalty
+
+To discourage players from repeatedly declining matches to "fish" for a preferred opponent, a penalty system is implemented.
+
+*   **Concept:** A user who declines a match or fails to accept in time receives a temporary matchmaking cooldown.
+*   **Implementation:**
+    *   A Redis key with a TTL (Time To Live) is used (e.g., `cooldown:matchmaking:{user_id}`).
+    *   When a user "dodges," the server sets this key with an expiry (e.g., 60 seconds).
+    *   The `POST /v1/matchmaking/queue` endpoint will first check if this key exists. If it does, the request is rejected with a "You are on a matchmaking cooldown" message until the key expires.
+    *   The cooldown duration can be increased for repeat offenders.

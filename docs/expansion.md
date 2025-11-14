@@ -78,3 +78,11 @@ This document outlines potential new features to expand the GamerProtocol.io API
     1.  **Purchase:** Use the same one-time purchase flow as the In-Game Store to allow users to buy ticket packs.
     2.  **Usage:** The `QuotaService` (or a similar service that runs before match creation) would be modified. If a user is out of free "strikes" and does not have a subscription, it would check for an available ticket in their balance.
     3.  **Deduct:** If a ticket is available, it is consumed, and the match is created. If not, the request is denied.
+
+### Party/Group Queuing
+
+*   **Concept:** Allow a party of two or more friends to queue up together for team-based games (e.g., 2v2 Spades).
+*   **Implementation:**
+    *   **Party System:** A more formal party system would be needed, likely managed in Redis. A party leader would invite friends, and once assembled, the leader could initiate the matchmaking search.
+    *   **Matchmaking Logic:** The `ProcessMatchmakingQueue` job would be adapted to look for parties of the correct size instead of individuals. It would then match one party against another.
+    *   **Data Structure:** The queue in Redis would need to store party IDs instead of just user IDs, with a separate Redis hash mapping party IDs to the list of user IDs in that party.

@@ -33,8 +33,8 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 }

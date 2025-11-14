@@ -50,9 +50,9 @@ class Game extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 
-    public function moves()
+    public function actions()
     {
-        return $this->hasMany(Move::class);
+        return $this->hasMany(Action::class);
     }
 
     // Helper methods

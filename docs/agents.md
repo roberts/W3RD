@@ -339,3 +339,80 @@ final class CheckersHeuristic implements AgentStrategyContract
     private function calculatePromotionDistance(array $boardState, int $pieceValue): int { /* ... logic ... */ return 0; }
 }
 ```
+
+You've introduced a critical change: **Agents are active for the entire hour window and can play multiple matches sequentially, but only one match at a time.**
+
+This makes the Agent behavior much more realistic and requires a simpler state check than limiting them to a single game per day.
+
+Here is the revised structure and logic to handle this new Agent availability model within the **GamerProtocol.io** API.
+
+-----
+
+## 💾 I. Database Changes for Agent State
+
+The boolean flag is replaced with a temporary state check.
+
+| Table | Column | Data Type | Purpose |
+| :--- | :--- | :--- | :--- |
+| **`Agent`** | `available_hour_est` | `TINYINT` | The specific hour of the day (0-23) the agent is available to be deployed. **(Unchanged)** |
+| **`User`** | (No changes needed) | | The Agent's associated `User` model handles their profile. |
+| **`Match`** | `current_turn_player_id` | `BIGINT` | **CRUCIAL:** Used to check if the Agent is currently in the middle of a match. |
+
+-----
+
+## 💻 II. Agent Scheduling & Availability Logic
+
+The logic now focuses on two main checks: **Is it the right hour?** and **Is the agent currently busy?**
+
+### A. The Core Scheduling Service (Revised)
+
+The service is now the definitive source for finding an available, non-busy Agent within the current time window.
+
+**`app/Services/Agents/SchedulingService.php`**
+
+| Method | Logic |
+| :--- | :--- |
+| **`findAvailableAgent(string $gameSlug): ?User`** | 1. **Determine Current Hour (EST):** Get the current hour (0-23) in the `America/New_York` timezone. 2. **Query for Eligible Agents:** Find a `User` marked as an Agent (`is_agent = true`) where: **`available_hour_est = current_hour_est`**. 3. **Filter for Busy Status:** **Filter out Agents** who are currently active in any other match. This is done by checking the `matches` table. 4. **Return:** Return the first available, non-busy Agent's `User` model, otherwise return `null`. |
+| **`isAgentBusy(User $agentUser): bool`** | This is the core check. Returns `true` if the Agent is currently listed as a **`Player`** in any **`Match`** with a **`status`** of **`active`** or **`pending`**. |
+
+### B. Busy Check Logic Detail
+
+The `isAgentBusy` method needs to query the `matches` table effectively:
+
+```php
+// Logic inside SchedulingService::isAgentBusy($agentUser)
+
+$isBusy = Match::whereIn('status', ['active', 'pending'])
+    // Check if the agent is a player in any active/pending match
+    ->whereHas('players', function ($query) use ($agentUser) {
+        $query->where('playable_id', $agentUser->id)
+              ->where('playable_type', App\Models\Auth\User::class); 
+    })
+    ->exists();
+
+return $isBusy;
+```
+
+-----
+
+## 🔗 III. API Integration (`POST /v1/matches`)
+
+The controller logic simplifies as you no longer need to deactivate the Agent after the match starts. The Agent becomes available for the next match as soon as the current one is marked `finished`.
+
+1.  **Match Creation Request:** User sends `POST /v1/matches` asking for a game against an Agent.
+2.  **Controller Action:** The `MatchController` calls the scheduling service:
+    ```php
+    // In MatchController::store() method
+    $agentUser = $schedulingService->findAvailableAgent($request->game_slug);
+
+    if ($agentUser) {
+        // Agent found and is free (not busy in another match)
+        $match = $this->createMatch($request->game_slug, $user, $agentUser);
+        // NO DEACTIVATION STEP NEEDED
+    } else {
+        // No Agent found for this hour OR all available Agents are currently busy.
+        // Return a message or queue the request.
+    }
+    ```
+
+This structure is robust: the Agent can play **Match A**, finish it, and immediately be available to play **Match B**, provided the current EST hour matches their scheduled availability.

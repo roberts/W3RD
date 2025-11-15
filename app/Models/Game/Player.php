@@ -3,14 +3,16 @@
 namespace App\Models\Game;
 
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Player extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $fillable = [
+        'ulid',
         'game_id',
         'user_id',
         'name',
@@ -33,6 +35,12 @@ class Player extends Model
                 throw new \InvalidArgumentException('Position ID must be between 1 and 10.');
             }
         });
+    }
+
+    // Use ULID for route model binding
+    public function getRouteKeyName()
+    {
+        return 'ulid';
     }
 
     // Relationships

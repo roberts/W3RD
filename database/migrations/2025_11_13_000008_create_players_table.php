@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
+            $table->ulid('ulid')->unique();
             $table->foreignId('game_id')->constrained('games');
             $table->foreignId('user_id')->constrained('users');
             $table->string('name', 50);

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Events\GameActionProcessed;
-use App\Games\ValidateFour\ActionFactory;
-use App\Games\ValidateFour\ValidateFourGameState;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
 use Illuminate\Http\JsonResponse;
@@ -60,14 +58,15 @@ class GameActionController extends Controller
             ], 400);
         }
 
-        // Validate request
+        // Validate request - basic validation, game-specific validation happens in the action factory
         $validated = $request->validate([
-            'action_type' => 'required|string|in:drop_disc,pop_out',
+            'action_type' => 'required|string',
             'action_details' => 'required|array',
         ]);
 
-        // Create the game state object from database
-        $gameState = ValidateFourGameState::fromArray($game->game_state ?? []);
+        // Dynamically get the state class for this game mode and restore state
+        $stateClass = $mode->getStateClass();
+        $gameState = $stateClass::fromArray($game->game_state ?? []);
 
         // Check if current turn has timed out
         $deadline = $mode->getActionDeadline($gameState, $game);
@@ -106,9 +105,10 @@ class GameActionController extends Controller
             ], 400);
         }
 
-        // Create the action DTO
+        // Get the action factory for this game and create the action DTO
+        $actionFactoryClass = $mode->getActionFactory();
         try {
-            $action = ActionFactory::create(
+            $action = $actionFactoryClass::create(
                 $validated['action_type'],
                 $validated['action_details']
             );

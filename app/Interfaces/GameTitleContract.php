@@ -43,10 +43,63 @@ use Carbon\Carbon;
  * }
  * ```
  *
- * @see \App\Games\ValidateFour\AbstractValidateFourMode For Validate Four implementation
+ * @see \App\Games\ValidateFour\BaseValidateFourMode For Validate Four implementation
  */
 interface GameTitleContract
 {
+    /**
+     * Create initial game state for a new game.
+     *
+     * This method initializes the game state with the provided players. Different games
+     * require different numbers of players (2 for Validate Four, 4 for Hearts, variable for Poker).
+     *
+     * Example:
+     * ```php
+     * // Two-player game
+     * $state = $mode->createInitialState('player1-ulid', 'player2-ulid');
+     *
+     * // Four-player game (Hearts)
+     * $state = $mode->createInitialState('p1-ulid', 'p2-ulid', 'p3-ulid', 'p4-ulid');
+     * ```
+     *
+     * @param string ...$playerUlids Variable number of player ULIDs
+     * @return object The initial game state object
+     * @throws \InvalidArgumentException If incorrect number of players provided
+     */
+    public function createInitialState(string ...$playerUlids): object;
+
+    /**
+     * Get the fully qualified class name of the game state class.
+     *
+     * Returns the FQCN of the state class this mode uses (e.g., ValidateFourGameState::class).
+     * Allows the controller to dynamically instantiate the correct state class.
+     *
+     * Example:
+     * ```php
+     * $stateClass = $mode->getStateClass();
+     * $gameState = $stateClass::fromArray($game->game_state);
+     * ```
+     *
+     * @return string Fully qualified class name
+     */
+    public function getStateClass(): string;
+
+    /**
+     * Get the fully qualified class name of the action factory.
+     *
+     * Returns the FQCN of the action factory class for this game (e.g., ValidateFour\ActionFactory::class).
+     * Allows the controller to dynamically create actions for different games.
+     *
+     * Example:
+     * ```php
+     * $factoryClass = $mode->getActionFactory();
+     * $action = $factoryClass::create('drop_disc', ['column' => 3]);
+     * ```
+     *
+     * @return string Fully qualified class name
+     */
+    public function getActionFactory(): string;
+
     /**
      * Validate a player's action.
      *

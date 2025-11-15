@@ -4,26 +4,28 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour;
 
-use App\Games\ValidateFour\Actions\DropDiscAction;
-use App\Games\ValidateFour\Actions\PopOutAction;
+use App\Games\ValidateFour\Actions\DropDisc;
+use App\Games\ValidateFour\Actions\PopOut;
+use App\Interfaces\ActionFactoryContract;
+use App\Interfaces\GameActionContract;
 
-class ActionFactory
+class ActionFactory implements ActionFactoryContract
 {
     /**
      * Create an action DTO from request data.
      *
      * @param string $actionType The type of action (drop_disc, pop_out, etc.)
      * @param array<string, mixed> $data The action data from the request
-     * @return object The action DTO
-     * @throws \InvalidArgumentException If action type is unknown
+     * @return GameActionContract The action DTO
+     * @throws \InvalidArgumentException If action type is unknown or data is invalid
      */
-    public static function create(string $actionType, array $data): object
+    public static function create(string $actionType, array $data): GameActionContract
     {
         return match ($actionType) {
-            'drop_disc' => new DropDiscAction(
+            'drop_disc' => new DropDisc(
                 column: $data['column'] ?? throw new \InvalidArgumentException('Missing column for drop_disc action')
             ),
-            'pop_out' => new PopOutAction(
+            'pop_out' => new PopOut(
                 column: $data['column'] ?? throw new \InvalidArgumentException('Missing column for pop_out action')
             ),
             default => throw new \InvalidArgumentException("Unknown action type: {$actionType}"),
@@ -43,5 +45,15 @@ class ActionFactory
             'drop_disc', 'pop_out' => isset($data['column']) && is_int($data['column']),
             default => false,
         };
+    }
+
+    /**
+     * Get all supported action types for Validate Four.
+     *
+     * @return array<string>
+     */
+    public static function getSupportedActionTypes(): array
+    {
+        return ['drop_disc', 'pop_out'];
     }
 }

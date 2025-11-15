@@ -1,31 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Games\ValidateFour\Actions;
 
-class DropDisc
-{
-    public readonly int $column;
+use App\Interfaces\GameActionContract;
 
+class DropDisc implements GameActionContract
+{
     /**
      * Create a new DropDisc action.
      *
-     * @param array $data Must contain 'column' key with integer value
-     * @throws \InvalidArgumentException if data is invalid
+     * @param int $column The column index (0-based) to drop the disc into
+     * @throws \InvalidArgumentException if column is negative
      */
-    public function __construct(array $data)
-    {
-        if (!isset($data['column'])) {
-            throw new \InvalidArgumentException('DropDisc action requires "column" field.');
-        }
-
-        if (!is_int($data['column']) && !is_numeric($data['column'])) {
-            throw new \InvalidArgumentException('Column must be an integer.');
-        }
-
-        $this->column = (int) $data['column'];
-
+    public function __construct(
+        public readonly int $column,
+    ) {
         if ($this->column < 0) {
             throw new \InvalidArgumentException('Column must be non-negative.');
         }
+    }
+
+    /**
+     * Get the action type identifier.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return 'drop_disc';
+    }
+
+    /**
+     * Convert the action to an array for storage.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'column' => $this->column,
+        ];
     }
 }

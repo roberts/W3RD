@@ -2,23 +2,27 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidateFour\AbstractValidateFourMode;
+use App\Games\ValidateFour\BaseValidateFourMode;
 use App\Games\ValidateFour\ValidateFourGameState;
 
-class FiveMode extends AbstractValidateFourMode
+class FiveMode extends BaseValidateFourMode
 {
     /**
-     * Create a new game state for Five mode (Connect 5).
+     * Create initial game state for Connect Five mode.
      *
-     * @param string $playerOneUlid
-     * @param string $playerTwoUlid
+     * @param string ...$playerUlids Player ULIDs (must be exactly 2)
      * @return ValidateFourGameState
+     * @throws \InvalidArgumentException If not exactly 2 players provided
      */
-    public function createInitialState(string $playerOneUlid, string $playerTwoUlid): ValidateFourGameState
+    public function createInitialState(string ...$playerUlids): object
     {
+        if (count($playerUlids) !== 2) {
+            throw new \InvalidArgumentException('Validate Four requires exactly 2 players');
+        }
+
         return ValidateFourGameState::createNew(
-            playerOneUlid: $playerOneUlid,
-            playerTwoUlid: $playerTwoUlid,
+            playerOneUlid: $playerUlids[0],
+            playerTwoUlid: $playerUlids[1],
             columns: 7,
             rows: 6,
             connectCount: 5

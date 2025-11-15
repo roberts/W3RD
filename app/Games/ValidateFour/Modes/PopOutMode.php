@@ -2,12 +2,12 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidateFour\AbstractValidateFourMode;
+use App\Games\ValidateFour\BaseValidateFourMode;
 use App\Games\ValidateFour\Actions\DropDisc;
 use App\Games\ValidateFour\Actions\PopOut;
 use App\Games\ValidateFour\ValidateFourGameState;
 
-class PopOutMode extends AbstractValidateFourMode
+class PopOutMode extends BaseValidateFourMode
 {
     /**
      * Override parent applyAction to handle both drop_disc and pop_out actions.

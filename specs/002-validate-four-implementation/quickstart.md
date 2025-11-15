@@ -34,7 +34,7 @@ Create the following empty classes and files.
 
 ### Global Interface
 
-**File:** `app/Interfaces/GameModeStrategy.php`
+**File:** `app/Interfaces/GameModeContract.php`
 ```php
 <?php
 
@@ -42,7 +42,7 @@ namespace App\Interfaces;
 
 use App\Models\Game\Player;
 
-interface GameModeStrategy
+interface GameModeContract
 {
     public function validateAction(object $gameState, object $action): bool;
     public function applyAction(object $gameState, object $action): object;
@@ -70,9 +70,9 @@ class ValidateFourGameState
 
 namespace App\Games\ValidateFour;
 
-use App\Interfaces\GameModeStrategy;
+use App\Interfaces\GameModeContract;
 
-abstract class AbstractValidateFourMode implements GameModeStrategy
+abstract class AbstractValidateFourMode implements GameModeContract
 {
     // Shared logic for all Validate Four modes will go here.
 }

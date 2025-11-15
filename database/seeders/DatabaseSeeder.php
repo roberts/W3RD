@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AvatarSeeder::class,
             ClientSeeder::class,
             BadgeSeeder::class,
+            ModeSeeder::class,
         ]);
 
         // Create test user

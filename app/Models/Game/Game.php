@@ -16,8 +16,9 @@ class Game extends Model
     protected $fillable = [
         'ulid',
         'title_slug',
+        'mode_id',
         'status',
-        'created_by_user_id',
+        'creator_id',
         'winner_id',
         'turn_number',
         'game_state',
@@ -33,6 +34,7 @@ class Game extends Model
         'title_slug' => GameTitle::class,
         'game_state' => 'array',
         'turn_number' => 'integer',
+        'mode_id' => 'integer',
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
         'expires_at' => 'datetime',
@@ -50,7 +52,12 @@ class Game extends Model
     // Relationships
     public function creator()
     {
-        return $this->belongsTo(User::class, 'created_by_user_id');
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function mode()
+    {
+        return $this->belongsTo(Mode::class);
     }
 
     public function players()

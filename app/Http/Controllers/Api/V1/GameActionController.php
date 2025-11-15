@@ -4,11 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Events\GameActionProcessed;
 use App\Games\ValidateFour\ActionFactory;
-use App\Games\ValidateFour\Modes\StandardMode;
-use App\Games\ValidateFour\Modes\PopOutMode;
-use App\Games\ValidateFour\Modes\EightBySevenMode;
-use App\Games\ValidateFour\Modes\NineBySixMode;
-use App\Games\ValidateFour\Modes\FiveMode;
 use App\Games\ValidateFour\ValidateFourGameState;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
@@ -28,7 +23,25 @@ class GameActionController extends Controller
     public function store(Request $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
+
+        // Verify game has a mode configured
+        if (!$game->mode) {
+            return response()->json([
+                'error' => 'Configuration error',
+                'message' => 'This game does not have a valid mode configured.',
+            ], 500);
+        }
+
+        // Get the mode handler
+        try {
+            $mode = $game->mode->getHandler();
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Configuration error',
+                'message' => 'Unable to load game mode handler.',
+            ], 500);
+        }
 
         // Verify the authenticated user is a player in this game
         $player = $game->players()->where('user_id', Auth::id())->first();
@@ -52,9 +65,6 @@ class GameActionController extends Controller
             'action_type' => 'required|string|in:drop_disc,pop_out',
             'action_details' => 'required|array',
         ]);
-
-        // Get the appropriate mode based on game mode
-        $mode = $this->getModeForGame($game);
 
         // Create the game state object from database
         $gameState = ValidateFourGameState::fromArray($game->game_state ?? []);
@@ -177,24 +187,5 @@ class GameActionController extends Controller
                 'penalty' => $mode->getTimeoutPenalty(),
             ],
         ]);
-    }
-
-    /**
-     * Get the mode instance for a game based on its mode.
-     *
-     * @param Game $game
-     * @return object Mode instance
-     */
-    protected function getModeForGame(Game $game): object
-    {
-        // Map game modes to mode classes
-        return match($game->game_mode) {
-            'standard' => new StandardMode(),
-            'pop_out' => new PopOutMode(),
-            'eight_by_seven' => new EightBySevenMode(),
-            'nine_by_six' => new NineBySixMode(),
-            'five' => new FiveMode(),
-            default => new StandardMode(),
-        };
     }
 }

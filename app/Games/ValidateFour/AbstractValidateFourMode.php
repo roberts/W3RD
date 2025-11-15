@@ -11,10 +11,28 @@ use Carbon\Carbon;
 abstract class AbstractValidateFourMode implements GameTitleContract
 {
     /**
+     * Default turn time limit in seconds.
+     * Subclasses can override this constant for mode-specific timing.
+     */
+    protected const DEFAULT_TURN_TIME_SECONDS = 30;
+
+    /**
+     * Grace period in seconds to account for network latency.
+     * Added to the turn time limit when calculating deadlines.
+     */
+    protected const NETWORK_GRACE_PERIOD_SECONDS = 2;
+
+    /**
+     * Default penalty when a turn times out.
+     * Valid values: 'none', 'pass', 'forfeit'
+     */
+    protected const DEFAULT_TIMEOUT_PENALTY = 'forfeit';
+
+    /**
      * Validate a player's action.
      *
      * @param object $gameState ValidateFourGameState instance
-     * @param object $action Action DTO (DropDisc, PopOut, etc.)
+     * @param object $action The action DTO (DropDisc, PopOut, etc)
      * @return bool
      */
     public function validateAction(object $gameState, object $action): bool
@@ -184,22 +202,22 @@ abstract class AbstractValidateFourMode implements GameTitleContract
 
     /**
      * Get the timelimit in seconds for each action.
-     * Default is 30 seconds, but can be overridden by specific modes.
+     * Returns the default constant value, but can be overridden by specific modes.
      *
-     * @return int
+     * @return int Time limit in seconds
      */
     public function getTimelimit(): int
     {
-        return 30;
+        return static::DEFAULT_TURN_TIME_SECONDS;
     }
 
     /**
      * Get the deadline timestamp for the current action.
-     * Calculated as: last action time + timelimit + 2 second grace period
+     * Calculated as: last action time + timelimit + grace period for network latency
      *
      * @param object $gameState ValidateFourGameState instance
      * @param Game $game The game model instance
-     * @return Carbon
+     * @return Carbon The deadline timestamp
      */
     public function getActionDeadline(object $gameState, Game $game): Carbon
     {
@@ -207,18 +225,20 @@ abstract class AbstractValidateFourMode implements GameTitleContract
         $lastAction = $game->actions()->latest()->first();
         $baseTime = $lastAction ? $lastAction->created_at : $game->started_at;
 
-        // Add timelimit + 2 second grace period for network latency
-        return $baseTime->copy()->addSeconds($this->getTimelimit() + 2);
+        // Add timelimit + grace period for network latency
+        return $baseTime->copy()->addSeconds(
+            $this->getTimelimit() + static::NETWORK_GRACE_PERIOD_SECONDS
+        );
     }
 
     /**
      * Get the penalty applied when an action times out.
-     * Default is 'forfeit', but can be overridden by specific modes.
+     * Returns the default constant value, but can be overridden by specific modes.
      *
      * @return string 'none', 'pass', or 'forfeit'
      */
     public function getTimeoutPenalty(): string
     {
-        return 'forfeit';
+        return static::DEFAULT_TIMEOUT_PENALTY;
     }
 }

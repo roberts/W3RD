@@ -8,7 +8,7 @@ return [
     |
     | This file maps game titles to their available modes and corresponding
     | strategy classes. Each game can have multiple modes, and each mode
-    | is mapped to a concrete implementation of the GameModeContract interface.
+    | is mapped to a concrete implementation of the GameTitleContract interface.
     |
     */
 

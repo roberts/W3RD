@@ -12,7 +12,7 @@ This document breaks down the implementation of the "Validate Four" feature into
 
 These tasks create the core building blocks required for all game modes.
 
-- [x] T004 Create the global game mode interface in `app/Interfaces/GameModeContract.php`
+- [x] T004 Create the global game mode interface in `app/Interfaces/GameTitleContract.php`
 - [x] T005 Create the base `ValidateFourGameState` class in `app/Games/ValidateFour/ValidateFourGameState.php`
 - [x] T006 Create the `AbstractValidateFourMode` class in `app/Games/ValidateFour/AbstractValidateFourMode.php`
 - [x] T007 [P] Create the `DropDisc` Action DTO in `app/Games/ValidateFour/Actions/DropDisc.php`

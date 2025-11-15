@@ -32,6 +32,20 @@ class GameRulesController extends Controller
         // Load the base rules
         $rules = require $rulesPath;
 
+        // Add timeout details from the game mode if a mode is specified
+        $mode = request()->query('mode');
+        if ($mode) {
+            $modeClass = $this->getModeClass($gameDirName, $mode);
+            if ($modeClass) {
+                $modeInstance = new $modeClass();
+                $rules['timeout'] = [
+                    'timelimit_seconds' => $modeInstance->getTimelimit(),
+                    'grace_period_seconds' => 2,
+                    'penalty' => $modeInstance->getTimeoutPenalty(),
+                ];
+            }
+        }
+
         // Check for mode-specific rules and merge them
         if (isset($rules['modes']) && is_array($rules['modes'])) {
             foreach ($rules['modes'] as $modeName => $modeData) {
@@ -46,5 +60,21 @@ class GameRulesController extends Controller
         }
 
         return response()->json($rules);
+    }
+
+    /**
+     * Get the mode class for a specific game and mode.
+     *
+     * @param string $gameDirName
+     * @param string $mode
+     * @return string|null
+     */
+    protected function getModeClass(string $gameDirName, string $mode): ?string
+    {
+        // Convert mode name to class name (e.g., 'pop_out' → 'PopOutMode')
+        $modeClassName = str_replace(' ', '', ucwords(str_replace('_', ' ', $mode))) . 'Mode';
+        $modeClass = "App\\Games\\{$gameDirName}\\Modes\\{$modeClassName}";
+
+        return class_exists($modeClass) ? $modeClass : null;
     }
 }

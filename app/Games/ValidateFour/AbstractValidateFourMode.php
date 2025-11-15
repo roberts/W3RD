@@ -3,10 +3,12 @@
 namespace App\Games\ValidateFour;
 
 use App\Games\ValidateFour\Actions\DropDisc;
-use App\Interfaces\GameModeContract;
+use App\Interfaces\GameTitleContract;
+use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Carbon\Carbon;
 
-abstract class AbstractValidateFourMode implements GameModeContract
+abstract class AbstractValidateFourMode implements GameTitleContract
 {
     /**
      * Validate a player's action.
@@ -195,5 +197,45 @@ abstract class AbstractValidateFourMode implements GameModeContract
         }
 
         return false;
+    }
+
+    /**
+     * Get the timelimit in seconds for each action.
+     * Default is 30 seconds, but can be overridden by specific modes.
+     *
+     * @return int
+     */
+    public function getTimelimit(): int
+    {
+        return 30;
+    }
+
+    /**
+     * Get the deadline timestamp for the current action.
+     * Calculated as: last action time + timelimit + 2 second grace period
+     *
+     * @param object $gameState ValidateFourGameState instance
+     * @param Game $game The game model instance
+     * @return Carbon
+     */
+    public function getActionDeadline(object $gameState, Game $game): Carbon
+    {
+        // Get the last action's timestamp, or game start time if no actions yet
+        $lastAction = $game->actions()->latest()->first();
+        $baseTime = $lastAction ? $lastAction->created_at : $game->started_at;
+
+        // Add timelimit + 2 second grace period for network latency
+        return $baseTime->copy()->addSeconds($this->getTimelimit() + 2);
+    }
+
+    /**
+     * Get the penalty applied when an action times out.
+     * Default is 'forfeit', but can be overridden by specific modes.
+     *
+     * @return string 'none', 'pass', or 'forfeit'
+     */
+    public function getTimeoutPenalty(): string
+    {
+        return 'forfeit';
     }
 }

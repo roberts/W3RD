@@ -53,13 +53,45 @@ class GameActionController extends Controller
             'action_details' => 'required|array',
         ]);
 
+        // Get the appropriate mode based on game mode
+        $mode = $this->getModeForGame($game);
+
         // Create the game state object
         $gameState = new ValidateFourGameState($game->game_state ?? []);
+
+        // Check if current turn has timed out
+        $deadline = $mode->getActionDeadline($gameState, $game);
+        if (now()->isAfter($deadline)) {
+            $penalty = $mode->getTimeoutPenalty();
+            
+            if ($penalty === 'forfeit') {
+                // Forfeit the game - other player wins
+                $game->game_status = 'completed';
+                $game->winner_id = $game->players()
+                    ->where('ulid', '!=', $gameState->current_player_ulid)
+                    ->first()
+                    ->id;
+                $game->save();
+
+                return response()->json([
+                    'error' => 'Action timeout',
+                    'message' => 'Your turn has timed out. You have forfeited the game.',
+                    'game_status' => 'completed',
+                    'penalty' => 'forfeit',
+                ], 408);
+            } elseif ($penalty === 'pass') {
+                return response()->json([
+                    'error' => 'Action timeout',
+                    'message' => 'Your turn has timed out and has been passed.',
+                    'penalty' => 'pass',
+                ], 408);
+            }
+        }
 
         // Verify it's this player's turn
         if ($gameState->current_player_ulid !== $player->ulid) {
             return response()->json([
-                'error' => 'Not your turn',
+                'error' => 'Invalid turn',
                 'message' => 'It is not your turn.',
             ], 400);
         }
@@ -78,12 +110,8 @@ class GameActionController extends Controller
             ], 400);
         }
 
-        // Get the appropriate strategy based on game mode
-        // For now, defaulting to StandardMode. This should come from the game's mode field
-        $strategy = new StandardMode();
-
         // Validate the action
-        if (!$strategy->validateAction($gameState, $action)) {
+        if (!$mode->validateAction($gameState, $action)) {
             return response()->json([
                 'error' => 'Invalid move',
                 'message' => 'This move is not valid.',
@@ -91,10 +119,10 @@ class GameActionController extends Controller
         }
 
         // Apply the action
-        $gameState = $strategy->applyAction($gameState, $action);
+        $gameState = $mode->applyAction($gameState, $action);
 
         // Check for end condition
-        $winner = $strategy->checkEndCondition($gameState);
+        $winner = $mode->checkEndCondition($gameState);
         if ($winner) {
             $game->status = 'finished';
             $game->winner_id = $winner->id;
@@ -119,15 +147,44 @@ class GameActionController extends Controller
         // Increment turn number
         $game->increment('turn_number');
 
+        // Calculate the next action deadline
+        $game->refresh(); // Refresh to get the just-created action
+        $nextDeadline = $mode->getActionDeadline($gameState, $game);
+
         return response()->json([
             'message' => 'Action applied successfully',
             'game' => [
                 'ulid' => $game->ulid,
                 'status' => $game->status,
                 'game_state' => $game->game_state,
-                'winner_ulid' => $gameState->winner_ulid,
-                'is_draw' => $gameState->is_draw,
+                'winner_ulid' => $gameState->winner_ulid ?? null,
+                'is_draw' => $gameState->is_draw ?? false,
+            ],
+            'next_action_deadline' => $nextDeadline->toIso8601String(),
+            'timeout' => [
+                'timelimit_seconds' => $mode->getTimelimit(),
+                'grace_period_seconds' => 2,
+                'penalty' => $mode->getTimeoutPenalty(),
             ],
         ]);
+    }
+
+    /**
+     * Get the mode instance for a game based on its mode.
+     *
+     * @param Game $game
+     * @return object Mode instance
+     */
+    protected function getModeForGame(Game $game): object
+    {
+        // Map game modes to mode classes
+        return match($game->game_mode) {
+            'standard' => new StandardMode(),
+            'pop_out' => new PopOutMode(),
+            'eight_by_seven' => new EightBySevenMode(),
+            'nine_by_six' => new NineBySixMode(),
+            'five' => new FiveMode(),
+            default => new StandardMode(),
+        };
     }
 }

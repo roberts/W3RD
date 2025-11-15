@@ -60,13 +60,13 @@ app/Games/Chess/
 
 The core of the game engine is a three-layer system based on the Strategy design pattern.
 
-### 1. The Global Interface (`GameModeContract`)
+### 1. The Global Interface (`GameTitleContract`)
 
 This is the universal contract for all game modes in the entire application. It guarantees that the system can interact with any game's rules in a consistent way.
 
 ```php
-// app/Interfaces/GameModeContract.php
-interface GameModeContract
+// app/Interfaces/GameTitleContract.php
+interface GameTitleContract
 {
     public function validateAction(object $gameState, object $action): bool;
     public function applyAction(object $gameState, object $action): object;
@@ -76,7 +76,7 @@ interface GameModeContract
 
 ### 2. The Game-Specific Abstract Class (`AbstractChessMode`)
 
-This is the heart of our DRY implementation. This class `implements GameModeContract` and contains all the shared logic for a specific game title.
+This is the heart of our DRY implementation. This class `implements GameTitleContract` and contains all the shared logic for a specific game title.
 
 *   **Responsibilities:**
     *   Implement methods for validating piece movements (e.g., `isRookMoveValid()`).

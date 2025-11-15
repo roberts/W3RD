@@ -2,9 +2,11 @@
 
 namespace App\Interfaces;
 
+use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Carbon\Carbon;
 
-interface GameModeContract
+interface GametypeContract
 {
     /**
      * Validate a player's action.
@@ -31,4 +33,27 @@ interface GameModeContract
      * @return Player|null The winning player, or null if game continues
      */
     public function checkEndCondition(object $gameState): ?Player;
+
+    /**
+     * Get the timelimit in seconds for each action.
+     *
+     * @return int Timelimit in seconds
+     */
+    public function getTimelimit(): int;
+
+    /**
+     * Get the deadline timestamp for the current action.
+     *
+     * @param object $gameState The current game state object
+     * @param Game $game The game model instance
+     * @return Carbon The deadline timestamp
+     */
+    public function getActionDeadline(object $gameState, Game $game): Carbon;
+
+    /**
+     * Get the penalty applied when an action times out.
+     *
+     * @return string Penalty type: 'none', 'pass', or 'forfeit'
+     */
+    public function getTimeoutPenalty(): string;
 }

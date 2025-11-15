@@ -7,10 +7,11 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Game extends Model
 {
-    use HasFactory, HasUlids;
+    use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
         'ulid',
@@ -20,12 +21,24 @@ class Game extends Model
         'winner_id',
         'turn_number',
         'game_state',
+        'started_at',
+        'finished_at',
+        'expires_at',
+        'player_count',
+        'action_count',
+        'duration_seconds',
     ];
 
     protected $casts = [
         'title_slug' => GameTitle::class,
         'game_state' => 'array',
         'turn_number' => 'integer',
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'player_count' => 'integer',
+        'action_count' => 'integer',
+        'duration_seconds' => 'integer',
     ];
 
     // Use ULID for route model binding

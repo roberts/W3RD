@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('client_id')->constrained('clients');
             $table->string('ip_address', 45)->nullable();
+            $table->string('user_agent', 512)->nullable();
             $table->string('device_info', 512)->nullable();
             $table->string('token_id', 100)->nullable();
             $table->timestamp('logged_in_at')->useCurrent();

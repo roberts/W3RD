@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('color', 20);
 
             $table->unique(['game_id', 'position_id']);
+            $table->unique(['game_id', 'user_id']); // Prevent same user joining twice
             $table->timestamps();
+            
+            // Composite indexes for common queries
+            $table->index(['user_id', 'game_id']);
         });
 
         // Add winner_id foreign key to games table now that players exists

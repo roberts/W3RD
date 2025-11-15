@@ -21,10 +21,18 @@ return new class extends Migration
             // Validation and Integrity
             $table->enum('status', ['success', 'invalid', 'error'])->default('success');
             $table->string('error_code', 50)->nullable();
+
+            // Game State Snapshot - json (new state after action)?
             
             // Temporal Data
             $table->timestamp('timestamp_client')->nullable();
+            $table->softDeletes();
             $table->timestamps();
+            
+            // Composite indexes for common queries
+            $table->index(['game_id', 'turn_number']);
+            $table->index(['player_id', 'timestamp_client']);
+            $table->index(['game_id', 'action_type']);
         });
     }
 };

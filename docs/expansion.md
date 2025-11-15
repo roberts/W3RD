@@ -95,3 +95,10 @@ Already have a few tables & need to rethink the best way to manage this data. Wi
 - Games Won
 - Current Streak
 - Same stats for each of the Game Titles & maybe the Modes.
+
+### Potential Table Additions
+
+- Notifications - for Laravel's notification system
+- Game Invites - if games can be private/invited
+- Blocked Users - for user moderation
+- Reported Content - for community management

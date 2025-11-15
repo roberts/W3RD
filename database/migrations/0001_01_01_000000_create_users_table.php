@@ -30,8 +30,9 @@ return new class extends Migration
             $table->string('pm_type')->nullable();
             $table->string('pm_last_four', 4)->nullable();
 
-            // Deactivation field
+            // Deactivation and soft deletes
             $table->timestamp('deactivated_at')->nullable()->index();
+            $table->softDeletes();
         });
 
         // Password reset tokens table

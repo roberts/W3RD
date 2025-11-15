@@ -16,6 +16,7 @@ return new class extends Migration
             $table->morphs('source');
 
             $table->integer('points')->comment('Positive (award) or negative (deduction)');
+            $table->integer('balance_after')->index()->comment('Running balance after this transaction');
             $table->string('description', 100);
             $table->timestamps();
         });

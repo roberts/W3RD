@@ -11,6 +11,7 @@ use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\PointLedger;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
@@ -19,7 +20,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -101,7 +102,7 @@ class User extends Authenticatable
 
     public function isActive(): bool
     {
-        return $this->deactivated_at === null;
+        return $this->deactivated_at === null && !$this->trashed();
     }
 
     public function initials(): string

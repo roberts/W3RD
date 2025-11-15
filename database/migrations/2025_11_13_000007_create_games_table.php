@@ -17,7 +17,22 @@ return new class extends Migration
             $table->unsignedBigInteger('winner_id')->nullable();
             $table->integer('turn_number')->default(0);
             $table->json('game_state');
+            
+            // Cached counters
+            $table->tinyInteger('player_count')->default(0);
+            $table->integer('action_count')->default(0);
+            $table->integer('duration_seconds')->nullable();
+            
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+            
+            // Composite indexes for common queries
+            $table->index(['status', 'created_at']);
+            $table->index(['created_by_user_id', 'status']);
+            $table->index('created_at');
         });
     }
 };

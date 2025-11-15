@@ -22,6 +22,19 @@ class Player extends Model
         'position_id' => 'integer',
     ];
 
+    // Boot method for model events
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Validate position_id is between 1-10 before saving
+        static::saving(function ($player) {
+            if ($player->position_id !== null && ($player->position_id < 1 || $player->position_id > 10)) {
+                throw new \InvalidArgumentException('Position ID must be between 1 and 10.');
+            }
+        });
+    }
+
     // Relationships
     public function game()
     {

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Games\ValidateFour\Actions\DropDisc;
-use App\Games\ValidateFour\Actions\PopOut;
+use App\Events\GameActionProcessed;
+use App\Games\ValidateFour\ActionFactory;
 use App\Games\ValidateFour\Modes\StandardMode;
 use App\Games\ValidateFour\Modes\PopOutMode;
 use App\Games\ValidateFour\Modes\EightBySevenMode;
@@ -56,8 +56,8 @@ class GameActionController extends Controller
         // Get the appropriate mode based on game mode
         $mode = $this->getModeForGame($game);
 
-        // Create the game state object
-        $gameState = new ValidateFourGameState($game->game_state ?? []);
+        // Create the game state object from database
+        $gameState = ValidateFourGameState::fromArray($game->game_state ?? []);
 
         // Check if current turn has timed out
         $deadline = $mode->getActionDeadline($gameState, $game);
@@ -66,9 +66,9 @@ class GameActionController extends Controller
             
             if ($penalty === 'forfeit') {
                 // Forfeit the game - other player wins
-                $game->game_status = 'completed';
+                $game->status = 'completed';
                 $game->winner_id = $game->players()
-                    ->where('ulid', '!=', $gameState->current_player_ulid)
+                    ->where('ulid', '!=', $gameState->currentPlayerUlid)
                     ->first()
                     ->id;
                 $game->save();
@@ -89,7 +89,7 @@ class GameActionController extends Controller
         }
 
         // Verify it's this player's turn
-        if ($gameState->current_player_ulid !== $player->ulid) {
+        if ($gameState->currentPlayerUlid !== $player->ulid) {
             return response()->json([
                 'error' => 'Invalid turn',
                 'message' => 'It is not your turn.',
@@ -98,11 +98,10 @@ class GameActionController extends Controller
 
         // Create the action DTO
         try {
-            $action = match($validated['action_type']) {
-                'drop_disc' => new DropDisc($validated['action_details']),
-                'pop_out' => new PopOut($validated['action_details']),
-                default => throw new \Exception('Invalid action type'),
-            };
+            $action = ActionFactory::create(
+                $validated['action_type'],
+                $validated['action_details']
+            );
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'error' => 'Invalid action',
@@ -122,12 +121,15 @@ class GameActionController extends Controller
         $gameState = $mode->applyAction($gameState, $action);
 
         // Check for end condition
-        $winner = $mode->checkEndCondition($gameState);
-        if ($winner) {
-            $game->status = 'finished';
+        $winnerUlid = $mode->checkEndCondition($gameState);
+        if ($winnerUlid) {
+            $game->status = 'completed';
+            $winner = $game->players()->where('ulid', $winnerUlid)->first();
             $game->winner_id = $winner->id;
-        } elseif ($gameState->is_draw) {
-            $game->status = 'finished';
+            $gameState = $gameState->withWinner($winnerUlid);
+        } elseif ($gameState->isBoardFull()) {
+            $game->status = 'completed';
+            $gameState = $gameState->withDraw();
         }
 
         // Save the updated game state
@@ -151,14 +153,22 @@ class GameActionController extends Controller
         $game->refresh(); // Refresh to get the just-created action
         $nextDeadline = $mode->getActionDeadline($gameState, $game);
 
+        // Broadcast the action to all players via websocket
+        broadcast(new GameActionProcessed(
+            game: $game,
+            actionType: $validated['action_type'],
+            actionDetails: $validated['action_details'],
+            playerUlid: $player->ulid,
+        ));
+
         return response()->json([
             'message' => 'Action applied successfully',
             'game' => [
                 'ulid' => $game->ulid,
                 'status' => $game->status,
                 'game_state' => $game->game_state,
-                'winner_ulid' => $gameState->winner_ulid ?? null,
-                'is_draw' => $gameState->is_draw ?? false,
+                'winner_ulid' => $gameState->winnerUlid,
+                'is_draw' => $gameState->isDraw,
             ],
             'next_action_deadline' => $nextDeadline->toIso8601String(),
             'timeout' => [

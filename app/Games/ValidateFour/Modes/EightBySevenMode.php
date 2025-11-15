@@ -16,14 +16,12 @@ class EightBySevenMode extends AbstractValidateFourMode
      */
     public function createInitialState(string $playerOneUlid, string $playerTwoUlid): ValidateFourGameState
     {
-        return new ValidateFourGameState(
-            board: [],
+        return ValidateFourGameState::createNew(
             playerOneUlid: $playerOneUlid,
             playerTwoUlid: $playerTwoUlid,
-            currentPlayerUlid: $playerOneUlid,
             columns: 8,
             rows: 7,
-            connectCount: 4,
+            connectCount: 4
         );
     }
 }

@@ -10,17 +10,17 @@ use App\Games\ValidateFour\ValidateFourGameState;
 class PopOutMode extends AbstractValidateFourMode
 {
     /**
-     * Validate and apply the given action.
+     * Override parent applyAction to handle both drop_disc and pop_out actions.
      *
      * @param DropDisc|PopOut $action
      * @param ValidateFourGameState $gameState
      * @return ValidateFourGameState
-     * @throws \InvalidArgumentException
      */
-    public function applyAction($action, ValidateFourGameState $gameState): ValidateFourGameState
+    public function applyAction($action, $gameState): object
     {
-        // Validate the action first
-        $this->validateAction($action, $gameState);
+        if (!($gameState instanceof ValidateFourGameState)) {
+            return $gameState;
+        }
 
         // Handle pop_out action
         if ($action instanceof PopOut) {
@@ -36,27 +36,35 @@ class PopOutMode extends AbstractValidateFourMode
      *
      * @param PopOut $action
      * @param ValidateFourGameState $gameState
-     * @throws \InvalidArgumentException
+     * @return bool
      */
-    protected function validatePopOutAction(PopOut $action, ValidateFourGameState $gameState): void
+    protected function validatePopOutAction(PopOut $action, ValidateFourGameState $gameState): bool
     {
         $column = $action->column;
-        $board = $gameState->board;
-        $currentPlayerUlid = $gameState->currentPlayerUlid;
+        
+        // Check column is valid
+        if ($column < 0 || $column >= $gameState->columns) {
+            return false;
+        }
 
-        // Check if bottom disc exists
-        if ($board[count($board) - 1][$column] === null) {
-            throw new \InvalidArgumentException("Cannot pop out from empty column $column");
+        // Check if bottom disc exists (bottom row is rows - 1)
+        $bottomRow = $gameState->rows - 1;
+        $bottomDisc = $gameState->getDiscAt($bottomRow, $column);
+        if ($bottomDisc === null) {
+            return false;
         }
 
         // Check if bottom disc belongs to current player
-        if ($board[count($board) - 1][$column] !== $currentPlayerUlid) {
-            throw new \InvalidArgumentException("Cannot pop out opponent's disc from column $column");
+        if ($bottomDisc !== $gameState->currentPlayerUlid) {
+            return false;
         }
+
+        return true;
     }
 
     /**
      * Apply a pop_out action to the game state.
+     * Returns a new immutable game state with the disc popped and column shifted.
      *
      * @param PopOut $action
      * @param ValidateFourGameState $gameState
@@ -64,28 +72,19 @@ class PopOutMode extends AbstractValidateFourMode
      */
     protected function applyPopOut(PopOut $action, ValidateFourGameState $gameState): ValidateFourGameState
     {
-        $board = $gameState->board;
+        $newBoard = $gameState->board;
         $column = $action->column;
-        $rows = count($board);
 
         // Remove the bottom disc and shift all discs above it down
-        for ($row = $rows - 1; $row > 0; $row--) {
-            $board[$row][$column] = $board[$row - 1][$column];
+        for ($row = $gameState->rows - 1; $row > 0; $row--) {
+            $newBoard[$row][$column] = $newBoard[$row - 1][$column];
         }
-        $board[0][$column] = null; // Top row becomes empty
+        $newBoard[0][$column] = null; // Top row becomes empty
 
-        // Create new game state with updated board and switched turn
-        return new ValidateFourGameState(
-            board: $board,
-            playerOneUlid: $gameState->playerOneUlid,
-            playerTwoUlid: $gameState->playerTwoUlid,
-            currentPlayerUlid: $gameState->currentPlayerUlid === $gameState->playerOneUlid
-                ? $gameState->playerTwoUlid
-                : $gameState->playerOneUlid,
-            columns: $gameState->columns,
-            rows: $gameState->rows,
-            connectCount: $gameState->connectCount,
-        );
+        // Return new state with updated board and switched turn
+        return $gameState
+            ->withBoard($newBoard)
+            ->withNextPlayer();
     }
 
     /**
@@ -93,14 +92,18 @@ class PopOutMode extends AbstractValidateFourMode
      *
      * @param DropDisc|PopOut $action
      * @param ValidateFourGameState $gameState
-     * @throws \InvalidArgumentException
+     * @return bool
      */
-    public function validateAction($action, ValidateFourGameState $gameState): void
+    public function validateAction($action, $gameState): bool
     {
-        if ($action instanceof PopOut) {
-            $this->validatePopOutAction($action, $gameState);
-        } else {
-            parent::validateAction($action, $gameState);
+        if (!($gameState instanceof ValidateFourGameState)) {
+            return false;
         }
+
+        if ($action instanceof PopOut) {
+            return $this->validatePopOutAction($action, $gameState);
+        }
+
+        return parent::validateAction($action, $gameState);
     }
 }

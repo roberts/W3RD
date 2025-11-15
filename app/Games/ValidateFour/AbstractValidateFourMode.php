@@ -50,27 +50,16 @@ abstract class AbstractValidateFourMode implements GameTitleContract
      * Check if the game has ended (win or draw).
      *
      * @param object $gameState ValidateFourGameState instance
-     * @return Player|null The winning player, or null if game continues
+     * @return string|null The winning player's ULID, or null if game continues
      */
-    public function checkEndCondition(object $gameState): ?Player
+    public function checkEndCondition(object $gameState): ?string
     {
         if (!($gameState instanceof ValidateFourGameState)) {
             return null;
         }
 
         // Check for a winner
-        $winnerUlid = $this->checkForWinner($gameState);
-        if ($winnerUlid) {
-            $gameState->winner_ulid = $winnerUlid;
-            return Player::where('ulid', $winnerUlid)->first();
-        }
-
-        // Check for a draw
-        if ($gameState->isBoardFull()) {
-            $gameState->is_draw = true;
-        }
-
-        return null;
+        return $this->checkForWinner($gameState);
     }
 
     /**
@@ -83,7 +72,7 @@ abstract class AbstractValidateFourMode implements GameTitleContract
     protected function validateDropDisc(ValidateFourGameState $state, DropDisc $action): bool
     {
         // Check if column index is valid
-        if ($action->column < 0 || $action->column >= $state->board_width) {
+        if ($action->column < 0 || $action->column >= $state->columns) {
             return false;
         }
 
@@ -93,6 +82,7 @@ abstract class AbstractValidateFourMode implements GameTitleContract
 
     /**
      * Apply a drop disc action to the game state.
+     * Returns a new immutable game state.
      *
      * @param ValidateFourGameState $state
      * @param DropDisc $action
@@ -105,19 +95,10 @@ abstract class AbstractValidateFourMode implements GameTitleContract
             return $state; // Should not happen if validation passed
         }
 
-        $playerNumber = $state->getPlayerNumber($state->current_player_ulid);
-        if ($playerNumber === null) {
-            return $state; // Invalid player
-        }
-
-        $state->setDiscAt($action->column, $row, $playerNumber);
-
-        // Switch to next player
-        $currentIndex = array_search($state->current_player_ulid, $state->player_ulids);
-        $nextIndex = ($currentIndex + 1) % count($state->player_ulids);
-        $state->current_player_ulid = $state->player_ulids[$nextIndex];
-
-        return $state;
+        // Place the disc and switch player
+        return $state
+            ->withDiscAt($row, $action->column, $state->currentPlayerUlid)
+            ->withNextPlayer();
     }
 
     /**
@@ -128,32 +109,32 @@ abstract class AbstractValidateFourMode implements GameTitleContract
      */
     protected function checkForWinner(ValidateFourGameState $state): ?string
     {
-        // Check all possible winning lines
-        for ($col = 0; $col < $state->board_width; $col++) {
-            for ($row = 0; $row < $state->board_height; $row++) {
-                $disc = $state->getDiscAt($col, $row);
-                if ($disc === 0) {
+        // Check all possible starting positions for winning lines
+        for ($row = 0; $row < $state->rows; $row++) {
+            for ($col = 0; $col < $state->columns; $col++) {
+                $disc = $state->getDiscAt($row, $col);
+                if ($disc === null) {
                     continue;
                 }
 
-                // Check horizontal
-                if ($this->checkLine($state, $col, $row, 1, 0)) {
-                    return $state->player_map[$disc];
+                // Check horizontal (right)
+                if ($this->checkLine($state, $row, $col, 0, 1, $disc)) {
+                    return $disc;
                 }
 
-                // Check vertical
-                if ($this->checkLine($state, $col, $row, 0, 1)) {
-                    return $state->player_map[$disc];
+                // Check vertical (down)
+                if ($this->checkLine($state, $row, $col, 1, 0, $disc)) {
+                    return $disc;
                 }
 
                 // Check diagonal (down-right)
-                if ($this->checkLine($state, $col, $row, 1, 1)) {
-                    return $state->player_map[$disc];
+                if ($this->checkLine($state, $row, $col, 1, 1, $disc)) {
+                    return $disc;
                 }
 
-                // Check diagonal (up-right)
-                if ($this->checkLine($state, $col, $row, 1, -1)) {
-                    return $state->player_map[$disc];
+                // Check diagonal (down-left)
+                if ($this->checkLine($state, $row, $col, 1, -1, $disc)) {
+                    return $disc;
                 }
             }
         }
@@ -165,35 +146,37 @@ abstract class AbstractValidateFourMode implements GameTitleContract
      * Check if there is a winning line starting from a position in a direction.
      *
      * @param ValidateFourGameState $state
-     * @param int $startCol
      * @param int $startRow
-     * @param int $deltaCol
-     * @param int $deltaRow
+     * @param int $startCol
+     * @param int $deltaRow Row direction (-1, 0, or 1)
+     * @param int $deltaCol Column direction (-1, 0, or 1)
+     * @param string $playerUlid The player ULID to check for
      * @return bool
      */
-    protected function checkLine(ValidateFourGameState $state, int $startCol, int $startRow, int $deltaCol, int $deltaRow): bool
-    {
-        $disc = $state->getDiscAt($startCol, $startRow);
-        if ($disc === 0) {
-            return false;
-        }
-
+    protected function checkLine(
+        ValidateFourGameState $state,
+        int $startRow,
+        int $startCol,
+        int $deltaRow,
+        int $deltaCol,
+        string $playerUlid
+    ): bool {
         $count = 0;
-        $col = $startCol;
         $row = $startRow;
+        $col = $startCol;
 
-        while ($col >= 0 && $col < $state->board_width && $row >= 0 && $row < $state->board_height) {
-            if ($state->getDiscAt($col, $row) === $disc) {
+        while ($row >= 0 && $row < $state->rows && $col >= 0 && $col < $state->columns) {
+            if ($state->getDiscAt($row, $col) === $playerUlid) {
                 $count++;
-                if ($count >= $state->connect_length) {
+                if ($count >= $state->connectCount) {
                     return true;
                 }
             } else {
                 break;
             }
 
-            $col += $deltaCol;
             $row += $deltaRow;
+            $col += $deltaCol;
         }
 
         return false;

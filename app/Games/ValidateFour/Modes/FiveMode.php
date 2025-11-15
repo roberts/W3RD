@@ -16,14 +16,12 @@ class FiveMode extends AbstractValidateFourMode
      */
     public function createInitialState(string $playerOneUlid, string $playerTwoUlid): ValidateFourGameState
     {
-        return new ValidateFourGameState(
-            board: [],
+        return ValidateFourGameState::createNew(
             playerOneUlid: $playerOneUlid,
             playerTwoUlid: $playerTwoUlid,
-            currentPlayerUlid: $playerOneUlid,
             columns: 7,
             rows: 6,
-            connectCount: 5,
+            connectCount: 5
         );
     }
 }

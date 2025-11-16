@@ -9,11 +9,25 @@ use Illuminate\Auth\Access\Response;
 class ClientPolicy
 {
     /**
+     * Perform pre-authorization checks.
+     *
+     * @param  \App\Models\Auth\User  $user
+     * @param  string  $ability
+     * @return void|bool
+     */
+    public function before(User $user, $ability)
+    {
+        if ($user->can('manage-everything')) {
+            return true;
+        }
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('create-clients');
     }
 
     /**
@@ -21,7 +35,7 @@ class ClientPolicy
      */
     public function view(User $user, Client $client): bool
     {
-        return false;
+        return $user->can('create-clients');
     }
 
     /**
@@ -29,7 +43,7 @@ class ClientPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('create-clients');
     }
 
     /**
@@ -37,7 +51,7 @@ class ClientPolicy
      */
     public function update(User $user, Client $client): bool
     {
-        return false;
+        return $user->can('edit-own-client') && $user->id === $client->creator_id;
     }
 
     /**

@@ -8,11 +8,25 @@ use Illuminate\Auth\Access\Response;
 class UserPolicy
 {
     /**
+     * Perform pre-authorization checks.
+     *
+     * @param  \App\Models\Auth\User  $user
+     * @param  string  $ability
+     * @return void|bool
+     */
+    public function before(User $user, $ability)
+    {
+        if ($user->can('manage-everything')) {
+            return true;
+        }
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('edit-any-user-profile');
     }
 
     /**
@@ -20,7 +34,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        return $user->can('edit-any-user-profile');
     }
 
     /**
@@ -36,7 +50,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return false;
+        return $user->can('edit-any-user-profile');
     }
 
     /**

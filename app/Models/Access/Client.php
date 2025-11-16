@@ -17,12 +17,22 @@ class Client extends Model
         'api_key',
         'platform',
         'is_active',
+        'website',
     ];
 
     protected $casts = [
         'platform' => Platform::class,
         'is_active' => 'boolean',
     ];
+
+    public function getWebsiteLinkAttribute(): ?string
+    {
+        if ($this->website) {
+            return 'https://' . $this->website;
+        }
+
+        return null;
+    }
 
     // Relationships
     public function entries()

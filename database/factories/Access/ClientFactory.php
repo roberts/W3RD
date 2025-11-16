@@ -20,6 +20,7 @@ class ClientFactory extends Factory
         return [
             'name' => $this->faker->company,
             'api_key' => \Illuminate\Support\Str::random(32),
+            'website' => $this->faker->domainName,
             'platform' => $this->faker->randomElement(Platform::cases()),
             'is_active' => true,
         ];

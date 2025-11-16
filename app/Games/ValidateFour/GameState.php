@@ -151,7 +151,7 @@ class GameState extends BaseGameState
         int $columns = 7,
         int $rows = 6,
         int $connectCount = 4
-    ): self {
+    ): static {
         // Initialize empty board: rows x columns, all null
         $board = array_fill(0, $rows, array_fill(0, $columns, null));
 
@@ -197,7 +197,7 @@ class GameState extends BaseGameState
      * @param array<string, mixed> $stateData Associative array from database JSON
      * @return self Restored immutable game state instance
      */
-    public static function fromArray(array $stateData): self
+    public static function fromArray(array $stateData): static
     {
         // Restore players from array
         $players = [];
@@ -326,7 +326,7 @@ class GameState extends BaseGameState
      * @param string $playerUlid
      * @return self
      */
-    public function withDiscAt(int $row, int $column, string $playerUlid): self
+    public function withDiscAt(int $row, int $column, string $playerUlid): static
     {
         $newBoard = $this->board;
         $newBoard[$row][$column] = $playerUlid;
@@ -350,7 +350,7 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withNextPlayer(): self
+    public function withNextPlayer(): static
     {
         // Get player ULIDs in position order
         $playersByPosition = $this->players;
@@ -382,7 +382,7 @@ class GameState extends BaseGameState
      * @param GamePhase $phase New phase
      * @return self
      */
-    public function withPhase(GamePhase $phase): self
+    public function withPhase(GamePhase $phase): static
     {
         return new self(
             players: $this->players,
@@ -404,7 +404,7 @@ class GameState extends BaseGameState
      * @param GameStatus $status New status
      * @return self
      */
-    public function withStatus(GameStatus $status): self
+    public function withStatus(GameStatus $status): static
     {
         return new self(
             players: $this->players,
@@ -426,7 +426,7 @@ class GameState extends BaseGameState
      * @param string $winnerUlid
      * @return self
      */
-    public function withWinner(string $winnerUlid): self
+    public function withWinner(string $winnerUlid): static
     {
         return new self(
             players: $this->players,
@@ -447,7 +447,7 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withDraw(): self
+    public function withDraw(): static
     {
         return new self(
             players: $this->players,
@@ -464,12 +464,12 @@ class GameState extends BaseGameState
     }
 
     /**
-     * Create a new state with an updated board (for complex operations like pop out).
+     * Create a new state with a completely new board.
      *
      * @param array $newBoard
-     * @return self
+     * @return static
      */
-    public function withBoard(array $newBoard): self
+    public function withBoard(array $newBoard): static
     {
         return new self(
             players: $this->players,

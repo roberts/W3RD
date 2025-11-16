@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Events\GameActionProcessed;
-use App\Games\GameServiceProvider;
+use App\Providers\GameServiceProvider;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
 use App\Services\GameActionRecorder;
@@ -30,15 +30,7 @@ class GameActionController extends Controller
     public function store(Request $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify game has a mode configured
-        if (!$game->mode) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'This game does not have a valid mode configured.',
-            ], 500);
-        }
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
         try {
@@ -248,15 +240,7 @@ class GameActionController extends Controller
     public function availableActions(string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify game has a mode configured
-        if (!$game->mode) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'This game does not have a valid mode configured.',
-            ], 500);
-        }
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
         try {

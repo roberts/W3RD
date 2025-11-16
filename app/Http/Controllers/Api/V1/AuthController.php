@@ -11,7 +11,7 @@ use App\Http\Requests\Api\V1\Auth\VerifyRequest;
 use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
-use App\Models\User;
+use App\Models\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

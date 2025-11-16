@@ -17,9 +17,9 @@ class PopOutMode extends BaseValidateFour
      * @param object $action
      * @return ValidationResult
      */
-    public function validateAction(object $action): ValidationResult
+    public function validateAction(object $gameState, object $action): ValidationResult
     {
-        if (!($this->gameState instanceof GameState)) {
+        if (!($gameState instanceof GameState)) {
             return ValidationResult::invalid(
                 'INVALID_STATE_TYPE',
                 'Game state must be a GameState instance'
@@ -27,10 +27,10 @@ class PopOutMode extends BaseValidateFour
         }
 
         if ($action instanceof PopOut) {
-            return $this->validatePopOutAction($this->gameState, $action);
+            return $this->validatePopOutAction($gameState, $action);
         }
 
-        return parent::validateAction($action);
+        return parent::validateAction($gameState, $action);
     }
 
     /**
@@ -40,19 +40,19 @@ class PopOutMode extends BaseValidateFour
      * @param object $action
      * @return object
      */
-    public function applyAction(object $action): object
+    public function applyAction(object $gameState, object $action): object
     {
-        if (!($this->gameState instanceof GameState)) {
-            return $this->gameState;
+        if (!($gameState instanceof GameState)) {
+            return $gameState;
         }
 
         // Handle pop_out action
         if ($action instanceof PopOut) {
-            return $this->applyPopOut($this->gameState, $action);
+            return $this->applyPopOut($gameState, $action);
         }
 
         // For drop_disc, use parent implementation
-        return parent::applyAction($action);
+        return parent::applyAction($gameState, $action);
     }
 
     /**
@@ -62,25 +62,25 @@ class PopOutMode extends BaseValidateFour
      * @param string $playerUlid
      * @return array<string, mixed>
      */
-    public function getAvailableActions(string $playerUlid): array
+    public function getAvailableActions(object $gameState, string $playerUlid): array
     {
-        $actions = parent::getAvailableActions($playerUlid);
+        $actions = parent::getAvailableActions($gameState, $playerUlid);
         
-        if (!($this->gameState instanceof GameState)) {
+        if (!($gameState instanceof GameState)) {
             return $actions;
         }
 
         // If not player's turn, no actions available
-        if ($this->gameState->currentPlayerUlid !== $playerUlid) {
+        if ($gameState->currentPlayerUlid !== $playerUlid) {
             return [];
         }
 
         // Find columns where player can pop out (has disc at bottom)
-        $bottomRow = $this->gameState->rows - 1;
+        $bottomRow = $gameState->rows - 1;
         $popOutColumns = [];
         
-        for ($col = 0; $col < $this->gameState->columns; $col++) {
-            $bottomDisc = $this->gameState->getDiscAt($bottomRow, $col);
+        for ($col = 0; $col < $gameState->columns; $col++) {
+            $bottomDisc = $gameState->getDiscAt($bottomRow, $col);
             if ($bottomDisc === $playerUlid) {
                 $popOutColumns[] = $col;
             }
@@ -136,7 +136,7 @@ class PopOutMode extends BaseValidateFour
      * @param PopOut $action
      * @return ValidationResult
      */
-    protected function validatePopOutAction(ValidateFourGameState $gameState, PopOut $action): ValidationResult
+    protected function validatePopOutAction(GameState $gameState, PopOut $action): ValidationResult
     {
         $column = $action->column;
         
@@ -180,7 +180,7 @@ class PopOutMode extends BaseValidateFour
      * @param PopOut $action
      * @return ValidateFourGameState
      */
-    protected function applyPopOut(ValidateFourGameState $gameState, PopOut $action): ValidateFourGameState
+    protected function applyPopOut(GameState $gameState, PopOut $action): GameState
     {
         $newBoard = $gameState->board;
         $column = $action->column;

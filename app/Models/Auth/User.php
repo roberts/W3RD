@@ -2,6 +2,7 @@
 
 namespace App\Models\Auth;
 
+use App\Models\Access\Client;
 use App\Models\Billing\Quota;
 use App\Models\Billing\Strike;
 use App\Models\Content\Avatar;
@@ -17,10 +18,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes;
+    use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes, HasRoles;
 
     protected $fillable = [
         'name',

@@ -24,6 +24,7 @@
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.9",
         "roberts/support": "^1.0",
+        "spatie/laravel-data": "^4.5",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {
@@ -80,7 +81,7 @@
             "@php artisan config:clear --ansi",
             "@php artisan test --testsuite=Browser"
         ],
-        "analyse": "vendor/bin/phpstan analyse",
+        "analyse": "vendor/bin/phpstan analyse app database --memory-limit=512M",
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint",
         "lint": "vendor/bin/phpstan analyse && vendor/bin/pest --coverage",

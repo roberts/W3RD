@@ -112,9 +112,9 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      * @param object $action The action DTO (DropDisc, PopOut, etc)
      * @return ValidationResult
      */
-    public function validateAction(object $action): ValidationResult
+    public function validateAction(object $gameState, object $action): ValidationResult
     {
-        if (!($this->gameState instanceof GameState)) {
+        if (!($gameState instanceof GameState)) {
             return ValidationResult::invalid(
                 'INVALID_STATE_TYPE',
                 'Game state must be a GameState instance'
@@ -122,7 +122,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
         }
 
         if ($action instanceof DropDisc) {
-            return $this->validateDropDisc($this->gameState, $action);
+            return $this->validateDropDisc($gameState, $action);
         }
 
         return ValidationResult::invalid(
@@ -152,20 +152,20 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      *
      * @return GameOutcome The game outcome
      */
-    public function checkEndCondition(): GameOutcome
+    public function checkEndCondition(object $gameState): GameOutcome
     {
-        if (!($this->gameState instanceof GameState)) {
+        if (!($gameState instanceof GameState)) {
             return GameOutcome::inProgress();
         }
 
         // Check for a winner
-        $winnerUlid = $this->checkForWinner($this->gameState);
+        $winnerUlid = $this->checkForWinner($gameState);
         if ($winnerUlid) {
             return GameOutcome::win($winnerUlid, 'four_in_a_row');
         }
 
         // Check for draw (board full)
-        if ($this->gameState->isBoardFull()) {
+        if ($gameState->isBoardFull()) {
             return GameOutcome::draw('board_full');
         }
 
@@ -178,21 +178,21 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      * @param string $playerUlid The player's ULID
      * @return array<string, mixed> Map of action types to their available parameters
      */
-    public function getAvailableActions(string $playerUlid): array
+    public function getAvailableActions(object $gameState, string $playerUlid): array
     {
-        if (!($this->gameState instanceof GameState)) {
+        if (!($gameState instanceof GameState)) {
             return [];
         }
 
         // If not player's turn, no actions available
-        if ($this->gameState->currentPlayerUlid !== $playerUlid) {
+        if ($gameState->currentPlayerUlid !== $playerUlid) {
             return [];
         }
 
         // Find columns that aren't full
         $availableColumns = [];
-        for ($col = 0; $col < $this->gameState->columns; $col++) {
-            if ($this->gameState->getLowestEmptyRow($col) !== null) {
+        for ($col = 0; $col < $gameState->columns; $col++) {
+            if ($gameState->getLowestEmptyRow($col) !== null) {
                 $availableColumns[] = $col;
             }
         }

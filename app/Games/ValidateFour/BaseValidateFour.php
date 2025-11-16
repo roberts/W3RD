@@ -4,9 +4,8 @@ namespace App\Games\ValidateFour;
 
 use App\Games\BaseBoardGameTitle;
 use App\Games\GameOutcome;
-use App\Games\ValidationResult;
-use App\Games\ValidateFour\GameState;
 use App\Games\ValidateFour\Actions\DropDisc;
+use App\Games\ValidationResult;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use Carbon\Carbon;
@@ -41,8 +40,9 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      *
      * Validate Four requires exactly 2 players.
      *
-     * @param string ...$playerUlids Player ULIDs (must be exactly 2)
+     * @param  string  ...$playerUlids  Player ULIDs (must be exactly 2)
      * @return GameState
+     *
      * @throws \InvalidArgumentException If not exactly 2 players provided
      */
     public function createInitialState(string ...$playerUlids): object
@@ -62,8 +62,6 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
 
     /**
      * Get the state class name.
-     *
-     * @return string
      */
     public function getStateClass(): string
     {
@@ -72,8 +70,6 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
 
     /**
      * Get the action factory class name.
-     *
-     * @return string
      */
     public function getActionFactory(): string
     {
@@ -96,7 +92,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
             'sections' => [
                 [
                     'title' => 'Core Gameplay',
-                    'content' => <<<MARKDOWN
+                    'content' => <<<'MARKDOWN'
                     *   Players take turns dropping one of their colored discs from the top into a column.
                     *   The disc falls to the lowest available space within the column.
                     *   The first player to form a line of four of their discs wins.
@@ -109,12 +105,11 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Validate a player's action.
      *
-     * @param object $action The action DTO (DropDisc, PopOut, etc)
-     * @return ValidationResult
+     * @param  object  $action  The action DTO (DropDisc, PopOut, etc)
      */
     public function validateAction(object $gameState, object $action): ValidationResult
     {
-        if (!($gameState instanceof GameState)) {
+        if (! ($gameState instanceof GameState)) {
             return ValidationResult::invalid(
                 'INVALID_STATE_TYPE',
                 'Game state must be a GameState instance'
@@ -134,8 +129,8 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Apply a valid action to the game state.
      *
-     * @param object $gameState GameState instance
-     * @param object $action Action DTO
+     * @param  object  $gameState  GameState instance
+     * @param  object  $action  Action DTO
      * @return object Updated GameState
      */
     public function applyAction(object $gameState, object $action): object
@@ -154,7 +149,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      */
     public function checkEndCondition(object $gameState): GameOutcome
     {
-        if (!($gameState instanceof GameState)) {
+        if (! ($gameState instanceof GameState)) {
             return GameOutcome::inProgress();
         }
 
@@ -175,12 +170,12 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Get available actions for a specific player.
      *
-     * @param string $playerUlid The player's ULID
+     * @param  string  $playerUlid  The player's ULID
      * @return array<string, mixed> Map of action types to their available parameters
      */
     public function getAvailableActions(object $gameState, string $playerUlid): array
     {
-        if (!($gameState instanceof GameState)) {
+        if (! ($gameState instanceof GameState)) {
             return [];
         }
 
@@ -206,10 +201,6 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
 
     /**
      * Validate a drop disc action.
-     *
-     * @param GameState $state
-     * @param DropDisc $action
-     * @return ValidationResult
      */
     protected function validateDropDisc(GameState $state, DropDisc $action): ValidationResult
     {
@@ -237,10 +228,6 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Apply a drop disc action to the game state.
      * Returns a new immutable game state.
-     *
-     * @param GameState $state
-     * @param DropDisc $action
-     * @return GameState
      */
     protected function applyDropDisc(GameState $state, DropDisc $action): GameState
     {
@@ -258,7 +245,6 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Check if there is a winner on the board.
      *
-     * @param GameState $state
      * @return string|null The winner's ULID, or null if no winner
      */
     protected function checkForWinner(GameState $state): ?string
@@ -299,13 +285,9 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Check if there is a winning line starting from a position in a direction.
      *
-     * @param GameState $state
-     * @param int $startRow
-     * @param int $startCol
-     * @param int $deltaRow Row direction (-1, 0, or 1)
-     * @param int $deltaCol Column direction (-1, 0, or 1)
-     * @param string $playerUlid The player ULID to check for
-     * @return bool
+     * @param  int  $deltaRow  Row direction (-1, 0, or 1)
+     * @param  int  $deltaCol  Column direction (-1, 0, or 1)
+     * @param  string  $playerUlid  The player ULID to check for
      */
     protected function checkLine(
         GameState $state,
@@ -351,8 +333,8 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      * Get the deadline timestamp for the current action.
      * Calculated as: last action time + timelimit + grace period for network latency
      *
-     * @param object $gameState GameState instance
-     * @param Game $game The game model instance
+     * @param  object  $gameState  GameState instance
+     * @param  Game  $game  The game model instance
      * @return Carbon The deadline timestamp
      */
     public function getActionDeadline(object $gameState, Game $game): Carbon

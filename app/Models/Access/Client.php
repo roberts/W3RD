@@ -30,7 +30,7 @@ class Client extends Model
     public function getWebsiteLinkAttribute(): ?string
     {
         if ($this->website) {
-            return 'https://' . $this->website;
+            return 'https://'.$this->website;
         }
 
         return null;

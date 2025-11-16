@@ -4,14 +4,12 @@ namespace App\Policies;
 
 use App\Models\Auth\User;
 use App\Models\Content\Avatar;
-use Illuminate\Auth\Access\Response;
 
 class AvatarPolicy
 {
     /**
      * Perform pre-authorization checks.
      *
-     * @param  \App\Models\Auth\User  $user
      * @param  string  $ability
      * @return void|bool
      */

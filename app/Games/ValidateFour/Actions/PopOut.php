@@ -11,7 +11,8 @@ class PopOut implements GameActionContract
     /**
      * Create a new PopOut action.
      *
-     * @param int $column The column index (0-based) to pop out from the bottom
+     * @param  int  $column  The column index (0-based) to pop out from the bottom
+     *
      * @throws \InvalidArgumentException if column is negative
      */
     public function __construct(
@@ -24,8 +25,6 @@ class PopOut implements GameActionContract
 
     /**
      * Get the action type identifier.
-     *
-     * @return string
      */
     public function getType(): string
     {

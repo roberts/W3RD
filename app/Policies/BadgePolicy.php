@@ -4,14 +4,12 @@ namespace App\Policies;
 
 use App\Models\Auth\User;
 use App\Models\Gamification\Badge;
-use Illuminate\Auth\Access\Response;
 
 class BadgePolicy
 {
     /**
      * Perform pre-authorization checks.
      *
-     * @param  \App\Models\Auth\User  $user
      * @param  string  $ability
      * @return void|bool
      */

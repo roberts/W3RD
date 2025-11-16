@@ -11,8 +11,6 @@ class StandardMode extends BaseValidateFour
 
     /**
      * Returns the complete rules for the Standard mode.
-     *
-     * @return array
      */
     public static function getRules(): array
     {
@@ -24,7 +22,7 @@ class StandardMode extends BaseValidateFour
             'sections' => [
                 [
                     'title' => 'Board & Objective',
-                    'content' => <<<MARKDOWN
+                    'content' => <<<'MARKDOWN'
                     *   **Board size:** 7 columns × 6 rows.
                     *   **Objective:** Connect four of your discs in a row.
                     MARKDOWN,

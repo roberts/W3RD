@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('name');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             // Unique constraint: each title can only have one mode with a given slug
             $table->unique(['title_slug', 'slug']);
             $table->index(['title_slug', 'is_active']);

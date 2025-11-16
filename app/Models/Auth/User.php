@@ -22,7 +22,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes, HasRoles;
+    use Billable, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected $fillable = [
         'name',
@@ -115,18 +115,18 @@ class User extends Authenticatable
 
     public function isActive(): bool
     {
-        return $this->deactivated_at === null && !$this->trashed();
+        return $this->deactivated_at === null && ! $this->trashed();
     }
 
     public function initials(): string
     {
         $names = explode(' ', $this->name);
         $initials = '';
-        
+
         foreach ($names as $name) {
             $initials .= strtoupper(substr($name, 0, 1));
         }
-        
+
         return $initials;
     }
 }

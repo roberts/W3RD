@@ -30,22 +30,21 @@ class Mode extends Model
     }
 
     // Helper methods
-    
+
     /**
      * Get the handler class instance for this mode.
      *
-     * @return GameTitleContract
      * @throws \Exception if handler class doesn't exist or doesn't implement GameTitleContract
      */
     public function getHandler(): GameTitleContract
     {
-        if (!class_exists($this->handler_class)) {
+        if (! class_exists($this->handler_class)) {
             throw new \Exception("Handler class {$this->handler_class} does not exist");
         }
 
-        $handler = new $this->handler_class();
+        $handler = new $this->handler_class;
 
-        if (!$handler instanceof GameTitleContract) {
+        if (! $handler instanceof GameTitleContract) {
             throw new \Exception("Handler class {$this->handler_class} must implement GameTitleContract");
         }
 

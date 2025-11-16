@@ -17,9 +17,9 @@ class PlayerState extends BasePlayerState
     /**
      * Create a new player state.
      *
-     * @param string $ulid Player's ULID
-     * @param int $position Player position (1 or 2)
-     * @param string $color Player's disc color (e.g., 'red', 'yellow')
+     * @param  string  $ulid  Player's ULID
+     * @param  int  $position  Player position (1 or 2)
+     * @param  string  $color  Player's disc color (e.g., 'red', 'yellow')
      */
     public function __construct(
         string $ulid,
@@ -32,8 +32,7 @@ class PlayerState extends BasePlayerState
     /**
      * Create player state from array.
      *
-     * @param array<string, mixed> $data Serialized player data
-     * @return self
+     * @param  array<string, mixed>  $data  Serialized player data
      */
     public static function fromArray(array $data): self
     {

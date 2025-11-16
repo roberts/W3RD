@@ -17,11 +17,6 @@ class ForfeitHandler implements TimeoutHandlerContract
 {
     /**
      * Handle timeout by forfeiting the game.
-     *
-     * @param Game $game
-     * @param object $gameState
-     * @param string $timedOutPlayerUlid
-     * @return GameOutcome
      */
     public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
     {
@@ -30,7 +25,7 @@ class ForfeitHandler implements TimeoutHandlerContract
             ->where('ulid', '!=', $timedOutPlayerUlid)
             ->first();
 
-        if (!$winnerPlayer) {
+        if (! $winnerPlayer) {
             // Fallback if no opponent found (shouldn't happen)
             return GameOutcome::draw('timeout_no_opponent');
         }
@@ -40,8 +35,6 @@ class ForfeitHandler implements TimeoutHandlerContract
 
     /**
      * Get the handler name.
-     *
-     * @return string
      */
     public function getName(): string
     {

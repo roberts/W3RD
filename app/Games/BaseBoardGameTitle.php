@@ -6,10 +6,6 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
 {
     /**
      * Check if a given coordinate is within the board boundaries.
-     *
-     * @param int $row
-     * @param int $col
-     * @return bool
      */
     protected function isWithinBounds(int $row, int $col): bool
     {
@@ -25,13 +21,12 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
 
     /**
      * Returns the structured rules for this game title.
-     *
-     * @return array
      */
     public static function getRules(): array
     {
         $rules = parent::getRules();
         $rules['description'] = 'Base description for a board game.';
+
         return $rules;
     }
 }

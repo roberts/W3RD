@@ -3,13 +3,12 @@
 namespace App\Actions\Fortify;
 
 use App\Models\Access\Client;
+use App\Models\Auth\Entry;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use App\Actions\Fortify\PasswordValidationRules;
-use App\Models\Auth\Entry;
 
 class CreateNewUser implements CreatesNewUsers
 {

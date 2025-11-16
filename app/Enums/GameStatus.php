@@ -20,8 +20,6 @@ enum GameStatus: string
 
     /**
      * Get a human-readable label for the status.
-     *
-     * @return string
      */
     public function label(): string
     {
@@ -36,8 +34,6 @@ enum GameStatus: string
 
     /**
      * Get a description of the status.
-     *
-     * @return string
      */
     public function description(): string
     {
@@ -52,8 +48,6 @@ enum GameStatus: string
 
     /**
      * Check if the game is in a playable state.
-     *
-     * @return bool
      */
     public function isPlayable(): bool
     {
@@ -62,8 +56,6 @@ enum GameStatus: string
 
     /**
      * Check if the game has ended.
-     *
-     * @return bool
      */
     public function isFinished(): bool
     {

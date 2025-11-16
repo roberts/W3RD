@@ -21,8 +21,6 @@ abstract class BaseGameTitle implements GameTitleContract
 
     /**
      * Returns the fully qualified class name of the game state object.
-     *
-     * @return string
      */
     abstract protected function getGameStateClass(): string;
 
@@ -38,8 +36,6 @@ abstract class BaseGameTitle implements GameTitleContract
 
     /**
      * Returns the structured rules for this game title.
-     *
-     * @return array
      */
     public static function getRules(): array
     {

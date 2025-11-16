@@ -20,12 +20,11 @@ class GameActionRecorder
     /**
      * Record a game action to the database.
      *
-     * @param Game $game The game instance
-     * @param Player $player The player who performed the action
-     * @param GameActionContract $action The action that was performed
-     * @param ValidationResult $validationResult The validation result
-     * @param int $turnNumber The current turn number
-     * @return void
+     * @param  Game  $game  The game instance
+     * @param  Player  $player  The player who performed the action
+     * @param  GameActionContract  $action  The action that was performed
+     * @param  ValidationResult  $validationResult  The validation result
+     * @param  int  $turnNumber  The current turn number
      */
     public function record(
         Game $game,
@@ -47,12 +46,6 @@ class GameActionRecorder
 
     /**
      * Record a successful action (convenience method).
-     *
-     * @param Game $game
-     * @param Player $player
-     * @param GameActionContract $action
-     * @param int $turnNumber
-     * @return void
      */
     public function recordSuccess(
         Game $game,
@@ -65,13 +58,6 @@ class GameActionRecorder
 
     /**
      * Record a failed action (convenience method).
-     *
-     * @param Game $game
-     * @param Player $player
-     * @param GameActionContract $action
-     * @param ValidationResult $validationResult
-     * @param int $turnNumber
-     * @return void
      */
     public function recordFailure(
         Game $game,

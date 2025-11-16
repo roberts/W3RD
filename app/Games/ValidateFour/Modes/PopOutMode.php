@@ -2,24 +2,19 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidationResult;
-use App\Games\ValidateFour\BaseValidateFour;
-use App\Games\ValidateFour\Actions\DropDisc;
 use App\Games\ValidateFour\Actions\PopOut;
+use App\Games\ValidateFour\BaseValidateFour;
 use App\Games\ValidateFour\GameState;
+use App\Games\ValidationResult;
 
 class PopOutMode extends BaseValidateFour
 {
     /**
      * Override parent validateAction to handle both drop_disc and pop_out actions.
-     *
-     * @param object $gameState
-     * @param object $action
-     * @return ValidationResult
      */
     public function validateAction(object $gameState, object $action): ValidationResult
     {
-        if (!($gameState instanceof GameState)) {
+        if (! ($gameState instanceof GameState)) {
             return ValidationResult::invalid(
                 'INVALID_STATE_TYPE',
                 'Game state must be a GameState instance'
@@ -35,14 +30,10 @@ class PopOutMode extends BaseValidateFour
 
     /**
      * Override parent applyAction to handle both drop_disc and pop_out actions.
-     *
-     * @param object $gameState
-     * @param object $action
-     * @return object
      */
     public function applyAction(object $gameState, object $action): object
     {
-        if (!($gameState instanceof GameState)) {
+        if (! ($gameState instanceof GameState)) {
             return $gameState;
         }
 
@@ -58,15 +49,13 @@ class PopOutMode extends BaseValidateFour
     /**
      * Override getAvailableActions to include pop_out option.
      *
-     * @param object $gameState
-     * @param string $playerUlid
      * @return array<string, mixed>
      */
     public function getAvailableActions(object $gameState, string $playerUlid): array
     {
         $actions = parent::getAvailableActions($gameState, $playerUlid);
-        
-        if (!($gameState instanceof GameState)) {
+
+        if (! ($gameState instanceof GameState)) {
             return $actions;
         }
 
@@ -78,7 +67,7 @@ class PopOutMode extends BaseValidateFour
         // Find columns where player can pop out (has disc at bottom)
         $bottomRow = $gameState->rows - 1;
         $popOutColumns = [];
-        
+
         for ($col = 0; $col < $gameState->columns; $col++) {
             $bottomDisc = $gameState->getDiscAt($bottomRow, $col);
             if ($bottomDisc === $playerUlid) {
@@ -97,8 +86,6 @@ class PopOutMode extends BaseValidateFour
      * Returns the complete rules for the Pop-Out mode.
      *
      * Merges its specific rules with the base Validate Four rules.
-     *
-     * @return array
      */
     public static function getRules(): array
     {
@@ -110,7 +97,7 @@ class PopOutMode extends BaseValidateFour
             'sections' => [
                 [
                     'title' => 'Special Rule: Popping Out',
-                    'content' => <<<MARKDOWN
+                    'content' => <<<'MARKDOWN'
                     On your turn, you may choose to **pop out** one of your own discs from the **bottom row**.
 
                     *   This removes the disc from the board.
@@ -132,14 +119,12 @@ class PopOutMode extends BaseValidateFour
     /**
      * Validate a pop_out action.
      *
-     * @param ValidateFourGameState $gameState
-     * @param PopOut $action
-     * @return ValidationResult
+     * @param  ValidateFourGameState  $gameState
      */
     protected function validatePopOutAction(GameState $gameState, PopOut $action): ValidationResult
     {
         $column = $action->column;
-        
+
         // Check column is valid
         if ($column < 0 || $column >= $gameState->columns) {
             return ValidationResult::invalid(
@@ -176,8 +161,7 @@ class PopOutMode extends BaseValidateFour
      * Apply a pop_out action to the game state.
      * Returns a new immutable game state with the disc popped and column shifted.
      *
-     * @param ValidateFourGameState $gameState
-     * @param PopOut $action
+     * @param  ValidateFourGameState  $gameState
      * @return ValidateFourGameState
      */
     protected function applyPopOut(GameState $gameState, PopOut $action): GameState

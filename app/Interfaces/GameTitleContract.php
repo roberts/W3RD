@@ -64,8 +64,9 @@ interface GameTitleContract
      * $state = $mode->createInitialState('p1-ulid', 'p2-ulid', 'p3-ulid', 'p4-ulid');
      * ```
      *
-     * @param string ...$playerUlids Variable number of player ULIDs
+     * @param  string  ...$playerUlids  Variable number of player ULIDs
      * @return object The initial game state object
+     *
      * @throws \InvalidArgumentException If incorrect number of players provided
      */
     public function createInitialState(string ...$playerUlids): object;
@@ -107,8 +108,6 @@ interface GameTitleContract
      *
      * Returns a structured array containing the title, description, and
      * sections of rules, which can be formatted with Markdown.
-     *
-     * @return array
      */
     public static function getRules(): array;
 
@@ -127,8 +126,8 @@ interface GameTitleContract
      * }
      * ```
      *
-     * @param object $gameState The current game state object (e.g., ValidateFourGameState)
-     * @param object $action The action DTO to validate (e.g., DropDiscAction)
+     * @param  object  $gameState  The current game state object (e.g., ValidateFourGameState)
+     * @param  object  $action  The action DTO to validate (e.g., DropDiscAction)
      * @return ValidationResult Detailed validation result with error information
      */
     public function validateAction(object $gameState, object $action): ValidationResult;
@@ -140,8 +139,8 @@ interface GameTitleContract
      * with the action applied. For immutable state objects, this must return a new
      * instance rather than modifying the existing one.
      *
-     * @param object $gameState The current game state object
-     * @param object $action The action DTO to apply
+     * @param  object  $gameState  The current game state object
+     * @param  object  $action  The action DTO to apply
      * @return object The updated game state object (new instance if immutable)
      */
     public function applyAction(object $gameState, object $action): object;
@@ -164,7 +163,7 @@ interface GameTitleContract
      * }
      * ```
      *
-     * @param object $gameState The current game state object
+     * @param  object  $gameState  The current game state object
      * @return GameOutcome The game outcome (finished/in-progress, winner, draw, scores, etc.)
      */
     public function checkEndCondition(object $gameState): GameOutcome;
@@ -183,8 +182,8 @@ interface GameTitleContract
      * ]
      * ```
      *
-     * @param object $gameState The current game state object
-     * @param string $playerUlid The player's ULID
+     * @param  object  $gameState  The current game state object
+     * @param  string  $playerUlid  The player's ULID
      * @return array<string, mixed> Map of action types to their available parameters
      */
     public function getAvailableActions(object $gameState, string $playerUlid): array;
@@ -205,8 +204,8 @@ interface GameTitleContract
      * Calculates when the current player's turn expires, including any grace periods.
      * Used by the controller to check for timeouts.
      *
-     * @param object $gameState The current game state object
-     * @param Game $game The game model instance (to access last action timestamp)
+     * @param  object  $gameState  The current game state object
+     * @param  Game  $game  The game model instance (to access last action timestamp)
      * @return Carbon The deadline timestamp
      */
     public function getActionDeadline(object $gameState, Game $game): Carbon;

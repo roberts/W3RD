@@ -13,7 +13,7 @@ enum ActionType: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DROP_PIECE => 'Drop Piece',
             self::MOVE_PIECE => 'Move Piece',
             self::PLAY_CARD => 'Play Card',
@@ -25,7 +25,7 @@ enum ActionType: string
 
     public function description(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DROP_PIECE => 'Place a piece on the board (e.g., Connect Four)',
             self::MOVE_PIECE => 'Move a piece on the board (e.g., Checkers)',
             self::PLAY_CARD => 'Play a card from hand (e.g., Hearts, Spades)',
@@ -42,6 +42,7 @@ enum ActionType: string
                 return $case;
             }
         }
+
         return null;
     }
 }

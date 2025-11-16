@@ -23,13 +23,10 @@ class GameActionProcessed implements ShouldBroadcast
         public readonly string $actionType,
         public readonly array $actionDetails,
         public readonly string $playerUlid,
-    ) {
-    }
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.
-     *
-     * @return Channel
      */
     public function broadcastOn(): Channel
     {

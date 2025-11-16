@@ -14,9 +14,10 @@ class ActionFactory implements ActionFactoryContract
     /**
      * Create an action DTO from request data.
      *
-     * @param string $actionType The type of action (drop_disc, pop_out, etc.)
-     * @param array<string, mixed> $data The action data from the request
+     * @param  string  $actionType  The type of action (drop_disc, pop_out, etc.)
+     * @param  array<string, mixed>  $data  The action data from the request
      * @return GameActionContract The action DTO
+     *
      * @throws \InvalidArgumentException If action type is unknown or data is invalid
      */
     public static function create(string $actionType, array $data): GameActionContract
@@ -35,8 +36,8 @@ class ActionFactory implements ActionFactoryContract
     /**
      * Validate that the action type exists and has required fields.
      *
-     * @param string $actionType The type of action to validate
-     * @param array<string, mixed> $data The action data to validate
+     * @param  string  $actionType  The type of action to validate
+     * @param  array<string, mixed>  $data  The action data to validate
      * @return bool True if valid, false otherwise
      */
     public static function validate(string $actionType, array $data): bool

@@ -4,14 +4,12 @@ namespace App\Policies;
 
 use App\Models\Auth\Registration;
 use App\Models\Auth\User;
-use Illuminate\Auth\Access\Response;
 
 class RegistrationPolicy
 {
     /**
      * Perform pre-authorization checks.
      *
-     * @param  \App\Models\Auth\User  $user
      * @param  string  $ability
      * @return void|bool
      */

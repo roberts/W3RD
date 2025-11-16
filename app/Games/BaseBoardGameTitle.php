@@ -9,7 +9,7 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
      */
     protected function isWithinBounds(int $row, int $col): bool
     {
-        $board = $this->gameState->getBoard();
+        $board = $this->gameState->board;
         $rowCount = count($board);
         if ($rowCount === 0) {
             return false;

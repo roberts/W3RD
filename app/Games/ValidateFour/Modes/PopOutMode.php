@@ -119,7 +119,7 @@ class PopOutMode extends BaseValidateFour
     /**
      * Validate a pop_out action.
      *
-     * @param  ValidateFourGameState  $gameState
+     * @param  GameState  $gameState
      */
     protected function validatePopOutAction(GameState $gameState, PopOut $action): ValidationResult
     {
@@ -161,8 +161,8 @@ class PopOutMode extends BaseValidateFour
      * Apply a pop_out action to the game state.
      * Returns a new immutable game state with the disc popped and column shifted.
      *
-     * @param  ValidateFourGameState  $gameState
-     * @return ValidateFourGameState
+     * @param  GameState  $gameState
+     * @return GameState
      */
     protected function applyPopOut(GameState $gameState, PopOut $action): GameState
     {

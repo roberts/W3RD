@@ -143,7 +143,7 @@ class GameState extends BaseGameState
      * @param  int  $columns  Number of columns (default: 7)
      * @param  int  $rows  Number of rows (default: 6)
      * @param  int  $connectCount  Number to connect to win (default: 4)
-     * @return self New immutable game state instance
+     * @return static New immutable game state instance
      */
     public static function createNew(
         string $playerOneUlid,
@@ -169,7 +169,7 @@ class GameState extends BaseGameState
             ),
         ];
 
-        return new self(
+        return new static(
             players: $players,
             currentPlayerUlid: $playerOneUlid,
             winnerUlid: null,
@@ -195,7 +195,7 @@ class GameState extends BaseGameState
      * ```
      *
      * @param  array<string, mixed>  $stateData  Associative array from database JSON
-     * @return self Restored immutable game state instance
+     * @return static Restored immutable game state instance
      */
     public static function fromArray(array $stateData): static
     {
@@ -214,7 +214,7 @@ class GameState extends BaseGameState
             ? GameStatus::from($stateData['status'])
             : GameStatus::ACTIVE;
 
-        return new self(
+        return new static(
             players: $players,
             currentPlayerUlid: $stateData['current_player_ulid'] ?? null,
             winnerUlid: $stateData['winner_ulid'] ?? null,
@@ -321,7 +321,7 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withDiscAt(int $row, int $column, string $playerUlid): static
+    public function withDiscAt(int $row, int $column, string $playerUlid): self
     {
         $newBoard = $this->board;
         $newBoard[$row][$column] = $playerUlid;
@@ -343,7 +343,7 @@ class GameState extends BaseGameState
     /**
      * Create a new state with the turn switched to the other player.
      *
-     * @return self
+     * @return static
      */
     public function withNextPlayer(): static
     {
@@ -357,7 +357,7 @@ class GameState extends BaseGameState
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
         $nextPlayerUlid = $playerUlids[$nextIndex];
 
-        return new self(
+        return new static(
             players: $this->players,
             currentPlayerUlid: $nextPlayerUlid,
             winnerUlid: $this->winnerUlid,
@@ -375,11 +375,11 @@ class GameState extends BaseGameState
      * Create a new state with updated phase.
      *
      * @param  GamePhase  $phase  New phase
-     * @return self
+     * @return static
      */
     public function withPhase(GamePhase $phase): static
     {
-        return new self(
+        return new static(
             players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: $this->winnerUlid,
@@ -397,11 +397,11 @@ class GameState extends BaseGameState
      * Create a new state with updated status.
      *
      * @param  GameStatus  $status  New status
-     * @return self
+     * @return static
      */
     public function withStatus(GameStatus $status): static
     {
-        return new self(
+        return new static(
             players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: $this->winnerUlid,
@@ -418,11 +418,11 @@ class GameState extends BaseGameState
     /**
      * Create a new state with a winner set.
      *
-     * @return self
+     * @return static
      */
     public function withWinner(string $winnerUlid): static
     {
-        return new self(
+        return new static(
             players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: $winnerUlid,
@@ -441,7 +441,7 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withDraw(): static
+    public function withDraw(): self
     {
         return new self(
             players: $this->players,
@@ -460,7 +460,7 @@ class GameState extends BaseGameState
     /**
      * Create a new state with a completely new board.
      */
-    public function withBoard(array $newBoard): static
+    public function withBoard(array $newBoard): self
     {
         return new self(
             players: $this->players,

@@ -6,22 +6,24 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PointLedger extends Model
+class Point extends Model
 {
     use HasFactory;
+
+    protected $table = 'points';
 
     protected $fillable = [
         'user_id',
         'source_type',
         'source_id',
-        'points',
-        'balance_after',
+        'change',
+        'new_total',
         'description',
     ];
 
     protected $casts = [
-        'points' => 'integer',
-        'balance_after' => 'integer',
+        'change' => 'integer',
+        'new_total' => 'integer',
     ];
 
     // Boot method for model events
@@ -29,16 +31,16 @@ class PointLedger extends Model
     {
         parent::boot();
 
-        // Calculate balance_after when creating a new ledger entry
-        static::creating(function ($ledger) {
-            // Get the most recent ledger entry for this user
-            $previousEntry = static::where('user_id', $ledger->user_id)
+        // Calculate new_total when creating a new ledger entry
+        static::creating(function ($point) {
+            // Get the most recent point ledger entry for this user
+            $previousEntry = static::where('user_id', $point->user_id)
                 ->orderBy('id', 'desc')
                 ->first();
 
-            // Calculate the new balance
-            $previousBalance = $previousEntry ? $previousEntry->balance_after : 0;
-            $ledger->balance_after = $previousBalance + $ledger->points;
+            // Calculate the new total
+            $previousTotal = $previousEntry ? $previousEntry->new_total : 0;
+            $point->new_total = $previousTotal + $point->change;
         });
     }
 

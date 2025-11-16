@@ -8,7 +8,7 @@ use App\Models\Content\Avatar;
 use App\Models\Game\Player;
 use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
-use App\Models\Gamification\PointLedger;
+use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -74,9 +74,9 @@ class User extends Authenticatable
         return $this->hasMany(Quota::class);
     }
 
-    public function pointLedgers()
+    public function points()
     {
-        return $this->hasMany(PointLedger::class);
+        return $this->hasMany(Point::class);
     }
 
     public function globalRank()

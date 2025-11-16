@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('point_ledgers', function (Blueprint $table) {
+        Schema::create('points', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
 
             // Polymorphic relation to source (e.g., Game, Badge)
             $table->morphs('source');
 
-            $table->integer('points')->comment('Positive (award) or negative (deduction)');
-            $table->integer('balance_after')->index()->comment('Running balance after this transaction');
+            $table->integer('change')->comment('Positive (award) or negative (deduction)');
+            $table->integer('new_total')->index()->comment('Running balance after this transaction');
             $table->string('description', 100);
             $table->timestamps();
         });

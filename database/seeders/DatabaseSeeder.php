@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AvatarSeeder::class,
             ClientSeeder::class,
             RoleSeeder::class,
+            PermissionSeeder::class,
             BadgeSeeder::class,
             ModeSeeder::class,
         ]);

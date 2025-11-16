@@ -12,8 +12,9 @@ return new class extends Migration
             $table->id();
             $table->ulid('ulid')->unique()->index();
             $table->string('title_slug', 50)->index();
+            $table->foreignId('mode_id')->constrained('modes');
             $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
-            $table->foreignId('created_by_user_id')->nullable()->constrained('users');
+            $table->foreignId('creator_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
             $table->integer('turn_number')->default(0);
             $table->json('game_state');
@@ -31,7 +32,7 @@ return new class extends Migration
             
             // Composite indexes for common queries
             $table->index(['status', 'created_at']);
-            $table->index(['created_by_user_id', 'status']);
+            $table->index(['creator_id', 'status']);
             $table->index('created_at');
         });
     }

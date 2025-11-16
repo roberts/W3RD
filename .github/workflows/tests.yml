@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -27,7 +27,7 @@ jobs:
           coverage: xdebug
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
@@ -47,8 +47,44 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      - name: Create Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Configure Database for Testing
+        run: |
+          sed -i 's/DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env
+          sed -i 's|DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|' .env
+
+      - name: Run Migrations
+        run: php artisan migrate --force
+
       - name: Build Assets
         run: npm run build
 
       - name: Run Tests
-        run: ./vendor/bin/pest
+        run: composer test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Application Server
+        run: php artisan serve --host=127.0.0.1 --port=8000 &
+
+      - name: Wait for Server
+        run: |
+          timeout 30 bash -c 'until curl -s http://127.0.0.1:8000 > /dev/null; do sleep 1; done'
+
+      - name: Run Browser Tests
+        run: composer test-browser
+        env:
+          APP_URL: http://127.0.0.1:8000
+
+      - name: Upload Screenshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-screenshots
+          path: tests/Browser/Screenshots/
+          retention-days: 7

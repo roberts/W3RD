@@ -1,0 +1,230 @@
+```yaml
+openapi: 3.0.0
+info:
+  title: Lobby and Matchmaking API
+  version: 1.0.0
+  description: API for creating and managing game lobbies and using the public matchmaking system.
+
+paths:
+  /api/v1/games/quickplay:
+    post:
+      summary: Join the public matchmaking queue
+      tags:
+        - Quickplay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - game_title
+              properties:
+                game_title:
+                  type: string
+                  example: "validate-four"
+                game_mode:
+                  type: string
+                  nullable: true
+                  example: "blitz"
+      responses:
+        '202':
+          description: Successfully joined the queue.
+        '429':
+          description: User is on a matchmaking cooldown.
+    delete:
+      summary: Leave the public matchmaking queue
+      tags:
+        - Quickplay
+      responses:
+        '204':
+          description: Successfully left the queue.
+
+  /api/v1/games/quickplay/accept:
+    post:
+      summary: Accept a found match
+      tags:
+        - Quickplay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - match_id
+              properties:
+                match_id:
+                  type: string
+                  description: The temporary ID for the match confirmation.
+      responses:
+        '202':
+          description: Acceptance registered. Waiting for opponent.
+        '404':
+          description: Match confirmation has expired.
+
+  /api/v1/games/lobbies:
+    get:
+      summary: List all public lobbies
+      tags:
+        - Lobbies
+      responses:
+        '200':
+          description: A list of public lobbies.
+    post:
+      summary: Create a new lobby
+      tags:
+        - Lobbies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                game_title:
+                  type: string
+                  example: "validate-four"
+                game_mode:
+                  type: string
+                  nullable: true
+                  example: "blitz"
+                is_public:
+                  type: boolean
+                  example: false
+                min_players:
+                  type: integer
+                  example: 2
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  example: "2025-12-01T20:00:00Z"
+                invitees:
+                  type: array
+                  items:
+                    type: integer
+                  example: [2, 3, 4]
+      responses:
+        '201':
+          description: Lobby created successfully.
+
+  /api/v1/games/lobbies/{lobby_ulid}:
+    get:
+      summary: Get details of a specific lobby
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lobby details.
+    delete:
+      summary: Cancel a lobby (Host only)
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Lobby cancelled.
+
+  /api/v1/games/lobbies/{lobby_ulid}/players:
+    post:
+      summary: Invite a player to a lobby (Host only)
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 3
+      responses:
+        '201':
+          description: Player invited.
+
+  /api/v1/games/lobbies/{lobby_ulid}/players/{user_id}:
+    put:
+      summary: Respond to a lobby invitation
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          description: The user ID of the player responding.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [accepted, declined]
+                  example: accepted
+      responses:
+        '200':
+          description: Response recorded.
+    delete:
+      summary: Kick a player from a lobby (Host only)
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          description: The user ID of the player to kick.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Player kicked.
+
+  /api/v1/games/lobbies/{lobby_ulid}/ready-check:
+    post:
+      summary: Initiate a ready check (Host only)
+      tags:
+        - Lobbies
+      parameters:
+        - name: lobby_ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Ready check initiated.
+```

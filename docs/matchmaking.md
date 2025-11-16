@@ -1,72 +1,79 @@
-# ♟️ Public Matchmaking Architecture
+# ♟️ Multiplayer Architecture: Quickplay & Lobbies
 
-This document details the architecture for an intelligent public matchmaking queue, designed to be fast, fair, and engaging.
+This document details the architecture for the platform's multiplayer systems, designed to be fast, flexible, and engaging. It covers two main components: the **Quickplay** system for automated public matchmaking and the **Lobby** system for user-created private and public games.
 
 ---
 
-## 1. Core Concepts & Technology
+## 1. Quickplay (Public Matchmaking)
+
+The Quickplay system is designed to get players into a game against a suitable opponent as quickly as possible.
+
+### 1.1. Core Concepts & Technology
 
 *   **Primary Goal:** Automatically pair users with suitable opponents (human or AI) quickly, while preventing repeat matchups and providing a seamless user experience.
-*   **Core Technology:** **Redis**. Its speed is essential for this real-time feature. We will use three main data structures:
-    1.  **Sorted Sets:** For the main queue, ordered by player level. (`matchmaking:{game_title}` where game_title is a GameTitle enum value)
-    2.  **Hashes:** To store the timestamp when a user joins the queue. (`matchmaking:timestamps`)
-    3.  **Lists:** To maintain a short-term memory of a user's recent opponents. (`recent_opponents:{user_id}`)
+*   **Core Technology:** **Redis**. Its speed is essential for this real-time feature. We will use several data structures:
+    1.  **Sorted Sets:** For the main queue, ordered by player level. (`quickplay:{game_title}:{game_mode}` where game_mode is optional).
+    2.  **Hashes:** To store user join timestamps (`quickplay:timestamps`) and to manage match confirmations (`quickplay:confirm:{match_id}`).
+    3.  **Lists:** To maintain a short-term memory of a user's recent opponents (`recent_opponents:{user_id}`).
+    4.  **Keys with TTL:** For temporary cooldown penalties (`cooldown:quickplay:{user_id}`).
+
+### 1.2. The Quickplay Flow
+
+This flow is orchestrated by a frequently-run scheduled job (`ProcessQuickplayQueue`).
+
+#### Step 1: User Enters the Queue
+
+*   **Endpoint:** `POST /v1/games/quickplay`
+*   **Body:** `{ "game_title": "chess", "game_mode": "blitz" }` (game_mode is optional).
+*   **Logic:** The user is added to the appropriate Redis sorted set, and their join time is recorded.
+
+#### Step 2: The Matchmaking Job Executes
+
+The job runs every 5-10 seconds, finds a suitable opponent (human or AI), and avoids recent opponents.
+
+*   **AI Fallback:** If a player waits over 30 seconds, the system seeks an AI opponent via `SchedulingService->findAvailableAgent()`.
+
+#### Step 3: "Accept Game" Confirmation Flow
+
+1.  **Game Found Event:** The job dispatches a `GameFound` event to both users.
+2.  **Confirmation:** Users accept by sending a request to `POST /v1/games/quickplay/accept`.
+3.  **Game Creation:** Once both users accept, the `Game` record is created, and a `GameStarted` event is broadcast.
+4.  **Dodge Penalty:** Failing to accept results in a temporary cooldown that prevents re-queuing. The penalty escalates for repeat offenses (30s, 2m, 5m).
 
 ---
 
-## 2. The Matchmaking Flow
+## 2. Lobby System (Private & Public Games)
 
-This flow is orchestrated by a frequently-run scheduled job (`ProcessMatchmakingQueue`).
+The Lobby system provides a persistent, flexible way for players to organize their own games.
 
-### Step 1: User Enters the Queue
+### 2.1. Core Concepts & Technology
 
-*   **Endpoint:** `POST /v1/matchmaking/queue`
-*   **Body:** `{ "game_title": "validate-four" }` (accepts GameTitle enum values)
-*   **Logic:**
-    1.  The user's `level` for the specified game title is retrieved.
-    2.  The user is added to the game title's sorted set: `ZADD matchmaking:validate-four <user_level> <user_id>`
-    3.  The user's join time is recorded: `HSET matchmaking:timestamps <user_id> <current_timestamp>`
+*   **Primary Goal:** Allow users to create, schedule, and manage private (invite-only) and public (discoverable) game sessions.
+*   **Core Technology:** **Database (MySQL/PostgreSQL)**. Persistence is key, as lobbies can exist for minutes, hours, or days.
+*   **Database Schema:**
+    *   `lobbies`: Stores the core lobby data (host, game title, mode, public/private status, schedule, etc.).
+    *   `lobby_players`: A pivot table linking users to lobbies and tracking their acceptance status (`pending`, `accepted`, `declined`).
 
-### Step 2: The Matchmaking Job Executes
+### 2.2. The Lobby Flow
 
-The job runs every 5-10 seconds and performs the following logic for each game title queue.
+#### Step 1: Lobby Creation
 
-1.  **Get a Player:** Fetch the player who has been waiting the longest (`PlayerA`).
-2.  **Check Wait Time:** Retrieve `PlayerA`'s join timestamp.
-3.  **Agent Fallback Logic (Wait > 30s):**
-    *   If `PlayerA` has been waiting over 30 seconds, the system stops looking for human players and immediately seeks an AI opponent.
-    *   It calls `SchedulingService->findAvailableAgent()`, passing a list of excluded user IDs (the player's own ID and their recent opponents).
-    *   If a suitable agent is found, a game is created. The agent's `User` model is used, making it indistinguishable from a human player to the client.
-    *   If no agent is free, `PlayerA` remains in the queue for the next cycle.
-4.  **Human Matchmaking Logic (Wait < 30s):**
-    *   The system fetches `PlayerA`'s recent opponents list from Redis: `LRANGE recent_opponents:{playerA_id} 0 -1`.
-    *   It then searches the queue for another player (`PlayerB`) with a similar level.
-    *   **Validation:** It checks if `PlayerB` is on `PlayerA`'s recent list, and vice-versa. If there's a conflict, it discards `PlayerB` and looks for the next candidate.
-    *   If a valid human opponent is found, they proceed to the "Accept Game" flow.
+*   **Endpoint:** `POST /v1/games/lobbies`
+*   **Body:** Includes `game_title`, `game_mode` (optional), `is_public`, `min_players`, `scheduled_at` (optional), and a list of `invitees` for private lobbies.
+*   **Logic:** Creates the `Lobby` and `LobbyPlayer` records. For private lobbies, a `LobbyInvitation` event is sent to each invitee.
 
-### Step 3: "Accept Game" Confirmation Flow
+#### Step 2: Managing and Joining a Lobby
 
-To prevent AFK players from starting games, a confirmation step is required.
+*   **List Public Lobbies:** `GET /v1/games/lobbies`
+*   **View a Lobby:** `GET /v1/games/lobbies/{lobby_ulid}`
+*   **Respond to Invite:** `PUT /v1/games/lobbies/{lobby_ulid}/players/{user_id}` with a body of `{ "status": "accepted" }`.
+*   **Host Management:** The host can kick players (`DELETE /.../players/{user_id}`) and initiate a ready check (`POST /.../ready-check`).
 
-1.  **Game Found Event:** When a valid pair is identified, the job does **not** create the game. Instead, it dispatches a `GameFound` event via Reverb to both users.
-2.  **Client-Side Prompt:** Both clients receive the event and display an "Accept Game" prompt with a 10-second countdown.
-3.  **Confirmation:** If a user accepts, the client sends a request to a new endpoint: `POST /v1/matchmaking/accept`. The server uses Redis to track that the user has accepted.
-4.  **Game Creation:** Once the server has received acceptances from **both** users, it finalizes the process:
-    *   Creates the `Game` record in the database.
-    *   Removes both users from the matchmaking queue.
-    *   Updates their `recent_opponents` lists in Redis.
-    *   Broadcasts a `GameCreated` event with the game details, navigating the clients to the game screen.
-5.  **Failure/Decline:** If one user declines or their 10-second timer expires, they are removed from the queue. The other user is placed back at the front of the queue to find a new opponent on the next job cycle.
+#### Step 3: Game Start (The Handoff)
 
----
+The system waits for the start conditions to be met.
 
-## 3. Queue Dodge Penalty
+*   **For Immediate Games:** When the `min_players` count is met by accepted players, the system creates the `Game` record.
+*   **For Scheduled Games:** A scheduled job (`ProcessScheduledLobbies`) checks at the `scheduled_at` time. If conditions are met, it creates the `Game`.
+*   **Handoff:** In both cases, a `GameStarted` event is broadcast to all players, navigating them to the game screen. The lobby's status is marked as `completed`.
 
-To discourage players from repeatedly declining games to "fish" for a preferred opponent, a penalty system is implemented.
-
-*   **Concept:** A user who declines a game or fails to accept in time receives a temporary matchmaking cooldown.
-*   **Implementation:**
-    *   A Redis key with a TTL (Time To Live) is used (e.g., `cooldown:matchmaking:{user_id}`).
-    *   When a user "dodges," the server sets this key with an expiry (e.g., 60 seconds).
-    *   The `POST /v1/matchmaking/queue` endpoint will first check if this key exists. If it does, the request is rejected with a "You are on a matchmaking cooldown" message until the key expires.
-    *   The cooldown duration can be increased for repeat offenders.

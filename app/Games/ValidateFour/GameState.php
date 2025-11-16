@@ -426,7 +426,7 @@ class GameState extends BaseGameState
             players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: $winnerUlid,
-            phase: GamePhase::FINISHED,
+            phase: GamePhase::COMPLETED,
             status: GameStatus::COMPLETED,
             board: $this->board,
             columns: $this->columns,
@@ -443,11 +443,11 @@ class GameState extends BaseGameState
      */
     public function withDraw(): self
     {
-        return new self(
+        return new static(
             players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: null,
-            phase: GamePhase::FINISHED,
+            phase: GamePhase::COMPLETED,
             status: GameStatus::COMPLETED,
             board: $this->board,
             columns: $this->columns,

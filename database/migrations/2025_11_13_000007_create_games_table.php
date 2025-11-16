@@ -13,7 +13,7 @@ return new class extends Migration
             $table->ulid('ulid')->unique()->index();
             $table->string('title_slug', 50)->index();
             $table->foreignId('mode_id')->constrained('modes');
-            $table->enum('status', ['pending', 'active', 'finished'])->default('pending');
+            $table->enum('status', ['pending', 'active', 'completed'])->default('pending');
             $table->foreignId('creator_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
             $table->integer('turn_number')->default(0);

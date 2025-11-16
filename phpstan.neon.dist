@@ -34,9 +34,6 @@ parameters:
         # Composite primary key - Laravel doesn't support this natively
         - '#Property App\\Models\\Gamification\\UserTitleLevel::\$primaryKey.*does not accept default value#'
         
-        # Game status completed vs finished - these are legacy inconsistencies
-        - '#Property App\\Models\\Game\\Game::\$status.*does not accept.*completed#'
-        
         # GameTitleContract method signatures - interface evolution issues
         - '#Method App\\Interfaces\\GameTitleContract::(getActionDeadline|validateAction|applyAction|checkEndCondition|getAvailableActions)\(\) invoked with#'
         

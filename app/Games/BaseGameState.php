@@ -113,7 +113,7 @@ abstract class BaseGameState
      */
     public function isFinished(): bool
     {
-        return $this->phase === GamePhase::FINISHED || $this->status->isFinished();
+        return $this->phase === GamePhase::COMPLETED || $this->status->isFinished();
     }
 
     /**

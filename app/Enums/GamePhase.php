@@ -15,7 +15,7 @@ namespace App\Enums;
  * - ACTIVE: Main gameplay phase
  * - BETTING: Poker betting rounds (preflop, flop, turn, river)
  * - RESOLUTION: End-of-round scoring or cleanup
- * - FINISHED: Game has concluded
+ * - COMPLETED: Game has concluded
  */
 enum GamePhase: string
 {
@@ -23,7 +23,7 @@ enum GamePhase: string
     case ACTIVE = 'active';
     case BETTING = 'betting';
     case RESOLUTION = 'resolution';
-    case FINISHED = 'finished';
+    case COMPLETED = 'completed';
 
     /**
      * Get a human-readable label for the phase.
@@ -35,7 +35,7 @@ enum GamePhase: string
             self::ACTIVE => 'Active',
             self::BETTING => 'Betting',
             self::RESOLUTION => 'Resolution',
-            self::FINISHED => 'Finished',
+            self::COMPLETED => 'Completed',
         };
     }
 
@@ -49,7 +49,7 @@ enum GamePhase: string
             self::ACTIVE => 'Main gameplay in progress',
             self::BETTING => 'Betting or bidding round',
             self::RESOLUTION => 'Scoring and end-of-round resolution',
-            self::FINISHED => 'Game has concluded',
+            self::COMPLETED => 'Game has concluded',
         };
     }
 }

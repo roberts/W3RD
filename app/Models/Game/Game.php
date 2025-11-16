@@ -2,6 +2,7 @@
 
 namespace App\Models\Game;
 
+use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -32,6 +33,7 @@ class Game extends Model
 
     protected $casts = [
         'title_slug' => GameTitle::class,
+        'status' => GameStatus::class,
         'game_state' => 'array',
         'turn_number' => 'integer',
         'mode_id' => 'integer',
@@ -78,11 +80,11 @@ class Game extends Model
     // Helper methods
     public function isFinished(): bool
     {
-        return $this->status === 'finished';
+        return $this->status === GameStatus::COMPLETED;
     }
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === GameStatus::ACTIVE;
     }
 }

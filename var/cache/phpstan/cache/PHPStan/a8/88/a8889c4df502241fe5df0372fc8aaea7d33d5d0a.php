@@ -87,7 +87,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php' => 
     array (
-      0 => '772e1325b15944b1c6ef7d0908230a468c2293b8',
+      0 => '2c606bd1bfd140cdc9a467ffb1a83aa765e852a6',
       1 => 
       array (
         0 => 'app\\http\\controllers\\api\\v1\\gameactioncontroller',
@@ -393,7 +393,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     '/home/drewroberts/Code/protocol/app/Models/Game/Game.php' => 
     array (
-      0 => 'c430b586ff93d31f5445a5cedd3c832c2a046b71',
+      0 => 'a6dfcbcf92f3ca7526707785fe1c2e67b8b5576c',
       1 => 
       array (
         0 => 'app\\models\\game\\game',
@@ -655,7 +655,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     '/home/drewroberts/Code/protocol/app/Enums/GamePhase.php' => 
     array (
-      0 => '661e992235bf581fff759bf9ab8705f97cb200bb',
+      0 => '4ee28e922b0a62cfee522986e365964922759dfc',
       1 => 
       array (
         0 => 'app\\enums\\gamephase',
@@ -871,7 +871,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     '/home/drewroberts/Code/protocol/app/Games/ValidateFour/GameState.php' => 
     array (
-      0 => '8d8fc9ad2b8a738a7f6bc84ee444c18bc6814816',
+      0 => 'c3de2d88bc6736b7cf8043b107b8d04099a50715',
       1 => 
       array (
         0 => 'app\\games\\validatefour\\gamestate',
@@ -932,7 +932,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     '/home/drewroberts/Code/protocol/app/Games/BaseGameState.php' => 
     array (
-      0 => '0aa1e22a5360915f8aa3c22a754d9796bf9b87fd',
+      0 => 'db3b3481b2dbc8fe065cbaea663bf61180c9d3a7',
       1 => 
       array (
         0 => 'app\\games\\basegamestate',

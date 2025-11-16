@@ -3251,6 +3251,23 @@ return [
       ),
        'fixedErrorDiff' => NULL,
     )),
+    6 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Unsafe usage of new static().',
+       'file' => '/home/drewroberts/Code/protocol/app/Games/ValidateFour/GameState.php',
+       'line' => 446,
+       'canBeIgnored' => true,
+       'filePath' => '/home/drewroberts/Code/protocol/app/Games/ValidateFour/GameState.php',
+       'traitFilePath' => NULL,
+       'tip' => 'See: https://phpstan.org/blog/solving-phpstan-error-unsafe-usage-of-new-static',
+       'nodeLine' => 446,
+       'nodeType' => 'PhpParser\\Node\\Expr\\New_',
+       'identifier' => 'new.static',
+       'metadata' => 
+      array (
+      ),
+       'fixedErrorDiff' => NULL,
+    )),
   ),
   '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/AuthController.php' => 
   array (
@@ -3278,12 +3295,12 @@ return [
     \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Method App\\Interfaces\\GameTitleContract::getActionDeadline() invoked with 1 parameter, 2 required.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 69,
+       'line' => 70,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => NULL,
-       'nodeLine' => 69,
+       'nodeLine' => 70,
        'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
        'identifier' => 'arguments.count',
        'metadata' => 
@@ -3293,31 +3310,14 @@ return [
     )),
     1 => 
     \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Property App\\Models\\Game\\Game::$status (\'active\'|\'finished\'|\'pending\') does not accept \'completed\'.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 84,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 84,
-       'nodeType' => 'PHPStan\\Node\\PropertyAssignNode',
-       'identifier' => 'assign.propertyType',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    2 => 
-    \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Access to an undefined property App\\Models\\Game\\Game::$finish_reason.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 85,
+       'line' => 86,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => 'Learn more: <fg=cyan>https://phpstan.org/blog/solving-phpstan-access-to-undefined-property</>',
-       'nodeLine' => 85,
+       'nodeLine' => 86,
        'nodeType' => 'PHPStan\\Node\\PropertyAssignNode',
        'identifier' => 'property.notFound',
        'metadata' => 
@@ -3325,16 +3325,33 @@ return [
       ),
        'fixedErrorDiff' => NULL,
     )),
-    3 => 
+    2 => 
     \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Method App\\Interfaces\\GameTitleContract::validateAction() invoked with 1 parameter, 2 required.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 139,
+       'line' => 140,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => NULL,
-       'nodeLine' => 139,
+       'nodeLine' => 140,
+       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
+       'identifier' => 'arguments.count',
+       'metadata' => 
+      array (
+      ),
+       'fixedErrorDiff' => NULL,
+    )),
+    3 => 
+    \PHPStan\Analyser\Error::__set_state(array(
+       'message' => 'Method App\\Interfaces\\GameTitleContract::applyAction() invoked with 1 parameter, 2 required.',
+       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
+       'line' => 160,
+       'canBeIgnored' => true,
+       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
+       'traitFilePath' => NULL,
+       'tip' => NULL,
+       'nodeLine' => 160,
        'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
        'identifier' => 'arguments.count',
        'metadata' => 
@@ -3344,14 +3361,14 @@ return [
     )),
     4 => 
     \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::applyAction() invoked with 1 parameter, 2 required.',
+       'message' => 'Method App\\Interfaces\\GameTitleContract::checkEndCondition() invoked with 0 parameters, 1 required.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 159,
+       'line' => 163,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => NULL,
-       'nodeLine' => 159,
+       'nodeLine' => 163,
        'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
        'identifier' => 'arguments.count',
        'metadata' => 
@@ -3361,48 +3378,14 @@ return [
     )),
     5 => 
     \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::checkEndCondition() invoked with 0 parameters, 1 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 162,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 162,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    6 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Property App\\Models\\Game\\Game::$status (\'active\'|\'finished\'|\'pending\') does not accept \'completed\'.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 164,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 164,
-       'nodeType' => 'PHPStan\\Node\\PropertyAssignNode',
-       'identifier' => 'assign.propertyType',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    7 => 
-    \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Access to an undefined property App\\Models\\Game\\Game::$finish_reason.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 165,
+       'line' => 166,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => 'Learn more: <fg=cyan>https://phpstan.org/blog/solving-phpstan-access-to-undefined-property</>',
-       'nodeLine' => 165,
+       'nodeLine' => 166,
        'nodeType' => 'PHPStan\\Node\\PropertyAssignNode',
        'identifier' => 'property.notFound',
        'metadata' => 
@@ -3410,16 +3393,16 @@ return [
       ),
        'fixedErrorDiff' => NULL,
     )),
-    8 => 
+    6 => 
     \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Method App\\Interfaces\\GameTitleContract::getAvailableActions() invoked with 1 parameter, 2 required.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 259,
+       'line' => 260,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => NULL,
-       'nodeLine' => 259,
+       'nodeLine' => 260,
        'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
        'identifier' => 'arguments.count',
        'metadata' => 
@@ -3427,16 +3410,16 @@ return [
       ),
        'fixedErrorDiff' => NULL,
     )),
-    9 => 
+    7 => 
     \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Method App\\Interfaces\\GameTitleContract::getActionDeadline() invoked with 1 parameter, 2 required.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 262,
+       'line' => 263,
        'canBeIgnored' => true,
        'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'traitFilePath' => NULL,
        'tip' => NULL,
-       'nodeLine' => 262,
+       'nodeLine' => 263,
        'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
        'identifier' => 'arguments.count',
        'metadata' => 
@@ -4034,7 +4017,7 @@ return [
       0 => 
       array (
         0 => 'broadcast',
-        1 => 204,
+        1 => 205,
       ),
     ),
   ),
@@ -4744,7 +4727,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Enums/GamePhase.php' => 
   array (
-    'fileHash' => '661e992235bf581fff759bf9ab8705f97cb200bb',
+    'fileHash' => '4ee28e922b0a62cfee522986e365964922759dfc',
     'dependentFiles' => 
     array (
       0 => '/home/drewroberts/Code/protocol/app/Games/BaseGameState.php',
@@ -4759,6 +4742,8 @@ return [
     array (
       0 => '/home/drewroberts/Code/protocol/app/Games/BaseGameState.php',
       1 => '/home/drewroberts/Code/protocol/app/Games/ValidateFour/GameState.php',
+      2 => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
+      3 => '/home/drewroberts/Code/protocol/app/Models/Game/Game.php',
     ),
   ),
   '/home/drewroberts/Code/protocol/app/Enums/GameTitle.php' => 
@@ -4806,7 +4791,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Games/BaseGameState.php' => 
   array (
-    'fileHash' => '0aa1e22a5360915f8aa3c22a754d9796bf9b87fd',
+    'fileHash' => 'db3b3481b2dbc8fe065cbaea663bf61180c9d3a7',
     'dependentFiles' => 
     array (
       0 => '/home/drewroberts/Code/protocol/app/Games/BaseBoardGameTitle.php',
@@ -4900,7 +4885,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Games/ValidateFour/GameState.php' => 
   array (
-    'fileHash' => '8d8fc9ad2b8a738a7f6bc84ee444c18bc6814816',
+    'fileHash' => 'c3de2d88bc6736b7cf8043b107b8d04099a50715',
     'dependentFiles' => 
     array (
       0 => '/home/drewroberts/Code/protocol/app/Games/ValidateFour/BaseValidateFour.php',
@@ -4976,7 +4961,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php' => 
   array (
-    'fileHash' => '772e1325b15944b1c6ef7d0908230a468c2293b8',
+    'fileHash' => '2c606bd1bfd140cdc9a467ffb1a83aa765e852a6',
     'dependentFiles' => 
     array (
     ),
@@ -5211,7 +5196,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Models/Game/Game.php' => 
   array (
-    'fileHash' => 'c430b586ff93d31f5445a5cedd3c832c2a046b71',
+    'fileHash' => 'a6dfcbcf92f3ca7526707785fe1c2e67b8b5576c',
     'dependentFiles' => 
     array (
       0 => '/home/drewroberts/Code/protocol/app/Events/GameActionProcessed.php',
@@ -5521,7 +5506,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/database/migrations/2025_11_13_000007_create_games_table.php' => 
   array (
-    'fileHash' => '1d8d0058b9873adad746ecffa244b1f1f876f956',
+    'fileHash' => '9ba9542cb6630a268eff0be994ba62822aa50f02',
     'dependentFiles' => 
     array (
     ),
@@ -6050,7 +6035,7 @@ return [
  * - ACTIVE: Main gameplay phase
  * - BETTING: Poker betting rounds (preflop, flop, turn, river)
  * - RESOLUTION: End-of-round scoring or cleanup
- * - FINISHED: Game has concluded
+ * - COMPLETED: Game has concluded
  */',
          'namespace' => 'App\\Enums',
          'uses' => 
@@ -6091,8 +6076,8 @@ return [
         )),
         4 => 
         \PHPStan\Dependency\ExportedNode\ExportedEnumCaseNode::__set_state(array(
-           'name' => 'FINISHED',
-           'value' => '\'finished\'',
+           'name' => 'COMPLETED',
+           'value' => '\'completed\'',
            'phpDoc' => NULL,
         )),
         5 => 
@@ -12270,6 +12255,7 @@ return [
              'namespace' => 'App\\Http\\Controllers\\Api\\V1',
              'uses' => 
             array (
+              'gamestatus' => 'App\\Enums\\GameStatus',
               'gameactionprocessed' => 'App\\Events\\GameActionProcessed',
               'controller' => 'App\\Http\\Controllers\\Controller',
               'game' => 'App\\Models\\Game\\Game',
@@ -12333,6 +12319,7 @@ return [
              'namespace' => 'App\\Http\\Controllers\\Api\\V1',
              'uses' => 
             array (
+              'gamestatus' => 'App\\Enums\\GameStatus',
               'gameactionprocessed' => 'App\\Events\\GameActionProcessed',
               'controller' => 'App\\Http\\Controllers\\Controller',
               'game' => 'App\\Models\\Game\\Game',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
@@ -48,7 +49,7 @@ class GameActionController extends Controller
         }
 
         // Check if game is still active
-        if ($game->status !== 'active') {
+        if ($game->status !== GameStatus::ACTIVE) {
             return response()->json([
                 'error' => 'Invalid game state',
                 'message' => 'This game is not active.',
@@ -81,7 +82,7 @@ class GameActionController extends Controller
             $outcome = $timeoutHandler->handleTimeout($game, $mode->getGameState(), $mode->getGameState()->currentPlayerUlid);
 
             if ($outcome->isFinished) {
-                $game->status = 'completed';
+                $game->status = GameStatus::COMPLETED;
                 $game->finish_reason = $outcome->reason;
 
                 if ($outcome->winnerUlid) {
@@ -161,7 +162,7 @@ class GameActionController extends Controller
         // Check for end condition using new GameOutcome
         $outcome = $mode->checkEndCondition();
         if ($outcome->isFinished) {
-            $game->status = 'completed';
+            $game->status = GameStatus::COMPLETED;
             $game->finish_reason = $outcome->reason;
 
             if ($outcome->winnerUlid) {

@@ -67,7 +67,7 @@ class GameActionController extends Controller
         $gameState = $stateClass::fromArray($game->game_state ?? []);
 
         // Check if current turn has timed out
-        $deadline = $mode->getActionDeadline($game);
+        $deadline = $mode->getActionDeadline($gameState, $game);
         if (now()->isAfter($deadline)) {
             $penalty = $mode->getTimeoutPenalty();
 
@@ -137,7 +137,7 @@ class GameActionController extends Controller
         }
 
         // Validate the action with rich error feedback
-        $validationResult = $mode->validateAction($action);
+        $validationResult = $mode->validateAction($gameState, $action);
         if (! $validationResult->isValid) {
             // Record failed action for debugging
             $this->actionRecorder->recordFailure(
@@ -157,10 +157,10 @@ class GameActionController extends Controller
         }
 
         // Apply the action
-        $gameState = $mode->applyAction($action);
+        $gameState = $mode->applyAction($gameState, $action);
 
         // Check for end condition using new GameOutcome
-        $outcome = $mode->checkEndCondition();
+        $outcome = $mode->checkEndCondition($gameState);
         if ($outcome->isFinished) {
             $game->status = GameStatus::COMPLETED;
             $game->finish_reason = $outcome->reason;
@@ -256,11 +256,14 @@ class GameActionController extends Controller
             ], 403);
         }
 
+        // Get the current game state
+        $gameState = $mode->getGameState();
+
         // Get available actions from mode
-        $actions = $mode->getAvailableActions($player->ulid);
+        $actions = $mode->getAvailableActions($gameState, $player->ulid);
 
         // Calculate deadline
-        $deadline = $mode->getActionDeadline($game);
+        $deadline = $mode->getActionDeadline($gameState, $game);
 
         return response()->json([
             'available_actions' => $actions,

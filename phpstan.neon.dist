@@ -34,9 +34,6 @@ parameters:
         # Composite primary key - Laravel doesn't support this natively
         - '#Property App\\Models\\Gamification\\UserTitleLevel::\$primaryKey.*does not accept default value#'
         
-        # GameTitleContract method signatures - interface evolution issues
-        - '#Method App\\Interfaces\\GameTitleContract::(getActionDeadline|validateAction|applyAction|checkEndCondition|getAvailableActions)\(\) invoked with#'
-        
         # Enum issues in GameServiceProvider
         - '#Invalid array key type App\\Enums\\GameTitle#'
         - '#Part \$gameTitleSlug \(App\\Enums\\GameTitle\) of encapsed string cannot be cast to string#'

@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
+class Container_0d4aa5f41b extends _PHPStan_e870ac104\Nette\DI\Container
 {
 	protected $tags = [
 		'phpstan.broker.dynamicMethodReturnTypeExtension' => [
@@ -2976,7 +2976,6 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 				'#Access to an undefined property App\\\Models\\\Game\\\Mode::\$handler_class#',
 				'#Access to an undefined property App\\\Models\\\Game\\\Game::\$(mode|finish_reason)#',
 				'#Property App\\\Models\\\Gamification\\\UserTitleLevel::\$primaryKey.*does not accept default value#',
-				'#Method App\\\Interfaces\\\GameTitleContract::(getActionDeadline|validateAction|applyAction|checkEndCondition|getAvailableActions)\(\) invoked with#',
 				'#Invalid array key type App\\\Enums\\\GameTitle#',
 				'#Part \$gameTitleSlug \(App\\\Enums\\\GameTitle\) of encapsed string cannot be cast to string#',
 				'#Call to an undefined method Laravel\\\Socialite\\\Contracts\\\Provider::userFromToken\(\)#',
@@ -5254,7 +5253,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5274,7 +5273,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5297,7 +5296,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5317,7 +5316,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5382,7 +5381,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5440,7 +5439,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -5498,7 +5497,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			private $container;
 
 
-			public function __construct(Container_489d342ea4 $container)
+			public function __construct(Container_0d4aa5f41b $container)
 			{
 				$this->container = $container;
 			}
@@ -8863,7 +8862,7 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 	}
 
 
-	public function createServiceContainer(): Container_489d342ea4
+	public function createServiceContainer(): Container_0d4aa5f41b
 	{
 		return $this;
 	}
@@ -9432,7 +9431,6 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 				'#Access to an undefined property App\\\Models\\\Game\\\Mode::\$handler_class#',
 				'#Access to an undefined property App\\\Models\\\Game\\\Game::\$(mode|finish_reason)#',
 				'#Property App\\\Models\\\Gamification\\\UserTitleLevel::\$primaryKey.*does not accept default value#',
-				'#Method App\\\Interfaces\\\GameTitleContract::(getActionDeadline|validateAction|applyAction|checkEndCondition|getAvailableActions)\(\) invoked with#',
 				'#Invalid array key type App\\\Enums\\\GameTitle#',
 				'#Part \$gameTitleSlug \(App\\\Enums\\\GameTitle\) of encapsed string cannot be cast to string#',
 				'#Call to an undefined method Laravel\\\Socialite\\\Contracts\\\Provider::userFromToken\(\)#',
@@ -9631,32 +9629,21 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 			'cliAutoloadFile' => null,
 			'env' => [
 				'SHELL' => '/usr/bin/bash',
-				'DB_PASSWORD' => '',
-				'MAIL_PORT' => '2525',
 				'COLORTERM' => 'truecolor',
 				'HYPRLAND_CMD' => 'Hyprland',
 				'XDG_CONFIG_DIRS' => '/etc/xdg',
 				'XDG_SESSION_PATH' => '/org/freedesktop/DisplayManager/Session0',
 				'XDG_MENU_PREFIX' => 'hyprland-',
 				'TERM_PROGRAM_VERSION' => '1.105.1',
-				'REDIS_PASSWORD' => 'null',
 				'GUM_CONFIRM_PROMPT_FOREGROUND' => '6',
 				'XDG_BACKEND' => 'wayland',
-				'PHPRC' => '/tmp/7are11v4sslgbgUEtGL',
-				'LOG_LEVEL' => 'debug',
 				'LANGUAGE' => 'C',
-				'REDIS_HOST' => '127.0.0.1',
-				'CACHE_STORE' => 'database',
-				'PHPSTAN_ORIGINAL_INIS' => '/etc/php/php.ini:/etc/php/conf.d/xdebug.ini',
 				'XDG_DATA_HOME' => '/home/drewroberts/.local/share',
-				'APP_FAKER_LOCALE' => 'en_US',
 				'GUM_CONFIRM_SELECTED_BACKGROUND' => '2',
 				'INPUT_METHOD' => 'fcitx',
 				'XCOMPOSEFILE' => '~/.XCompose',
 				'XDG_CONFIG_HOME' => '/home/drewroberts/.config',
-				'APP_LOCALE' => 'en',
 				'OMARCHY_PATH' => '/home/drewroberts/.local/share/omarchy',
-				'AWS_DEFAULT_REGION' => 'us-east-1',
 				'MEMORY_PRESSURE_WRITE' => 'c29tZSAyMDAwMDAgMjAwMDAwMAA=',
 				'XMODIFIERS' => '@@im=fcitx',
 				'LIBVA_DRIVER_NAME' => 'nvidia',
@@ -9665,73 +9652,46 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 				'NO_AT_BRIDGE' => '1',
 				'XCURSOR_SIZE' => '24',
 				'EDITOR' => 'nvim',
-				'MEMCACHED_HOST' => '127.0.0.1',
 				'XDG_SEAT' => 'seat0',
 				'PHP_BINARY' => '/usr/bin/php',
 				'PWD' => '/home/drewroberts/Code/protocol',
-				'SESSION_PATH' => '/',
-				'MAIL_FROM_ADDRESS' => 'mail@gamerprotocol.io',
-				'LOGNAME' => 'drewroberts',
 				'XDG_SESSION_DESKTOP' => 'Hyprland',
+				'LOGNAME' => 'drewroberts',
 				'XDG_SESSION_TYPE' => 'wayland',
-				'VITE_APP_NAME' => 'Gamer Protocol',
 				'SYSTEMD_EXEC_PID' => '1647',
-				'_' => '/usr/bin/php',
+				'_' => 'vendor/bin/phpstan',
 				'VSCODE_GIT_ASKPASS_NODE' => '/opt/visual-studio-code/code',
-				'DB_PORT' => '3306',
 				'TERMINAL' => 'xdg-terminal-exec',
 				'QT_STYLE_OVERRIDE' => 'kvantum',
 				'MOTD_SHOWN' => 'pam',
-				'LINES' => '9',
 				'COMPOSER_BINARY' => '/usr/bin/composer',
-				'MAIL_MAILER' => 'log',
 				'HOME' => '/home/drewroberts',
 				'LANG' => 'en_US.UTF-8',
-				'REDIS_CLIENT' => 'phpredis',
 				'_JAVA_AWT_WM_NONREPARENTING' => '1',
-				'MAIL_USERNAME' => 'null',
 				'XDG_CURRENT_DESKTOP' => 'Hyprland',
-				'FILESYSTEM_DISK' => 'local',
-				'APP_FALLBACK_LOCALE' => 'en',
-				'COLUMNS' => '117',
 				'MEMORY_PRESSURE_WATCH' => '/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/session.slice/wayland-wm@hyprland.desktop.service/memory.pressure',
 				'STARSHIP_SHELL' => 'bash',
-				'APP_KEY' => 'base64:nsKzDNsr8SJUTSxGdZAYXWY7yKQ0UMDDJHP/O2CjLrk=',
 				'WAYLAND_DISPLAY' => 'wayland-1',
 				'__MISE_DIFF' => 'eAFrXpyfk9KwOC+1vGFJQWJJxsSbtvoZ+bmp+ilFqeVF+UmpRSXF+no5+cmJOfrFGYlFqfq5mcWp+pl5xSWJOTnF+nn5Kan6RkZ6RoZ6BvpJmXkAU2Ee5A',
-				'APP_ENV' => 'local',
 				'GIT_ASKPASS' => '/opt/visual-studio-code/resources/app/extensions/git/dist/askpass.sh',
 				'XDG_SEAT_PATH' => '/org/freedesktop/DisplayManager/Seat0',
-				'MAIL_PASSWORD' => 'null',
-				'APP_DEBUG' => 'true',
-				'AWS_SECRET_ACCESS_KEY' => '',
 				'INVOCATION_ID' => '39ac9f490ef34ff9bf2ac1be7066f601',
-				'APP_URL' => 'http://protocol.test',
 				'MANAGERPID' => '1470',
 				'BAT_THEME' => 'ansi',
-				'LOG_STACK' => 'single',
-				'SESSION_ENCRYPT' => 'false',
-				'BCRYPT_ROUNDS' => '12',
 				'CHROME_DESKTOP' => 'code.desktop',
 				'STARSHIP_SESSION_KEY' => '2226017498232673',
-				'UWSM_WAIT_VARNAMES' => 'HYPRLAND_INSTANCE_SIGNATURE',
 				'QT_QPA_PLATFORM' => 'wayland;xcb',
+				'UWSM_WAIT_VARNAMES' => 'HYPRLAND_INSTANCE_SIGNATURE',
 				'__MISE_ORIG_PATH' => '/home/drewroberts/.local/share/mise/installs/node/22.21.0/bin:/home/drewroberts/.local/share/omarchy/bin/:/home/drewroberts/.local/share/../bin:/home/drewroberts/.local/share/../bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/drewroberts/.config/Code/User/globalStorage/github.copilot-chat/debugCommand',
 				'XDG_CACHE_HOME' => '/home/drewroberts/.cache',
-				'DB_USERNAME' => 'root',
 				'VSCODE_GIT_ASKPASS_EXTRA_ARGS' => '',
-				'LOG_DEPRECATIONS_CHANNEL' => 'null',
-				'SHELL_VERBOSITY' => '0',
 				'VSCODE_PYTHON_AUTOACTIVATE_GUARD' => '1',
+				'SHELL_VERBOSITY' => '0',
 				'SDL_IM_MODULE' => 'fcitx',
 				'NVD_BACKEND' => 'direct',
-				'DB_CONNECTION' => 'mysql',
 				'XDG_SESSION_CLASS' => 'user',
 				'TERM' => 'xterm-256color',
-				'APP_MAINTENANCE_DRIVER' => 'file',
-				'DB_HOST' => '127.0.0.1',
 				'USER' => 'drewroberts',
-				'MAIL_SCHEME' => 'null',
 				'GIT_PAGER' => 'cat',
 				'SDL_VIDEODRIVER' => 'wayland',
 				'SUDO_EDITOR' => 'nvim',
@@ -9741,27 +9701,16 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 				'HYPRLAND_INSTANCE_SIGNATURE' => 'unknown_1763087785_151603279',
 				'NOTIFY_SOCKET' => '/run/user/1000/systemd/notify',
 				'DISPLAY' => ':1',
-				'APP_NAME' => 'Gamer Protocol',
 				'SHLVL' => '2',
 				'MOZ_ENABLE_WAYLAND' => '1',
-				'AWS_ACCESS_KEY_ID' => '',
-				'AWS_USE_PATH_STYLE_ENDPOINT' => 'false',
-				'LOG_CHANNEL' => 'stack',
 				'QT_IM_MODULE' => 'fcitx',
 				'XDG_VTNR' => '1',
-				'QUEUE_CONNECTION' => 'database',
 				'XDG_SESSION_ID' => '1',
-				'MAIL_FROM_NAME' => 'Gamer Protocol',
 				'MANAGERPIDFDID' => '1471',
-				'AWS_BUCKET' => '',
-				'REDIS_PORT' => '6379',
 				'XDG_STATE_HOME' => '/home/drewroberts/.local/state',
-				'SESSION_DOMAIN' => 'null',
 				'XDG_RUNTIME_DIR' => '/run/user/1000',
 				'DEBUGINFOD_URLS' => 'https://debuginfod.archlinux.org ',
 				'COMPOSER_ORIGINAL_INIS' => '/etc/php/php.ini:/etc/php/conf.d/xdebug.ini',
-				'BROADCAST_CONNECTION' => 'log',
-				'SESSION_DRIVER' => 'database',
 				'VSCODE_GIT_ASKPASS_MAIN' => '/opt/visual-studio-code/resources/app/extensions/git/dist/askpass-main.js',
 				'JOURNAL_STREAM' => '9:16221',
 				'MISE_SHELL' => 'bash',
@@ -9770,21 +9719,22 @@ class Container_489d342ea4 extends _PHPStan_e870ac104\Nette\DI\Container
 				'PATH' => '/home/drewroberts/Code/protocol/vendor/bin:/home/drewroberts/.local/share/../bin:/home/drewroberts/.config/composer/vendor/bin:/home/drewroberts/.local/share/mise/installs/node/22.21.0/bin:/home/drewroberts/.local/share/omarchy/bin/:/home/drewroberts/.local/share/../bin:/home/drewroberts/.local/share/../bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/drewroberts/.config/Code/User/globalStorage/github.copilot-chat/debugCommand',
 				'__GLX_VENDOR_LIBRARY_NAME' => 'nvidia',
 				'GDK_SCALE' => '2',
-				'PHP_INI_SCAN_DIR' => '',
-				'MAIL_HOST' => '127.0.0.1',
 				'ORIGINAL_XDG_CURRENT_DESKTOP' => 'Hyprland',
 				'DBUS_SESSION_BUS_ADDRESS' => 'unix:path=/run/user/1000/bus',
-				'XDEBUG_HANDLER_SETTINGS' => '/tmp/7are11v4sslgbgUEtGL|1|*|*|/etc/php/php.ini:/etc/php/conf.d/xdebug.ini|3.4.5',
+				'XDEBUG_HANDLER_SETTINGS' => '/tmp/qv21qn5s9j175yt51H1|1|*|*|/etc/php/php.ini:/etc/php/conf.d/xdebug.ini|3.4.5',
 				'MAIL' => '/var/spool/mail/drewroberts',
-				'UWSM_FINALIZE_VARNAMES' => 'HYPRLAND_INSTANCE_SIGNATURE HYPRLAND_CMD HYPRCURSOR_THEME HYPRCURSOR_SIZE XCURSOR_SIZE XCURSOR_THEME',
 				'GUM_CONFIRM_UNSELECTED_FOREGROUND' => '0',
+				'UWSM_FINALIZE_VARNAMES' => 'HYPRLAND_INSTANCE_SIGNATURE HYPRLAND_CMD HYPRCURSOR_THEME HYPRCURSOR_SIZE XCURSOR_SIZE XCURSOR_THEME',
 				'GUM_CONFIRM_UNSELECTED_BACKGROUND' => '8',
-				'DB_DATABASE' => 'protocol',
-				'SESSION_LIFETIME' => '120',
 				'GIT_TERMINAL_PROMPT' => '0',
 				'GUM_CONFIRM_SELECTED_FOREGROUND' => '0',
 				'HYPRCURSOR_SIZE' => '24',
 				'TERM_PROGRAM' => 'vscode',
+				'LINES' => '9',
+				'COLUMNS' => '117',
+				'PHPSTAN_ORIGINAL_INIS' => '/etc/php/php.ini:/etc/php/conf.d/xdebug.ini',
+				'PHP_INI_SCAN_DIR' => '',
+				'PHPRC' => '/tmp/qv21qn5s9j175yt51H1',
 			],
 		];
 	}

@@ -3293,23 +3293,6 @@ return [
   array (
     0 => 
     \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::getActionDeadline() invoked with 1 parameter, 2 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 70,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 70,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    1 => 
-    \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Access to an undefined property App\\Models\\Game\\Game::$finish_reason.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
        'line' => 86,
@@ -3325,58 +3308,7 @@ return [
       ),
        'fixedErrorDiff' => NULL,
     )),
-    2 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::validateAction() invoked with 1 parameter, 2 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 140,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 140,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    3 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::applyAction() invoked with 1 parameter, 2 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 160,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 160,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    4 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::checkEndCondition() invoked with 0 parameters, 1 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 163,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 163,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    5 => 
+    1 => 
     \PHPStan\Analyser\Error::__set_state(array(
        'message' => 'Access to an undefined property App\\Models\\Game\\Game::$finish_reason.',
        'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
@@ -3388,40 +3320,6 @@ return [
        'nodeLine' => 166,
        'nodeType' => 'PHPStan\\Node\\PropertyAssignNode',
        'identifier' => 'property.notFound',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    6 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::getAvailableActions() invoked with 1 parameter, 2 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 260,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 260,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
-       'metadata' => 
-      array (
-      ),
-       'fixedErrorDiff' => NULL,
-    )),
-    7 => 
-    \PHPStan\Analyser\Error::__set_state(array(
-       'message' => 'Method App\\Interfaces\\GameTitleContract::getActionDeadline() invoked with 1 parameter, 2 required.',
-       'file' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'line' => 263,
-       'canBeIgnored' => true,
-       'filePath' => '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php',
-       'traitFilePath' => NULL,
-       'tip' => NULL,
-       'nodeLine' => 263,
-       'nodeType' => 'PhpParser\\Node\\Expr\\MethodCall',
-       'identifier' => 'arguments.count',
        'metadata' => 
       array (
       ),
@@ -4961,7 +4859,7 @@ return [
   ),
   '/home/drewroberts/Code/protocol/app/Http/Controllers/Api/V1/GameActionController.php' => 
   array (
-    'fileHash' => '2c606bd1bfd140cdc9a467ffb1a83aa765e852a6',
+    'fileHash' => 'fb6a74dcbf2b27ca08088bdf8fa92b01a1bd6929',
     'dependentFiles' => 
     array (
     ),

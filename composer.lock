@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "38e870c7e79b8dd5ac19bedf0fed93af",
+    "content-hash": "9956db607cc56e89abcc677033fb2bc0",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -6905,6 +6905,94 @@
                 }
             ],
             "time": "2024-06-11T12:45:25+00:00"
+        },
+        {
+            "name": "roberts/support",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roberts/support.git",
+                "reference": "af2687b5649774307754a7f367b033e9a14af98e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roberts/support/zipball/af2687b5649774307754a7f367b033e9a14af98e",
+                "reference": "af2687b5649774307754a7f367b033e9a14af98e",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^12.26",
+                "php": "^8.4",
+                "spatie/laravel-package-tools": "^1.92"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.10",
+                "guzzlehttp/promises": "^2.3",
+                "larastan/larastan": "^3.7",
+                "laravel/pint": "^1.24",
+                "nunomaduro/collision": "^8.8.2",
+                "orchestra/canvas": "^10.0.2",
+                "orchestra/testbench": "^10.8",
+                "orchestra/testbench-core": "^10.6.5",
+                "orchestra/workbench": "^10.0.6",
+                "pestphp/pest": "^4.1",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0.3",
+                "phpstan/phpstan-phpunit": "^2.0.7",
+                "psy/psysh": "^0.12.10",
+                "symfony/translation": "^7.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Support": "Roberts\\Support\\Facades\\Support"
+                    },
+                    "providers": [
+                        "Roberts\\Support\\SupportServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Helpers/Test.php"
+                ],
+                "psr-4": {
+                    "Roberts\\Support\\": "src/",
+                    "Roberts\\Support\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Drew Roberts",
+                    "email": "github@drewroberts.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Common functions used in Laravel packages",
+            "homepage": "https://github.com/roberts/support",
+            "keywords": [
+                "laravel",
+                "laravel package",
+                "support"
+            ],
+            "support": {
+                "issues": "https://github.com/roberts/support/issues",
+                "source": "https://github.com/roberts/support/tree/v1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/drewroberts",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-10-17T01:52:13+00:00"
         },
         {
             "name": "ryangjchandler/blade-capture-directive",

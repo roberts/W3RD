@@ -22,6 +22,7 @@
         "laravel/tinker": "^2.10",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.9",
+        "roberts/support": "^1.0",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {

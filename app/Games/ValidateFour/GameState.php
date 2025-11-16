@@ -318,8 +318,6 @@ class GameState extends BaseGameState
     /**
      * Create a new state with a disc placed at the specified position.
      * Returns a new immutable instance.
-     *
-     * @return self
      */
     public function withDiscAt(int $row, int $column, string $playerUlid): self
     {
@@ -342,8 +340,6 @@ class GameState extends BaseGameState
 
     /**
      * Create a new state with the turn switched to the other player.
-     *
-     * @return static
      */
     public function withNextPlayer(): static
     {
@@ -375,7 +371,6 @@ class GameState extends BaseGameState
      * Create a new state with updated phase.
      *
      * @param  GamePhase  $phase  New phase
-     * @return static
      */
     public function withPhase(GamePhase $phase): static
     {
@@ -397,7 +392,6 @@ class GameState extends BaseGameState
      * Create a new state with updated status.
      *
      * @param  GameStatus  $status  New status
-     * @return static
      */
     public function withStatus(GameStatus $status): static
     {
@@ -417,8 +411,6 @@ class GameState extends BaseGameState
 
     /**
      * Create a new state with a winner set.
-     *
-     * @return static
      */
     public function withWinner(string $winnerUlid): static
     {
@@ -438,8 +430,6 @@ class GameState extends BaseGameState
 
     /**
      * Create a new state marked as a draw.
-     *
-     * @return self
      */
     public function withDraw(): self
     {

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->foreignId('image_id')->nullable()->constrained('images');
             $table->json('condition_json')->comment('Unlock criteria, e.g., {"wins": 10}');
+            $table->foreignId('creator_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

@@ -7,15 +7,17 @@ use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Roberts\Support\Traits\HasCreator;
 
 class Avatar extends Model
 {
-    use HasFactory;
+    use HasCreator, HasFactory;
 
     protected $fillable = [
         'name',
         'image_id',
         'type',
+        'creator_id',
     ];
 
     protected $casts = [

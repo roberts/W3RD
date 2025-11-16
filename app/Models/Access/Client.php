@@ -4,6 +4,7 @@ namespace App\Models\Access;
 
 use App\Enums\Platform;
 use App\Models\Auth\Entry;
+use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,5 +28,10 @@ class Client extends Model
     public function entries()
     {
         return $this->hasMany(Entry::class);
+    }
+
+    public function registeredUsers()
+    {
+        return $this->hasMany(User::class, 'registration_client_id');
     }
 }

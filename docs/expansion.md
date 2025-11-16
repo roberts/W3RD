@@ -87,7 +87,7 @@ This document outlines potential new features to expand the GamerProtocol.io API
     *   **Matchmaking Logic:** The `ProcessMatchmakingQueue` job would be adapted to look for parties of the correct size instead of individuals. It would then match one party against another.
     *   **Data Structure:** The queue in Redis would need to store party IDs instead of just user IDs, with a separate Redis hash mapping party IDs to the list of user IDs in that party.
 
-### User Stats
+## 4. User Stats
 
 Already have a few tables & need to rethink the best way to manage this data. Will return to this later.
 
@@ -96,9 +96,109 @@ Already have a few tables & need to rethink the best way to manage this data. Wi
 - Current Streak
 - Same stats for each of the Game Titles & maybe the Modes.
 
-### Potential Table Additions
+## 5. Potential Table Additions
 
 - Notifications - for Laravel's notification system
 - Game Invites - if games can be private/invited
 - Blocked Users - for user moderation
 - Reported Content - for community management
+
+## 6\. `create_clans_table` (Social Structure)
+
+Defines persistent groups for collaboration and competition.
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('clans', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->foreignId('leader_id')->constrained('users');
+            $table->json('resource_pool_json')->nullable()->comment('Shared resources/bank');
+            $table->timestamps();
+        });
+    }
+};
+```
+
+## 7\. `create_clan_members_table` (Clan Pivot)
+
+Links users to their clan and defines their role within the social structure.
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('clan_members', function (Blueprint $table) {
+            $table->foreignId('clan_id')->constrained('clans');
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('rank_title', 50)->default('Member');
+            $table->primary(['clan_id', 'user_id']);
+            $table->timestamps();
+        });
+    }
+};
+```
+
+## 8\. `create_user_resources_table` (Persistent Inventory)
+
+Tracks global resources for complex strategy games, separated by game type.
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('user_resources', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('game_slug', 50); // The game this resource is tied to
+            $table->string('resource_type', 50); // e.g., 'gold', 'wood', 'population'
+            $table->decimal('quantity', 14, 4)->default(0);
+
+            $table->primary(['user_id', 'game_slug', 'resource_type'], 'user_resource_pk');
+            $table->timestamps();
+        });
+    }
+};
+```
+
+## 9\. `create_skill_ratings_table` (ELO/MMR Tracking)
+
+Tracks advanced matchmaking rating separate from experience level.
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('skill_ratings', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('game_slug', 50); 
+            $table->integer('rating_value')->default(1500)->comment('Standard ELO or MMR rating');
+            $table->integer('games_played')->default(0);
+
+            $table->primary(['user_id', 'game_slug']);
+            $table->timestamps();
+        });
+    }
+};
+```

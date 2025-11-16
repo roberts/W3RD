@@ -12,16 +12,17 @@ All endpoints use the base path `/v1/`.
     * `Authorization: Bearer [Sanctum User Token]`
     * `X-Client-Key: [API Key from clients table]` (For application authorization)
 
-### 1. 🔑 Identity & Core Access
+### 1. 🔑 Authentication & User Management
 
 | Resource | HTTP Method | Endpoint | Purpose | Auth Requirements |
 | :--- | :--- | :--- | :--- | :--- |
-| **Entries** | `POST` | `/v1/entries` | **User Login.** Authenticates credentials and returns a Sanctum API token. Records entry to platform. | `X-Client-Key` Only |
-| **Entries** | `DELETE` | `/v1/entries` | **User Logout.** Revokes the current API token and marks entry as logged out. | Bearer + Client Key |
-| **User** | `GET` | `/v1/user` | Retrieve the currently authenticated user's profile and plan status. | Bearer + Client Key |
-| **User** | `PATCH` | `/v1/user` | Update user profile data (name, password, avatar choice). | Bearer + Client Key |
-| **Avatars** | `GET` | `/v1/avatars` | List all available **Avatar** assets (free, premium, NFT). | Bearer + Client Key |
-| **Agents** | `GET` | `/v1/agents` | List available AI/Local **Agent** profiles (for matchmaking setup). | Bearer + Client Key |
+| **Register** | `POST` | `/v1/auth/register` | **Standard Registration.** Creates a pending registration and sends a verification email. | `X-Client-Key` Only |
+| **Verify** | `POST` | `/v1/auth/verify` | **Verify Email.** Verifies the token, creates the user, and returns a login token. | `X-Client-Key` Only |
+| **Login** | `POST` | `/v1/auth/login` | **Standard Login.** Authenticates with email/password and returns a login token. | `X-Client-Key` Only |
+| **Social Login** | `POST` | `/v1/auth/social` | **Social Login.** Authenticates with a provider's access token and returns a login token. | `X-Client-Key` Only |
+| **Logout** | `POST` | `/v1/auth/logout` | **User Logout.** Revokes the current API token. | Bearer + Client Key |
+| **User** | `GET` | `/v1/auth/user` | **Get User.** Retrieve the currently authenticated user's profile. | Bearer + Client Key |
+| **User** | `PATCH` | `/v1/auth/user` | **Update User.** Update the authenticated user's profile data. | Bearer + Client Key |
 
 ---
 
@@ -67,12 +68,8 @@ All requests require `Authorization: Bearer [User Token]` and `X-Client-Key`, un
 
 | Endpoint | HTTP Method | Request Body Data (Input) | Response Body Data (Output) |
 | :--- | :--- | :--- | :--- |
-| `/v1/entries` | `POST` | `email`, `password` | `token` (Bearer), `user` (User profile object) |
-| `/v1/entries` | `DELETE` | *(None)* | `status: success` (204 No Content) |
-| `/v1/user` | `GET` | *(None)* | `user` (Full profile, including `avatar_id`, `email`, `deactivated_at`) |
-| `/v1/user` | `PATCH` | `name` (Optional), `password` (Optional) | `user` (Updated profile object) |
-| `/v1/avatars` | `GET` | *(None)* | Array of `avatar` objects (`id`, `name`, `image_url`, `type`) |
-| `/v1/agents` | `GET` | *(None)* | Array of `agent` objects (`id`, `name`, `available_hour_est`, `avatar_id`) |
+| `/v1/auth/user` | `GET` | *(None)* | `user` (Full profile, including `avatar_id`, `email`, `deactivated_at`) |
+| `/v1/auth/user` | `PATCH` | `name` (Optional), `password` (Optional) | `user` (Updated profile object) |
 
 ---
 

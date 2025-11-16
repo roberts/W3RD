@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('two_factor_secret')->nullable();
             $table->text('two_factor_recovery_codes')->nullable();
             $table->timestamp('two_factor_confirmed_at')->nullable();
+            $table->foreignId('registration_client_id')->constrained('clients');
             $table->foreignId('agent_id')->nullable()->unique()->index()->constrained('agents');
             $table->rememberToken();
             $table->timestamps();

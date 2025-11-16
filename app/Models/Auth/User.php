@@ -30,6 +30,7 @@ class User extends Authenticatable
         'agent_id',
         'avatar_id',
         'deactivated_at',
+        'registration_client_id',
     ];
 
     protected $hidden = [
@@ -92,6 +93,16 @@ class User extends Authenticatable
     public function titleLevels()
     {
         return $this->hasMany(UserTitleLevel::class);
+    }
+
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    public function registrationClient()
+    {
+        return $this->belongsTo(Client::class, 'registration_client_id');
     }
 
     // Helper methods

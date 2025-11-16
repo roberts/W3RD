@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * User progress tracking for game titles.
- * 
+ *
  * Uses a composite primary key (user_id, title_slug) which Laravel doesn't
  * natively support. The array assignment to $primaryKey triggers a PHPStan
  * warning but works correctly at runtime for our use case.

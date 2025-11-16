@@ -169,7 +169,7 @@ final class GameState extends BaseGameState
             ),
         ];
 
-        return new static(
+        return new self(
             players: $players,
             currentPlayerUlid: $playerOneUlid,
             winnerUlid: null,

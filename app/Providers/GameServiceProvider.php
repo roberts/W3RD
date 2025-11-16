@@ -19,7 +19,7 @@ class GameServiceProvider extends ServiceProvider
             ],
         ];
 
-        $gameTitleSlug = $game->title_slug;
+        $gameTitleSlug = $game->title_slug->value;
         $gameModeSlug = $game->mode->slug;
 
         if (! isset($map[$gameTitleSlug][$gameModeSlug])) {

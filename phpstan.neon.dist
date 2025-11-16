@@ -11,39 +11,5 @@ parameters:
     tmpDir: var/cache/phpstan
 
     ignoreErrors:
-        # Laravel Eloquent model property type covariance issues - these are framework patterns
-        - '#PHPDoc type .* of property .* is not covariant with PHPDoc type#'
-        
-        # Nullsafe operator warnings in factories - these are intentional for factory defaults
-        - '#Using nullsafe property access.*on left side of \?\? is unnecessary#'
-        
-        # Password validation rule - Password class implements ValidationRule
-        -
-            message: '#Method App\\Actions\\Fortify\\(CreateNewUser|ResetUserPassword)::passwordRules\(\) should return array.*#'
-            path: app/Actions/Fortify/PasswordValidationRules.php
-        
-        # BaseBoardGameTitle expects gameState to have board property (checked at runtime)
-        -
-            message: '#Access to an undefined property App\\Games\\BaseGameState::\$board#'
-            path: app/Games/BaseBoardGameTitle.php
-        
-        # Model properties that exist in database but aren't explicitly defined
-        - '#Access to an undefined property App\\Models\\Game\\Mode::\$handler_class#'
-        - '#Access to an undefined property App\\Models\\Game\\Game::\$(mode|finish_reason)#'
-        
-        # Composite primary key - Laravel doesn't support this natively
-        - '#Property App\\Models\\Gamification\\UserTitleLevel::\$primaryKey.*does not accept default value#'
-        
-        # Enum issues in GameServiceProvider
-        - '#Invalid array key type App\\Enums\\GameTitle#'
-        - '#Part \$gameTitleSlug \(App\\Enums\\GameTitle\) of encapsed string cannot be cast to string#'
-        
-        # Socialite method - exists but not in type definition
-        - '#Call to an undefined method Laravel\\Socialite\\Contracts\\Provider::userFromToken\(\)#'
-        
-        # Unsafe usage of new static() in immutable value objects - this is safe in our controlled inheritance
-        -
-            message: '#Unsafe usage of new static\(\)#'
-            path: app/Games/ValidateFour/GameState.php
 
     excludePaths:

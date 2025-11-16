@@ -61,7 +61,7 @@ use App\Games\BaseGameState;
  *
  * @see \App\Interfaces\GameTitleContract For the interface all game modes must implement
  */
-class GameState extends BaseGameState
+final class GameState extends BaseGameState
 {
     /**
      * Board structure: board[row][column] where:

@@ -7,6 +7,9 @@ use App\Interfaces\GameTitleContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $handler_class
+ */
 class Mode extends Model
 {
     use HasFactory;

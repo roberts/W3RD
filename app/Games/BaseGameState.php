@@ -37,6 +37,8 @@ use App\Enums\GameStatus;
  *     }
  * }
  * ```
+ *
+ * @property array<int, array<int, string|null>> $board Board state for board games (defined in subclasses)
  */
 abstract class BaseGameState
 {

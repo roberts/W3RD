@@ -102,6 +102,8 @@ class AuthController extends Controller
     public function socialLogin(SocialLoginRequest $request)
     {
         try {
+            // userFromToken exists in Socialite but isn't in type definitions
+            /** @phpstan-ignore-next-line */
             $providerUser = Socialite::driver($request->provider)->userFromToken($request->access_token);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Invalid provider token.'], 401);

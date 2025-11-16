@@ -16,7 +16,7 @@ class GameFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     * @var class-string<\App\Models\Game\Game>
      */
     protected $model = Game::class;
 
@@ -32,7 +32,7 @@ class GameFactory extends Factory
             'mode_id' => Mode::where('title_slug', GameTitle::VALIDATE_FOUR->value)
                 ->where('slug', 'standard')
                 ->first()
-                ?->id ?? 1,
+                ->id ?? 1,
             'status' => 'pending',
             'creator_id' => User::factory(),
             'turn_number' => 1,
@@ -78,7 +78,7 @@ class GameFactory extends Factory
                 ->first();
 
             return [
-                'mode_id' => $mode?->id ?? $attributes['mode_id'],
+                'mode_id' => $mode->id ?? $attributes['mode_id'],
             ];
         });
     }

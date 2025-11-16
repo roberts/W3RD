@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property Mode $mode
+ * @property string|null $finish_reason
+ */
 class Game extends Model
 {
     use HasFactory, HasUlids, SoftDeletes;

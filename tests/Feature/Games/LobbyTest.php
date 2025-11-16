@@ -1,8 +1,6 @@
 <?php
 
-use App\Enums\GameTitle;
 use App\Enums\LobbyPlayerStatus;
-use App\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Lobby;
 use App\Models\LobbyPlayer;
@@ -98,7 +96,7 @@ test('user can create scheduled lobby', function () {
 
 test('can list all public lobbies', function () {
     $host = User::factory()->create();
-    
+
     // Create public and private lobbies
     Lobby::factory()->public()->create();
     Lobby::factory()->public()->create();
@@ -215,7 +213,7 @@ test('invitee can accept invitation', function () {
     $host = User::factory()->create();
     $invitee = User::factory()->create();
     $lobby = Lobby::factory()->create(['host_id' => $host->id, 'min_players' => 3]);
-    
+
     $lobbyPlayer = LobbyPlayer::factory()->create([
         'lobby_id' => $lobby->id,
         'user_id' => $invitee->id,
@@ -239,7 +237,7 @@ test('invitee can decline invitation', function () {
     $host = User::factory()->create();
     $invitee = User::factory()->create();
     $lobby = Lobby::factory()->create(['host_id' => $host->id]);
-    
+
     $lobbyPlayer = LobbyPlayer::factory()->create([
         'lobby_id' => $lobby->id,
         'user_id' => $invitee->id,
@@ -282,7 +280,7 @@ test('host can kick player from lobby', function () {
     $host = User::factory()->create();
     $player = User::factory()->create();
     $lobby = Lobby::factory()->create(['host_id' => $host->id]);
-    
+
     $lobbyPlayer = LobbyPlayer::factory()->create([
         'lobby_id' => $lobby->id,
         'user_id' => $player->id,
@@ -315,7 +313,7 @@ test('non-host cannot kick players', function () {
     $otherUser = User::factory()->create();
     $player = User::factory()->create();
     $lobby = Lobby::factory()->create(['host_id' => $host->id]);
-    
+
     LobbyPlayer::factory()->create([
         'lobby_id' => $lobby->id,
         'user_id' => $player->id,

@@ -1,12 +1,11 @@
 <?php
 
-use App\Enums\GameTitle;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
 
 test('authenticated user can join quickplay queue', function () {
     $user = User::factory()->create();
-    
+
     // Mock Redis responses
     Redis::shouldReceive('exists')->andReturn(false);
     Redis::shouldReceive('zadd')->andReturn(1);
@@ -26,7 +25,7 @@ test('authenticated user can join quickplay queue', function () {
 
 test('user can join quickplay queue with game mode', function () {
     $user = User::factory()->create();
-    
+
     // Mock Redis responses
     Redis::shouldReceive('exists')->andReturn(false);
     Redis::shouldReceive('zadd')->andReturn(1);

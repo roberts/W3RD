@@ -15,8 +15,7 @@ class LobbyReadyCheck implements ShouldBroadcast
 
     public function __construct(
         public Lobby $lobby
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

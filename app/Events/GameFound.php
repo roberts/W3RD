@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -17,8 +16,7 @@ class GameFound implements ShouldBroadcast
         public int $userId,
         public string $matchId,
         public array $matchData
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

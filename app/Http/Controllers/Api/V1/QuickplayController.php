@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameTitle;
-use App\Events\GameFound;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Str;
 
 class QuickplayController extends Controller
 {
@@ -30,7 +28,7 @@ class QuickplayController extends Controller
         $user = $request->user();
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
-        if (!$gameTitle) {
+        if (! $gameTitle) {
             return response()->json(['error' => 'Invalid game title'], 400);
         }
 
@@ -40,6 +38,7 @@ class QuickplayController extends Controller
         $cooldownKey = "cooldown:quickplay:{$user->id}";
         if (Redis::exists($cooldownKey)) {
             $ttl = Redis::ttl($cooldownKey);
+
             return response()->json([
                 'error' => 'You are on a matchmaking cooldown',
                 'cooldown_remaining' => $ttl,
@@ -49,7 +48,7 @@ class QuickplayController extends Controller
         // Add to queue (sorted set by skill level)
         $queueKey = "quickplay:{$gameTitle->value}:{$gameMode}";
         $skillLevel = $this->getUserSkillLevel($user, $gameTitle);
-        
+
         Redis::zadd($queueKey, $skillLevel, $user->id);
 
         // Store join timestamp
@@ -98,7 +97,7 @@ class QuickplayController extends Controller
         $confirmKey = "quickplay:accept:{$matchId}";
 
         // Check if match still exists
-        if (!Redis::exists($confirmKey)) {
+        if (! Redis::exists($confirmKey)) {
             return response()->json(['error' => 'Match confirmation has expired'], 404);
         }
 
@@ -107,8 +106,8 @@ class QuickplayController extends Controller
 
         // Check if both players have accepted
         $acceptances = Redis::hgetall($confirmKey);
-        
-        if (count($acceptances) === 2 && !in_array('0', $acceptances)) {
+
+        if (count($acceptances) === 2 && ! in_array('0', $acceptances)) {
             // Both players accepted - create the game
             $playerIds = array_keys($acceptances);
             $this->createGame($playerIds, $matchId);
@@ -145,7 +144,7 @@ class QuickplayController extends Controller
         // This will be implemented to create Game and GamePlayer records
         // For now, just clean up the match confirmation
         Redis::del("quickplay:accept:{$matchId}");
-        
+
         // Remove players from queue
         foreach ($playerIds as $playerId) {
             Redis::hdel('quickplay:timestamps', $playerId);

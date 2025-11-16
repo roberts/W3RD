@@ -18,8 +18,11 @@ class ProcessQuickplayQueue implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private const AI_FALLBACK_THRESHOLD = 30; // seconds
+
     private const MATCH_CONFIRMATION_TIMEOUT = 15; // seconds
+
     private const SKILL_RANGE = 5; // Skill level difference tolerance
+
     private const RECENT_OPPONENT_LIMIT = 5; // Remember last N opponents
 
     public function handle(): void
@@ -36,10 +39,10 @@ class ProcessQuickplayQueue implements ShouldQueue
     private function processQueue(GameTitle $gameTitle, string $mode): void
     {
         $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
-        
+
         // Get all players in queue
         $players = Redis::zrange($queueKey, 0, -1, 'WITHSCORES');
-        
+
         if (empty($players)) {
             return;
         }
@@ -60,12 +63,13 @@ class ProcessQuickplayQueue implements ShouldQueue
             // Check for AI fallback
             if ($waitTime >= self::AI_FALLBACK_THRESHOLD) {
                 $this->matchWithAI($userId, $gameTitle, $mode, $queueKey);
+
                 continue;
             }
 
             // Try to find human opponent
             $opponent = $this->findOpponent($player, $playersArray, $queueKey);
-            
+
             if ($opponent) {
                 $this->createMatchConfirmation($userId, $opponent['user_id'], $gameTitle, $mode, $queueKey);
             }
@@ -75,8 +79,8 @@ class ProcessQuickplayQueue implements ShouldQueue
     private function getWaitTime(int $userId): int
     {
         $joinTimestamp = Redis::hget('quickplay:timestamps', $userId);
-        
-        if (!$joinTimestamp) {
+
+        if (! $joinTimestamp) {
             return 0;
         }
 
@@ -87,20 +91,20 @@ class ProcessQuickplayQueue implements ShouldQueue
     {
         $userId = $player['user_id'];
         $skill = $player['skill'];
-        
+
         // Get recent opponents
         $recentOpponents = Redis::lrange("recent_opponents:{$userId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
 
         foreach ($allPlayers as $potential) {
             $potentialId = $potential['user_id'];
-            
+
             // Skip self
             if ($potentialId === $userId) {
                 continue;
             }
 
             // Skip if already removed from queue
-            if (!Redis::zscore($queueKey, $potentialId)) {
+            if (! Redis::zscore($queueKey, $potentialId)) {
                 continue;
             }
 
@@ -127,7 +131,7 @@ class ProcessQuickplayQueue implements ShouldQueue
         // TODO: Call SchedulingService to find AI agent
         // For now, just log that we would match with AI
         \Log::info("Would match user {$userId} with AI for {$gameTitle->value}:{$mode}");
-        
+
         // TODO: Create game with AI opponent
     }
 
@@ -147,7 +151,7 @@ class ProcessQuickplayQueue implements ShouldQueue
         // Update recent opponents lists
         Redis::lpush("recent_opponents:{$userId1}", $userId2);
         Redis::ltrim("recent_opponents:{$userId1}", 0, self::RECENT_OPPONENT_LIMIT - 1);
-        
+
         Redis::lpush("recent_opponents:{$userId2}", $userId1);
         Redis::ltrim("recent_opponents:{$userId2}", 0, self::RECENT_OPPONENT_LIMIT - 1);
 
@@ -170,16 +174,16 @@ class ProcessQuickplayQueue implements ShouldQueue
         // After timeout, check if both players accepted
         dispatch(function () use ($matchId, $userId1, $userId2) {
             $confirmKey = "quickplay:accept:{$matchId}";
-            
-            if (!Redis::exists($confirmKey)) {
+
+            if (! Redis::exists($confirmKey)) {
                 return; // Already processed
             }
 
             $acceptances = Redis::hgetall($confirmKey);
-            
+
             // Apply penalties to non-accepters
             foreach ([$userId1, $userId2] as $userId) {
-                if (!isset($acceptances[$userId]) || $acceptances[$userId] === '0') {
+                if (! isset($acceptances[$userId]) || $acceptances[$userId] === '0') {
                     app(QuickplayController::class)->applyDodgePenalty($userId);
                 }
             }

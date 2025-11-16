@@ -37,7 +37,7 @@ class ProcessScheduledLobbies implements ShouldQueue
             // Cancel the lobby - not enough players
             $lobby->markAsCancelled();
             \Log::info("Cancelled scheduled lobby {$lobby->ulid} - insufficient players");
-            
+
             // TODO: Notify players that the scheduled game was cancelled
         }
     }

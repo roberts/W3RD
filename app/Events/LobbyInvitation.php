@@ -16,8 +16,7 @@ class LobbyInvitation implements ShouldBroadcast
     public function __construct(
         public int $userId,
         public Lobby $lobby
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

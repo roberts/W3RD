@@ -30,7 +30,7 @@ class LobbyPlayerController extends Controller
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $user = $request->user();
 
-        if (!$lobby->isHost($user)) {
+        if (! $lobby->isHost($user)) {
             return response()->json(['error' => 'Only the host can invite players'], 403);
         }
 
@@ -86,7 +86,7 @@ class LobbyPlayerController extends Controller
             ->first();
 
         // If no existing record and lobby is public, allow joining
-        if (!$lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
+        if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
                 'user_id' => $userId,
@@ -94,7 +94,7 @@ class LobbyPlayerController extends Controller
             ]);
 
             // Check if minimum players met
-            if ($lobby->hasMinimumPlayers() && !$lobby->scheduled_at) {
+            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 
@@ -103,7 +103,7 @@ class LobbyPlayerController extends Controller
             ]);
         }
 
-        if (!$lobbyPlayer) {
+        if (! $lobbyPlayer) {
             return response()->json(['error' => 'You are not invited to this lobby'], 404);
         }
 
@@ -116,7 +116,7 @@ class LobbyPlayerController extends Controller
             $lobbyPlayer->accept();
 
             // Check if minimum players met for immediate (non-scheduled) game
-            if ($lobby->hasMinimumPlayers() && !$lobby->scheduled_at) {
+            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 
@@ -140,7 +140,7 @@ class LobbyPlayerController extends Controller
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();
 
-        if (!$lobby->isHost($currentUser)) {
+        if (! $lobby->isHost($currentUser)) {
             return response()->json(['error' => 'Only the host can kick players'], 403);
         }
 

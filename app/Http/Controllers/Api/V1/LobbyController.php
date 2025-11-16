@@ -69,7 +69,7 @@ class LobbyController extends Controller
         $user = $request->user();
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
-        if (!$gameTitle) {
+        if (! $gameTitle) {
             return response()->json(['error' => 'Invalid game title'], 400);
         }
 
@@ -93,7 +93,7 @@ class LobbyController extends Controller
             ]);
 
             // Add invitees
-            if (!empty($validated['invitees'])) {
+            if (! empty($validated['invitees'])) {
                 foreach ($validated['invitees'] as $inviteeId) {
                     if ($inviteeId === $user->id) {
                         continue; // Skip host
@@ -125,6 +125,7 @@ class LobbyController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => 'Failed to create lobby'], 500);
         }
     }
@@ -174,7 +175,7 @@ class LobbyController extends Controller
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $user = $request->user();
 
-        if (!$lobby->isHost($user)) {
+        if (! $lobby->isHost($user)) {
             return response()->json(['error' => 'Only the host can cancel the lobby'], 403);
         }
 
@@ -195,7 +196,7 @@ class LobbyController extends Controller
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $user = $request->user();
 
-        if (!$lobby->isHost($user)) {
+        if (! $lobby->isHost($user)) {
             return response()->json(['error' => 'Only the host can initiate a ready check'], 403);
         }
 

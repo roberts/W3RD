@@ -33,7 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
         Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
-        
+
         // Quickplay (Public Matchmaking)
         Route::prefix('games/quickplay')->controller(QuickplayController::class)->group(function () {
             Route::post('/', 'join');
@@ -48,7 +48,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/{lobby_ulid}', [LobbyController::class, 'show']);
             Route::delete('/{lobby_ulid}', [LobbyController::class, 'destroy']);
             Route::post('/{lobby_ulid}/ready-check', [LobbyController::class, 'readyCheck']);
-            
+
             // Lobby Players
             Route::post('/{lobby_ulid}/players', [LobbyPlayerController::class, 'store']);
             Route::put('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'update']);

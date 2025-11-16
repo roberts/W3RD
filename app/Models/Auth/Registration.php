@@ -2,8 +2,9 @@
 
 namespace App\Models\Auth;
 
+use App\Models\Access\Client;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasFactory;
 
 class Registration extends Model
 {

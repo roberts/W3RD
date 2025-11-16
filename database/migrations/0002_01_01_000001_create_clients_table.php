@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->string('platform')->default(Platform::WEB->value);
             $table->boolean('is_active')->default(true);
+            $table->foreignId('creator_id')->nullable()->index();
             $table->timestamps();
         });
     }

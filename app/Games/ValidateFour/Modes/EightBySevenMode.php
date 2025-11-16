@@ -10,8 +10,9 @@ class EightBySevenMode extends BaseValidateFour
     /**
      * Create initial game state for 8x7 mode.
      *
-     * @param string ...$playerUlids Player ULIDs (must be exactly 2)
+     * @param  string  ...$playerUlids  Player ULIDs (must be exactly 2)
      * @return GameState
+     *
      * @throws \InvalidArgumentException If not exactly 2 players provided
      */
     public function createInitialState(string ...$playerUlids): object
@@ -31,8 +32,6 @@ class EightBySevenMode extends BaseValidateFour
 
     /**
      * Returns the complete rules for the 8x7 mode.
-     *
-     * @return array
      */
     public static function getRules(): array
     {
@@ -44,7 +43,7 @@ class EightBySevenMode extends BaseValidateFour
             'sections' => [
                 [
                     'title' => 'Board & Objective',
-                    'content' => <<<MARKDOWN
+                    'content' => <<<'MARKDOWN'
                     *   **Board size:** 8 columns × 7 rows.
                     *   **Objective:** Connect four of your discs in a row.
                     MARKDOWN,

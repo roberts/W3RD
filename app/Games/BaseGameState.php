@@ -43,11 +43,11 @@ abstract class BaseGameState
     /**
      * Create a new base game state.
      *
-     * @param array<string, object> $players Map of player ULID to player state object
-     * @param string|null $currentPlayerUlid ULID of player whose turn it is (null for simultaneous/finished games)
-     * @param string|null $winnerUlid ULID of winning player (null if game not won yet)
-     * @param GamePhase $phase Current game phase
-     * @param GameStatus $status Current game lifecycle status
+     * @param  array<string, object>  $players  Map of player ULID to player state object
+     * @param  string|null  $currentPlayerUlid  ULID of player whose turn it is (null for simultaneous/finished games)
+     * @param  string|null  $winnerUlid  ULID of winning player (null if game not won yet)
+     * @param  GamePhase  $phase  Current game phase
+     * @param  GameStatus  $status  Current game lifecycle status
      */
     public function __construct(
         public readonly array $players,
@@ -74,7 +74,7 @@ abstract class BaseGameState
     /**
      * Get a specific player's state by ULID.
      *
-     * @param string $playerUlid Player ULID
+     * @param  string  $playerUlid  Player ULID
      * @return object|null The player's state object, or null if not found
      */
     public function getPlayer(string $playerUlid): ?object
@@ -94,8 +94,6 @@ abstract class BaseGameState
 
     /**
      * Get the number of players.
-     *
-     * @return int
      */
     public function getPlayerCount(): int
     {
@@ -104,8 +102,6 @@ abstract class BaseGameState
 
     /**
      * Check if the game has a winner.
-     *
-     * @return bool
      */
     public function hasWinner(): bool
     {
@@ -114,8 +110,6 @@ abstract class BaseGameState
 
     /**
      * Check if the game is finished.
-     *
-     * @return bool
      */
     public function isFinished(): bool
     {
@@ -125,7 +119,7 @@ abstract class BaseGameState
     /**
      * Create a new state with updated phase.
      *
-     * @param GamePhase $phase New phase
+     * @param  GamePhase  $phase  New phase
      * @return static New state instance
      */
     abstract public function withPhase(GamePhase $phase): static;
@@ -133,7 +127,7 @@ abstract class BaseGameState
     /**
      * Create a new state with updated status.
      *
-     * @param GameStatus $status New status
+     * @param  GameStatus  $status  New status
      * @return static New state instance
      */
     abstract public function withStatus(GameStatus $status): static;
@@ -141,7 +135,7 @@ abstract class BaseGameState
     /**
      * Create a new state with a winner.
      *
-     * @param string $winnerUlid Winner's ULID
+     * @param  string  $winnerUlid  Winner's ULID
      * @return static New state instance
      */
     abstract public function withWinner(string $winnerUlid): static;
@@ -156,7 +150,7 @@ abstract class BaseGameState
     /**
      * Create state from database array.
      *
-     * @param array<string, mixed> $data Serialized state data
+     * @param  array<string, mixed>  $data  Serialized state data
      * @return static New state instance
      */
     abstract public static function fromArray(array $data): static;

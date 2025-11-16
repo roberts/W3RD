@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unique(['game_id', 'position_id']);
             $table->unique(['game_id', 'user_id']); // Prevent same user joining twice
             $table->timestamps();
-            
+
             // Composite indexes for common queries
             $table->index(['user_id', 'game_id']);
         });

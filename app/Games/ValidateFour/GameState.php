@@ -67,7 +67,7 @@ class GameState extends BaseGameState
      * Board structure: board[row][column] where:
      * - null = empty space
      * - string = player ULID who owns the disc
-     * 
+     *
      * Row 0 is the top, row (rows-1) is the bottom where discs land.
      *
      * @var array<int, array<int, string|null>>
@@ -89,16 +89,16 @@ class GameState extends BaseGameState
     /**
      * Create a new Validate Four game state.
      *
-     * @param array<string, PlayerState> $players Map of player ULID to PlayerState
-     * @param string|null $currentPlayerUlid ULID of current player
-     * @param string|null $winnerUlid ULID of winner
-     * @param GamePhase $phase Current game phase
-     * @param GameStatus $status Current game status
-     * @param array<int, array<int, string|null>> $board The game board
-     * @param int $columns Number of columns
-     * @param int $rows Number of rows
-     * @param int $connectCount Number to connect to win
-     * @param bool $isDraw Whether game is a draw
+     * @param  array<string, PlayerState>  $players  Map of player ULID to PlayerState
+     * @param  string|null  $currentPlayerUlid  ULID of current player
+     * @param  string|null  $winnerUlid  ULID of winner
+     * @param  GamePhase  $phase  Current game phase
+     * @param  GameStatus  $status  Current game status
+     * @param  array<int, array<int, string|null>>  $board  The game board
+     * @param  int  $columns  Number of columns
+     * @param  int  $rows  Number of rows
+     * @param  int  $connectCount  Number to connect to win
+     * @param  bool  $isDraw  Whether game is a draw
      */
     public function __construct(
         array $players,
@@ -113,7 +113,7 @@ class GameState extends BaseGameState
         bool $isDraw = false,
     ) {
         parent::__construct($players, $currentPlayerUlid, $winnerUlid, $phase, $status);
-        
+
         $this->board = $board;
         $this->columns = $columns;
         $this->rows = $rows;
@@ -138,11 +138,11 @@ class GameState extends BaseGameState
      * );
      * ```
      *
-     * @param string $playerOneUlid ULID of player one (goes first)
-     * @param string $playerTwoUlid ULID of player two
-     * @param int $columns Number of columns (default: 7)
-     * @param int $rows Number of rows (default: 6)
-     * @param int $connectCount Number to connect to win (default: 4)
+     * @param  string  $playerOneUlid  ULID of player one (goes first)
+     * @param  string  $playerTwoUlid  ULID of player two
+     * @param  int  $columns  Number of columns (default: 7)
+     * @param  int  $rows  Number of rows (default: 6)
+     * @param  int  $connectCount  Number to connect to win (default: 4)
      * @return self New immutable game state instance
      */
     public static function createNew(
@@ -151,7 +151,7 @@ class GameState extends BaseGameState
         int $columns = 7,
         int $rows = 6,
         int $connectCount = 4
-    ): self {
+    ): static {
         // Initialize empty board: rows x columns, all null
         $board = array_fill(0, $rows, array_fill(0, $columns, null));
 
@@ -194,10 +194,10 @@ class GameState extends BaseGameState
      * $gameState = ValidateFourGameState::fromArray($game->game_state);
      * ```
      *
-     * @param array<string, mixed> $stateData Associative array from database JSON
+     * @param  array<string, mixed>  $stateData  Associative array from database JSON
      * @return self Restored immutable game state instance
      */
-    public static function fromArray(array $stateData): self
+    public static function fromArray(array $stateData): static
     {
         // Restore players from array
         $players = [];
@@ -206,10 +206,10 @@ class GameState extends BaseGameState
         }
 
         // Parse phase and status enums
-        $phase = isset($stateData['phase']) 
+        $phase = isset($stateData['phase'])
             ? GamePhase::from($stateData['phase'])
             : GamePhase::ACTIVE;
-            
+
         $status = isset($stateData['status'])
             ? GameStatus::from($stateData['status'])
             : GameStatus::ACTIVE;
@@ -267,8 +267,6 @@ class GameState extends BaseGameState
     /**
      * Get the disc owner at a specific position (row, column).
      *
-     * @param int $row
-     * @param int $column
      * @return string|null Player ULID or null if empty
      */
     public function getDiscAt(int $row, int $column): ?string
@@ -276,6 +274,7 @@ class GameState extends BaseGameState
         if ($row < 0 || $row >= $this->rows || $column < 0 || $column >= $this->columns) {
             return null;
         }
+
         return $this->board[$row][$column];
     }
 
@@ -283,7 +282,6 @@ class GameState extends BaseGameState
      * Find the lowest empty row in a column (where disc would land).
      * Returns the row index from bottom to top.
      *
-     * @param int $column
      * @return int|null The row index, or null if column is full
      */
     public function getLowestEmptyRow(int $column): ?int
@@ -298,13 +296,12 @@ class GameState extends BaseGameState
                 return $row;
             }
         }
+
         return null; // Column is full
     }
 
     /**
      * Check if the board is completely full (draw condition).
-     *
-     * @return bool
      */
     public function isBoardFull(): bool
     {
@@ -314,6 +311,7 @@ class GameState extends BaseGameState
                 return false;
             }
         }
+
         return true;
     }
 
@@ -321,12 +319,9 @@ class GameState extends BaseGameState
      * Create a new state with a disc placed at the specified position.
      * Returns a new immutable instance.
      *
-     * @param int $row
-     * @param int $column
-     * @param string $playerUlid
      * @return self
      */
-    public function withDiscAt(int $row, int $column, string $playerUlid): self
+    public function withDiscAt(int $row, int $column, string $playerUlid): static
     {
         $newBoard = $this->board;
         $newBoard[$row][$column] = $playerUlid;
@@ -350,13 +345,13 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withNextPlayer(): self
+    public function withNextPlayer(): static
     {
         // Get player ULIDs in position order
         $playersByPosition = $this->players;
-        uasort($playersByPosition, fn($a, $b) => $a->position <=> $b->position);
+        uasort($playersByPosition, fn ($a, $b) => $a->position <=> $b->position);
         $playerUlids = array_keys($playersByPosition);
-        
+
         // Find current player index and advance to next
         $currentIndex = array_search($this->currentPlayerUlid, $playerUlids);
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
@@ -379,10 +374,10 @@ class GameState extends BaseGameState
     /**
      * Create a new state with updated phase.
      *
-     * @param GamePhase $phase New phase
+     * @param  GamePhase  $phase  New phase
      * @return self
      */
-    public function withPhase(GamePhase $phase): self
+    public function withPhase(GamePhase $phase): static
     {
         return new self(
             players: $this->players,
@@ -401,10 +396,10 @@ class GameState extends BaseGameState
     /**
      * Create a new state with updated status.
      *
-     * @param GameStatus $status New status
+     * @param  GameStatus  $status  New status
      * @return self
      */
-    public function withStatus(GameStatus $status): self
+    public function withStatus(GameStatus $status): static
     {
         return new self(
             players: $this->players,
@@ -423,10 +418,9 @@ class GameState extends BaseGameState
     /**
      * Create a new state with a winner set.
      *
-     * @param string $winnerUlid
      * @return self
      */
-    public function withWinner(string $winnerUlid): self
+    public function withWinner(string $winnerUlid): static
     {
         return new self(
             players: $this->players,
@@ -447,7 +441,7 @@ class GameState extends BaseGameState
      *
      * @return self
      */
-    public function withDraw(): self
+    public function withDraw(): static
     {
         return new self(
             players: $this->players,
@@ -464,12 +458,9 @@ class GameState extends BaseGameState
     }
 
     /**
-     * Create a new state with an updated board (for complex operations like pop out).
-     *
-     * @param array $newBoard
-     * @return self
+     * Create a new state with a completely new board.
      */
-    public function withBoard(array $newBoard): self
+    public function withBoard(array $newBoard): static
     {
         return new self(
             players: $this->players,

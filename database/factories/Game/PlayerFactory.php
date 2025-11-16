@@ -6,7 +6,6 @@ use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Player>
@@ -42,7 +41,7 @@ class PlayerFactory extends Factory
     public function position(int $position): static
     {
         $colors = ['red', 'yellow', 'blue', 'green'];
-        
+
         return $this->state(fn (array $attributes) => [
             'position_id' => $position,
             'color' => $colors[($position - 1) % count($colors)],

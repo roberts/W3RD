@@ -45,12 +45,12 @@ class GameOutcome
     /**
      * Create a new game outcome.
      *
-     * @param bool $isFinished Whether the game has ended
-     * @param string|null $winnerUlid ULID of the winning player, or null if no winner yet
-     * @param bool $isDraw Whether the game ended in a draw
-     * @param array<int, string> $rankings Array of player ULIDs in finishing order (1st to last)
-     * @param array<string, int|float> $scores Map of player ULID to final score
-     * @param string|null $reason Machine-readable reason for end (e.g., 'four_in_a_row', 'timeout', 'forfeit')
+     * @param  bool  $isFinished  Whether the game has ended
+     * @param  string|null  $winnerUlid  ULID of the winning player, or null if no winner yet
+     * @param  bool  $isDraw  Whether the game ended in a draw
+     * @param  array<int, string>  $rankings  Array of player ULIDs in finishing order (1st to last)
+     * @param  array<string, int|float>  $scores  Map of player ULID to final score
+     * @param  string|null  $reason  Machine-readable reason for end (e.g., 'four_in_a_row', 'timeout', 'forfeit')
      */
     public function __construct(
         public readonly bool $isFinished,
@@ -63,8 +63,6 @@ class GameOutcome
 
     /**
      * Create an outcome for a game still in progress.
-     *
-     * @return self
      */
     public static function inProgress(): self
     {
@@ -74,9 +72,8 @@ class GameOutcome
     /**
      * Create an outcome for a simple win.
      *
-     * @param string $winnerUlid ULID of the winning player
-     * @param string|null $reason Machine-readable reason for the win
-     * @return self
+     * @param  string  $winnerUlid  ULID of the winning player
+     * @param  string|null  $reason  Machine-readable reason for the win
      */
     public static function win(string $winnerUlid, ?string $reason = null): self
     {
@@ -90,8 +87,7 @@ class GameOutcome
     /**
      * Create an outcome for a draw.
      *
-     * @param string|null $reason Machine-readable reason for the draw
-     * @return self
+     * @param  string|null  $reason  Machine-readable reason for the draw
      */
     public static function draw(?string $reason = null): self
     {

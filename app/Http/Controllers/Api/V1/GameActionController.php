@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Events\GameActionProcessed;
-use App\Games\GameServiceProvider;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
+use App\Providers\GameServiceProvider;
 use App\Services\GameActionRecorder;
 use App\Services\Timeouts\ForfeitHandler;
-use App\Services\Timeouts\PassHandler;
 use App\Services\Timeouts\NoneHandler;
+use App\Services\Timeouts\PassHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,23 +22,11 @@ class GameActionController extends Controller
 
     /**
      * Process a player's action in a game.
-     *
-     * @param Request $request
-     * @param string $gameUlid
-     * @return JsonResponse
      */
     public function store(Request $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify game has a mode configured
-        if (!$game->mode) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'This game does not have a valid mode configured.',
-            ], 500);
-        }
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
         try {
@@ -52,7 +40,7 @@ class GameActionController extends Controller
 
         // Verify the authenticated user is a player in this game
         $player = $game->players()->where('user_id', Auth::id())->first();
-        if (!$player) {
+        if (! $player) {
             return response()->json([
                 'error' => 'Forbidden',
                 'message' => 'You are not a player in this game.',
@@ -81,26 +69,26 @@ class GameActionController extends Controller
         $deadline = $mode->getActionDeadline($game);
         if (now()->isAfter($deadline)) {
             $penalty = $mode->getTimeoutPenalty();
-            
+
             // Get timeout handler
-            $timeoutHandler = match($penalty) {
-                'forfeit' => new ForfeitHandler(),
-                'pass' => new PassHandler(),
-                'none' => new NoneHandler(),
-                default => new NoneHandler(),
+            $timeoutHandler = match ($penalty) {
+                'forfeit' => new ForfeitHandler,
+                'pass' => new PassHandler,
+                'none' => new NoneHandler,
+                default => new NoneHandler,
             };
 
             $outcome = $timeoutHandler->handleTimeout($game, $mode->getGameState(), $mode->getGameState()->currentPlayerUlid);
-            
+
             if ($outcome->isFinished) {
                 $game->status = 'completed';
                 $game->finish_reason = $outcome->reason;
-                
+
                 if ($outcome->winnerUlid) {
                     $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                     $game->winner_id = $winner->id;
                 }
-                
+
                 $game->save();
 
                 return response()->json([
@@ -149,7 +137,7 @@ class GameActionController extends Controller
 
         // Validate the action with rich error feedback
         $validationResult = $mode->validateAction($action);
-        if (!$validationResult->isValid) {
+        if (! $validationResult->isValid) {
             // Record failed action for debugging
             $this->actionRecorder->recordFailure(
                 $game,
@@ -175,19 +163,19 @@ class GameActionController extends Controller
         if ($outcome->isFinished) {
             $game->status = 'completed';
             $game->finish_reason = $outcome->reason;
-            
+
             if ($outcome->winnerUlid) {
                 $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                 $game->winner_id = $winner->id;
                 $gameState = $gameState->withWinner($outcome->winnerUlid);
             }
-            
+
             if ($outcome->isDraw) {
                 $gameState = $gameState->withDraw();
             }
 
             // Store rankings and scores if provided
-            if (!empty($outcome->rankings)) {
+            if (! empty($outcome->rankings)) {
                 $gameStateArray = $gameState->toArray();
                 $gameStateArray['final_rankings'] = $outcome->rankings;
                 $gameStateArray['final_scores'] = $outcome->scores;
@@ -241,22 +229,11 @@ class GameActionController extends Controller
 
     /**
      * Get available actions for the current player.
-     *
-     * @param string $gameUlid
-     * @return JsonResponse
      */
     public function availableActions(string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify game has a mode configured
-        if (!$game->mode) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'This game does not have a valid mode configured.',
-            ], 500);
-        }
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
         try {
@@ -270,7 +247,7 @@ class GameActionController extends Controller
 
         // Get the player
         $player = $game->players()->where('user_id', Auth::id())->first();
-        if (!$player) {
+        if (! $player) {
             return response()->json([
                 'available_actions' => [],
                 'is_your_turn' => false,

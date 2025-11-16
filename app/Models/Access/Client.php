@@ -7,10 +7,11 @@ use App\Models\Auth\Entry;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Roberts\Support\Traits\HasCreator;
 
 class Client extends Model
 {
-    use HasFactory;
+    use HasCreator, HasFactory;
 
     protected $fillable = [
         'name',
@@ -18,6 +19,7 @@ class Client extends Model
         'platform',
         'is_active',
         'website',
+        'creator_id',
     ];
 
     protected $casts = [
@@ -28,7 +30,7 @@ class Client extends Model
     public function getWebsiteLinkAttribute(): ?string
     {
         if ($this->website) {
-            return 'https://' . $this->website;
+            return 'https://'.$this->website;
         }
 
         return null;

@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Games\BaseGameTitle;
 use App\Games\ValidateFour\Modes\PopOutMode;
 use App\Games\ValidateFour\Modes\StandardMode;
-use App\Models\Game;
+use App\Models\Game\Game;
 use Illuminate\Support\ServiceProvider;
 
 class GameServiceProvider extends ServiceProvider

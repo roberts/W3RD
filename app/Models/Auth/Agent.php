@@ -61,7 +61,7 @@ class Agent extends Model
         }
 
         $currentHourEst = now('America/New_York')->hour;
-        
+
         return $currentHourEst === $this->available_hour_est;
     }
 
@@ -81,7 +81,7 @@ class Agent extends Model
 
     public function getDifficultyLabel(): string
     {
-        return match(true) {
+        return match (true) {
             $this->difficulty <= 2 => 'Very Easy',
             $this->difficulty <= 4 => 'Easy',
             $this->difficulty <= 6 => 'Medium',

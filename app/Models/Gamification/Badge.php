@@ -6,16 +6,18 @@ use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Roberts\Support\Traits\HasCreator;
 
 class Badge extends Model
 {
-    use HasFactory;
+    use HasCreator, HasFactory;
 
     protected $fillable = [
         'slug',
         'name',
         'image_id',
         'condition_json',
+        'creator_id',
     ];
 
     protected $casts = [

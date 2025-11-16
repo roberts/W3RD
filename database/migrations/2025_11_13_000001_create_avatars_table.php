@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('name', 50)->unique();
             $table->foreignId('image_id')->nullable()->constrained('images');
             $table->string('type')->default(AvatarType::FREE->value);
+            $table->foreignId('creator_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

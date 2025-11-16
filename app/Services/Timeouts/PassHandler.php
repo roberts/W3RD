@@ -19,11 +19,6 @@ class PassHandler implements TimeoutHandlerContract
      * Handle timeout by passing the turn.
      *
      * The game state is advanced to the next player without any action.
-     *
-     * @param Game $game
-     * @param object $gameState
-     * @param string $timedOutPlayerUlid
-     * @return GameOutcome
      */
     public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
     {
@@ -33,8 +28,6 @@ class PassHandler implements TimeoutHandlerContract
 
     /**
      * Get the handler name.
-     *
-     * @return string
      */
     public function getName(): string
     {

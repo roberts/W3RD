@@ -18,9 +18,9 @@ interface TimeoutHandlerContract
     /**
      * Handle a player timeout.
      *
-     * @param Game $game The game instance
-     * @param object $gameState The current game state
-     * @param string $timedOutPlayerUlid The player who timed out
+     * @param  Game  $game  The game instance
+     * @param  object  $gameState  The current game state
+     * @param  string  $timedOutPlayerUlid  The player who timed out
      * @return GameOutcome The outcome after applying timeout penalty
      */
     public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome;

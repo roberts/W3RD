@@ -19,11 +19,6 @@ class NoneHandler implements TimeoutHandlerContract
      * Handle timeout by doing nothing.
      *
      * Game continues normally as if no timeout occurred.
-     *
-     * @param Game $game
-     * @param object $gameState
-     * @param string $timedOutPlayerUlid
-     * @return GameOutcome
      */
     public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
     {
@@ -33,8 +28,6 @@ class NoneHandler implements TimeoutHandlerContract
 
     /**
      * Get the handler name.
-     *
-     * @return string
      */
     public function getName(): string
     {

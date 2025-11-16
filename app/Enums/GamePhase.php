@@ -27,8 +27,6 @@ enum GamePhase: string
 
     /**
      * Get a human-readable label for the phase.
-     *
-     * @return string
      */
     public function label(): string
     {
@@ -43,8 +41,6 @@ enum GamePhase: string
 
     /**
      * Get a description of the phase.
-     *
-     * @return string
      */
     public function description(): string
     {

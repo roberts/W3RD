@@ -1,44 +1,38 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Lobby and Matchmaking System
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `003-lobby-and-matchmaking` | **Date**: 2025-11-16 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/003-lobby-and-matchmaking/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+This plan details the implementation of a comprehensive matchmaking and lobby system. It includes a high-speed public "Quickplay" queue using Redis for automated matchmaking with an AI fallback, and a persistent, database-driven lobby system for private (invite-only) and public (discoverable) games. The lobby system supports scheduling, minimum player counts, and host management features.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: PHP 8.3
+**Primary Dependencies**: Laravel 12, Livewire, Redis, Pest
+**Storage**: MySQL/PostgreSQL (for persistent lobbies), Redis (for queues, confirmations, cooldowns)
+**Testing**: Pest (Unit, Feature), PHPUnit
+**Target Platform**: Linux Web Server
+**Project Type**: Web Application
+**Performance Goals**: Find public match for 95% of players within 60s; Support 10,000 concurrent users.
+**Constraints**: Must use Laravel Reverb for real-time notifications.
+**Scale/Scope**: 10,000 concurrent users across both Quickplay and lobby systems.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+This project does not have a `.specify/memory/constitution.md` file with defined principles. All gates pass by default.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/003-lobby-and-matchmaking/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
@@ -48,51 +42,53 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+# Web application structure
+app/
+├── Enums/
+│   ├── LobbyStatus.php
+│   └── LobbyPlayerStatus.php
+├── Events/
+│   ├── GameFound.php
+│   ├── LobbyInvitation.php
+│   └── LobbyReadyCheck.php
+├── Http/
+│   └── Controllers/
+│       └── Api/
+│           └── V1/
+│               ├── QuickplayController.php
+│               ├── LobbyController.php
+│               └── LobbyPlayerController.php
+├── Jobs/
+│   ├── ProcessQuickplayQueue.php
+│   └── ProcessScheduledLobbies.php
+├── Models/
+│   ├── Lobby.php
+│   └── LobbyPlayer.php
+└── Services/
+    └── SchedulingService.php # (Existing, to be modified)
+
+database/
+├── factories/
+│   ├── LobbyFactory.php
+│   └── LobbyPlayerFactory.php
+└── migrations/
+    ├── ####_##_##_######_create_lobbies_table.php
+    └── ####_##_##_######_create_lobby_players_table.php
+
+routes/
+└── api.php # (Existing, to be modified)
 
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+├── Feature/
+│   ├── LobbyTest.php
+│   └── QuickplayTest.php
+└── Unit/
+    ├── LobbyTest.php
+    └── QuickplayTest.php
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: The feature will be integrated into the existing Laravel web application structure. New models, controllers, jobs, and events will be created in their respective `app/` subdirectories. Database migrations and factories will be added, and tests will be placed in `tests/Feature` and `tests/Unit`.
 
 ## Complexity Tracking
 
@@ -100,5 +96,4 @@ directories captured above]
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| N/A       | N/A        | N/A                                 |

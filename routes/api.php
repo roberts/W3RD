@@ -12,5 +12,6 @@ Route::prefix('v1')->group(function () {
     // Game Actions API (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
+        Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
     });
 });

@@ -15,7 +15,6 @@ class Mode extends Model
         'title_slug',
         'slug',
         'name',
-        'handler_class',
         'is_active',
     ];
 

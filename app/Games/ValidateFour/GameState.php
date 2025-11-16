@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour;
 
+use App\Enums\GamePhase;
+use App\Enums\GameStatus;
+use App\Games\BaseGameState;
+
 /**
  * Immutable game state for Validate Four (Connect Four variant).
  *
- * This class uses an immutable architecture where state cannot be modified after creation.
- * All state changes return a new instance with the updated values.
+ * This class extends BaseGameState and adds Validate Four-specific state
+ * (board, dimensions, connect count).
  *
  * ## Board Structure
  * The board is a 2D array: `board[row][column]` where:
@@ -57,7 +61,7 @@ namespace App\Games\ValidateFour;
  *
  * @see \App\Interfaces\GameTitleContract For the interface all game modes must implement
  */
-class ValidateFourGameState
+class GameState extends BaseGameState
 {
     /**
      * Board structure: board[row][column] where:
@@ -79,53 +83,41 @@ class ValidateFourGameState
     /** @var int Number of discs to connect in a row to win */
     public readonly int $connectCount;
 
-    /** @var string ULID of the player whose turn it is */
-    public readonly string $currentPlayerUlid;
-
-    /** @var string ULID of player one */
-    public readonly string $playerOneUlid;
-
-    /** @var string ULID of player two */
-    public readonly string $playerTwoUlid;
-
-    /** @var string|null ULID of the winning player, null if no winner yet */
-    public readonly ?string $winnerUlid;
-
     /** @var bool True if game ended in a draw */
     public readonly bool $isDraw;
 
     /**
-     * Private constructor - use static factory methods to create instances.
+     * Create a new Validate Four game state.
      *
+     * @param array<string, PlayerState> $players Map of player ULID to PlayerState
+     * @param string|null $currentPlayerUlid ULID of current player
+     * @param string|null $winnerUlid ULID of winner
+     * @param GamePhase $phase Current game phase
+     * @param GameStatus $status Current game status
      * @param array<int, array<int, string|null>> $board The game board
-     * @param string $playerOneUlid ULID of player one
-     * @param string $playerTwoUlid ULID of player two
-     * @param string $currentPlayerUlid ULID of current player
      * @param int $columns Number of columns
      * @param int $rows Number of rows
      * @param int $connectCount Number to connect to win
-     * @param string|null $winnerUlid ULID of winner
      * @param bool $isDraw Whether game is a draw
      */
-    private function __construct(
+    public function __construct(
+        array $players,
+        ?string $currentPlayerUlid,
+        ?string $winnerUlid,
+        GamePhase $phase,
+        GameStatus $status,
         array $board,
-        string $playerOneUlid,
-        string $playerTwoUlid,
-        string $currentPlayerUlid,
         int $columns,
         int $rows,
         int $connectCount,
-        ?string $winnerUlid = null,
         bool $isDraw = false,
     ) {
+        parent::__construct($players, $currentPlayerUlid, $winnerUlid, $phase, $status);
+        
         $this->board = $board;
-        $this->playerOneUlid = $playerOneUlid;
-        $this->playerTwoUlid = $playerTwoUlid;
-        $this->currentPlayerUlid = $currentPlayerUlid;
         $this->columns = $columns;
         $this->rows = $rows;
         $this->connectCount = $connectCount;
-        $this->winnerUlid = $winnerUlid;
         $this->isDraw = $isDraw;
     }
 
@@ -163,11 +155,27 @@ class ValidateFourGameState
         // Initialize empty board: rows x columns, all null
         $board = array_fill(0, $rows, array_fill(0, $columns, null));
 
+        // Create player states
+        $players = [
+            $playerOneUlid => new PlayerState(
+                ulid: $playerOneUlid,
+                position: 1,
+                color: 'red'
+            ),
+            $playerTwoUlid => new PlayerState(
+                ulid: $playerTwoUlid,
+                position: 2,
+                color: 'yellow'
+            ),
+        ];
+
         return new self(
-            board: $board,
-            playerOneUlid: $playerOneUlid,
-            playerTwoUlid: $playerTwoUlid,
+            players: $players,
             currentPlayerUlid: $playerOneUlid,
+            winnerUlid: null,
+            phase: GamePhase::ACTIVE,
+            status: GameStatus::ACTIVE,
+            board: $board,
             columns: $columns,
             rows: $rows,
             connectCount: $connectCount,
@@ -191,15 +199,31 @@ class ValidateFourGameState
      */
     public static function fromArray(array $stateData): self
     {
+        // Restore players from array
+        $players = [];
+        foreach ($stateData['players'] ?? [] as $ulid => $playerData) {
+            $players[$ulid] = PlayerState::fromArray($playerData);
+        }
+
+        // Parse phase and status enums
+        $phase = isset($stateData['phase']) 
+            ? GamePhase::from($stateData['phase'])
+            : GamePhase::ACTIVE;
+            
+        $status = isset($stateData['status'])
+            ? GameStatus::from($stateData['status'])
+            : GameStatus::ACTIVE;
+
         return new self(
+            players: $players,
+            currentPlayerUlid: $stateData['current_player_ulid'] ?? null,
+            winnerUlid: $stateData['winner_ulid'] ?? null,
+            phase: $phase,
+            status: $status,
             board: $stateData['board'] ?? [],
-            playerOneUlid: $stateData['player_one_ulid'] ?? '',
-            playerTwoUlid: $stateData['player_two_ulid'] ?? '',
-            currentPlayerUlid: $stateData['current_player_ulid'] ?? '',
             columns: $stateData['columns'] ?? 7,
             rows: $stateData['rows'] ?? 6,
             connectCount: $stateData['connect_count'] ?? 4,
-            winnerUlid: $stateData['winner_ulid'] ?? null,
             isDraw: $stateData['is_draw'] ?? false,
         );
     }
@@ -220,15 +244,22 @@ class ValidateFourGameState
      */
     public function toArray(): array
     {
+        // Serialize players to array
+        $playersArray = [];
+        foreach ($this->players as $ulid => $playerState) {
+            $playersArray[$ulid] = $playerState->toArray();
+        }
+
         return [
+            'players' => $playersArray,
+            'current_player_ulid' => $this->currentPlayerUlid,
+            'winner_ulid' => $this->winnerUlid,
+            'phase' => $this->phase->value,
+            'status' => $this->status->value,
             'board' => $this->board,
             'columns' => $this->columns,
             'rows' => $this->rows,
             'connect_count' => $this->connectCount,
-            'current_player_ulid' => $this->currentPlayerUlid,
-            'player_one_ulid' => $this->playerOneUlid,
-            'player_two_ulid' => $this->playerTwoUlid,
-            'winner_ulid' => $this->winnerUlid,
             'is_draw' => $this->isDraw,
         ];
     }
@@ -301,14 +332,15 @@ class ValidateFourGameState
         $newBoard[$row][$column] = $playerUlid;
 
         return new self(
-            board: $newBoard,
-            playerOneUlid: $this->playerOneUlid,
-            playerTwoUlid: $this->playerTwoUlid,
+            players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
+            winnerUlid: $this->winnerUlid,
+            phase: $this->phase,
+            status: $this->status,
+            board: $newBoard,
             columns: $this->columns,
             rows: $this->rows,
             connectCount: $this->connectCount,
-            winnerUlid: $this->winnerUlid,
             isDraw: $this->isDraw,
         );
     }
@@ -320,19 +352,70 @@ class ValidateFourGameState
      */
     public function withNextPlayer(): self
     {
-        $nextPlayer = $this->currentPlayerUlid === $this->playerOneUlid
-            ? $this->playerTwoUlid
-            : $this->playerOneUlid;
+        // Get player ULIDs in position order
+        $playersByPosition = $this->players;
+        uasort($playersByPosition, fn($a, $b) => $a->position <=> $b->position);
+        $playerUlids = array_keys($playersByPosition);
+        
+        // Find current player index and advance to next
+        $currentIndex = array_search($this->currentPlayerUlid, $playerUlids);
+        $nextIndex = ($currentIndex + 1) % count($playerUlids);
+        $nextPlayerUlid = $playerUlids[$nextIndex];
 
         return new self(
+            players: $this->players,
+            currentPlayerUlid: $nextPlayerUlid,
+            winnerUlid: $this->winnerUlid,
+            phase: $this->phase,
+            status: $this->status,
             board: $this->board,
-            playerOneUlid: $this->playerOneUlid,
-            playerTwoUlid: $this->playerTwoUlid,
-            currentPlayerUlid: $nextPlayer,
             columns: $this->columns,
             rows: $this->rows,
             connectCount: $this->connectCount,
+            isDraw: $this->isDraw,
+        );
+    }
+
+    /**
+     * Create a new state with updated phase.
+     *
+     * @param GamePhase $phase New phase
+     * @return self
+     */
+    public function withPhase(GamePhase $phase): self
+    {
+        return new self(
+            players: $this->players,
+            currentPlayerUlid: $this->currentPlayerUlid,
             winnerUlid: $this->winnerUlid,
+            phase: $phase,
+            status: $this->status,
+            board: $this->board,
+            columns: $this->columns,
+            rows: $this->rows,
+            connectCount: $this->connectCount,
+            isDraw: $this->isDraw,
+        );
+    }
+
+    /**
+     * Create a new state with updated status.
+     *
+     * @param GameStatus $status New status
+     * @return self
+     */
+    public function withStatus(GameStatus $status): self
+    {
+        return new self(
+            players: $this->players,
+            currentPlayerUlid: $this->currentPlayerUlid,
+            winnerUlid: $this->winnerUlid,
+            phase: $this->phase,
+            status: $status,
+            board: $this->board,
+            columns: $this->columns,
+            rows: $this->rows,
+            connectCount: $this->connectCount,
             isDraw: $this->isDraw,
         );
     }
@@ -346,14 +429,15 @@ class ValidateFourGameState
     public function withWinner(string $winnerUlid): self
     {
         return new self(
-            board: $this->board,
-            playerOneUlid: $this->playerOneUlid,
-            playerTwoUlid: $this->playerTwoUlid,
+            players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
+            winnerUlid: $winnerUlid,
+            phase: GamePhase::FINISHED,
+            status: GameStatus::COMPLETED,
+            board: $this->board,
             columns: $this->columns,
             rows: $this->rows,
             connectCount: $this->connectCount,
-            winnerUlid: $winnerUlid,
             isDraw: false,
         );
     }
@@ -366,14 +450,15 @@ class ValidateFourGameState
     public function withDraw(): self
     {
         return new self(
-            board: $this->board,
-            playerOneUlid: $this->playerOneUlid,
-            playerTwoUlid: $this->playerTwoUlid,
+            players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
+            winnerUlid: null,
+            phase: GamePhase::FINISHED,
+            status: GameStatus::COMPLETED,
+            board: $this->board,
             columns: $this->columns,
             rows: $this->rows,
             connectCount: $this->connectCount,
-            winnerUlid: null,
             isDraw: true,
         );
     }
@@ -387,14 +472,15 @@ class ValidateFourGameState
     public function withBoard(array $newBoard): self
     {
         return new self(
-            board: $newBoard,
-            playerOneUlid: $this->playerOneUlid,
-            playerTwoUlid: $this->playerTwoUlid,
+            players: $this->players,
             currentPlayerUlid: $this->currentPlayerUlid,
+            winnerUlid: $this->winnerUlid,
+            phase: $this->phase,
+            status: $this->status,
+            board: $newBoard,
             columns: $this->columns,
             rows: $this->rows,
             connectCount: $this->connectCount,
-            winnerUlid: $this->winnerUlid,
             isDraw: $this->isDraw,
         );
     }

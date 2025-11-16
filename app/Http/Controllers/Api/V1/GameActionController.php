@@ -3,14 +3,23 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Events\GameActionProcessed;
+use App\Games\GameServiceProvider;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
+use App\Services\GameActionRecorder;
+use App\Services\Timeouts\ForfeitHandler;
+use App\Services\Timeouts\PassHandler;
+use App\Services\Timeouts\NoneHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GameActionController extends Controller
 {
+    public function __construct(
+        protected GameActionRecorder $actionRecorder
+    ) {}
+
     /**
      * Process a player's action in a game.
      *
@@ -33,7 +42,7 @@ class GameActionController extends Controller
 
         // Get the mode handler
         try {
-            $mode = $game->mode->getHandler();
+            $mode = GameServiceProvider::getMode($game);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Configuration error',
@@ -69,26 +78,45 @@ class GameActionController extends Controller
         $gameState = $stateClass::fromArray($game->game_state ?? []);
 
         // Check if current turn has timed out
-        $deadline = $mode->getActionDeadline($gameState, $game);
+        $deadline = $mode->getActionDeadline($game);
         if (now()->isAfter($deadline)) {
             $penalty = $mode->getTimeoutPenalty();
             
-            if ($penalty === 'forfeit') {
-                // Forfeit the game - other player wins
+            // Get timeout handler
+            $timeoutHandler = match($penalty) {
+                'forfeit' => new ForfeitHandler(),
+                'pass' => new PassHandler(),
+                'none' => new NoneHandler(),
+                default => new NoneHandler(),
+            };
+
+            $outcome = $timeoutHandler->handleTimeout($game, $mode->getGameState(), $mode->getGameState()->currentPlayerUlid);
+            
+            if ($outcome->isFinished) {
                 $game->status = 'completed';
-                $game->winner_id = $game->players()
-                    ->where('ulid', '!=', $gameState->currentPlayerUlid)
-                    ->first()
-                    ->id;
+                $game->finish_reason = $outcome->reason;
+                
+                if ($outcome->winnerUlid) {
+                    $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
+                    $game->winner_id = $winner->id;
+                }
+                
                 $game->save();
 
                 return response()->json([
                     'error' => 'Action timeout',
                     'message' => 'Your turn has timed out. You have forfeited the game.',
                     'game_status' => 'completed',
-                    'penalty' => 'forfeit',
+                    'penalty' => $penalty,
                 ], 408);
-            } elseif ($penalty === 'pass') {
+            }
+
+            // Pass strategy - advance to next player
+            if ($penalty === 'pass') {
+                $gameState = $mode->getGameState()->withNextPlayer();
+                $game->game_state = $gameState->toArray();
+                $game->save();
+
                 return response()->json([
                     'error' => 'Action timeout',
                     'message' => 'Your turn has timed out and has been passed.',
@@ -98,7 +126,7 @@ class GameActionController extends Controller
         }
 
         // Verify it's this player's turn
-        if ($gameState->currentPlayerUlid !== $player->ulid) {
+        if ($mode->getGameState()->currentPlayerUlid !== $player->ulid) {
             return response()->json([
                 'error' => 'Invalid turn',
                 'message' => 'It is not your turn.',
@@ -119,48 +147,69 @@ class GameActionController extends Controller
             ], 400);
         }
 
-        // Validate the action
-        if (!$mode->validateAction($gameState, $action)) {
+        // Validate the action with rich error feedback
+        $validationResult = $mode->validateAction($action);
+        if (!$validationResult->isValid) {
+            // Record failed action for debugging
+            $this->actionRecorder->recordFailure(
+                $game,
+                $player,
+                $action,
+                $validationResult,
+                $game->turn_number ?? 1
+            );
+
             return response()->json([
                 'error' => 'Invalid move',
-                'message' => 'This move is not valid.',
+                'error_code' => $validationResult->errorCode,
+                'message' => $validationResult->message,
+                'context' => $validationResult->context,
             ], 400);
         }
 
         // Apply the action
-        $gameState = $mode->applyAction($gameState, $action);
+        $gameState = $mode->applyAction($action);
 
-        // Check for end condition
-        $winnerUlid = $mode->checkEndCondition($gameState);
-        if ($winnerUlid) {
+        // Check for end condition using new GameOutcome
+        $outcome = $mode->checkEndCondition();
+        if ($outcome->isFinished) {
             $game->status = 'completed';
-            $winner = $game->players()->where('ulid', $winnerUlid)->first();
-            $game->winner_id = $winner->id;
-            $gameState = $gameState->withWinner($winnerUlid);
-        } elseif ($gameState->isBoardFull()) {
-            $game->status = 'completed';
-            $gameState = $gameState->withDraw();
+            $game->finish_reason = $outcome->reason;
+            
+            if ($outcome->winnerUlid) {
+                $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
+                $game->winner_id = $winner->id;
+                $gameState = $gameState->withWinner($outcome->winnerUlid);
+            }
+            
+            if ($outcome->isDraw) {
+                $gameState = $gameState->withDraw();
+            }
+
+            // Store rankings and scores if provided
+            if (!empty($outcome->rankings)) {
+                $gameStateArray = $gameState->toArray();
+                $gameStateArray['final_rankings'] = $outcome->rankings;
+                $gameStateArray['final_scores'] = $outcome->scores;
+                $game->game_state = $gameStateArray;
+            } else {
+                $game->game_state = $gameState->toArray();
+            }
+        } else {
+            // Save the updated game state
+            $game->game_state = $gameState->toArray();
         }
 
-        // Save the updated game state
-        $game->game_state = $gameState->toArray();
         $game->save();
 
-        // Record the action in the actions table
-        $game->actions()->create([
-            'player_id' => $player->id,
-            'turn_number' => $game->turn_number ?? 1,
-            'action_type' => $validated['action_type'],
-            'action_details' => $validated['action_details'],
-            'status' => 'success',
-            'timestamp_client' => now(),
-        ]);
+        // Record the action using the service
+        $this->actionRecorder->recordSuccess($game, $player, $action, $game->turn_number ?? 1);
 
         // Increment turn number
         $game->increment('turn_number');
 
         // Calculate the next action deadline
-        $game->refresh(); // Refresh to get the just-created action
+        $game->refresh();
         $nextDeadline = $mode->getActionDeadline($gameState, $game);
 
         // Broadcast the action to all players via websocket
@@ -178,7 +227,8 @@ class GameActionController extends Controller
                 'status' => $game->status,
                 'game_state' => $game->game_state,
                 'winner_ulid' => $gameState->winnerUlid,
-                'is_draw' => $gameState->isDraw,
+                'is_draw' => $gameState->isDraw ?? false,
+                'finish_reason' => $outcome->reason ?? null,
             ],
             'next_action_deadline' => $nextDeadline->toIso8601String(),
             'timeout' => [
@@ -186,6 +236,60 @@ class GameActionController extends Controller
                 'grace_period_seconds' => 2,
                 'penalty' => $mode->getTimeoutPenalty(),
             ],
+        ]);
+    }
+
+    /**
+     * Get available actions for the current player.
+     *
+     * @param string $gameUlid
+     * @return JsonResponse
+     */
+    public function availableActions(string $gameUlid): JsonResponse
+    {
+        // Find the game by ULID
+        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
+
+        // Verify game has a mode configured
+        if (!$game->mode) {
+            return response()->json([
+                'error' => 'Configuration error',
+                'message' => 'This game does not have a valid mode configured.',
+            ], 500);
+        }
+
+        // Get the mode handler
+        try {
+            $mode = GameServiceProvider::getMode($game);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Configuration error',
+                'message' => 'Unable to load game mode handler.',
+            ], 500);
+        }
+
+        // Get the player
+        $player = $game->players()->where('user_id', Auth::id())->first();
+        if (!$player) {
+            return response()->json([
+                'available_actions' => [],
+                'is_your_turn' => false,
+                'message' => 'You are not a player in this game.',
+            ], 403);
+        }
+
+        // Get available actions from mode
+        $actions = $mode->getAvailableActions($player->ulid);
+
+        // Calculate deadline
+        $deadline = $mode->getActionDeadline($game);
+
+        return response()->json([
+            'available_actions' => $actions,
+            'is_your_turn' => $mode->getGameState()->currentPlayerUlid === $player->ulid,
+            'phase' => $mode->getGameState()->phase->value ?? 'active',
+            'deadline' => $deadline->toIso8601String(),
+            'timelimit_seconds' => $mode->getTimelimit(),
         ]);
     }
 }

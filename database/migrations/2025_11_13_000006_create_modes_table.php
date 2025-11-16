@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('title_slug', 50)->index();
             $table->string('slug', 50);
             $table->string('name');
-            $table->string('handler_class');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             

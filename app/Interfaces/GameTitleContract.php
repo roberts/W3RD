@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Interfaces;
 
+use App\Games\GameOutcome;
+use App\Games\ValidationResult;
 use App\Models\Game\Game;
 use Carbon\Carbon;
 
@@ -34,7 +36,7 @@ use Carbon\Carbon;
  * class StandardMode implements GameTitleContract
  * {
  *     // PHPDoc provides type hints for specific game
- *     public function validateAction(object $gameState, object $action): bool
+ *     public function validateAction(object $gameState, object $action): ValidationResult
  *     {
  *         assert($gameState instanceof ValidateFourGameState);
  *         assert($action instanceof DropDiscAction || $action instanceof PopOutAction);
@@ -101,16 +103,35 @@ interface GameTitleContract
     public function getActionFactory(): string;
 
     /**
+     * Get the structured rules for this game title.
+     *
+     * Returns a structured array containing the title, description, and
+     * sections of rules, which can be formatted with Markdown.
+     *
+     * @return array
+     */
+    public static function getRules(): array;
+
+    /**
      * Validate a player's action.
      *
      * Checks if the action is legal according to the game rules without modifying state.
-     * Must return bool - never throw exceptions during validation.
+     * Returns detailed validation result with error information for the UI.
+     *
+     * Example:
+     * ```php
+     * $result = $mode->validateAction($gameState, $action);
+     * if (!$result->isValid) {
+     *     // Display $result->message to user
+     *     // Use $result->errorCode for client-side logic
+     * }
+     * ```
      *
      * @param object $gameState The current game state object (e.g., ValidateFourGameState)
      * @param object $action The action DTO to validate (e.g., DropDiscAction)
-     * @return bool True if the action is valid, false otherwise
+     * @return ValidationResult Detailed validation result with error information
      */
-    public function validateAction(object $gameState, object $action): bool;
+    public function validateAction(object $gameState, object $action): ValidationResult;
 
     /**
      * Apply a valid action to the game state.
@@ -126,16 +147,47 @@ interface GameTitleContract
     public function applyAction(object $gameState, object $action): object;
 
     /**
-     * Check if the game has been won or drawn.
+     * Check if the game has been won, drawn, or is still in progress.
      *
-     * Returns the ULID of the winning player, or null if the game continues.
-     * Does not check for draws - the controller handles that separately via
-     * isBoardFull() or similar game-specific logic.
+     * Returns a rich outcome object supporting wins, draws, rankings, and scores.
+     * Used by the controller to determine if the game should end.
+     *
+     * Example:
+     * ```php
+     * $outcome = $mode->checkEndCondition($gameState);
+     * if ($outcome->isFinished) {
+     *     if ($outcome->isDraw) {
+     *         // Handle draw
+     *     } elseif ($outcome->winnerUlid) {
+     *         // Handle win
+     *     }
+     * }
+     * ```
      *
      * @param object $gameState The current game state object
-     * @return string|null The winning player's ULID, or null if game continues
+     * @return GameOutcome The game outcome (finished/in-progress, winner, draw, scores, etc.)
      */
-    public function checkEndCondition(object $gameState): ?string;
+    public function checkEndCondition(object $gameState): GameOutcome;
+
+    /**
+     * Get available actions for a specific player.
+     *
+     * Returns array of legal actions the player can take in the current game state.
+     * Used for client-side validation and UI updates.
+     *
+     * Example return format:
+     * ```php
+     * [
+     *     'drop_disc' => ['columns' => [0, 1, 2, 4, 5]],  // Column 3 is full
+     *     'pop_out' => ['columns' => [0, 2]],             // Only these have player's discs
+     * ]
+     * ```
+     *
+     * @param object $gameState The current game state object
+     * @param string $playerUlid The player's ULID
+     * @return array<string, mixed> Map of action types to their available parameters
+     */
+    public function getAvailableActions(object $gameState, string $playerUlid): array;
 
     /**
      * Get the timelimit in seconds for each action.

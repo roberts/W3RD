@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Auth;
 
+use App\Models\Access\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,6 +31,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'registration_client_id' => Client::factory(),
         ];
     }
 
@@ -44,7 +46,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the model does not have two-factor authentication configured.
+     * Indicate that the model does not have two-factor aSearcheduthentication configured.
      */
     public function withoutTwoFactor(): static
     {

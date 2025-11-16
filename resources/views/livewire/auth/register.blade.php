@@ -7,6 +7,7 @@
 
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
+            <input type="hidden" name="api_key" value="{{ $api_key }}">
             <!-- Name -->
             <flux:input
                 name="name"

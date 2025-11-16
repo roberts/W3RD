@@ -15,21 +15,17 @@ class ClientSeeder extends Seeder
     {
         $clients = [
             [
-                'name' => 'Web Application',
+                'name' => 'Gamer Protocol',
+                'website' => 'gamerprotocol.io',
                 'api_key' => Str::random(64),
                 'platform' => 'web',
                 'is_active' => true,
             ],
             [
-                'name' => 'iOS Application',
+                'name' => 'Token Games',
+                'website' => 'tokengames.io',
                 'api_key' => Str::random(64),
-                'platform' => 'ios',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Android Application',
-                'api_key' => Str::random(64),
-                'platform' => 'android',
+                'platform' => 'web',
                 'is_active' => true,
             ],
         ];

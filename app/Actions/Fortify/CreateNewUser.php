@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use App\Actions\Fortify\PasswordValidationRules;
+use App\Enums\ActionType;
+use App\Models\Auth\Entry;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -35,11 +38,20 @@ class CreateNewUser implements CreatesNewUsers
 
         $client = Client::where('api_key', $input['api_key'])->firstOrFail();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
             'registration_client_id' => $client->id,
         ]);
+
+        Entry::create([
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'action_type' => ActionType::REGISTER,
+            'ip_address' => request()->ip(),
+        ]);
+
+        return $user;
     }
 }

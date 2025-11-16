@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9956db607cc56e89abcc677033fb2bc0",
+    "content-hash": "ab7947249246c1c8d2d02451dab8a99c",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -563,6 +563,200 @@
                 }
             ],
             "time": "2024-07-16T11:13:48+00:00"
+        },
+        {
+            "name": "cloudinary-labs/cloudinary-laravel",
+            "version": "3.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cloudinary-community/cloudinary-laravel.git",
+                "reference": "575f4508f9fb50ee9b915e7b53868f5bc9ccf2bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cloudinary-community/cloudinary-laravel/zipball/575f4508f9fb50ee9b915e7b53868f5bc9ccf2bb",
+                "reference": "575f4508f9fb50ee9b915e7b53868f5bc9ccf2bb",
+                "shasum": ""
+            },
+            "require": {
+                "cloudinary/cloudinary_php": "^3.0",
+                "ext-json": "*",
+                "illuminate/support": "^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.20",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "pestphp/pest": "^2.35|^3.0",
+                "phpspec/prophecy-phpunit": "^2.3",
+                "sempro/phpunit-pretty-print": "^1.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "CloudinaryLabs\\CloudinaryLaravel\\CloudinaryServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "CloudinaryLabs\\CloudinaryLaravel\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Manders",
+                    "homepage": "https://github.com/joshmanders"
+                }
+            ],
+            "description": "A Laravel Cloudinary Package",
+            "homepage": "https://github.com/cloudinary-labs/cloudinary-laravel",
+            "keywords": [
+                "File Transformations",
+                "Media management",
+                "cloudinary",
+                "cloudinary-laravel",
+                "file uploads",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/cloudinary-community/cloudinary-laravel/issues",
+                "source": "https://github.com/cloudinary-community/cloudinary-laravel/tree/3.0.2"
+            },
+            "time": "2025-10-13T05:21:21+00:00"
+        },
+        {
+            "name": "cloudinary/cloudinary_php",
+            "version": "3.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cloudinary/cloudinary_php.git",
+                "reference": "c373c01db4ecfe9637b1cb384ab1587c4af86793"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cloudinary/cloudinary_php/zipball/c373c01db4ecfe9637b1cb384ab1587c4af86793",
+                "reference": "c373c01db4ecfe9637b1cb384ab1587c4af86793",
+                "shasum": ""
+            },
+            "require": {
+                "cloudinary/transformation-builder-sdk": "^2",
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.4.5",
+                "guzzlehttp/promises": "^1.5.3|^2.0",
+                "guzzlehttp/psr7": "^2.7",
+                "monolog/monolog": "^2|^3",
+                "php": ">=8.0.0",
+                "psr/log": "^2|^3"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-zip": "*",
+                "friendsofphp/php-cs-fixer": "*",
+                "phpmd/phpmd": "*",
+                "squizlabs/php_codesniffer": "*",
+                "symfony/phpunit-bridge": "^7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cloudinary",
+                    "homepage": "https://github.com/cloudinary/cloudinary_php/graphs/contributors"
+                }
+            ],
+            "description": "Cloudinary PHP SDK",
+            "homepage": "https://github.com/cloudinary/cloudinary_php",
+            "keywords": [
+                "cdn",
+                "cloud",
+                "cloudinary",
+                "image management",
+                "sdk"
+            ],
+            "support": {
+                "email": "info@cloudinary.com",
+                "issues": "https://github.com/cloudinary/cloudinary_php/issues",
+                "source": "https://github.com/cloudinary/cloudinary_php/tree/3.1.2"
+            },
+            "time": "2025-09-21T10:52:52+00:00"
+        },
+        {
+            "name": "cloudinary/transformation-builder-sdk",
+            "version": "2.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cloudinary/php-transformation-builder-sdk.git",
+                "reference": "6ff4a84f14dbc5197563db63b6abbbe77a68d7e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cloudinary/php-transformation-builder-sdk/zipball/6ff4a84f14dbc5197563db63b6abbbe77a68d7e7",
+                "reference": "6ff4a84f14dbc5197563db63b6abbbe77a68d7e7",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=8.0.0"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-zip": "*",
+                "friendsofphp/php-cs-fixer": "*",
+                "phpmd/phpmd": "*",
+                "squizlabs/php_codesniffer": "*",
+                "symfony/phpunit-bridge": "^7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cloudinary",
+                    "homepage": "https://github.com/cloudinary/php-transformation-builder-sdk/graphs/contributors"
+                }
+            ],
+            "description": "Cloudinary PHP Transformation Builder SDK",
+            "homepage": "https://github.com/cloudinary/php-transformation-builder-sdk",
+            "keywords": [
+                "cdn",
+                "cloud",
+                "cloudinary",
+                "image management",
+                "sdk"
+            ],
+            "support": {
+                "email": "info@cloudinary.com",
+                "issues": "https://github.com/cloudinary/php-transformation-builder-sdk/issues",
+                "source": "https://github.com/cloudinary/php-transformation-builder-sdk/tree/2.1.2"
+            },
+            "time": "2025-02-03T11:14:03+00:00"
         },
         {
             "name": "clue/redis-protocol",
@@ -1154,6 +1348,97 @@
                 }
             ],
             "time": "2025-10-31T18:51:33+00:00"
+        },
+        {
+            "name": "drewroberts/media",
+            "version": "v12.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/drewroberts/media.git",
+                "reference": "b761bf47f06a4595f7529b64599599317add2b85"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/drewroberts/media/zipball/b761bf47f06a4595f7529b64599599317add2b85",
+                "reference": "b761bf47f06a4595f7529b64599599317add2b85",
+                "shasum": ""
+            },
+            "require": {
+                "cloudinary-labs/cloudinary-laravel": "^3.0",
+                "filament/filament": "^4.1",
+                "illuminate/contracts": "^12.34",
+                "php": "^8.4",
+                "roberts/laravel-singledb-tenancy": "^1.0",
+                "roberts/support": "^1.0",
+                "spatie/eloquent-sortable": "^4.5",
+                "spatie/laravel-package-tools": "^1.92"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.10",
+                "guzzlehttp/promises": "^2.3",
+                "larastan/larastan": "^3.7",
+                "laravel/pint": "^1.24",
+                "nunomaduro/collision": "^8.8.2",
+                "orchestra/canvas": "^10.0.2",
+                "orchestra/testbench": "^10.8",
+                "orchestra/testbench-core": "^10.6.5",
+                "orchestra/workbench": "^10.0.6",
+                "pestphp/pest": "^4.1",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "psy/psysh": "^0.12.10",
+                "symfony/translation": "^7.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Media": "DrewRoberts\\Media\\Facades\\Media"
+                    },
+                    "providers": [
+                        "DrewRoberts\\Media\\MediaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DrewRoberts\\Media\\": "src/",
+                    "DrewRoberts\\Media\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Drew Roberts",
+                    "email": "github@drewroberts.com",
+                    "homepage": "https://drewroberts.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel Package for opinionated usage of Media (images & videos)",
+            "homepage": "https://github.com/drewroberts/media",
+            "keywords": [
+                "laravel",
+                "laravel package",
+                "media"
+            ],
+            "support": {
+                "issues": "https://github.com/drewroberts/media/issues",
+                "source": "https://github.com/drewroberts/media/tree/v12.1.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/drewroberts",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-10-21T21:18:01+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -6907,6 +7192,96 @@
             "time": "2024-06-11T12:45:25+00:00"
         },
         {
+            "name": "roberts/laravel-singledb-tenancy",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/roberts/laravel-singledb-tenancy.git",
+                "reference": "cbabd5420ef6f6d4929d654bba92b89ddb231f79"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/roberts/laravel-singledb-tenancy/zipball/cbabd5420ef6f6d4929d654bba92b89ddb231f79",
+                "reference": "cbabd5420ef6f6d4929d654bba92b89ddb231f79",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0.1",
+                "illuminate/contracts": "^12.26",
+                "php": "^8.4",
+                "roberts/support": "^1.0",
+                "spatie/laravel-package-tools": "^1.92"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.10",
+                "guzzlehttp/promises": "^2.3",
+                "larastan/larastan": "^3.7",
+                "laravel/pint": "^1.24",
+                "nunomaduro/collision": "^8.8.2",
+                "orchestra/canvas": "^10.0.2",
+                "orchestra/testbench": "^10.8",
+                "orchestra/testbench-core": "^10.6.5",
+                "orchestra/workbench": "^10.0.6",
+                "pestphp/pest": "^4.1",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0.3",
+                "phpstan/phpstan-phpunit": "^2.0.7",
+                "psy/psysh": "^0.12.10",
+                "symfony/translation": "^7.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LaravelSingledbTenancy": "Roberts\\LaravelSingledbTenancy\\Facades\\LaravelSingledbTenancy"
+                    },
+                    "providers": [
+                        "Roberts\\LaravelSingledbTenancy\\LaravelSingledbTenancyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Helpers/Context.php"
+                ],
+                "psr-4": {
+                    "Roberts\\LaravelSingledbTenancy\\": "src/",
+                    "Roberts\\LaravelSingledbTenancy\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Drew Roberts",
+                    "email": "github@drewroberts.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel package for single database multi-tenancy",
+            "homepage": "https://github.com/roberts/laravel-singledb-tenancy",
+            "keywords": [
+                "laravel package",
+                "multi-tenancy",
+                "single database"
+            ],
+            "support": {
+                "issues": "https://github.com/roberts/laravel-singledb-tenancy/issues",
+                "source": "https://github.com/roberts/laravel-singledb-tenancy/tree/v1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/drewroberts",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-10-21T17:15:02+00:00"
+        },
+        {
             "name": "roberts/support",
             "version": "v1.0.0",
             "source": {
@@ -7149,6 +7524,80 @@
                 }
             ],
             "time": "2022-12-17T21:53:22+00:00"
+        },
+        {
+            "name": "spatie/eloquent-sortable",
+            "version": "4.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/eloquent-sortable.git",
+                "reference": "c1c4f3a66cd41eb7458783c8a4c8e5d7924a9f20"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/eloquent-sortable/zipball/c1c4f3a66cd41eb7458783c8a4c8e5d7924a9f20",
+                "reference": "c1c4f3a66cd41eb7458783c8a4c8e5d7924a9f20",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^9.31|^10.0|^11.0|^12.0",
+                "illuminate/support": "^9.31|^10.0|^11.0|^12.0",
+                "nesbot/carbon": "^2.63|^3.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.9"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^9.5|^10.0|^11.5.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\EloquentSortable\\EloquentSortableServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\EloquentSortable\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be"
+                }
+            ],
+            "description": "Sortable behaviour for eloquent models",
+            "homepage": "https://github.com/spatie/eloquent-sortable",
+            "keywords": [
+                "behaviour",
+                "eloquent",
+                "laravel",
+                "model",
+                "sort",
+                "sortable"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/eloquent-sortable/issues",
+                "source": "https://github.com/spatie/eloquent-sortable/tree/4.5.2"
+            },
+            "funding": [
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-25T11:46:57+00:00"
         },
         {
             "name": "spatie/invade",

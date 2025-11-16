@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AvatarSeeder::class,
             ClientSeeder::class,
+            RoleSeeder::class,
             BadgeSeeder::class,
             ModeSeeder::class,
         ]);

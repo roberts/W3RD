@@ -3,26 +3,14 @@
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Tests\Feature\Helpers\GameHelper;
 
 describe('Rematch Management', function () {
     describe('Rematch Request', function () {
         it('allows player to request rematch from completed game', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
-            $game = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            $winnerPlayer = Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
-            $game->update(['winner_id' => $winnerPlayer->id]);
+            $game = GameHelper::createCompletedGame($player1, $player2);
 
             $response = $this->actingAs($player1)->postJson("/api/v1/games/{$game->ulid}/rematch");
 
@@ -35,13 +23,13 @@ describe('Rematch Management', function () {
 
         it('rejects rematch request from ongoing game', function () {
             $player1 = User::factory()->create();
-            $game = Game::factory()->active()->create([
+            $player2 = User::factory()->create();
+            $game = GameHelper::createGame([
                 'creator_id' => $player1->id,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
+                'status' => \App\Enums\GameStatus::ACTIVE,
+            ], [
+                ['user' => $player1, 'position_id' => 1],
+                ['user' => $player2, 'position_id' => 2],
             ]);
 
             $response = $this->actingAs($player1)->postJson("/api/v1/games/{$game->ulid}/rematch");
@@ -53,19 +41,7 @@ describe('Rematch Management', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
             $nonPlayer = User::factory()->create();
-            $game = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
+            $game = GameHelper::createCompletedGame($player1, $player2);
 
             $response = $this->actingAs($nonPlayer)->postJson("/api/v1/games/{$game->ulid}/rematch");
 
@@ -77,20 +53,7 @@ describe('Rematch Management', function () {
         it('creates new game with swapped positions', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
-            $originalGame = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            $winnerPlayer = Player::factory()->create([
-                'game_id' => $originalGame->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $originalGame->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
-            $originalGame->update(['winner_id' => $winnerPlayer->id]);
+            $originalGame = GameHelper::createCompletedGame($player1, $player2);
 
             // Player1 requests rematch
             $rematchResponse = $this->actingAs($player1)
@@ -121,19 +84,7 @@ describe('Rematch Management', function () {
         it('notifies requester when rematch is accepted', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
-            $game = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
+            $game = GameHelper::createCompletedGame($player1, $player2);
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
@@ -186,19 +137,7 @@ describe('Rematch Management', function () {
         it('notifies requester when rematch is declined', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
-            $game = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
+            $game = GameHelper::createCompletedGame($player1, $player2);
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
@@ -218,19 +157,7 @@ describe('Rematch Management', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
             $nonPlayer = User::factory()->create();
-            $game = Game::factory()->completed()->create([
-                'creator_id' => $player1->id,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player1->id,
-                'position_id' => 1,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $player2->id,
-                'position_id' => 2,
-            ]);
+            $game = GameHelper::createCompletedGame($player1, $player2);
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)

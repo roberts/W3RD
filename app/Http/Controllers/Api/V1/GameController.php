@@ -95,7 +95,7 @@ class GameController extends Controller
      */
     public function requestRematch(Request $request, string $gameUlid): JsonResponse
     {
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = Game::where('ulid', $gameUlid)->with('players')->firstOrFail();
 
         try {
             $rematchRequest = $this->rematchService->createRematchRequest(

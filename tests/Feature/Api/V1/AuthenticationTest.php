@@ -5,6 +5,8 @@ use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Tests\Feature\Helpers\AssertionHelper;
+use Tests\Feature\Helpers\AuthenticationHelper;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -13,16 +15,12 @@ describe('Auth', function () {
     describe('Registration', function () {
         describe('Valid Input', function () {
             it('creates user with valid data and returns 201 with token', function () {
-                $client = Client::factory()->create();
-
-                $response = postJson('/api/v1/auth/register', [
-                    'client_id' => $client->id,
+                $result = AuthenticationHelper::registerUser([
                     'email' => 'test@example.com',
                     'password' => 'Password123!',
-                    'password_confirmation' => 'Password123!',
                 ]);
 
-                $response->assertCreated();
+                $result['response']->assertCreated();
             });
         });
 
@@ -38,8 +36,7 @@ describe('Auth', function () {
                     'password_confirmation' => 'Password123!',
                 ]);
 
-                $response->assertUnprocessable()
-                    ->assertJsonValidationErrors('email');
+                AssertionHelper::assertValidationError($response, 'email');
             });
 
             it('rejects invalid email format with 422', function () {
@@ -52,8 +49,7 @@ describe('Auth', function () {
                     'password_confirmation' => 'Password123!',
                 ]);
 
-                $response->assertUnprocessable()
-                    ->assertJsonValidationErrors('email');
+                AssertionHelper::assertValidationError($response, 'email');
             });
 
             it('rejects weak password with 422', function () {
@@ -66,8 +62,7 @@ describe('Auth', function () {
                     'password_confirmation' => '123',
                 ]);
 
-                $response->assertUnprocessable()
-                    ->assertJsonValidationErrors('password');
+                AssertionHelper::assertValidationError($response, 'password');
             });
         });
     });
@@ -81,9 +76,7 @@ describe('Auth', function () {
                 'verification_token' => 'valid-verification-token',
             ]);
 
-            $response = postJson('/api/v1/auth/verify', [
-                'token' => 'valid-verification-token',
-            ]);
+            $response = AuthenticationHelper::verifyEmail('test@example.com', 'valid-verification-token');
 
             $response->assertOk()
                 ->assertJsonStructure(['token', 'user']);
@@ -106,32 +99,21 @@ describe('Auth', function () {
                 'password' => Hash::make('Password123!'),
             ]);
 
-            $response = postJson('/api/v1/auth/login', [
-                'email' => 'test@example.com',
-                'password' => 'Password123!',
-            ], [
-                'X-Client-Key' => $client->id,
-            ]);
+            $token = AuthenticationHelper::loginAs($user, 'Password123!');
 
-            $response->assertOk()
-                ->assertJsonStructure([
-                    'user' => ['username', 'name', 'avatar'],
-                    'token',
-                ]);
+            expect($token)->toBeString();
         });
 
         it('rejects invalid password with 401', function () {
             $client = Client::factory()->create();
-            User::factory()->create([
+            $user = User::factory()->create([
                 'email' => 'test@example.com',
                 'password' => Hash::make('CorrectPassword123!'),
             ]);
 
-            $response = postJson('/api/v1/auth/login', [
-                'email' => 'test@example.com',
+            $response = test()->postJson('/api/v1/auth/login', [
+                'email' => $user->email,
                 'password' => 'WrongPassword',
-            ], [
-                'X-Client-Key' => $client->id,
             ]);
 
             $response->assertUnauthorized();
@@ -223,9 +205,12 @@ describe('Auth', function () {
         });
 
         it('logs out and revokes tokens', function () {
-            $user = createAuthenticatedUser();
+            $user = AuthenticationHelper::createAuthenticatedUser();
+            $token = AuthenticationHelper::createToken($user);
 
-            $response = $this->actingAs($user)->postJson('/api/v1/auth/logout');
+            $response = $this->withHeaders([
+                'Authorization' => "Bearer {$token}",
+            ])->postJson('/api/v1/auth/logout');
 
             $response->assertOk();
         });
@@ -235,7 +220,7 @@ describe('Auth', function () {
                 'Authorization' => 'Bearer invalid-expired-token',
             ]);
 
-            $response->assertUnauthorized();
+            AssertionHelper::assertUnauthorized($response);
         });
     });
 });

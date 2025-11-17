@@ -38,10 +38,10 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 **⚠️ CRITICAL**: Complete these first to enable DRY principles across all test files
 
-- [ ] T006 [P] Create AuthenticationHelper class in `tests/Feature/Helpers/AuthenticationHelper.php` with actingAs, loginAs, createToken methods
-- [ ] T007 [P] Create GameHelper class in `tests/Feature/Helpers/GameHelper.php` with createGame, submitAction, assertGameState methods
-- [ ] T008 [P] Create BillingHelper class in `tests/Feature/Helpers/BillingHelper.php` with createSubscription, verifyReceipt methods
-- [ ] T009 [P] Create AssertionHelper class in `tests/Feature/Helpers/AssertionHelper.php` with assertJsonStructure, assertValidationError methods
+- [x] T006 [P] Create AuthenticationHelper class in `tests/Feature/Helpers/AuthenticationHelper.php` with actingAs, loginAs, createToken methods
+- [x] T007 [P] Create GameHelper class in `tests/Feature/Helpers/GameHelper.php` with createGame, submitAction, assertGameState methods
+- [x] T008 [P] Create BillingHelper class in `tests/Feature/Helpers/BillingHelper.php` with createSubscription, verifyReceipt methods
+- [x] T009 [P] Create AssertionHelper class in `tests/Feature/Helpers/AssertionHelper.php` with assertJsonStructure, assertValidationError methods
 - [x] T010 [P] Create CreatesGames trait in `tests/Feature/Traits/CreatesGames.php` for reusable game creation logic
 - [x] T011 [P] Create CreatesSubscriptions trait in `tests/Feature/Traits/CreatesSubscriptions.php` for reusable subscription setup
 - [x] T012 [P] Create InteractsWithWebSocket trait in `tests/Feature/Traits/InteractsWithWebSocket.php` for real-time testing helpers
@@ -113,22 +113,22 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Billing Tests (User Story 3)
 
-- [ ] T033 [P] [US3] Create BillingTest.php in `tests/Feature/Api/V1/BillingTest.php` with describe() structure
-- [ ] T034 [P] [US3] Create StripeWebhookTest.php in `tests/Feature/Api/V1/StripeWebhookTest.php` with describe() structure
+- [x] T033 [P] [US3] Create BillingTest.php in `tests/Feature/Api/V1/BillingTest.php` with describe() structure
+- [x] T034 [P] [US3] Create StripeWebhookTest.php in `tests/Feature/Api/V1/StripeWebhookTest.php` with describe() structure
 
 **Billing Operations (BillingTest.php)**:
 
-- [ ] T035 [US3] Add Plans & Status tests: list available plans (200), show current subscription status (200), show quota and usage (200)
-- [ ] T036 [US3] Add Stripe Subscription tests: create subscription with payment method (201), create customer if not exists, apply trial period, return checkout session URL
-- [ ] T037 [US3] Add IAP Verification tests with datasets: verify receipt from platform (apple, google, telegram) returns 200, create subscription on first purchase, update on renewal, handle validation failure (422)
-- [ ] T038 [US3] Add Subscription Management tests: return Stripe portal URL (200), require active Stripe subscription (403)
-- [ ] T039 [US3] Add Quota Enforcement tests: user exceeds quota returns 429, max strikes returns suspended status
+- [x] T035 [US3] Add Plans & Status tests: list available plans (200), show current subscription status (200), show quota and usage (200)
+- [x] T036 [US3] Add Stripe Subscription tests: create subscription with payment method (201), create customer if not exists, apply trial period, return checkout session URL
+- [x] T037 [US3] Add IAP Verification tests with datasets: verify receipt from platform (apple, google, telegram) returns 200, create subscription on first purchase, update on renewal, handle validation failure (422)
+- [x] T038 [US3] Add Subscription Management tests: return Stripe portal URL (200), require active Stripe subscription (403)
+- [x] T039 [US3] Add Quota Enforcement tests: user exceeds quota returns 429, max strikes returns suspended status
 
 **Stripe Webhooks (StripeWebhookTest.php)**:
 
-- [ ] T040 [US3] Add Signature Verification tests: process valid signature (200), reject invalid signature (400)
-- [ ] T041 [US3] Add Event Handling tests: handle subscription.created, subscription.updated, subscription.deleted, invoice.payment_succeeded, invoice.payment_failed
-- [ ] T042 [US3] Add Idempotency test: ignore duplicate webhook events
+- [x] T040 [US3] Add Signature Verification tests: process valid signature (200), reject invalid signature (400)
+- [x] T041 [US3] Add Event Handling tests: handle subscription.created, subscription.updated, subscription.deleted, invoice.payment_succeeded, invoice.payment_failed
+- [x] T042 [US3] Add Idempotency test: ignore duplicate webhook events
 
 **Checkpoint**: Billing test suite complete - client developers can verify all payment processing works correctly
 
@@ -142,23 +142,23 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Profile & Stats Tests (User Story 4)
 
-- [ ] T043 [P] [US4] Create ProfileTest.php in `tests/Feature/Api/V1/ProfileTest.php` with describe() structure
-- [ ] T044 [P] [US4] Create UserStatsTest.php in `tests/Feature/Api/V1/UserStatsTest.php` with describe() structure
-- [ ] T045 [P] [US4] Create UserLevelsTest.php in `tests/Feature/Api/V1/UserLevelsTest.php` with describe() structure
+- [x] T043 [P] [US4] Create ProfileTest.php in `tests/Feature/Api/V1/ProfileTest.php` with describe() structure
+- [x] T044 [P] [US4] Create UserStatsTest.php in `tests/Feature/Api/V1/UserStatsTest.php` with describe() structure
+- [x] T045 [P] [US4] Create UserLevelsTest.php in `tests/Feature/Api/V1/UserLevelsTest.php` with describe() structure
 
 **Profile Management (ProfileTest.php)**:
 
-- [ ] T046 [US4] Add Profile Retrieval tests: show current user profile (200), include avatar and stats
-- [ ] T047 [US4] Add Profile Update tests: update name (200), update avatar URL (200), reject invalid avatar URL (422), sanitize input data
+- [x] T046 [US4] Add Profile Retrieval tests: show current user profile (200), include avatar and stats
+- [x] T047 [US4] Add Profile Update tests: update name (200), update avatar URL (200), reject invalid avatar URL (422), sanitize input data
 
 **User Stats (UserStatsTest.php)**:
 
-- [ ] T048 [US4] Add Stats Display tests: show aggregated statistics (200), include wins/losses/draws, include per-title breakdown, calculate win rate correctly
+- [x] T048 [US4] Add Stats Display tests: show aggregated statistics (200), include wins/losses/draws, include per-title breakdown, calculate win rate correctly
 
 **User Levels (UserLevelsTest.php)**:
 
-- [ ] T049 [US4] Add Levels Display tests: show levels for all titles (200), include current XP and next level threshold, show progression percentage
-- [ ] T050 [US4] Add Level Progression tests: user earns XP triggers level-up event, total_wins and total_xp increment correctly after game completion
+- [x] T049 [US4] Add Levels Display tests: show levels for all titles (200), include current XP and next level threshold, show progression percentage
+- [x] T050 [US4] Add Level Progression tests: user earns XP triggers level-up event, total_wins and total_xp increment correctly after game completion
 
 **Checkpoint**: Profile & stats test suite complete - client developers can verify progression systems work accurately
 
@@ -258,16 +258,16 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 ## Task Summary
 
 **Total Tasks**: 84
-**Completed Tasks**: 45 (53%)
+**Completed Tasks**: 63 (75%)
 **Parallelizable Tasks**: 42 (50%)
 
 ### Tasks by User Story
 
-- **Setup & Foundation**: 12 tasks (T001-T012) ✅ 8/12 completed
+- **Setup & Foundation**: 12 tasks (T001-T012) ✅ 12/12 completed
 - **User Story 1 (P1 - Auth)**: 7 tasks (T013-T019) ✅ 7/7 completed
 - **User Story 2 (P1 - Games)**: 13 tasks (T020-T032) ✅ 13/13 completed
-- **User Story 3 (P2 - Billing)**: 10 tasks (T033-T042) ⏳ 0/10 completed
-- **User Story 4 (P2 - Profile/Stats)**: 8 tasks (T043-T050) ⏳ 0/8 completed
+- **User Story 3 (P2 - Billing)**: 10 tasks (T033-T042) ✅ 10/10 completed
+- **User Story 4 (P2 - Profile/Stats)**: 8 tasks (T043-T050) ✅ 8/8 completed
 - **User Story 5 (P3 - Lobbies)**: 9 tasks (T051-T059) ✅ 9/9 completed
 - **User Story 6 (P3 - Alerts)**: 4 tasks (T060-T063) ✅ 4/4 completed
 - **Public & Edge Cases**: 13 tasks (T064-T076) ⏳ 0/13 completed

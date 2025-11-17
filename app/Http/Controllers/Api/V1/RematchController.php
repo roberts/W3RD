@@ -46,9 +46,9 @@ class RematchController extends Controller
     /**
      * Decline a rematch request.
      */
-    public function decline(Request $request, RematchRequest $ulid): JsonResponse
+    public function decline(Request $request, RematchRequest $requestId): JsonResponse
     {
-        $rematchRequest = $ulid;
+        $rematchRequest = $requestId;
 
         try {
             $this->rematchService->declineRematchRequest(

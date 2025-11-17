@@ -4,6 +4,8 @@ use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Tests\Feature\Helpers\AssertionHelper;
+use Tests\Feature\Helpers\GameHelper;
 
 describe('Game Lifecycle', function () {
     describe('Game Retrieval', function () {
@@ -38,14 +40,11 @@ describe('Game Lifecycle', function () {
 
         it('shows single game details', function () {
             $user = User::factory()->create();
-            $game = Game::factory()->create([
+            $game = GameHelper::createGame([
                 'creator_id' => $user->id,
                 'status' => GameStatus::ACTIVE,
-            ]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $user->id,
-                'position_id' => 1,
+            ], [
+                ['user' => $user, 'position_id' => 1],
             ]);
 
             $response = $this->actingAs($user)->getJson("/api/v1/games/{$game->ulid}");
@@ -59,16 +58,13 @@ describe('Game Lifecycle', function () {
         it('rejects unauthorized access to game with 403', function () {
             $gameOwner = User::factory()->create();
             $otherUser = User::factory()->create();
-            $game = Game::factory()->create(['creator_id' => $gameOwner->id]);
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $gameOwner->id,
-                'position_id' => 1,
+            $game = GameHelper::createGame(['creator_id' => $gameOwner->id], [
+                ['user' => $gameOwner, 'position_id' => 1],
             ]);
 
             $response = $this->actingAs($otherUser)->getJson("/api/v1/games/{$game->ulid}");
 
-            $response->assertForbidden();
+            AssertionHelper::assertForbidden($response);
         });
     });
 

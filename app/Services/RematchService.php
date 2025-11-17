@@ -72,7 +72,7 @@ class RematchService
      */
     public function acceptRematchRequest(RematchRequest $rematchRequest, User $acceptingUser): Game
     {
-        // Validate user is the opponent
+        // Validate user is the opponent by comparing user ID directly
         if ($rematchRequest->opponent_user_id !== $acceptingUser->id) {
             throw new \InvalidArgumentException('Only the opponent can accept this rematch request.');
         }
@@ -155,7 +155,7 @@ class RematchService
      */
     public function declineRematchRequest(RematchRequest $rematchRequest, User $decliningUser): RematchRequest
     {
-        // Validate user is the opponent
+        // Validate user is the opponent by comparing user ID directly
         if ($rematchRequest->opponent_user_id !== $decliningUser->id) {
             throw new AccessDeniedHttpException('Only the opponent can decline this rematch request.');
         }

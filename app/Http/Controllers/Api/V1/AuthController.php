@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\Auth\LoginRequest;
-use App\Http\Requests\Api\V1\Auth\RegisterRequest;
-use App\Http\Requests\Api\V1\Auth\SocialLoginRequest;
-use App\Http\Requests\Api\V1\Auth\UpdateUserRequest;
-use App\Http\Requests\Api\V1\Auth\VerifyRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\SocialLoginRequest;
+use App\Http\Requests\Auth\UpdateUserRequest;
+use App\Http\Requests\Auth\VerifyRequest;
 use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;

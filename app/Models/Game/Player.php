@@ -37,6 +37,16 @@ class Player extends Model
         'position_id' => 'integer',
     ];
 
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
     // Boot method for model events
     protected static function boot()
     {

@@ -7,6 +7,7 @@ use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchController extends Controller
 {
@@ -60,8 +61,12 @@ class RematchController extends Controller
                     'rematch_request_id' => $rematchRequest->id,
                     'status' => $rematchRequest->fresh()->status,
                 ],
-                'message' => 'Rematch declined.',
+                'message' => 'Rematch request declined',
             ]);
+        } catch (AccessDeniedHttpException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 403);
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'message' => $e->getMessage(),

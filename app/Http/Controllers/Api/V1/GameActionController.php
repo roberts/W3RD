@@ -28,8 +28,8 @@ class GameActionController extends Controller
      */
     public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
     {
-        // Find the game by ULID
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        // Find the game by ULID and load the mode relationship
+        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
         try {

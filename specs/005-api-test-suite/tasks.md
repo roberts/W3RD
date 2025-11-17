@@ -58,13 +58,13 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Authentication Tests (User Story 1)
 
-- [ ] T013 [US1] Create AuthenticationTest.php file in `tests/Feature/Api/V1/AuthenticationTest.php` with describe() structure
-- [ ] T014 [US1] Add Registration tests: valid input creates user (201), duplicate email rejected (422), invalid email rejected (422), weak password rejected (422)
-- [ ] T015 [US1] Add Email Verification tests: valid token verifies email (200), invalid token rejected (422), expired token rejected (422)
-- [ ] T016 [US1] Add Login tests: valid credentials return token (200), invalid password rejected (422), unverified email rejected (403)
-- [ ] T017 [US1] Add Login rate limiting test: enforce 5 attempt limit returns 429
-- [ ] T018 [US1] Add Social Login tests with datasets: create user from OAuth (google, facebook, github) returns 201, link existing account, invalid token rejected (422)
-- [ ] T019 [US1] Add Token Management tests: get current user (200), update user profile (200), logout revokes tokens (200), expired token rejected (401)
+- [x] T013 [US1] Create AuthenticationTest.php file in `tests/Feature/Api/V1/AuthenticationTest.php` with describe() structure
+- [x] T014 [US1] Add Registration tests: valid input creates user (201), duplicate email rejected (422), invalid email rejected (422), weak password rejected (422)
+- [x] T015 [US1] Add Email Verification tests: valid token verifies email (200), invalid token rejected (422), expired token rejected (422)
+- [x] T016 [US1] Add Login tests: valid credentials return token (200), invalid password rejected (422), unverified email rejected (403)
+- [x] T017 [US1] Add Login rate limiting test: enforce 5 attempt limit returns 429
+- [x] T018 [US1] Add Social Login tests with datasets: create user from OAuth (google, facebook, github) returns 201, link existing account, invalid token rejected (422)
+- [x] T019 [US1] Add Token Management tests: get current user (200), update user profile (200), logout revokes tokens (200), expired token rejected (401)
 
 **Checkpoint**: Authentication test suite complete - client developers can verify all auth flows work correctly
 
@@ -78,28 +78,28 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Game Lifecycle Tests (User Story 2)
 
-- [ ] T020 [P] [US2] Create GameLifecycleTest.php in `tests/Feature/Api/V1/GameLifecycleTest.php` with describe() structure
-- [ ] T021 [P] [US2] Create QuickplayTest.php in `tests/Feature/Api/V1/QuickplayTest.php` with describe() structure
-- [ ] T022 [P] [US2] Create RematchTest.php in `tests/Feature/Api/V1/RematchTest.php` with describe() structure
+- [x] T020 [P] [US2] Create GameLifecycleTest.php in `tests/Feature/Api/V1/GameLifecycleTest.php` with describe() structure
+- [x] T021 [P] [US2] Create QuickplayTest.php in `tests/Feature/Api/V1/QuickplayTest.php` with describe() structure
+- [x] T022 [P] [US2] Create RematchTest.php in `tests/Feature/Api/V1/RematchTest.php` with describe() structure
 
 **Game Retrieval & Actions (GameLifecycleTest.php)**:
 
-- [ ] T023 [US2] Add Game Retrieval tests: list user games with pagination (200), show single game (200), unauthorized access rejected (403)
-- [ ] T024 [US2] Add Valid Move tests: accept DROP_PIECE (200), update game state correctly, advance turn, detect win condition, broadcast event
-- [ ] T025 [US2] Add Invalid Move tests: reject when not player turn (403), reject invalid column (422), reject in completed game (422), reject by non-player (403)
-- [ ] T026 [US2] Add Valid Options tests: return available moves for current player (200), empty array when not player turn (200)
+- [x] T023 [US2] Add Game Retrieval tests: list user games with pagination (200), show single game (200), unauthorized access rejected (403)
+- [x] T024 [US2] Add Valid Move tests: accept DROP_PIECE (200), update game state correctly, advance turn, detect win condition, broadcast event
+- [x] T025 [US2] Add Invalid Move tests: reject when not player turn (403), reject invalid column (422), reject in completed game (422), reject by non-player (403)
+- [x] T026 [US2] Add Valid Options tests: return available moves for current player (200), empty array when not player turn (200)
 
 **Quickplay Matchmaking (QuickplayTest.php)**:
 
-- [ ] T027 [US2] Add Join Queue tests: add user to queue (200), match two users immediately (200), return match_id when game created, enforce quota limits (429), reject suspended subscriptions (403)
-- [ ] T028 [US2] Add Leave Queue tests: remove user from queue (200), not in queue returns 404
-- [ ] T029 [US2] Add Accept Match tests: confirm acceptance (200), start game when all accept (200), reject expired match (422)
+- [x] T027 [US2] Add Join Queue tests: add user to queue (200), match two users immediately (200), return match_id when game created, enforce quota limits (429), reject suspended subscriptions (403)
+- [x] T028 [US2] Add Leave Queue tests: remove user from queue (200), not in queue returns 404
+- [x] T029 [US2] Add Accept Match tests: confirm acceptance (200), start game when all accept (200), reject expired match (422)
 
 **Rematch Requests (RematchTest.php)**:
 
-- [ ] T030 [US2] Add Accept Rematch tests: create new game (201), swap player positions, notify requester
-- [ ] T031 [US2] Add Decline Rematch tests: update status (200), notify requester
-- [ ] T032 [US2] Add Edge Cases tests: reject expired rematch (422), reject already responded (422)
+- [x] T030 [US2] Add Accept Rematch tests: create new game (201), swap player positions, notify requester
+- [x] T031 [US2] Add Decline Rematch tests: update status (200), notify requester
+- [x] T032 [US2] Add Edge Cases tests: reject expired rematch (422), reject already responded (422)
 
 **Checkpoint**: Game lifecycle test suite complete - client developers can verify complete game flow works end-to-end
 

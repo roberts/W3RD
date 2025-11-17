@@ -25,6 +25,16 @@ class RematchRequest extends Model
         'expires_at' => 'datetime',
     ];
 
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
     public function originalGame(): BelongsTo
     {
         return $this->belongsTo(Game::class, 'original_game_id');

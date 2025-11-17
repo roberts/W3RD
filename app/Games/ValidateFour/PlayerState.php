@@ -19,7 +19,7 @@ class PlayerState extends BasePlayerState
      *
      * @param  string  $ulid  Player's ULID
      * @param  int  $position  Player position (1 or 2)
-     * @param  string  $color  Player's disc color (e.g., 'red', 'yellow')
+     * @param  string  $color  Player's piece color (e.g., 'red', 'yellow')
      */
     public function __construct(
         string $ulid,

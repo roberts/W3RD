@@ -21,7 +21,7 @@ interface GameActionContract
     /**
      * Get the action type identifier.
      *
-     * Returns a string identifier for this action type (e.g., 'drop_disc', 'move_piece', 'play_card').
+     * Returns a string identifier for this action type (e.g., 'drop_piece', 'move_piece', 'play_card').
      * This is used for validation, routing, and storage.
      *
      * @return string Action type identifier (snake_case)

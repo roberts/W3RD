@@ -17,8 +17,8 @@ use App\Games\BaseGameState;
  * ## Board Structure
  * The board is a 2D array: `board[row][column]` where:
  * - `null` = empty space
- * - `string` = player ULID who owns the disc
- * - Row 0 is the top, row (rows-1) is the bottom where discs land
+ * - `string` = player ULID who owns the piece
+ * - Row 0 is the top, row (rows-1) is the bottom where pieces land
  *
  * ## Factory Methods
  * Use these static methods to create instances:
@@ -28,9 +28,9 @@ use App\Games\BaseGameState;
  * ## Fluent State Changes
  * Use `withX()` methods to create new instances with changes:
  * ```php
- * // Drop a disc and advance to next player
+ * // Drop a piece and advance to next player
  * $newState = $gameState
- *     ->withDiscAt($row, $column, $playerUlid)
+ *     ->withPieceAt($row, $column, $playerUlid)
  *     ->withNextPlayer();
  *
  * // Mark winner
@@ -45,7 +45,7 @@ use App\Games\BaseGameState;
  *
  * ## Querying State
  * ```php
- * $disc = $gameState->getDiscAt($row, $column);  // Returns player ULID or null
+ * $piece = $gameState->getPieceAt($row, $column);  // Returns player ULID or null
  * $emptyRow = $gameState->getLowestEmptyRow($column);  // Returns row index or null if column full
  * $isFull = $gameState->isBoardFull();  // Returns bool
  * ```
@@ -66,9 +66,9 @@ final class GameState extends BaseGameState
     /**
      * Board structure: board[row][column] where:
      * - null = empty space
-     * - string = player ULID who owns the disc
+     * - string = player ULID who owns the piece
      *
-     * Row 0 is the top, row (rows-1) is the bottom where discs land.
+     * Row 0 is the top, row (rows-1) is the bottom where pieces land.
      *
      * @var array<int, array<int, string|null>>
      */
@@ -265,11 +265,11 @@ final class GameState extends BaseGameState
     }
 
     /**
-     * Get the disc owner at a specific position (row, column).
+     * Get the piece owner at a specific position (row, column).
      *
      * @return string|null Player ULID or null if empty
      */
-    public function getDiscAt(int $row, int $column): ?string
+    public function getPieceAt(int $row, int $column): ?string
     {
         if ($row < 0 || $row >= $this->rows || $column < 0 || $column >= $this->columns) {
             return null;
@@ -279,7 +279,7 @@ final class GameState extends BaseGameState
     }
 
     /**
-     * Find the lowest empty row in a column (where disc would land).
+     * Find the lowest empty row in a column (where piece would land).
      * Returns the row index from bottom to top.
      *
      * @return int|null The row index, or null if column is full
@@ -316,10 +316,10 @@ final class GameState extends BaseGameState
     }
 
     /**
-     * Create a new state with a disc placed at the specified position.
+     * Create a new state with a piece placed at the specified position.
      * Returns a new immutable instance.
      */
-    public function withDiscAt(int $row, int $column, string $playerUlid): self
+    public function withPieceAt(int $row, int $column, string $playerUlid): self
     {
         $newBoard = $this->board;
         $newBoard[$row][$column] = $playerUlid;

@@ -10,7 +10,7 @@ use App\Games\ValidationResult;
 class PopOutMode extends BaseValidateFour
 {
     /**
-     * Override parent validateAction to handle both drop_disc and pop_out actions.
+     * Override parent validateAction to handle both drop_piece and pop_out actions.
      */
     public function validateAction(object $gameState, object $action): ValidationResult
     {
@@ -29,7 +29,7 @@ class PopOutMode extends BaseValidateFour
     }
 
     /**
-     * Override parent applyAction to handle both drop_disc and pop_out actions.
+     * Override parent applyAction to handle both drop_piece and pop_out actions.
      */
     public function applyAction(object $gameState, object $action): object
     {
@@ -42,7 +42,7 @@ class PopOutMode extends BaseValidateFour
             return $this->applyPopOut($gameState, $action);
         }
 
-        // For drop_disc, use parent implementation
+        // For drop_piece, use parent implementation
         return parent::applyAction($gameState, $action);
     }
 
@@ -64,13 +64,13 @@ class PopOutMode extends BaseValidateFour
             return [];
         }
 
-        // Find columns where player can pop out (has disc at bottom)
+        // Find columns where player can pop out (has piece at bottom)
         $bottomRow = $gameState->rows - 1;
         $popOutColumns = [];
 
         for ($col = 0; $col < $gameState->columns; $col++) {
-            $bottomDisc = $gameState->getDiscAt($bottomRow, $col);
-            if ($bottomDisc === $playerUlid) {
+            $bottomPiece = $gameState->getPieceAt($bottomRow, $col);
+            if ($bottomPiece === $playerUlid) {
                 $popOutColumns[] = $col;
             }
         }
@@ -93,16 +93,16 @@ class PopOutMode extends BaseValidateFour
 
         $popOutRules = [
             'name' => 'Pop Out',
-            'description' => 'A variant where you can remove a disc from the bottom row instead of dropping one.',
+            'description' => 'A variant where you can remove a piece from the bottom row instead of dropping one.',
             'sections' => [
                 [
                     'title' => 'Special Rule: Popping Out',
                     'content' => <<<'MARKDOWN'
-                    On your turn, you may choose to **pop out** one of your own discs from the **bottom row**.
+                    On your turn, you may choose to **pop out** one of your own pieces from the **bottom row**.
 
-                    *   This removes the disc from the board.
-                    *   All discs in the column above it will fall down one space.
-                    *   You cannot pop a disc if it is the only one in its column.
+                    *   This removes the piece from the board.
+                    *   All pieces in the column above it will fall down one space.
+                    *   You cannot pop a piece if it is the only one in its column.
                     MARKDOWN,
                 ],
             ],
@@ -132,22 +132,22 @@ class PopOutMode extends BaseValidateFour
             );
         }
 
-        // Check if bottom disc exists (bottom row is rows - 1)
+        // Check if bottom piece exists (bottom row is rows - 1)
         $bottomRow = $gameState->rows - 1;
-        $bottomDisc = $gameState->getDiscAt($bottomRow, $column);
-        if ($bottomDisc === null) {
+        $bottomPiece = $gameState->getPieceAt($bottomRow, $column);
+        if ($bottomPiece === null) {
             return ValidationResult::invalid(
-                'NO_DISC_AT_BOTTOM',
-                sprintf('No disc at bottom of column %d', $column),
+                'NO_PIECE_AT_BOTTOM',
+                sprintf('No piece at bottom of column %d', $column),
                 ['column' => $column]
             );
         }
 
-        // Check if bottom disc belongs to current player
-        if ($bottomDisc !== $gameState->currentPlayerUlid) {
+        // Check if bottom piece belongs to current player
+        if ($bottomPiece !== $gameState->currentPlayerUlid) {
             return ValidationResult::invalid(
-                'NOT_YOUR_DISC',
-                'You can only pop out your own discs',
+                'NOT_YOUR_PIECE',
+                'You can only pop out your own pieces',
                 ['column' => $column, 'disc_owner' => $bottomDisc]
             );
         }
@@ -157,14 +157,14 @@ class PopOutMode extends BaseValidateFour
 
     /**
      * Apply a pop_out action to the game state.
-     * Returns a new immutable game state with the disc popped and column shifted.
+     * Returns a new immutable game state with the piece popped and column shifted.
      */
     protected function applyPopOut(GameState $gameState, PopOut $action): GameState
     {
         $newBoard = $gameState->board;
         $column = $action->column;
 
-        // Remove the bottom disc and shift all discs above it down
+        // Remove the bottom piece and shift all pieces above it down
         for ($row = $gameState->rows - 1; $row > 0; $row--) {
             $newBoard[$row][$column] = $newBoard[$row - 1][$column];
         }

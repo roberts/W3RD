@@ -96,7 +96,7 @@ interface GameTitleContract
      * Example:
      * ```php
      * $factoryClass = $mode->getActionFactory();
-     * $action = $factoryClass::create('drop_disc', ['column' => 3]);
+     * $action = $factoryClass::create('drop_piece', ['column' => 3]);
      * ```
      *
      * @return string Fully qualified class name
@@ -177,7 +177,7 @@ interface GameTitleContract
      * Example return format:
      * ```php
      * [
-     *     'drop_disc' => ['columns' => [0, 1, 2, 4, 5]],  // Column 3 is full
+     *     'drop_piece' => ['columns' => [0, 1, 2, 4, 5]],  // Column 3 is full
      *     'pop_out' => ['columns' => [0, 2]],             // Only these have player's discs
      * ]
      * ```

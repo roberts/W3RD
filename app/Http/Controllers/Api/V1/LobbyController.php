@@ -17,11 +17,6 @@ use Illuminate\Support\Facades\DB;
 
 class LobbyController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
-
     /**
      * List all public lobbies
      */

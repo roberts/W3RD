@@ -69,27 +69,14 @@ Route::prefix('v1')->group(function () {
             Route::post('/{provider}/verify', 'verifyReceipt');
         });
 
-        // Games
-        Route::get('/games', [GameController::class, 'index']);
-        Route::get('/games/{gameUlid}', [GameController::class, 'show']);
-        Route::get('/games/{gameUlid}/history', [GameController::class, 'history']);
-        Route::post('/games/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
-
-        // Rematch Requests
-        Route::post('/rematch-requests/{requestId}/accept', [RematchController::class, 'accept']);
-        Route::post('/rematch-requests/{requestId}/decline', [RematchController::class, 'decline']);
-
-        Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
-        Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
-
-        // Quickplay (Public Matchmaking)
+        // Quickplay (Public Matchmaking) - must be before /games/{gameUlid}
         Route::prefix('games/quickplay')->controller(QuickplayController::class)->group(function () {
             Route::post('/', 'join');
             Route::delete('/', 'leave');
             Route::post('/accept', 'accept');
         });
 
-        // Lobbies
+        // Lobbies - must be before /games/{gameUlid}
         Route::prefix('games/lobbies')->group(function () {
             Route::get('/', [LobbyController::class, 'index']);
             Route::post('/', [LobbyController::class, 'store']);
@@ -102,5 +89,18 @@ Route::prefix('v1')->group(function () {
             Route::put('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'update']);
             Route::delete('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'destroy']);
         });
+
+        // Games
+        Route::get('/games', [GameController::class, 'index']);
+        Route::get('/games/{gameUlid}', [GameController::class, 'show']);
+        Route::get('/games/{gameUlid}/history', [GameController::class, 'history']);
+        Route::post('/games/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
+
+        // Rematch Requests
+        Route::post('/rematch-requests/{requestId}/accept', [RematchController::class, 'accept']);
+        Route::post('/rematch-requests/{requestId}/decline', [RematchController::class, 'decline']);
+
+        Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
+        Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
     });
 });

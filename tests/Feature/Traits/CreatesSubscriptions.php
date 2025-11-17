@@ -17,7 +17,7 @@ trait CreatesSubscriptions
             'status' => $status,
         ]);
     }
-    
+
     /**
      * Create an Apple subscription for the given user
      */
@@ -28,7 +28,7 @@ trait CreatesSubscriptions
             'status' => $status,
         ]);
     }
-    
+
     /**
      * Create a Google subscription for the given user
      */
@@ -39,7 +39,7 @@ trait CreatesSubscriptions
             'status' => $status,
         ]);
     }
-    
+
     /**
      * Create a Telegram subscription for the given user
      */

@@ -5,9 +5,9 @@ use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use function Pest\Laravel\postJson;
+
 use function Pest\Laravel\getJson;
-use function Pest\Laravel\patchJson;
+use function Pest\Laravel\postJson;
 
 describe('Authentication', function () {
     describe('Registration', function () {
@@ -39,7 +39,7 @@ describe('Authentication', function () {
                 ]);
 
                 $response->assertUnprocessable()
-                         ->assertJsonValidationErrors('email');
+                    ->assertJsonValidationErrors('email');
             });
 
             it('rejects invalid email format with 422', function () {
@@ -53,7 +53,7 @@ describe('Authentication', function () {
                 ]);
 
                 $response->assertUnprocessable()
-                         ->assertJsonValidationErrors('email');
+                    ->assertJsonValidationErrors('email');
             });
 
             it('rejects weak password with 422', function () {
@@ -67,7 +67,7 @@ describe('Authentication', function () {
                 ]);
 
                 $response->assertUnprocessable()
-                         ->assertJsonValidationErrors('password');
+                    ->assertJsonValidationErrors('password');
             });
         });
     });
@@ -86,7 +86,7 @@ describe('Authentication', function () {
             ]);
 
             $response->assertOk()
-                     ->assertJsonStructure(['token', 'user']);
+                ->assertJsonStructure(['token', 'user']);
         });
 
         it('rejects invalid verification token with 422', function () {
@@ -114,10 +114,10 @@ describe('Authentication', function () {
             ]);
 
             $response->assertOk()
-                     ->assertJsonStructure([
-                         'user' => ['id', 'email', 'name'],
-                         'token',
-                     ]);
+                ->assertJsonStructure([
+                    'user' => ['id', 'email', 'name'],
+                    'token',
+                ]);
         });
 
         it('rejects invalid password with 401', function () {

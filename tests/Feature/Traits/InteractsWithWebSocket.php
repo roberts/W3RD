@@ -13,7 +13,7 @@ trait InteractsWithWebSocket
     {
         Event::assertDispatched($eventClass);
     }
-    
+
     /**
      * Fake event broadcasting for testing
      */

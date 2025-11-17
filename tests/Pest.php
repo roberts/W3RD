@@ -54,6 +54,7 @@ expect()->extend('toHaveSubscriptionStructure', function () {
 expect()->extend('toBeSuccessfulApiResponse', function () {
     $this->value->assertSuccessful();
     $this->value->assertJson([]);
+
     return $this;
 });
 
@@ -85,7 +86,7 @@ function createAuthenticatedUser(array $attributes = []): User
 function assertValidationError(TestResponse $response, string $field): void
 {
     $response->assertStatus(422)
-             ->assertJsonValidationErrors($field);
+        ->assertJsonValidationErrors($field);
 }
 
 /**
@@ -94,5 +95,5 @@ function assertValidationError(TestResponse $response, string $field): void
 function assertApiError(TestResponse $response, int $status, string $message): void
 {
     $response->assertStatus($status)
-             ->assertJson(['message' => $message]);
+        ->assertJson(['message' => $message]);
 }

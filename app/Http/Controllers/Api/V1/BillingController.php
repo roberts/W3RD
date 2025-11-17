@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Billing\CreateStripeSubscriptionRequest;
+use App\Http\Requests\Billing\VerifyAppleReceiptRequest;
+use App\Http\Requests\Billing\VerifyGoogleReceiptRequest;
+use App\Http\Requests\Billing\VerifyTelegramReceiptRequest;
 use App\Services\AppleReceiptValidator;
 use App\Services\GooglePurchaseValidator;
 use App\Services\TelegramPaymentValidator;
@@ -64,12 +68,8 @@ class BillingController extends Controller
     /**
      * Create a Stripe Checkout session for subscription.
      */
-    public function createStripeSubscription(Request $request): JsonResponse
+    public function createStripeSubscription(CreateStripeSubscriptionRequest $request): JsonResponse
     {
-        $request->validate([
-            'plan' => 'required|string',
-        ]);
-
         $user = $request->user();
         $plan = $request->input('plan');
 
@@ -128,138 +128,130 @@ class BillingController extends Controller
     }
 
     /**
-     * Verify mobile IAP receipt (Apple, Google, Telegram).
+     * Verify Apple IAP receipt.
      */
-    public function verifyReceipt(Request $request, string $provider): JsonResponse
+    public function verifyAppleReceipt(VerifyAppleReceiptRequest $request): JsonResponse
     {
         $user = $request->user();
 
-        switch ($provider) {
-            case 'apple':
-                $request->validate([
-                    'transaction_id' => 'required|string',
-                ]);
+        try {
+            $result = $this->appleValidator->validate($request->input('transaction_id'));
 
-                try {
-                    $result = $this->appleValidator->validate($request->input('transaction_id'));
+            // Create or update subscription
+            /** @var \App\Models\Billing\Subscription $subscription */
+            $subscription = $user->subscriptions()->updateOrCreate(
+                ['stripe_id' => $request->input('transaction_id')],
+                [
+                    'type' => 'premium',
+                    'stripe_status' => 'active',
+                    'provider' => 'apple',
+                    'ends_at' => null, // Set based on Apple response if needed
+                ]
+            );
 
-                    // Create or update subscription
-                    /** @var \App\Models\Billing\Subscription $subscription */
-                    $subscription = $user->subscriptions()->updateOrCreate(
-                        ['stripe_id' => $request->input('transaction_id')],
-                        [
-                            'type' => 'premium',
-                            'stripe_status' => 'active',
-                            'provider' => 'apple',
-                            'ends_at' => null, // Set based on Apple response if needed
-                        ]
-                    );
+            return response()->json([
+                'data' => [
+                    'verified' => true,
+                    'subscription_id' => $subscription->id,
+                ],
+                'message' => 'Apple receipt verified successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to verify Apple receipt: '.$e->getMessage(),
+            ], 400);
+        }
+    }
 
-                    return response()->json([
-                        'data' => [
-                            'verified' => true,
-                            'subscription_id' => $subscription->id,
-                        ],
-                        'message' => 'Apple receipt verified successfully.',
-                    ]);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'message' => 'Failed to verify Apple receipt: '.$e->getMessage(),
-                    ], 400);
-                }
+    /**
+     * Verify Google Play purchase.
+     */
+    public function verifyGoogleReceipt(VerifyGoogleReceiptRequest $request): JsonResponse
+    {
+        $user = $request->user();
 
-            case 'google':
-                $request->validate([
-                    'product_id' => 'required|string',
-                    'token' => 'required|string',
-                ]);
+        try {
+            $result = $this->googleValidator->validate(
+                $request->input('product_id'),
+                $request->input('token')
+            );
 
-                try {
-                    $result = $this->googleValidator->validate(
-                        $request->input('product_id'),
-                        $request->input('token')
-                    );
-
-                    if (! $result['valid']) {
-                        return response()->json([
-                            'message' => 'Invalid Google Play purchase.',
-                        ], 400);
-                    }
-
-                    // Create or update subscription
-                    /** @var \App\Models\Billing\Subscription $subscription */
-                    $subscription = $user->subscriptions()->updateOrCreate(
-                        ['stripe_id' => $result['order_id']],
-                        [
-                            'type' => 'premium',
-                            'stripe_status' => 'active',
-                            'provider' => 'google',
-                            'ends_at' => null, // Set based on Google response if needed
-                        ]
-                    );
-
-                    return response()->json([
-                        'data' => [
-                            'verified' => true,
-                            'subscription_id' => $subscription->id,
-                        ],
-                        'message' => 'Google Play purchase verified successfully.',
-                    ]);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'message' => 'Failed to verify Google Play purchase: '.$e->getMessage(),
-                    ], 400);
-                }
-
-            case 'telegram':
-                $request->validate([
-                    'data' => 'required|array',
-                    'hash' => 'required|string',
-                ]);
-
-                try {
-                    $isValid = $this->telegramValidator->validate(
-                        $request->input('data'),
-                        $request->input('hash')
-                    );
-
-                    if (! $isValid) {
-                        return response()->json([
-                            'message' => 'Invalid Telegram payment hash.',
-                        ], 400);
-                    }
-
-                    $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
-
-                    // Create or update subscription
-                    /** @var \App\Models\Billing\Subscription $subscription */
-                    $subscription = $user->subscriptions()->updateOrCreate(
-                        ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
-                        [
-                            'type' => 'premium',
-                            'stripe_status' => 'active',
-                            'provider' => 'telegram',
-                            'ends_at' => null,
-                        ]
-                    );
-
-                    return response()->json([
-                        'data' => [
-                            'verified' => true,
-                            'subscription_id' => $subscription->id,
-                        ],
-                        'message' => 'Telegram payment verified successfully.',
-                    ]);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'message' => 'Failed to verify Telegram payment: '.$e->getMessage(),
-                    ], 400);
-                }
-
-            default:
+            if (! $result['valid']) {
                 return response()->json([
-                    'message' => 'Invalid provider. Supported: apple, google, telegram.',
+                    'message' => 'Invalid Google Play purchase.',
                 ], 400);
+            }
+
+            // Create or update subscription
+            /** @var \App\Models\Billing\Subscription $subscription */
+            $subscription = $user->subscriptions()->updateOrCreate(
+                ['stripe_id' => $result['order_id']],
+                [
+                    'type' => 'premium',
+                    'stripe_status' => 'active',
+                    'provider' => 'google',
+                    'ends_at' => null, // Set based on Google response if needed
+                ]
+            );
+
+            return response()->json([
+                'data' => [
+                    'verified' => true,
+                    'subscription_id' => $subscription->id,
+                ],
+                'message' => 'Google Play purchase verified successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to verify Google Play purchase: '.$e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Verify Telegram payment.
+     */
+    public function verifyTelegramReceipt(VerifyTelegramReceiptRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        try {
+            $isValid = $this->telegramValidator->validate(
+                $request->input('data'),
+                $request->input('hash')
+            );
+
+            if (! $isValid) {
+                return response()->json([
+                    'message' => 'Invalid Telegram payment hash.',
+                ], 400);
+            }
+
+            $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
+
+            // Create or update subscription
+            /** @var \App\Models\Billing\Subscription $subscription */
+            $subscription = $user->subscriptions()->updateOrCreate(
+                ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
+                [
+                    'type' => 'premium',
+                    'stripe_status' => 'active',
+                    'provider' => 'telegram',
+                    'ends_at' => null,
+                ]
+            );
+
+            return response()->json([
+                'data' => [
+                    'verified' => true,
+                    'subscription_id' => $subscription->id,
+                ],
+                'message' => 'Telegram payment verified successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to verify Telegram payment: '.$e->getMessage(),
+            ], 400);
         }
     }
 }

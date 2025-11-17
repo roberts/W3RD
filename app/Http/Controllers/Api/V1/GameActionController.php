@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
@@ -25,7 +26,7 @@ class GameActionController extends Controller
     /**
      * Process a player's action in a game.
      */
-    public function store(Request $request, string $gameUlid): JsonResponse
+    public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID
         $game = Game::where('ulid', $gameUlid)->firstOrFail();
@@ -59,10 +60,7 @@ class GameActionController extends Controller
         }
 
         // Validate request - basic validation, game-specific validation happens in the action factory
-        $validated = $request->validate([
-            'action_type' => 'required|string',
-            'action_details' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
         // Dynamically get the state class for this game mode and restore state
         $stateClass = $mode->getStateClass();
@@ -233,9 +231,9 @@ class GameActionController extends Controller
     }
 
     /**
-     * Get available actions for the current player.
+     * Get current player options of available actions
      */
-    public function availableActions(string $gameUlid): JsonResponse
+    public function options(string $gameUlid): JsonResponse
     {
         // Find the game by ULID
         $game = Game::where('ulid', $gameUlid)->firstOrFail();
@@ -255,7 +253,7 @@ class GameActionController extends Controller
         $player = $game->players()->where('user_id', Auth::id())->first();
         if (! $player) {
             return response()->json([
-                'available_actions' => [],
+                'options' => [],
                 'is_your_turn' => false,
                 'message' => 'You are not a player in this game.',
             ], 403);
@@ -271,7 +269,7 @@ class GameActionController extends Controller
         $deadline = $mode->getActionDeadline($gameState, $game);
 
         return response()->json([
-            'available_actions' => $actions,
+            'options' => $actions,
             'is_your_turn' => $mode->getGameState()->currentPlayerUlid === $player->ulid,
             'phase' => $mode->getGameState()->phase->value ?? 'active',
             'deadline' => $deadline->toIso8601String(),

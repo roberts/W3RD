@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,14 +46,11 @@ class AlertController extends Controller
     /**
      * Mark alerts as read.
      */
-    public function markAsRead(Request $request): JsonResponse
+    public function markAsRead(MarkAlertsAsReadRequest $request): JsonResponse
     {
         $user = $request->user();
 
-        $validated = $request->validate([
-            'alert_ids' => 'sometimes|array',
-            'alert_ids.*' => 'exists:alerts,id',
-        ]);
+        $validated = $request->validated();
 
         // If specific alert IDs provided, mark those
         if (isset($validated['alert_ids'])) {

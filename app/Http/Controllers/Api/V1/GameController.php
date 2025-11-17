@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
@@ -222,10 +223,10 @@ class GameController extends Controller
         }
 
         // Update game status
-        $game->status = \App\Enums\GameStatus::Completed;
+        $game->status = GameStatus::COMPLETED;
         $game->winner_id = $opponent->user_id;
         $game->finished_at = now();
-        $game->duration_seconds = now()->diffInSeconds($game->started_at ?? $game->created_at);
+        $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
 
         return response()->json([

@@ -97,7 +97,7 @@ Complete API reference for the GamerProtocol.io platform. All endpoints use the 
 | `GET` | `/v1/games/{gameUlid}` | Get current game state by ULID | Bearer + Client Key |
 | `GET` | `/v1/games/{gameUlid}/history` | Get full action history for game (replay) | Bearer + Client Key |
 | `POST` | `/v1/games/{gameUlid}/action` | Execute a game action | Bearer + Client Key |
-| `GET` | `/v1/games/{gameUlid}/available-actions` | Get list of valid actions for current state | Bearer + Client Key |
+| `GET` | `/v1/games/{gameUlid}/options` | Get list of valid actions for current state | Bearer + Client Key |
 | `POST` | `/v1/games/{gameUlid}/forfeit` | Forfeit/concede a game | Bearer + Client Key |
 
 #### Rematch System

@@ -51,7 +51,9 @@ Route::prefix('v1')->group(function () {
             Route::get('/status', 'getStatus');
             Route::post('/subscribe', 'createStripeSubscription');
             Route::get('/manage', 'manageSubscription');
-            Route::post('/{provider}/verify', 'verifyReceipt');
+            Route::post('/apple/verify', 'verifyAppleReceipt');
+            Route::post('/google/verify', 'verifyGoogleReceipt');
+            Route::post('/telegram/verify', 'verifyTelegramReceipt');
         });
 
         // Personal User Endpoints
@@ -95,7 +97,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [GameController::class, 'index']);
             Route::get('/{gameUlid}', [GameController::class, 'show']);
             Route::post('/{gameUlid}/action', [GameActionController::class, 'store']);
-            Route::get('/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
+            Route::get('/{gameUlid}/options', [GameActionController::class, 'options']);
             Route::get('/{gameUlid}/history', [GameController::class, 'history']);
             Route::post('/{gameUlid}/forfeit', [GameController::class, 'forfeit']);
             Route::post('/{gameUlid}/rematch', [GameController::class, 'requestRematch']);

@@ -94,10 +94,11 @@ Route::prefix('v1')->group(function () {
             // Games
             Route::get('/', [GameController::class, 'index']);
             Route::get('/{gameUlid}', [GameController::class, 'show']);
-            Route::get('/{gameUlid}/history', [GameController::class, 'history']);
-            Route::post('/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
             Route::post('/{gameUlid}/action', [GameActionController::class, 'store']);
             Route::get('/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
+            Route::get('/{gameUlid}/history', [GameController::class, 'history']);
+            Route::post('/{gameUlid}/forfeit', [GameController::class, 'forfeit']);
+            Route::post('/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
         });
     });
 });

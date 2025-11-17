@@ -182,4 +182,60 @@ class GameController extends Controller
             }),
         ]);
     }
+
+    /**
+     * Forfeit/concede a game.
+     */
+    public function forfeit(Request $request, string $gameUlid): JsonResponse
+    {
+        $user = $request->user();
+
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+
+        // Verify user is a player in this game
+        /** @var Player|null $player */
+        $player = $game->players()->where('user_id', $user->id)->first();
+
+        if (! $player) {
+            return response()->json([
+                'message' => 'You are not authorized to forfeit this game.',
+            ], 403);
+        }
+
+        // Can only forfeit active games
+        if ($game->status->value !== 'active') {
+            return response()->json([
+                'message' => 'Can only forfeit active games.',
+            ], 400);
+        }
+
+        // Determine the winner (opponent of the forfeiting player)
+        /** @var Player|null $opponent */
+        $opponent = $game->players()
+            ->where('user_id', '!=', $user->id)
+            ->first();
+
+        if (! $opponent) {
+            return response()->json([
+                'message' => 'Cannot determine opponent.',
+            ], 400);
+        }
+
+        // Update game status
+        $game->status = \App\Enums\GameStatus::Completed;
+        $game->winner_id = $opponent->user_id;
+        $game->finished_at = now();
+        $game->duration_seconds = now()->diffInSeconds($game->started_at ?? $game->created_at);
+        $game->save();
+
+        return response()->json([
+            'data' => [
+                'ulid' => $game->ulid,
+                'status' => $game->status->value,
+                'winner_id' => $game->winner_id,
+                'finished_at' => $game->finished_at,
+            ],
+            'message' => 'Game forfeited successfully.',
+        ]);
+    }
 }

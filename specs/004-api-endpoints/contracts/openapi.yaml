@@ -1,0 +1,412 @@
+openapi: 3.0.3
+info:
+  title: Protocol API
+  description: Core API for the Protocol platform, providing services for games, users, billing, and more.
+  version: 1.0.0
+servers:
+  - url: https://api.protocol.example.com/v1
+    description: Production Server
+  - url: http://localhost:8000/v1
+    description: Local Development Server
+paths:
+  /titles:
+    get:
+      summary: List Game Titles
+      description: Retrieve a list of all available game titles.
+      tags:
+        - Titles
+      responses:
+        '200':
+          description: A list of game titles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameTitle'
+  /games:
+    get:
+      summary: List Active Games
+      description: Retrieve a list of active or recent games.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of games.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+  /games/{gameUlid}:
+    get:
+      summary: Get Game Details
+      description: Retrieve the details of a specific game by its ULID.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gameUlid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Game details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /games/{gameUlid}/history:
+    get:
+      summary: Get Game History
+      description: Retrieve the move or action history for a specific game.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gameUlid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: A list of game actions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameAction'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /me/profile:
+    get:
+      summary: Get My Profile
+      description: Retrieve the public profile of the authenticated user.
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: The user's public profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+    patch:
+      summary: Update My Profile
+      description: Update the public profile of the authenticated user.
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bio:
+                  type: string
+                  nullable: true
+                social_links:
+                  type: object
+                  nullable: true
+      responses:
+        '200':
+          description: The updated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /leaderboards/{gameTitle}:
+    get:
+      summary: Get Leaderboard
+      description: Retrieve the leaderboard for a specific game title.
+      tags:
+        - Leaderboards
+      parameters:
+        - name: gameTitle
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [tic_tac_toe, four_in_a_row]
+      responses:
+        '200':
+          description: The game leaderboard.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Leaderboard'
+  /billing/subscribe:
+    post:
+      summary: Create Stripe Subscription
+      description: Creates a Stripe Checkout session for a new subscription.
+      tags:
+        - Billing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price_id:
+                  type: string
+      responses:
+        '200':
+          description: The Stripe Checkout session URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: url
+  /billing/manage:
+    get:
+      summary: Manage Subscription
+      description: Creates a Stripe Customer Portal session to manage an existing subscription.
+      tags:
+        - Billing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: The Stripe Customer Portal session URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: url
+  /billing/{provider}/verify:
+    post:
+      summary: Verify IAP Receipt
+      description: Verify a receipt from a third-party provider (Apple, Google, Telegram).
+      tags:
+        - Billing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [apple, google, telegram]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receipt_token:
+                  type: string
+      responses:
+        '200':
+          description: Subscription status updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /status:
+    get:
+      summary: API Status
+      description: Check the operational status of the API.
+      tags:
+        - General
+      responses:
+        '200':
+          description: API is operational.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStatus'
+  /me/notifications:
+    get:
+      summary: Get My Notifications
+      description: Retrieve the authenticated user's notifications.
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of notifications.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnprocessableEntity:
+      description: The request was well-formed but was unable to be followed due to semantic errors.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    GameTitle:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Four in a Row"
+        key:
+          type: string
+          example: "four_in_a_row"
+        description:
+          type: string
+    Game:
+      type: object
+      properties:
+        ulid:
+          type: string
+          format: ulid
+        game_title:
+          type: string
+          example: "four_in_a_row"
+        status:
+          type: string
+          enum: [pending, active, completed, abandoned]
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+    GameAction:
+      type: object
+      properties:
+        id:
+          type: integer
+        action_type:
+          type: string
+          example: "move"
+        details:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    Profile:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        social_links:
+          type: object
+          nullable: true
+        avatar_url:
+          type: string
+          format: url
+    Leaderboard:
+      type: object
+      properties:
+        game_title:
+          type: string
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              rank:
+                type: integer
+              user:
+                $ref: '#/components/schemas/User'
+              score:
+                type: integer
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: ulid
+        type:
+          type: string
+        data:
+          type: object
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    ApiStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        timestamp:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

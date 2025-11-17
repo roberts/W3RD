@@ -187,7 +187,7 @@ describe('Lobby Player Management', function () {
         it('prevents joining full lobby', function () {
             $host = User::factory()->create();
             $user = User::factory()->create();
-            
+
             // Create public lobby with min_players set to 2
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,

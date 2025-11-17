@@ -53,8 +53,8 @@ class AuthenticationHelper
 
         $userData = array_merge([
             'client_id' => $client->id,
-            'username' => 'testuser' . rand(1000, 9999),
-            'email' => 'test' . rand(1000, 9999) . '@example.com',
+            'username' => 'testuser'.rand(1000, 9999),
+            'email' => 'test'.rand(1000, 9999).'@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'name' => 'Test User',

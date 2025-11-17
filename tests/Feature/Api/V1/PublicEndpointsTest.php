@@ -3,7 +3,6 @@
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use Tests\Feature\Helpers\AssertionHelper;
 
 describe('Public Endpoints', function () {
     describe('System Status', function () {

@@ -108,7 +108,7 @@ class BillingHelper
     {
         return [
             'receipt_data' => base64_encode(json_encode([
-                'transaction_id' => 'apple_' . rand(100000, 999999),
+                'transaction_id' => 'apple_'.rand(100000, 999999),
                 'product_id' => 'com.gamerprotocol.starter',
                 'purchase_date_ms' => now()->timestamp * 1000,
             ])),
@@ -122,9 +122,9 @@ class BillingHelper
     public static function fakeGoogleReceipt(bool $valid = true): array
     {
         return [
-            'purchase_token' => 'google_' . bin2hex(random_bytes(16)),
+            'purchase_token' => 'google_'.bin2hex(random_bytes(16)),
             'product_id' => 'com.gamerprotocol.starter',
-            'order_id' => 'GPA.' . rand(1000, 9999),
+            'order_id' => 'GPA.'.rand(1000, 9999),
             'purchase_time' => now()->timestamp * 1000,
             'valid' => $valid,
         ];
@@ -136,8 +136,8 @@ class BillingHelper
     public static function fakeTelegramReceipt(bool $valid = true): array
     {
         return [
-            'telegram_payment_charge_id' => 'tg_' . bin2hex(random_bytes(16)),
-            'provider_payment_charge_id' => 'provider_' . bin2hex(random_bytes(16)),
+            'telegram_payment_charge_id' => 'tg_'.bin2hex(random_bytes(16)),
+            'provider_payment_charge_id' => 'provider_'.bin2hex(random_bytes(16)),
             'total_amount' => 999,
             'currency' => 'USD',
             'valid' => $valid,

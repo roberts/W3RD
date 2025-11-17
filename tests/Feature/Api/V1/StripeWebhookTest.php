@@ -21,7 +21,7 @@ describe('Stripe Webhook Processing', function () {
 
             $timestamp = time();
             $secret = config('services.stripe.webhook_secret', 'whsec_test');
-            $signature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+            $signature = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
 
             $response = $this->postJson('/api/v1/stripe/webhook', json_decode($payload, true), [
                 'Stripe-Signature' => "t={$timestamp},v1={$signature}",
@@ -42,7 +42,7 @@ describe('Stripe Webhook Processing', function () {
             ];
 
             $response = $this->postJson('/api/v1/stripe/webhook', $payload, [
-                'Stripe-Signature' => 't=' . time() . ',v1=invalid_signature',
+                'Stripe-Signature' => 't='.time().',v1=invalid_signature',
             ]);
 
             $response->assertStatus(400);

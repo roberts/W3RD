@@ -17,7 +17,8 @@ This repository contains the Laravel 12 API backend for the multi-platform game 
 2.  **Two-Factor Authorization:** Every request requires a **Sanctum Bearer Token** (user authentication) and an **X-Client-Key** (application authorization) found in the `clients` table.
 3.  **Real-Time Gameplay:** **Laravel Reverb** pushes instant game state updates to all subscribed clients.
 4.  **Flexible Game State:** All game boards and hands are stored in the unified **`games`** table using the **JSON column type** (MySQL 8.0+ required) and Laravel casting. Game titles are defined as PHP enums (Validate Four, Checkers, Hearts, Spades), allowing for unlimited game variations without database schema changes.
-5.  **Usage Metering:** Custom database logic handles complex quotas: **`strikes`** (daily free losses) and **`quotas`** (monthly member games).
+5. **Matchmaking:** Players can be matched in games through Quickplay, Lobbies (public & private) and Rematches.
+6.  **Usage Metering:** Custom database logic handles complex quotas: **`strikes`** (daily free losses) and **`quotas`** (monthly member games).
 
 ## Required Composer Packages
 

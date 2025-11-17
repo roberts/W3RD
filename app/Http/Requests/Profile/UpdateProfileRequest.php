@@ -25,7 +25,7 @@ class UpdateProfileRequest extends FormRequest
 
         // Only allow username updates if user has permission
         if ($this->user() && $this->user()->canUpdateUsername()) {
-            $rules['username'] = 'sometimes|string|min:3|max:50|unique:users,username,' . $this->user()->id;
+            $rules['username'] = 'sometimes|string|min:3|max:50|unique:users,username,'.$this->user()->id;
         }
 
         return $rules;
@@ -56,14 +56,14 @@ class UpdateProfileRequest extends FormRequest
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         // Check if username was attempted without permission
-        if ($this->has('username') && (!$this->user() || !$this->user()->canUpdateUsername())) {
+        if ($this->has('username') && (! $this->user() || ! $this->user()->canUpdateUsername())) {
             throw new \Illuminate\Validation\ValidationException(
                 $validator,
                 response()->json([
                     'message' => 'You do not have permission to update your username.',
                     'errors' => [
-                        'username' => ['You must have Master Player status to change your username.']
-                    ]
+                        'username' => ['You must have Master Player status to change your username.'],
+                    ],
                 ], 403)
             );
         }

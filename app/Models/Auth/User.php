@@ -60,7 +60,7 @@ class User extends Authenticatable
         static::creating(function ($user) {
             if (empty($user->username)) {
                 // Generate temporary username, will be updated after creation
-                $user->username = 'player' . str_pad((string) rand(1, 9999999), 7, '0', STR_PAD_LEFT);
+                $user->username = 'player'.str_pad((string) rand(1, 9999999), 7, '0', STR_PAD_LEFT);
             }
         });
 
@@ -83,7 +83,7 @@ class User extends Authenticatable
         $number = $userId + 69420;
         $paddedNumber = str_pad((string) $number, 7, '0', STR_PAD_LEFT);
 
-        return 'player' . $paddedNumber;
+        return 'player'.$paddedNumber;
     }
 
     // Relationships

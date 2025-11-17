@@ -20,13 +20,13 @@ class UserLevelsController extends Controller
         $levelCollection = $user->titleLevels()->get();
 
         $levels = $levelCollection->map(function (UserTitleLevel $titleLevel) {
-                return [
-                    'game_title' => $titleLevel->title_slug,
-                    'level' => $titleLevel->level,
-                    'experience_points' => $titleLevel->xp_current,
-                    'last_played_at' => $titleLevel->last_played_at?->toIso8601String(),
-                ];
-            });
+            return [
+                'game_title' => $titleLevel->title_slug,
+                'level' => $titleLevel->level,
+                'experience_points' => $titleLevel->xp_current,
+                'last_played_at' => $titleLevel->last_played_at?->toIso8601String(),
+            ];
+        });
 
         return response()->json([
             'data' => $levels,

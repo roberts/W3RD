@@ -27,6 +27,24 @@ This table will store notifications for users, such as game invites, billing iss
 }
 ```
 
+### `rematch_requests`
+
+This table will store rematch requests between players after a game completes.
+
+| Column               | Type        | Modifiers                               | Description                                      |
+| -------------------- | ----------- | --------------------------------------- | ------------------------------------------------ |
+| `id`                 | `ulid`      | `primary`                               | Primary key for the rematch request.             |
+| `original_game_id`   | `foreignId` | `constrained('games')->onDelete('cascade')` | The completed game that spawned this request. |
+| `requesting_user_id` | `foreignId` | `constrained('users')->onDelete('cascade')` | The user who requested the rematch.          |
+| `opponent_user_id`   | `foreignId` | `constrained('users')->onDelete('cascade')` | The opponent who must accept/decline.        |
+| `new_game_id`        | `foreignId` | `nullable()->constrained('games')->onDelete('set null')` | The new game created if accepted.    |
+| `status`             | `string`    |                                         | Status: `pending`, `accepted`, `declined`, `expired`. |
+| `expires_at`         | `timestamp` |                                         | Auto-expire time (5 minutes from creation).      |
+| `created_at`         | `timestamp` |                                         |                                                  |
+| `updated_at`         | `timestamp` |                                         |                                                  |
+
+**Indexes**: Index on `status` and `expires_at` for efficient cleanup jobs.
+
 ## 2. Modified Tables
 
 ### `users`

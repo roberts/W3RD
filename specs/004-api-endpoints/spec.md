@@ -157,6 +157,24 @@ A user wants to personalize their public-facing profile by changing their avatar
 1.  **Given** a user navigates to their "Edit Profile" screen, **When** the page loads, **Then** the app calls `GET /v1/me/profile` and populates the form with their current username, bio, and avatar.
 2.  **Given** the user changes their bio and saves, **When** the action is triggered, **Then** the app calls `PATCH /v1/me/profile` with the new data, and a subsequent fetch confirms the update.
 
+---
+
+### User Story 11 - A Player Requests a Rematch (Priority: P3)
+
+After completing a game, a player wants to quickly start a new game with the same opponent without going through the full matchmaking or lobby creation process.
+
+**Why this priority**: This is a high-value feature for player retention and engagement. When players finish an enjoyable game, the immediate opportunity to play again captures momentum and keeps them engaged with the platform.
+
+**Independent Test**: Can be tested with two users who have completed a game together. After the game ends, one player should be able to request a rematch, and the other should receive a notification and be able to accept or decline.
+
+**Acceptance Scenarios**:
+
+1.  **Given** a user has just completed a game, **When** they view the game results screen, **Then** the app displays a "Rematch" button.
+2.  **Given** the user clicks "Rematch", **When** the action is triggered, **Then** the app calls `POST /v1/games/{gameUlid}/rematch` and receives a success response.
+3.  **Given** a rematch has been requested, **When** the opponent opens their app, **Then** they receive a notification about the rematch request.
+4.  **Given** the opponent accepts the rematch, **When** they respond, **Then** a new game is created with the same players and game title, and both players are redirected to the new game.
+5.  **Given** the opponent declines or ignores the rematch for 5 minutes, **When** the timeout occurs, **Then** the rematch request is automatically expired and the requesting player is notified.
+
 ### Edge Cases
 
 -   **Invalid IDs**: How does the system respond when a request is made with a non-existent `gameUlid`, `title_slug`, etc.? (Should return a 404 Not Found).
@@ -206,6 +224,10 @@ To ensure clarity for client developers, the distinction between these two resou
 -   **FR-019**: The system **MUST** provide an endpoint (e.g., `POST /v1/me/notifications/mark-as-read`) to mark notifications as read.
 -   **FR-020**: The system **MUST** generate and persist notifications for key asynchronous events (e.g., friend request received, game invite, turn reminder).
 -   **FR-021**: The system **MUST** provide a `GET /v1/games/{gameUlid}/history` endpoint that returns a chronological list of all moves/actions taken in that game.
+-   **FR-024**: The system **MUST** provide a `POST /v1/games/{gameUlid}/rematch` endpoint that creates a rematch request.
+-   **FR-025**: The system **MUST** provide a `POST /v1/rematch-requests/{requestId}/accept` endpoint to accept a rematch request.
+-   **FR-026**: The system **MUST** provide a `POST /v1/rematch-requests/{requestId}/decline` endpoint to decline a rematch request.
+-   **FR-027**: The system **MUST** automatically expire rematch requests after 5 minutes if not responded to.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -218,6 +240,8 @@ To ensure clarity for client developers, the distinction between these two resou
 -   **Subscription**: The record of a User's active Plan, including its start and end dates.
 -   **Notification**: A record of an event that a user should be made aware of.
     -   Attributes: `id`, `user_id`, `type` (e.g., 'friend_request', 'game_invite'), `data` (JSON with context), `read_at` (nullable).
+-   **RematchRequest**: A temporary record of a rematch challenge between players.
+    -   Attributes: `id`, `original_game_id`, `requesting_user_id`, `opponent_user_id`, `status` (enum: `pending`, `accepted`, `declined`, `expired`), `expires_at`, `timestamps`.
 
 ## Success Criteria *(mandatory)*
 

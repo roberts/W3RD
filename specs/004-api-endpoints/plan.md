@@ -90,23 +90,29 @@ This phase details the step-by-step process for building the Core API Endpoints.
     -   Generate a migration to add `bio` and `social_links` columns to the `users` table.
 -   **Task 2.3: Create `subscriptions` Table Migration**
     -   Generate a migration to add the `provider` column to the `subscriptions` table.
--   **Task 2.4: Run Migrations**
+-   **Task 2.4: Create `rematch_requests` Migration**
+    -   Generate a migration to create the `rematch_requests` table as defined in `data-model.md`.
+-   **Task 2.5: Run Migrations**
     -   Execute `php artisan migrate`.
 
 ### Step 3: Models & Services
 -   **Task 3.1: Create `Notification` Model**
     -   Generate the `App\Models\Notification` Eloquent model.
--   **Task 3.2: Update `User` Model**
+-   **Task 3.2: Create `RematchRequest` Model**
+    -   Generate the `App\Models\RematchRequest` Eloquent model with relationships to Game and User.
+-   **Task 3.3: Update `User` Model**
     -   Add `bio` and `social_links` to the `$fillable` array.
     -   Add a `notifications()` relationship.
--   **Task 3.3: Update `Subscription` Model**
+-   **Task 3.4: Update `Subscription` Model**
     -   Add `provider` to the `$fillable` array.
--   **Task 3.4: Create Validation Services**
+-   **Task 3.5: Create Validation Services**
     -   Create `App\Services\AppleReceiptValidator` to handle App Store Server API communication.
     -   Create `App\Services\GooglePurchaseValidator` to handle Google Play Developer API communication.
     -   Create `App\Services\TelegramPaymentValidator` to handle Telegram payment hash validation.
--   **Task 3.5: Create Profile Service**
+-   **Task 3.6: Create Profile Service**
     -   Create `App\Services\ProfileService` to encapsulate the logic for updating user profiles.
+-   **Task 3.7: Create Rematch Service**
+    -   Create `App\Services\RematchService` to handle rematch request logic, including creation, acceptance, decline, and expiration.
 
 ### Step 4: Routing
 -   **Task 4.1: Add API Routes**
@@ -122,21 +128,34 @@ This phase details the step-by-step process for building the Core API Endpoints.
     -   `StatusController@index`: Return the API status.
 -   **Task 5.3: Implement Game Endpoints**
     -   `GameController@index`, `GameController@show`, `GameController@history`.
--   **Task 5.4: Implement User Profile Endpoints**
+-   **Task 5.4: Implement Rematch Endpoints**
+    -   `GameController@requestRematch`: Create a rematch request using `RematchService`.
+    -   Create `RematchController` with methods: `accept()`, `decline()`.
+-   **Task 5.5: Implement User Profile Endpoints**
     -   `ProfileController@show`: Return the authenticated user's profile.
     -   `ProfileController@update`: Use `ProfileService` to update the profile.
--   **Task 5.5: Implement Billing Endpoints**
+-   **Task 5.6: Implement Billing Endpoints**
     -   `BillingController@createStripeSubscription`: Use Cashier to create a checkout session.
     -   `BillingController@manageSubscription`: Use Cashier to create a customer portal session.
     -   `BillingController@verifyReceipt`: Use the appropriate validation service based on the provider parameter.
--   **Task 5.6: Implement Notification Endpoints**
+-   **Task 5.7: Implement Notification Endpoints**
     -   `NotificationController@index`: Return the user's notifications.
 
-### Step 6: Testing
--   **Task 6.1: Write Feature Tests**
+### Step 6: Background Jobs & Events
+-   **Task 6.1: Create Rematch Expiration Job**
+    -   Create `App\Jobs\ExpireRematchRequests` to automatically expire pending requests after 5 minutes.
+    -   Schedule this job to run every minute in `App\Console\Kernel`.
+-   **Task 6.2: Create Rematch Notification Events**
+    -   Create events: `RematchRequested`, `RematchAccepted`, `RematchDeclined`, `RematchExpired`.
+    -   Create listeners to send notifications to users for each event.
+
+### Step 7: Testing
+-   **Task 7.1: Write Feature Tests**
     -   Create a feature test for every new API endpoint.
     -   Test success cases (200 OK), authentication failures (401), authorization failures (403), not found errors (404), and validation errors (422).
--   **Task 6.2: Write Unit Tests**
+    -   Specifically test rematch flow: request, accept, decline, and expiration.
+-   **Task 7.2: Write Unit Tests**
     -   Create unit tests for the validation services (`AppleReceiptValidator`, `GooglePurchaseValidator`, `TelegramPaymentValidator`). Mock external API calls.
     -   Create unit tests for the `ProfileService`.
+    -   Create unit tests for the `RematchService`, including edge cases like duplicate requests and expired requests.
 

@@ -91,6 +91,89 @@ paths:
                   $ref: '#/components/schemas/GameAction'
         '404':
           $ref: '#/components/responses/NotFound'
+  /games/{gameUlid}/rematch:
+    post:
+      summary: Request a Rematch
+      description: Request a rematch with the same opponent after completing a game.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gameUlid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '201':
+          description: Rematch request created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RematchRequest'
+        '400':
+          description: Bad request (e.g., game not completed, already pending rematch).
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /rematch-requests/{requestId}/accept:
+    post:
+      summary: Accept a Rematch Request
+      description: Accept a pending rematch request from an opponent.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Rematch accepted, new game created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    $ref: '#/components/schemas/Game'
+                  rematch_request:
+                    $ref: '#/components/schemas/RematchRequest'
+        '400':
+          description: Bad request (e.g., request expired or already responded to).
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /rematch-requests/{requestId}/decline:
+    post:
+      summary: Decline a Rematch Request
+      description: Decline a pending rematch request from an opponent.
+      tags:
+        - Games
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Rematch declined successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RematchRequest'
+        '400':
+          description: Bad request (e.g., request expired or already responded to).
+        '404':
+          $ref: '#/components/responses/NotFound'
   /me/profile:
     get:
       summary: Get My Profile

@@ -6,6 +6,7 @@ use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use App\Services\GameActionRecorder;
 use App\Services\Timeouts\ForfeitHandler;
@@ -40,6 +41,7 @@ class GameActionController extends Controller
         }
 
         // Verify the authenticated user is a player in this game
+        /** @var Player|null $player */
         $player = $game->players()->where('user_id', Auth::id())->first();
         if (! $player) {
             return response()->json([
@@ -86,6 +88,7 @@ class GameActionController extends Controller
                 $game->finish_reason = $outcome->reason;
 
                 if ($outcome->winnerUlid) {
+                    /** @var Player $winner */
                     $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                     $game->winner_id = $winner->id;
                 }
@@ -166,6 +169,7 @@ class GameActionController extends Controller
             $game->finish_reason = $outcome->reason;
 
             if ($outcome->winnerUlid) {
+                /** @var Player $winner */
                 $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                 $game->winner_id = $winner->id;
                 $gameState = $gameState->withWinner($outcome->winnerUlid);
@@ -247,6 +251,7 @@ class GameActionController extends Controller
         }
 
         // Get the player
+        /** @var Player|null $player */
         $player = $game->players()->where('user_id', Auth::id())->first();
         if (! $player) {
             return response()->json([

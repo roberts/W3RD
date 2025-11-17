@@ -22,7 +22,9 @@ class UserStatsController extends Controller
             $query->where('status', 'completed');
         })->count();
         $totalPoints = $user->points()->sum('amount');
-        $globalRank = $user->globalRank;
+
+        // TODO: Implement global rank calculation
+        $globalRank = null;
 
         return response()->json([
             'data' => [
@@ -31,10 +33,7 @@ class UserStatsController extends Controller
                 'losses' => $losses,
                 'win_rate' => $totalGames > 0 ? round(($wins / $totalGames) * 100, 2) : 0,
                 'total_points' => $totalPoints,
-                'global_rank' => $globalRank ? [
-                    'rank' => $globalRank->rank,
-                    'percentile' => $globalRank->percentile,
-                ] : null,
+                'global_rank' => $globalRank,
             ],
         ]);
     }

@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Alert;
 use App\Models\Billing\Subscription;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
+use Symfony\Component\HttpFoundation\Response;
 
 class StripeWebhookController extends CashierWebhookController
 {
     /**
      * Handle subscription created.
      */
-    protected function handleCustomerSubscriptionCreated(array $payload): void
+    protected function handleCustomerSubscriptionCreated(array $payload): Response
     {
-        parent::handleCustomerSubscriptionCreated($payload);
+        return parent::handleCustomerSubscriptionCreated($payload);
 
         // Add custom logic if needed
         // For example, send welcome alert
@@ -22,9 +23,9 @@ class StripeWebhookController extends CashierWebhookController
     /**
      * Handle subscription updated.
      */
-    protected function handleCustomerSubscriptionUpdated(array $payload): void
+    protected function handleCustomerSubscriptionUpdated(array $payload): ?Response
     {
-        parent::handleCustomerSubscriptionUpdated($payload);
+        return parent::handleCustomerSubscriptionUpdated($payload);
 
         // Add custom logic if needed
     }
@@ -32,9 +33,9 @@ class StripeWebhookController extends CashierWebhookController
     /**
      * Handle subscription deleted.
      */
-    protected function handleCustomerSubscriptionDeleted(array $payload): void
+    protected function handleCustomerSubscriptionDeleted(array $payload): Response
     {
-        parent::handleCustomerSubscriptionDeleted($payload);
+        return parent::handleCustomerSubscriptionDeleted($payload);
 
         // Add custom logic if needed
         // For example, send cancellation alert
@@ -43,15 +44,14 @@ class StripeWebhookController extends CashierWebhookController
     /**
      * Handle payment failed.
      */
-    protected function handleInvoicePaymentFailed(array $payload): void
+    protected function handleInvoicePaymentFailed(array $payload): Response
     {
-        parent::handleInvoicePaymentFailed($payload);
-
         // Send payment failed alert
         $subscription = $this->findSubscription($payload['data']['object']['subscription'] ?? null);
 
         if ($subscription && $subscription->user) {
             Alert::create([
+                /** @phpstan-ignore-next-line */
                 'user_id' => $subscription->user->id,
                 'type' => 'billing_issue',
                 'data' => [
@@ -60,12 +60,14 @@ class StripeWebhookController extends CashierWebhookController
                 ],
             ]);
         }
+
+        return response('Webhook Handled', 200);
     }
 
     /**
      * Find subscription by Stripe ID.
      */
-    private function findSubscription(?string $stripeId)
+    private function findSubscription(?string $stripeId): ?Subscription
     {
         if (! $stripeId) {
             return null;

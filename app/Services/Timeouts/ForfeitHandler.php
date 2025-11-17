@@ -6,6 +6,7 @@ namespace App\Services\Timeouts;
 
 use App\Games\GameOutcome;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 
 /**
  * Forfeit handler - player loses immediately on timeout.
@@ -21,6 +22,7 @@ class ForfeitHandler implements TimeoutHandlerContract
     public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
     {
         // Find the opponent (winner)
+        /** @var Player|null $winnerPlayer */
         $winnerPlayer = $game->players()
             ->where('ulid', '!=', $timedOutPlayerUlid)
             ->first();

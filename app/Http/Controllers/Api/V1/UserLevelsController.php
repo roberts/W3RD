@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,15 +16,15 @@ class UserLevelsController extends Controller
     {
         $user = $request->user();
 
-        $levels = $user->titleLevels()
-            ->get()
-            ->map(function ($titleLevel) {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, UserTitleLevel> $levelCollection */
+        $levelCollection = $user->titleLevels()->get();
+
+        $levels = $levelCollection->map(function (UserTitleLevel $titleLevel) {
                 return [
-                    'game_title' => $titleLevel->game_title,
+                    'game_title' => $titleLevel->title_slug,
                     'level' => $titleLevel->level,
-                    'experience_points' => $titleLevel->experience_points,
-                    'games_played' => $titleLevel->games_played,
-                    'games_won' => $titleLevel->games_won,
+                    'experience_points' => $titleLevel->xp_current,
+                    'last_played_at' => $titleLevel->last_played_at?->toIso8601String(),
                 ];
             });
 

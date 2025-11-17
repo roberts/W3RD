@@ -8,10 +8,27 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @property int $id
+ * @property string $ulid
  * @property Mode $mode
+ * @property \Illuminate\Database\Eloquent\Collection<int, Player> $players
+ * @property \Illuminate\Database\Eloquent\Collection<int, Action> $actions
+ * @property GameStatus $status
+ * @property int|null $mode_id
+ * @property int|null $creator_id
+ * @property int|null $winner_id
+ * @property int|null $turn_number
+ * @property array|null $game_state
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $finish_reason
  */
 class Game extends Model
@@ -56,27 +73,27 @@ class Game extends Model
     }
 
     // Relationships
-    public function creator()
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function mode()
+    public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);
     }
 
-    public function players()
+    public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
-    public function winner()
+    public function winner(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'winner_id');
     }
 
-    public function actions()
+    public function actions(): HasMany
     {
         return $this->hasMany(Action::class);
     }

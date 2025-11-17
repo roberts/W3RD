@@ -20,8 +20,11 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
+        /** @var \Illuminate\Support\Collection<int, Alert> $alertItems */
+        $alertItems = $alerts->getCollection();
+
         return response()->json([
-            'data' => $alerts->map(function ($alert) {
+            'data' => $alertItems->map(function (Alert $alert) {
                 return [
                     'id' => $alert->id,
                     'type' => $alert->type,

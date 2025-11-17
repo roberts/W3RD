@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\GameStatus;
 use App\Events\RematchAccepted;
 use App\Events\RematchDeclined;
 use App\Events\RematchExpired;
 use App\Events\RematchRequested;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,7 @@ class RematchService
     public function createRematchRequest(Game $game, User $requestingUser): RematchRequest
     {
         // Validate game is completed
-        if ($game->status !== 'completed') {
+        if ($game->status !== GameStatus::COMPLETED) {
             throw new \InvalidArgumentException('Can only request rematch for completed games.');
         }
 
@@ -31,6 +33,7 @@ class RematchService
         }
 
         // Get opponent
+        /** @var Player|null $opponent */
         $opponent = $game->players()
             ->where('user_id', '!=', $requestingUser->id)
             ->first();
@@ -85,21 +88,21 @@ class RematchService
         }
 
         return DB::transaction(function () use ($rematchRequest) {
+            /** @var Game $originalGame */
             $originalGame = $rematchRequest->originalGame;
 
             // Create new game with same settings
             $newGame = Game::create([
                 'mode_id' => $originalGame->mode_id,
-                'status' => 'pending',
-                'current_turn_user_id' => null,
-                'board_state' => $originalGame->mode->initial_board_state ?? [],
+                'status' => GameStatus::PENDING,
             ]);
 
             // Copy players to new game (swap positions for fairness)
+            /** @var \App\Models\Game\Player $player */
             foreach ($originalGame->players as $player) {
                 $newGame->players()->create([
                     'user_id' => $player->user_id,
-                    'position' => $player->position === 1 ? 2 : 1, // Swap positions
+                    'position_id' => $player->position_id === 1 ? 2 : 1, // Swap positions
                 ]);
             }
 

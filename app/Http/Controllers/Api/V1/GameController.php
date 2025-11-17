@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,26 +31,33 @@ class GameController extends Controller
             ->paginate(20);
 
         return response()->json([
-            'data' => $games->map(function ($game) {
+            /** @phpstan-ignore-next-line */
+            'data' => $games->map(function (Game $game) {
+                /** @phpstan-ignore-next-line */
                 return [
                     'ulid' => $game->ulid,
                     'game_title' => $game->mode->game_title ?? null,
-                    'status' => $game->status,
-                    'current_turn_user_id' => $game->current_turn_user_id,
-                    'winner_user_id' => $game->winner_user_id,
-                    'players' => $game->players->map(function ($player) {
+                    'status' => $game->status->value,
+                    'turn_number' => $game->turn_number,
+                    'winner_id' => $game->winner_id,
+                    'players' => $game->players->map(function (Player $player) {
+                        /** @var string|null $username */
+                        $username = $player->user->username;
+                        /** @var int|null $avatarId */
+                        $avatarId = $player->user->avatar_id;
+
                         return [
                             'user_id' => $player->user_id,
-                            'name' => $player->user->name,
-                            'username' => $player->user->username,
-                            'avatar_id' => $player->user->avatar_id,
-                            'position' => $player->position,
+                            'name' => (string) $player->user->name,
+                            'username' => $username,
+                            'avatar_id' => $avatarId,
+                            'position' => $player->position_id,
                         ];
-                    }),
+                    })->values(),
                     'created_at' => $game->created_at,
                     'updated_at' => $game->updated_at,
                 ];
-            }),
+            })->values(),
             'meta' => [
                 'current_page' => $games->currentPage(),
                 'last_page' => $games->lastPage(),
@@ -83,23 +91,22 @@ class GameController extends Controller
             'data' => [
                 'ulid' => $game->ulid,
                 'game_title' => $game->mode->game_title ?? null,
-                'status' => $game->status,
-                'current_turn_user_id' => $game->current_turn_user_id,
-                'winner_user_id' => $game->winner_user_id,
-                'board_state' => $game->board_state,
+                'status' => $game->status->value,
+                'turn_number' => $game->turn_number,
+                'winner_id' => $game->winner_id,
+                'game_state' => $game->game_state,
                 'players' => $game->players->map(function ($player) {
                     return [
                         'user_id' => $player->user_id,
                         'name' => $player->user->name,
                         'username' => $player->user->username,
                         'avatar_id' => $player->user->avatar_id,
-                        'position' => $player->position,
-                        'winner' => $player->winner,
+                        'position' => $player->position_id,
                     ];
                 }),
                 'created_at' => $game->created_at,
                 'updated_at' => $game->updated_at,
-                'completed_at' => $game->completed_at,
+                'finished_at' => $game->finished_at,
             ],
         ]);
     }
@@ -157,7 +164,7 @@ class GameController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $actions->map(function ($action) {
+            'data' => $actions->map(function (Action $action) {
                 return [
                     'id' => $action->id,
                     'turn_number' => $action->turn_number,
@@ -167,7 +174,7 @@ class GameController extends Controller
                         'user_id' => $action->player->user_id,
                         'name' => $action->player->user->name,
                         'username' => $action->player->user->username,
-                        'position' => $action->player->position,
+                        'position' => $action->player->position_id,
                     ],
                     'status' => $action->status,
                     'created_at' => $action->created_at->toIso8601String(),

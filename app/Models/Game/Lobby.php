@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Game;
 
 use App\Enums\GameTitle;
 use App\Enums\LobbyStatus;

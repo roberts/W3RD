@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Game;
 
 use App\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;

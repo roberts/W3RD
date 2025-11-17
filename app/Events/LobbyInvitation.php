@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Lobby;
+use App\Models\Game\Lobby;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;

@@ -6,7 +6,20 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $ulid
+ * @property int $game_id
+ * @property int $user_id
+ * @property string|null $name
+ * @property int|null $position_id
+ * @property string|null $color
+ * @property User $user
+ * @property Game $game
+ */
 class Player extends Model
 {
     use HasFactory, HasUlids;
@@ -44,17 +57,17 @@ class Player extends Model
     }
 
     // Relationships
-    public function game()
+    public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function actions()
+    public function actions(): HasMany
     {
         return $this->hasMany(Action::class);
     }

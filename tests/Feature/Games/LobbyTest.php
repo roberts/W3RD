@@ -2,8 +2,8 @@
 
 use App\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
-use App\Models\Lobby;
-use App\Models\LobbyPlayer;
+use App\Models\Game\Lobby;
+use App\Models\Game\LobbyPlayer;
 
 test('authenticated user can create a private lobby', function () {
     $host = User::factory()->create();

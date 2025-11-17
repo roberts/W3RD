@@ -29,7 +29,7 @@ class LeaderboardController extends Controller
             ->orderBy('experience_points', 'desc')
             ->limit(100)
             ->get()
-            ->map(function ($titleLevel, $index) {
+            ->map(function (UserTitleLevel $titleLevel, $index) {
                 return [
                     'rank' => $index + 1,
                     'user' => [
@@ -39,7 +39,7 @@ class LeaderboardController extends Controller
                         'avatar_id' => $titleLevel->user->avatar_id,
                     ],
                     'level' => $titleLevel->level,
-                    'experience_points' => $titleLevel->experience_points,
+                    'experience_points' => $titleLevel->xp_current,
                 ];
             });
 

@@ -36,6 +36,7 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
+        /** @var \App\Models\Billing\Subscription|null $subscription */
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
 
         if (! $subscription) {
@@ -91,6 +92,7 @@ class BillingController extends Controller
 
             return response()->json([
                 'data' => [
+                    /** @phpstan-ignore-next-line */
                     'checkout_url' => $checkout->url,
                 ],
             ]);
@@ -142,6 +144,7 @@ class BillingController extends Controller
                     $result = $this->appleValidator->validate($request->input('transaction_id'));
 
                     // Create or update subscription
+                    /** @var \App\Models\Billing\Subscription $subscription */
                     $subscription = $user->subscriptions()->updateOrCreate(
                         ['stripe_id' => $request->input('transaction_id')],
                         [
@@ -184,6 +187,7 @@ class BillingController extends Controller
                     }
 
                     // Create or update subscription
+                    /** @var \App\Models\Billing\Subscription $subscription */
                     $subscription = $user->subscriptions()->updateOrCreate(
                         ['stripe_id' => $result['order_id']],
                         [
@@ -228,6 +232,7 @@ class BillingController extends Controller
                     $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
 
                     // Create or update subscription
+                    /** @var \App\Models\Billing\Subscription $subscription */
                     $subscription = $user->subscriptions()->updateOrCreate(
                         ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
                         [

@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\LobbyStatus;
-use App\Models\Lobby;
+use App\Models\Game\Lobby;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

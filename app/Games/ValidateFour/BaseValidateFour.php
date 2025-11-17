@@ -6,6 +6,7 @@ use App\Games\BaseBoardGameTitle;
 use App\Games\GameOutcome;
 use App\Games\ValidateFour\Actions\DropDisc;
 use App\Games\ValidationResult;
+use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use Carbon\Carbon;
@@ -340,6 +341,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     public function getActionDeadline(object $gameState, Game $game): Carbon
     {
         // Get the last action's timestamp, or game start time if no actions yet
+        /** @var Action|null $lastAction */
         $lastAction = $game->actions()->latest()->first();
         $baseTime = $lastAction ? $lastAction->created_at : $game->started_at;
 

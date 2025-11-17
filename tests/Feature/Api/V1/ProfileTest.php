@@ -157,7 +157,7 @@ describe('Profile Management', function () {
             // Create first user and manually set their username
             $existingUser = User::factory()->create();
             $existingUser->update(['username' => 'takenusername']);
-            
+
             $user = User::factory()->create();
 
             // Give permission
@@ -169,7 +169,7 @@ describe('Profile Management', function () {
             $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
                 'username' => 'takenusername',
             ]);
-            
+
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['username']);
         });

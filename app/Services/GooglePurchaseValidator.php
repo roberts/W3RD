@@ -12,7 +12,7 @@ class GooglePurchaseValidator
     public function __construct()
     {
         $this->client = new GoogleClient;
-        
+
         $serviceAccountJson = config('services.google.service_account_json');
         if ($serviceAccountJson) {
             $this->client->setAuthConfig(json_decode($serviceAccountJson, true));

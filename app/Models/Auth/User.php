@@ -75,7 +75,7 @@ class User extends Authenticatable
                 $user->saveQuietly(); // Save without triggering events again
             }
         });
-        
+
         static::updating(function ($user) {
             // Always store usernames in lowercase
             if ($user->isDirty('username') && ! empty($user->username)) {

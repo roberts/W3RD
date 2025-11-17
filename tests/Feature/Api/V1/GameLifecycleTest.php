@@ -416,4 +416,85 @@ describe('Game Lifecycle', function () {
             expect($response->json('is_your_turn'))->toBeFalse();
         });
     });
+
+    describe('Edge Cases', function () {
+        it('returns 404 for invalid game_id', function () {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->getJson('/api/v1/games/invalid-ulid-123');
+
+            $response->assertNotFound();
+        });
+
+        it('handles concurrent actions gracefully', function () {
+            $user1 = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = Game::factory()->active()->create([
+                'creator_id' => $user1->id,
+                'game_state' => [],
+            ]);
+
+            $player1 = Player::factory()->create([
+                'game_id' => $game->id,
+                'user_id' => $user1->id,
+                'position_id' => 1,
+            ]);
+
+            $player2 = Player::factory()->create([
+                'game_id' => $game->id,
+                'user_id' => $user2->id,
+                'position_id' => 2,
+            ]);
+
+            $game->update([
+                'game_state' => [
+                    'board' => array_fill(0, 6, array_fill(0, 7, null)),
+                    'current_player_ulid' => $player1->ulid,
+                    'columns' => 7,
+                    'rows' => 6,
+                    'connect_count' => 4,
+                    'players' => [
+                        $player1->ulid => ['ulid' => $player1->ulid, 'position' => 1, 'color' => 'red'],
+                        $player2->ulid => ['ulid' => $player2->ulid, 'position' => 2, 'color' => 'yellow'],
+                    ],
+                    'phase' => 'active',
+                    'status' => 'active',
+                ],
+            ]);
+
+            // Try to submit action with player 2 (not their turn)
+            $response = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
+
+            // Should reject because it's not their turn
+            expect($response->status())->toBeIn([400, 403]);
+        });
+
+        it('rejects malformed JSON in request body', function () {
+            $user = User::factory()->create();
+            $game = GameHelper::createGame(['creator_id' => $user->id], [
+                ['user' => $user, 'position_id' => 1],
+            ]);
+
+            // Using call() to send raw invalid JSON string
+            $response = $this->actingAs($user)->call(
+                'POST',
+                "/api/v1/games/{$game->ulid}/action",
+                [],
+                [],
+                [],
+                [
+                    'CONTENT_TYPE' => 'application/json',
+                    'HTTP_ACCEPT' => 'application/json',
+                ],
+                'invalid-json-content'
+            );
+
+            // Should return 400 for malformed JSON
+            expect($response->status())->toBeIn([400, 422]);
+        });
+    });
 });

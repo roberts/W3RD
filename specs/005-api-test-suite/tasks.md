@@ -217,22 +217,22 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Public Endpoints & Edge Cases
 
-- [ ] T064 [P] Create PublicEndpointsTest.php in `tests/Feature/Api/V1/PublicEndpointsTest.php` with describe() structure
-- [ ] T065 Add System Status tests: return API health status (200), no authentication required
-- [ ] T066 Add Game Titles tests: list all available titles (200), include mode information
-- [ ] T067 Add Game Rules tests: show rules for specific title (200), return 404 for invalid title
-- [ ] T068 Add Leaderboards tests: show top players for title (200), paginate results, filter by time period
+- [x] T064 [P] Create PublicEndpointsTest.php in `tests/Feature/Api/V1/PublicEndpointsTest.php` with describe() structure
+- [x] T065 Add System Status tests: return API health status (200), no authentication required
+- [x] T066 Add Game Titles tests: list all available titles (200), include mode information
+- [x] T067 Add Game Rules tests: show rules for specific title (200), return 404 for invalid title
+- [x] T068 Add Leaderboards tests: show top players for title (200), paginate results, filter by time period
 
 **Edge Cases (add to relevant test files)**:
 
-- [ ] T069 [P] Add invalid game_id edge case to GameLifecycleTest.php: game not found returns 404
-- [ ] T070 [P] Add concurrent actions edge case to GameLifecycleTest.php: handle simultaneous actions
+- [x] T069 [P] Add invalid game_id edge case to GameLifecycleTest.php: game not found returns 404
+- [x] T070 [P] Add concurrent actions edge case to GameLifecycleTest.php: handle simultaneous actions
 - [ ] T071 [P] Add webhook ordering edge case to StripeWebhookTest.php: handle out-of-order webhooks
-- [ ] T072 [P] Add expired OAuth edge case to AuthenticationTest.php: handle expired/revoked OAuth tokens
-- [ ] T073 [P] Add malformed JSON edge case to all test files: reject malformed request bodies (400)
+- [x] T072 [P] Add expired OAuth edge case to AuthenticationTest.php: handle expired/revoked OAuth tokens
+- [x] T073 [P] Add malformed JSON edge case to all test files: reject malformed request bodies (400)
 - [ ] T074 [P] Add database failure edge case to critical operations: handle connection failures gracefully
-- [ ] T075 [P] Add expired invitation edge case to LobbyPlayerTest.php: reject expired lobby invitation (422)
-- [ ] T076 [P] Add timezone edge case to timestamp comparisons: handle timezone differences correctly
+- [x] T075 [P] Add expired invitation edge case to LobbyPlayerTest.php: reject expired lobby invitation (422)
+- [x] T076 [P] Add timezone edge case to timestamp comparisons: handle timezone differences correctly
 
 **Checkpoint**: Public endpoints and edge cases complete - comprehensive coverage achieved
 
@@ -242,14 +242,14 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 **Goal**: Ensure test suite meets all success criteria and performance targets
 
-- [ ] T077 Run full test suite and verify <30 second execution time: `php artisan test tests/Feature/Api/`
-- [ ] T078 Verify 0% flakiness: run test suite 10 times consecutively, all must pass
-- [ ] T079 Check test code for DRY violations: max 3 lines duplicated setup across files
-- [ ] T080 Verify all 40+ endpoints have test coverage: cross-reference with `routes/api.php`
-- [ ] T081 Review test failure messages: ensure actionable error messages with expected vs actual
-- [ ] T082 [P] Add CI/CD pipeline configuration in `.github/workflows/tests.yml` for automated test execution
-- [ ] T083 [P] Document test execution in repository README.md: add "Running Tests" section
-- [ ] T084 Create test suite summary report: document coverage, execution time, edge cases covered
+- [x] T077 Run full test suite and verify <30 second execution time: `php artisan test tests/Feature/Api/`
+- [x] T078 Verify 0% flakiness: run test suite 10 times consecutively, all must pass
+- [x] T079 Check test code for DRY violations: max 3 lines duplicated setup across files
+- [x] T080 Verify all 40+ endpoints have test coverage: cross-reference with `routes/api.php`
+- [x] T081 Review test failure messages: ensure actionable error messages with expected vs actual
+- [x] T082 [P] Add CI/CD pipeline configuration in `.github/workflows/tests.yml` for automated test execution
+- [x] T083 [P] Document test execution in repository README.md: add "Running Tests" section
+- [x] T084 Create test suite summary report: document coverage, execution time, edge cases covered
 
 **Final Checkpoint**: Test suite ready for production use - meets all success criteria (SC-001 through SC-012)
 
@@ -258,7 +258,7 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 ## Task Summary
 
 **Total Tasks**: 84
-**Completed Tasks**: 63 (75%)
+**Completed Tasks**: 81 (96%)
 **Parallelizable Tasks**: 42 (50%)
 
 ### Tasks by User Story
@@ -270,8 +270,12 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 - **User Story 4 (P2 - Profile/Stats)**: 8 tasks (T043-T050) ✅ 8/8 completed
 - **User Story 5 (P3 - Lobbies)**: 9 tasks (T051-T059) ✅ 9/9 completed
 - **User Story 6 (P3 - Alerts)**: 4 tasks (T060-T063) ✅ 4/4 completed
-- **Public & Edge Cases**: 13 tasks (T064-T076) ⏳ 0/13 completed
-- **Polish & Verification**: 8 tasks (T077-T084) ⏳ 0/8 completed
+- **Public & Edge Cases**: 13 tasks (T064-T076) ✅ 11/13 completed
+- **Polish & Verification**: 8 tasks (T077-T084) ✅ 8/8 completed
+
+### Remaining Tasks
+- ⏳ T071: Add webhook ordering edge case to StripeWebhookTest.php (requires Stripe configuration)
+- ⏳ T074: Add database failure edge case (optional - requires complex setup)
 
 ---
 

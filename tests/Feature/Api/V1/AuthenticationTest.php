@@ -223,4 +223,49 @@ describe('Auth', function () {
             AssertionHelper::assertUnauthorized($response);
         });
     });
+
+    describe('Edge Cases', function () {
+        it('handles expired OAuth tokens gracefully', function () {
+            $client = Client::factory()->create();
+
+            Http::fake([
+                '*' => Http::response(['error' => 'Token expired'], 401),
+            ]);
+
+            $response = postJson('/api/v1/auth/social', [
+                'provider' => 'google',
+                'token' => 'expired-oauth-token',
+                'client_id' => $client->id,
+            ]);
+
+            expect($response->status())->toBeIn([401, 422]);
+        });
+
+        it('handles revoked OAuth tokens gracefully', function () {
+            $client = Client::factory()->create();
+
+            Http::fake([
+                '*' => Http::response(['error' => 'Token revoked'], 403),
+            ]);
+
+            $response = postJson('/api/v1/auth/social', [
+                'provider' => 'google',
+                'token' => 'revoked-oauth-token',
+                'client_id' => $client->id,
+            ]);
+
+            expect($response->status())->toBeIn([401, 403, 422]);
+        });
+
+        it('rejects malformed JSON in request body', function () {
+            // Using call() to send raw invalid JSON string
+            $response = $this->call('POST', '/api/v1/auth/login', [], [], [], [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+            ], 'invalid-json-content');
+
+            // Should return 400 for malformed JSON
+            expect($response->status())->toBeIn([400, 422]);
+        });
+    });
 });

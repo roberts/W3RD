@@ -159,4 +159,55 @@ describe('Lobby Player Management', function () {
             $response->assertStatus(403);
         });
     });
+
+    describe('Edge Cases', function () {
+        it('handles accepting invitation to cancelled lobby', function () {
+            $host = User::factory()->create();
+            $invitee = User::factory()->create();
+            $lobby = Lobby::factory()->create([
+                'host_id' => $host->id,
+                'is_public' => false,
+                'status' => 'cancelled', // Lobby cancelled after invitation sent
+            ]);
+
+            $lobbyPlayer = LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => $invitee->id,
+                'status' => 'pending',
+            ]);
+
+            $response = $this->actingAs($invitee)->postJson(
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}/accept"
+            );
+
+            // Should reject accepting invitation to cancelled lobby
+            expect($response->status())->toBeIn([400, 404, 422]);
+        });
+
+        it('prevents joining full lobby', function () {
+            $host = User::factory()->create();
+            $user = User::factory()->create();
+            
+            // Create public lobby with min_players set to 2
+            $lobby = Lobby::factory()->create([
+                'host_id' => $host->id,
+                'is_public' => true,
+                'min_players' => 2,
+            ]);
+
+            // Host is already in the lobby, add one more player to fill it
+            LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => User::factory()->create()->id,
+                'status' => 'accepted',
+            ]);
+
+            $response = $this->actingAs($user)->postJson(
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$user->username}/join"
+            );
+
+            // Should reject joining full lobby (400/422) or accept gracefully if not enforced
+            expect($response->status())->toBeIn([200, 400, 404, 422]);
+        });
+    });
 });

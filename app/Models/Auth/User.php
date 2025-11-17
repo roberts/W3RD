@@ -58,7 +58,10 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($user) {
-            if (empty($user->username)) {
+            // Always store usernames in lowercase
+            if (! empty($user->username)) {
+                $user->username = strtolower($user->username);
+            } else {
                 // Generate temporary username, will be updated after creation
                 $user->username = 'player'.str_pad((string) rand(1, 9999999), 7, '0', STR_PAD_LEFT);
             }
@@ -70,6 +73,13 @@ class User extends Authenticatable
             if ($user->username !== $properUsername) {
                 $user->username = $properUsername;
                 $user->saveQuietly(); // Save without triggering events again
+            }
+        });
+        
+        static::updating(function ($user) {
+            // Always store usernames in lowercase
+            if ($user->isDirty('username') && ! empty($user->username)) {
+                $user->username = strtolower($user->username);
             }
         });
     }

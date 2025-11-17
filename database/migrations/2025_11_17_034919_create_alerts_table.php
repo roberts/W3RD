@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('alerts', function (Blueprint $table) {
             $table->id();
-            $table->ulid();
+            $table->char('ulid', 26)->unique()->index();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('type');
             $table->json('data');

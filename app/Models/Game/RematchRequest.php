@@ -25,14 +25,18 @@ class RematchRequest extends Model
         'expires_at' => 'datetime',
     ];
 
-    /**
-     * Get the columns that should receive a unique identifier.
-     *
-     * @return array<int, string>
-     */
+    // Use ULID for route model binding
     public function uniqueIds(): array
     {
         return ['ulid'];
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
     }
 
     public function originalGame(): BelongsTo

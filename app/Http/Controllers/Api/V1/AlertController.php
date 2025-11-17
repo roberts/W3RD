@@ -27,7 +27,7 @@ class AlertController extends Controller
         return response()->json([
             'data' => $alertItems->map(function (Alert $alert) {
                 return [
-                    'id' => $alert->id,
+                    'ulid' => $alert->ulid,
                     'type' => $alert->type,
                     'data' => $alert->data,
                     'read_at' => $alert->read_at?->toIso8601String(),
@@ -52,10 +52,10 @@ class AlertController extends Controller
 
         $validated = $request->validated();
 
-        // If specific alert IDs provided, mark those
-        if (isset($validated['alert_ids'])) {
+        // If specific alert ULIDs provided, mark those
+        if (isset($validated['alert_ulids'])) {
             $user->alerts()
-                ->whereIn('id', $validated['alert_ids'])
+                ->whereIn('ulid', $validated['alert_ulids'])
                 ->whereNull('read_at')
                 ->update(['read_at' => now()]);
         } else {

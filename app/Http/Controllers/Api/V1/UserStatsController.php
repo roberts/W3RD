@@ -17,11 +17,23 @@ class UserStatsController extends Controller
 
         // Calculate global stats
         $totalGames = $user->players()->count();
-        $wins = $user->players()->where('winner', true)->count();
-        $losses = $user->players()->where('winner', false)->whereHas('game', function ($query) {
-            $query->where('status', 'completed');
+        
+        // Count wins: games where the player's ID matches the winner_id
+        $wins = $user->players()->whereHas('game', function ($query) {
+            $query->whereColumn('winner_id', 'players.id');
         })->count();
-        $totalPoints = $user->points()->sum('amount');
+        
+        // Count losses: completed games where player didn't win
+        $losses = $user->players()->whereHas('game', function ($query) {
+            $query->where('status', 'completed')
+                  ->where(function ($q) {
+                      $q->whereColumn('winner_id', '!=', 'players.id')
+                        ->orWhereNull('winner_id');
+                  });
+        })->count();
+        
+        // Sum total points from the points ledger (using 'change' column)
+        $totalPoints = $user->points()->sum('change');
 
         // TODO: Implement global rank calculation
         $globalRank = null;

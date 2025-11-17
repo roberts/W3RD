@@ -44,6 +44,11 @@ class Alert extends Model
         return ['ulid'];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

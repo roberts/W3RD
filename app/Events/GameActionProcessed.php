@@ -23,6 +23,7 @@ class GameActionProcessed implements ShouldBroadcast
         public readonly string $actionType,
         public readonly array $actionDetails,
         public readonly string $playerUlid,
+        public readonly string $actionUlid,
     ) {}
 
     /**
@@ -49,6 +50,7 @@ class GameActionProcessed implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
+            'action_ulid' => $this->actionUlid,
             'game_ulid' => $this->game->ulid,
             'action_type' => $this->actionType,
             'action_details' => $this->actionDetails,

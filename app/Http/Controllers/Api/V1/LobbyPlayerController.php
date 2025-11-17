@@ -69,27 +69,30 @@ class LobbyPlayerController extends Controller
     /**
      * Respond to a lobby invitation or join a public lobby
      */
-    public function update(RespondToInvitationRequest $request, string $lobbyUlid, int $userId): JsonResponse
+    public function update(RespondToInvitationRequest $request, string $lobbyUlid, string $username): JsonResponse
     {
         $validated = $request->validated();
 
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();
 
+        // Resolve username to user
+        $user = User::where('username', strtolower($username))->firstOrFail();
+
         // Verify the user is responding for themselves
-        if ($currentUser->id !== $userId) {
+        if ($currentUser->id !== $user->id) {
             return response()->json(['error' => 'You can only respond for yourself'], 403);
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $userId)
+            ->where('user_id', $user->id)
             ->first();
 
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
-                'user_id' => $userId,
+                'user_id' => $user->id,
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
@@ -135,7 +138,7 @@ class LobbyPlayerController extends Controller
     /**
      * Kick a player from a lobby (Host only)
      */
-    public function destroy(Request $request, string $lobbyUlid, int $userId): JsonResponse
+    public function destroy(Request $request, string $lobbyUlid, string $username): JsonResponse
     {
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();
@@ -144,12 +147,15 @@ class LobbyPlayerController extends Controller
             return response()->json(['error' => 'Only the host can kick players'], 403);
         }
 
-        if ($userId === $currentUser->id) {
+        // Resolve username to user
+        $user = User::where('username', strtolower($username))->firstOrFail();
+
+        if ($user->id === $currentUser->id) {
             return response()->json(['error' => 'Host cannot kick themselves'], 400);
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $userId)
+            ->where('user_id', $user->id)
             ->firstOrFail();
 
         $lobbyPlayer->delete();

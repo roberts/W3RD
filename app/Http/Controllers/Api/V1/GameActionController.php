@@ -194,7 +194,7 @@ class GameActionController extends Controller
         $game->save();
 
         // Record the action using the service
-        $this->actionRecorder->recordSuccess($game, $player, $action, $game->turn_number ?? 1);
+        $actionRecord = $this->actionRecorder->recordSuccess($game, $player, $action, $game->turn_number ?? 1);
 
         // Increment turn number
         $game->increment('turn_number');
@@ -209,10 +209,14 @@ class GameActionController extends Controller
             actionType: $validated['action_type'],
             actionDetails: $validated['action_details'],
             playerUlid: $player->ulid,
+            actionUlid: $actionRecord->ulid,
         ));
 
         return response()->json([
             'message' => 'Action applied successfully',
+            'action' => [
+                'ulid' => $actionRecord->ulid,
+            ],
             'game' => [
                 'ulid' => $game->ulid,
                 'status' => $game->status,

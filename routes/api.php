@@ -89,8 +89,8 @@ Route::prefix('v1')->group(function () {
 
                 // Lobby Players
                 Route::post('/{lobby_ulid}/players', [LobbyPlayerController::class, 'store']);
-                Route::put('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'update']);
-                Route::delete('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'destroy']);
+                Route::put('/{lobby_ulid}/players/{username}', [LobbyPlayerController::class, 'update']);
+                Route::delete('/{lobby_ulid}/players/{username}', [LobbyPlayerController::class, 'destroy']);
             });
 
             // Games

@@ -233,7 +233,7 @@ describe('Lobby Management', function () {
             ]);
 
             $response = $this->actingAs($invitee)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->id}",
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}",
                 ['status' => 'accepted']
             );
 
@@ -257,7 +257,7 @@ describe('Lobby Management', function () {
             ]);
 
             $response = $this->actingAs($invitee)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->id}",
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}",
                 ['status' => 'declined']
             );
 
@@ -275,7 +275,7 @@ describe('Lobby Management', function () {
             $lobby = Lobby::factory()->public()->create(['host_id' => $host->id, 'min_players' => 3]);
 
             $response = $this->actingAs($joiner)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$joiner->id}",
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$joiner->username}",
                 ['status' => 'accepted']
             );
 
@@ -301,7 +301,7 @@ describe('Lobby Management', function () {
             ]);
 
             $response = $this->actingAs($host)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->id}"
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}"
             );
 
             $response->assertStatus(204);
@@ -316,7 +316,7 @@ describe('Lobby Management', function () {
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
             $response = $this->actingAs($host)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$host->id}"
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$host->username}"
             );
 
             $response->assertStatus(400);
@@ -334,7 +334,7 @@ describe('Lobby Management', function () {
             ]);
 
             $response = $this->actingAs($otherUser)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->id}"
+                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}"
             );
 
             $response->assertStatus(403);

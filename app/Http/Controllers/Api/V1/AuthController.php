@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SocialLoginRequest;
 use App\Http\Requests\Auth\UpdateUserRequest;
 use App\Http\Requests\Auth\VerifyRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
@@ -64,7 +65,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => $user,
+            'user' => UserResource::make($user),
         ]);
     }
 
@@ -91,7 +92,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token->plainTextToken,
-            'user' => $user,
+            'user' => UserResource::make($user),
         ]);
     }
 
@@ -149,12 +150,12 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token->plainTextToken,
-            'user' => $user,
+            'user' => UserResource::make($user),
         ]);
     }
 
     /**
-     * Log out the current user.
+     * Log out a user.
      */
     public function logout(Request $request)
     {

@@ -18,9 +18,9 @@ class RematchController extends Controller
     /**
      * Accept a rematch request.
      */
-    public function accept(Request $request, string $requestId): JsonResponse
+    public function accept(Request $request, RematchRequest $requestId): JsonResponse
     {
-        $rematchRequest = RematchRequest::findOrFail($requestId);
+        $rematchRequest = $requestId;
 
         try {
             $newGame = $this->rematchService->acceptRematchRequest(
@@ -30,7 +30,7 @@ class RematchController extends Controller
 
             return response()->json([
                 'data' => [
-                    'rematch_request_id' => $rematchRequest->id,
+                    'rematch_request_ulid' => $rematchRequest->ulid,
                     'new_game_ulid' => $newGame->ulid,
                     'status' => $rematchRequest->fresh()->status,
                 ],
@@ -46,9 +46,9 @@ class RematchController extends Controller
     /**
      * Decline a rematch request.
      */
-    public function decline(Request $request, string $requestId): JsonResponse
+    public function decline(Request $request, RematchRequest $ulid): JsonResponse
     {
-        $rematchRequest = RematchRequest::findOrFail($requestId);
+        $rematchRequest = $ulid;
 
         try {
             $this->rematchService->declineRematchRequest(
@@ -58,7 +58,7 @@ class RematchController extends Controller
 
             return response()->json([
                 'data' => [
-                    'rematch_request_id' => $rematchRequest->id,
+                    'rematch_request_ulid' => $rematchRequest->ulid,
                     'status' => $rematchRequest->fresh()->status,
                 ],
                 'message' => 'Rematch request declined',

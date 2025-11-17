@@ -8,6 +8,8 @@ use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
+use App\Http\Resources\LobbyPlayerResource;
+use App\Http\Resources\UserResource;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -22,24 +24,17 @@ class LobbyController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $lobbies = Lobby::with(['host', 'players.user'])
+        $lobbies = Lobby::with(['host.avatar.image', 'players.user.avatar.image'])
             ->where('is_public', true)
             ->where('status', LobbyStatus::PENDING)
             ->latest()
             ->get()
             ->map(function (Lobby $lobby) {
-                /** @var \App\Models\Auth\User $host */
-                $host = $lobby->host;
-
                 return [
                     'ulid' => $lobby->ulid,
                     'game_title' => $lobby->game_title->value,
                     'game_mode' => $lobby->game_mode,
-                    'host' => [
-                        'id' => $host->id,
-                        'name' => $host->name,
-                        'username' => $host->username,
-                    ],
+                    'host' => UserResource::make($lobby->host),
                     'min_players' => $lobby->min_players,
                     'current_players' => $lobby->acceptedPlayers()->count(),
                     'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
@@ -126,7 +121,7 @@ class LobbyController extends Controller
      */
     public function show(Request $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = Lobby::with(['host', 'players.user'])
+        $lobby = Lobby::with(['host.avatar.image', 'players.user.avatar.image'])
             ->where('ulid', $lobbyUlid)
             ->firstOrFail();
 
@@ -138,33 +133,12 @@ class LobbyController extends Controller
                 'ulid' => $lobby->ulid,
                 'game_title' => $lobby->game_title->value,
                 'game_mode' => $lobby->game_mode,
-                'host' => [
-                    'id' => $host->id,
-                    'name' => $host->name,
-                    'username' => $host->username,
-                ],
+                'host' => UserResource::make($host),
                 'is_public' => $lobby->is_public,
                 'min_players' => $lobby->min_players,
                 'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
                 'status' => $lobby->status->value,
-                'players' => (function () use ($lobby) {
-                    /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Game\LobbyPlayer> $players */
-                    $players = $lobby->players;
-
-                    return $players->map(function (LobbyPlayer $player) {
-                        /** @var \App\Models\Auth\User $user */
-                        $user = $player->user;
-
-                        return [
-                            'user' => [
-                                'id' => $user->id,
-                                'name' => $user->name,
-                                'username' => $user->username,
-                            ],
-                            'status' => $player->status->value,
-                        ];
-                    });
-                })(),
+                'players' => LobbyPlayerResource::collection($lobby->players),
             ],
         ]);
     }

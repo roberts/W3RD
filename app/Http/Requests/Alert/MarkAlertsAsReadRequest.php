@@ -14,16 +14,16 @@ class MarkAlertsAsReadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'alert_ids' => 'sometimes|array',
-            'alert_ids.*' => 'exists:alerts,id',
+            'alert_ulids' => 'sometimes|array',
+            'alert_ulids.*' => 'exists:alerts,ulid',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'alert_ids.array' => 'Alert IDs must be an array',
-            'alert_ids.*.exists' => 'One or more alert IDs do not exist',
+            'alert_ulids.array' => 'Alert ULIDs must be an array',
+            'alert_ulids.*.exists' => 'One or more alert ULIDs do not exist',
         ];
     }
 }

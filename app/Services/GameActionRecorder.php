@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Games\ValidationResult;
 use App\Interfaces\GameActionContract;
+use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 
@@ -25,6 +26,7 @@ class GameActionRecorder
      * @param  GameActionContract  $action  The action that was performed
      * @param  ValidationResult  $validationResult  The validation result
      * @param  int  $turnNumber  The current turn number
+     * @return Action The created action
      */
     public function record(
         Game $game,
@@ -32,8 +34,9 @@ class GameActionRecorder
         GameActionContract $action,
         ValidationResult $validationResult,
         int $turnNumber
-    ): void {
-        $game->actions()->create([
+    ): Action {
+        /** @var Action */
+        return $game->actions()->create([
             'player_id' => $player->id,
             'turn_number' => $turnNumber,
             'action_type' => $action->getType(),
@@ -52,8 +55,8 @@ class GameActionRecorder
         Player $player,
         GameActionContract $action,
         int $turnNumber
-    ): void {
-        $this->record($game, $player, $action, ValidationResult::valid(), $turnNumber);
+    ): Action {
+        return $this->record($game, $player, $action, ValidationResult::valid(), $turnNumber);
     }
 
     /**
@@ -65,7 +68,7 @@ class GameActionRecorder
         GameActionContract $action,
         ValidationResult $validationResult,
         int $turnNumber
-    ): void {
-        $this->record($game, $player, $action, $validationResult, $turnNumber);
+    ): Action {
+        return $this->record($game, $player, $action, $validationResult, $turnNumber);
     }
 }

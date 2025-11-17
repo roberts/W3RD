@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('actions', function (Blueprint $table) {
             $table->id();
+            $table->ulid('ulid')->unique()->index();
             $table->foreignId('game_id')->constrained('games');
             $table->foreignId('player_id')->constrained('players');
 

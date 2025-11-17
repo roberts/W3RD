@@ -20,7 +20,7 @@ describe('Alert Management', function () {
                 ->assertJsonStructure([
                     'data' => [
                         '*' => [
-                            'id',
+                            'ulid',
                             'type',
                             'data',
                             'read_at',
@@ -61,9 +61,9 @@ describe('Alert Management', function () {
 
             $data = $response->json('data');
 
-            expect($data[0]['id'])->toBe($alert3->id);
-            expect($data[1]['id'])->toBe($alert2->id);
-            expect($data[2]['id'])->toBe($alert1->id);
+            expect($data[0]['ulid'])->toBe($alert3->ulid);
+            expect($data[1]['ulid'])->toBe($alert2->ulid);
+            expect($data[2]['ulid'])->toBe($alert1->ulid);
         });
 
         it('paginates alerts with 20 per page', function () {
@@ -108,7 +108,7 @@ describe('Alert Management', function () {
             $alert3 = Alert::factory()->unread()->create(['user_id' => $user->id]);
 
             $response = $this->actingAs($user)->postJson('/api/v1/me/alerts/mark-as-read', [
-                'alert_ids' => [$alert1->id, $alert2->id],
+                'alert_ulids' => [$alert1->ulid, $alert2->ulid],
             ]);
 
             $response->assertStatus(200)
@@ -150,7 +150,7 @@ describe('Alert Management', function () {
             $alert2 = Alert::factory()->unread()->create(['user_id' => $user2->id]);
 
             $response = $this->actingAs($user1)->postJson('/api/v1/me/alerts/mark-as-read', [
-                'alert_ids' => [$alert1->id, $alert2->id],
+                'alert_ulids' => [$alert1->ulid, $alert2->ulid],
             ]);
 
             $response->assertStatus(200);
@@ -171,7 +171,7 @@ describe('Alert Management', function () {
             ]);
 
             $response = $this->actingAs($user)->postJson('/api/v1/me/alerts/mark-as-read', [
-                'alert_ids' => [$alert->id],
+                'alert_ulids' => [$alert->ulid],
             ]);
 
             $response->assertStatus(200);

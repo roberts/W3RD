@@ -115,7 +115,7 @@ describe('Auth', function () {
 
             $response->assertOk()
                 ->assertJsonStructure([
-                    'user' => ['id', 'email', 'name'],
+                    'user' => ['username', 'name', 'avatar'],
                     'token',
                 ]);
         });

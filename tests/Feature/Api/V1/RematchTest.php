@@ -28,7 +28,7 @@ describe('Rematch Management', function () {
 
             $response->assertCreated()
                 ->assertJsonStructure([
-                    'data' => ['id', 'status'],
+                    'data' => ['ulid', 'status'],
                     'message',
                 ]);
         });
@@ -96,11 +96,11 @@ describe('Rematch Management', function () {
             $rematchResponse = $this->actingAs($player1)
                 ->postJson("/api/v1/games/{$originalGame->ulid}/rematch");
 
-            $rematchId = $rematchResponse->json('data.id');
+            $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Player2 accepts rematch
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/games/rematch/{$rematchId}/accept");
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
 
             $response->assertOk()
                 ->assertJsonStructure([
@@ -139,11 +139,11 @@ describe('Rematch Management', function () {
             $rematchResponse = $this->actingAs($player1)
                 ->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $rematchId = $rematchResponse->json('data.id');
+            $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Accept rematch
             $this->actingAs($player2)
-                ->postJson("/api/v1/games/rematch/{$rematchId}/accept");
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
 
             // Verify notification/event was sent (implementation-dependent)
             // This test passes as notification system varies by implementation
@@ -173,11 +173,11 @@ describe('Rematch Management', function () {
             $rematchResponse = $this->actingAs($player1)
                 ->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $rematchId = $rematchResponse->json('data.id');
+            $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Decline rematch
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/games/rematch/{$rematchId}/decline");
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/decline");
 
             $response->assertOk()
                 ->assertJson(['message' => 'Rematch request declined']);
@@ -204,11 +204,11 @@ describe('Rematch Management', function () {
             $rematchResponse = $this->actingAs($player1)
                 ->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $rematchId = $rematchResponse->json('data.id');
+            $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Decline rematch
             $this->actingAs($player2)
-                ->postJson("/api/v1/games/rematch/{$rematchId}/decline");
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/decline");
 
             // Verify notification/event was sent (implementation-dependent)
             expect(true)->toBeTrue();
@@ -236,11 +236,11 @@ describe('Rematch Management', function () {
             $rematchResponse = $this->actingAs($player1)
                 ->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $rematchId = $rematchResponse->json('data.id');
+            $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Non-player tries to decline
             $response = $this->actingAs($nonPlayer)
-                ->postJson("/api/v1/games/rematch/{$rematchId}/decline");
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/decline");
 
             $response->assertForbidden();
         });

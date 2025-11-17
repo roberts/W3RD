@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PlayerResource;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -27,34 +28,19 @@ class GameController extends Controller
         $games = Game::whereHas('players', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-            ->with(['players.user:id,name,username,avatar_id', 'mode'])
+            ->with(['players.user.avatar.image', 'mode'])
             ->orderBy('updated_at', 'desc')
             ->paginate(20);
 
         return response()->json([
-            /** @phpstan-ignore-next-line */
             'data' => $games->map(function (Game $game) {
-                /** @phpstan-ignore-next-line */
                 return [
                     'ulid' => $game->ulid,
                     'game_title' => $game->mode->game_title ?? null,
                     'status' => $game->status->value,
                     'turn_number' => $game->turn_number,
                     'winner_id' => $game->winner_id,
-                    'players' => $game->players->map(function (Player $player) {
-                        /** @var string|null $username */
-                        $username = $player->user->username;
-                        /** @var int|null $avatarId */
-                        $avatarId = $player->user->avatar_id;
-
-                        return [
-                            'user_id' => $player->user_id,
-                            'name' => (string) $player->user->name,
-                            'username' => $username,
-                            'avatar_id' => $avatarId,
-                            'position' => $player->position_id,
-                        ];
-                    })->values(),
+                    'players' => PlayerResource::collection($game->players)->resolve(),
                     'created_at' => $game->created_at,
                     'updated_at' => $game->updated_at,
                 ];
@@ -76,7 +62,7 @@ class GameController extends Controller
         $user = $request->user();
 
         $game = Game::where('ulid', $gameUlid)
-            ->with(['players.user:id,name,username,avatar_id', 'mode'])
+            ->with(['players.user.avatar.image', 'mode'])
             ->firstOrFail();
 
         // Verify user is a player in this game
@@ -96,15 +82,7 @@ class GameController extends Controller
                 'turn_number' => $game->turn_number,
                 'winner_id' => $game->winner_id,
                 'game_state' => $game->game_state,
-                'players' => $game->players->map(function ($player) {
-                    return [
-                        'user_id' => $player->user_id,
-                        'name' => $player->user->name,
-                        'username' => $player->user->username,
-                        'avatar_id' => $player->user->avatar_id,
-                        'position' => $player->position_id,
-                    ];
-                }),
+                'players' => PlayerResource::collection($game->players)->resolve(),
                 'created_at' => $game->created_at,
                 'updated_at' => $game->updated_at,
                 'finished_at' => $game->finished_at,
@@ -127,7 +105,7 @@ class GameController extends Controller
 
             return response()->json([
                 'data' => [
-                    'id' => $rematchRequest->id,
+                    'ulid' => $rematchRequest->ulid,
                     'status' => $rematchRequest->status,
                     'expires_at' => $rematchRequest->expires_at,
                 ],
@@ -167,16 +145,11 @@ class GameController extends Controller
         return response()->json([
             'data' => $actions->map(function (Action $action) {
                 return [
-                    'id' => $action->id,
+                    'ulid' => $action->ulid,
                     'turn_number' => $action->turn_number,
                     'action_type' => $action->action_type->value,
                     'action_details' => $action->action_details,
-                    'player' => [
-                        'user_id' => $action->player->user_id,
-                        'name' => $action->player->user->name,
-                        'username' => $action->player->user->username,
-                        'position' => $action->player->position_id,
-                    ],
+                    'player' => PlayerResource::make($action->player)->resolve(),
                     'status' => $action->status,
                     'created_at' => $action->created_at->toIso8601String(),
                 ];

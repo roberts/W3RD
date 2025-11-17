@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Alert;
+use App\Models\Billing\Subscription;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 
@@ -16,7 +18,7 @@ class StripeWebhookController extends CashierWebhookController
         parent::handleCustomerSubscriptionCreated($payload);
 
         // Add custom logic if needed
-        // For example, send welcome notification
+        // For example, send welcome alert
     }
 
     /**
@@ -37,7 +39,7 @@ class StripeWebhookController extends CashierWebhookController
         parent::handleCustomerSubscriptionDeleted($payload);
 
         // Add custom logic if needed
-        // For example, send cancellation notification
+        // For example, send cancellation alert
     }
 
     /**
@@ -47,11 +49,11 @@ class StripeWebhookController extends CashierWebhookController
     {
         parent::handleInvoicePaymentFailed($payload);
 
-        // Send payment failed notification
+        // Send payment failed alert
         $subscription = $this->findSubscription($payload['data']['object']['subscription'] ?? null);
         
         if ($subscription && $subscription->user) {
-            \App\Models\Notification::create([
+            Alert::create([
                 'user_id' => $subscription->user->id,
                 'type' => 'billing_issue',
                 'data' => [
@@ -71,6 +73,6 @@ class StripeWebhookController extends CashierWebhookController
             return null;
         }
 
-        return \App\Models\Billing\Subscription::where('stripe_id', $stripeId)->first();
+        return Subscription::where('stripe_id', $stripeId)->first();
     }
 }

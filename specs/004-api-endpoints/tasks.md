@@ -15,9 +15,9 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 - [X] T006 Create migration to add `provider` column to the `subscriptions` table in `database/migrations/`
 - [X] T007 Create migration for the `rematch_requests` table in `database/migrations/`
 - [X] T008 Run migrations with `php artisan migrate`
-- [X] T009 Create the `App\Models\Notification` model
+- [X] T009 Create the `App\Models\Alert` model (table: `notifications`)
 - [X] T010 Create the `App\Models\RematchRequest` model with relationships
-- [X] T011 Update the `App\Models\User` model to include `bio`, `social_links`, and the `notifications()` relationship
+- [X] T011 Update the `App\Models\User` model to include `bio`, `social_links`, and the `alerts()` relationship
 - [X] T012 Update the `App\Models\Subscription` model to include `provider` in the `$fillable` array
 
 ## Phase 3: User Story 1 - Player Explores Games and Profiles
@@ -97,16 +97,16 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 - [X] T052 [US4, US5] Implement `BillingController@verifyReceipt` to use the appropriate validation service based on the provider
 - [X] T053 [US4, US5] Add the `/v1/billing/{provider}/verify` route to `routes/api.php`
 
-## Phase 9: User Story 8 & 9 - Notifications & Game History
+## Phase 9: User Story 8 & 9 - Alerts & Game History
 
-**Goal**: A user can view their notifications and the move history of a game.
-**Independent Test**: A client can fetch data from `/v1/me/notifications` and `/v1/games/{gameUlid}/history`.
+**Goal**: A user can view their alerts and the move history of a game.
+**Independent Test**: A client can fetch data from `/v1/me/alerts` and `/v1/games/{gameUlid}/history`.
 
-- [ ] T054 [P] [US8] Create `App\Http\Controllers\Api\V1\NotificationController`
-- [ ] T055 [P] [US8] Implement `NotificationController@index` to list user notifications
-- [ ] T056 [P] [US8] Implement `NotificationController@markAsRead`
-- [ ] T057 [P] [US9] Implement `GameController@history` to return a game's move history
-- [ ] T058 [US8, US9] Add routes for notifications and game history to `routes/api.php`
+- [X] T054 [P] [US8] Create `App\Http\Controllers\Api\V1\AlertController`
+- [X] T055 [P] [US8] Implement `AlertController@index` to list user alerts
+- [X] T056 [P] [US8] Implement `AlertController@markAsRead`
+- [X] T057 [P] [US9] Implement `GameController@history` to return a game's move history
+- [X] T058 [US8, US9] Add routes for alerts and game history to `routes/api.php`
 
 ## Phase 10: User Story 7 - API Health Check
 

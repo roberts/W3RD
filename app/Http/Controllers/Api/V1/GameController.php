@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
@@ -128,5 +129,49 @@ class GameController extends Controller
                 'message' => $e->getMessage(),
             ], 400);
         }
+    }
+
+    /**
+     * Get move history for a specific game.
+     */
+    public function history(Request $request, string $gameUlid): JsonResponse
+    {
+        $user = $request->user();
+
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+
+        // Verify user is a player in this game
+        $isPlayer = $game->players->contains('user_id', $user->id);
+
+        if (! $isPlayer) {
+            return response()->json([
+                'message' => 'You are not authorized to view this game history.',
+            ], 403);
+        }
+
+        $actions = Action::where('game_id', $game->id)
+            ->with('player.user:id,name,username')
+            ->orderBy('turn_number', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'data' => $actions->map(function ($action) {
+                return [
+                    'id' => $action->id,
+                    'turn_number' => $action->turn_number,
+                    'action_type' => $action->action_type->value,
+                    'action_details' => $action->action_details,
+                    'player' => [
+                        'user_id' => $action->player->user_id,
+                        'name' => $action->player->user->name,
+                        'username' => $action->player->user->username,
+                        'position' => $action->player->position,
+                    ],
+                    'status' => $action->status,
+                    'created_at' => $action->created_at->toIso8601String(),
+                ];
+            }),
+        ]);
     }
 }

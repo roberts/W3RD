@@ -11,7 +11,7 @@ use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
-use App\Models\Notification;
+use App\Models\Alert;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -106,9 +106,9 @@ class User extends Authenticatable
         return $this->hasMany(SocialAccount::class);
     }
 
-    public function notifications()
+    public function alerts()
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(Alert::class);
     }
 
     public function registrationClient()

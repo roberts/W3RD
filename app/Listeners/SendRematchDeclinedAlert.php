@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\RematchDeclined;
-use App\Models\Notification;
+use App\Models\Alert;
 
-class SendRematchDeclinedNotification
+class SendRematchDeclinedAlert
 {
     /**
      * Handle the event.
@@ -14,7 +14,7 @@ class SendRematchDeclinedNotification
     {
         $rematchRequest = $event->rematchRequest;
 
-        Notification::create([
+        Alert::create([
             'user_id' => $rematchRequest->requesting_user_id,
             'type' => 'rematch_declined',
             'data' => [

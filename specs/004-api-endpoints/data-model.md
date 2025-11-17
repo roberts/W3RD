@@ -4,17 +4,17 @@ This document outlines the database schema changes required to support the new C
 
 ## 1. New Tables
 
-### `notifications`
+### `alerts`
 
-This table will store notifications for users, such as game invites, billing issues, or friend requests.
+This table will store alerts for users, such as game invites, billing issues, or rematch requests. The model is named `Alert` to avoid conflicts with Laravel's built-in Notification system.
 
 | Column        | Type        | Modifiers                               | Description                                      |
 | ------------- | ----------- | --------------------------------------- | ------------------------------------------------ |
-| `id`          | `ulid`      | `primary`                               | Primary key for the notification.                |
-| `user_id`     | `foreignId` | `constrained()->onDelete('cascade')`    | The user who receives the notification.          |
-| `type`        | `string`    |                                         | The type of notification (e.g., `billing_issue`). |
-| `data`        | `json`      |                                         | A payload containing notification-specific data. |
-| `read_at`     | `timestamp` | `nullable`                              | When the user marked the notification as read.   |
+| `id`          | `ulid`      | `primary`                               | Primary key for the alert.                       |
+| `user_id`     | `foreignId` | `constrained()->onDelete('cascade')`    | The user who receives the alert.                 |
+| `type`        | `string`    |                                         | The type of alert (e.g., `billing_issue`).       |
+| `data`        | `json`      |                                         | A payload containing alert-specific data.        |
+| `read_at`     | `timestamp` | `nullable`                              | When the user marked the alert as read.          |
 | `created_at`  | `timestamp` |                                         |                                                  |
 | `updated_at`  | `timestamp` |                                         |                                                  |
 

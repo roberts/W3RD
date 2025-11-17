@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\RematchAccepted;
-use App\Models\Notification;
+use App\Models\Alert;
 
-class SendRematchAcceptedNotification
+class SendRematchAcceptedAlert
 {
     /**
      * Handle the event.
@@ -15,7 +15,7 @@ class SendRematchAcceptedNotification
         $rematchRequest = $event->rematchRequest;
         $newGame = $event->newGame;
 
-        Notification::create([
+        Alert::create([
             'user_id' => $rematchRequest->requesting_user_id,
             'type' => 'rematch_accepted',
             'data' => [

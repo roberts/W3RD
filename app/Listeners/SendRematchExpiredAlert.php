@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\RematchExpired;
-use App\Models\Notification;
+use App\Models\Alert;
 
-class SendRematchExpiredNotification
+class SendRematchExpiredAlert
 {
     /**
      * Handle the event.
@@ -14,7 +14,7 @@ class SendRematchExpiredNotification
     {
         $rematchRequest = $event->rematchRequest;
 
-        Notification::create([
+        Alert::create([
             'user_id' => $rematchRequest->requesting_user_id,
             'type' => 'rematch_expired',
             'data' => [

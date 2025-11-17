@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\RematchRequested;
-use App\Models\Notification;
+use App\Models\Alert;
 
-class SendRematchRequestNotification
+class SendRematchRequestAlert
 {
     /**
      * Handle the event.
@@ -14,7 +14,7 @@ class SendRematchRequestNotification
     {
         $rematchRequest = $event->rematchRequest;
 
-        Notification::create([
+        Alert::create([
             'user_id' => $rematchRequest->opponent_user_id,
             'type' => 'rematch_requested',
             'data' => [

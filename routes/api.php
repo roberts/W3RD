@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\AlertController;
 use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\GameActionController;
 use App\Http\Controllers\Api\V1\GameController;
@@ -55,6 +56,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/me/profile', [ProfileController::class, 'show']);
         Route::patch('/me/profile', [ProfileController::class, 'update']);
 
+        // Alerts
+        Route::get('/me/alerts', [AlertController::class, 'index']);
+        Route::post('/me/alerts/mark-as-read', [AlertController::class, 'markAsRead']);
+
         // Billing
         Route::prefix('billing')->controller(BillingController::class)->group(function () {
             Route::get('/plans', 'getPlans');
@@ -67,6 +72,7 @@ Route::prefix('v1')->group(function () {
         // Games
         Route::get('/games', [GameController::class, 'index']);
         Route::get('/games/{gameUlid}', [GameController::class, 'show']);
+        Route::get('/games/{gameUlid}/history', [GameController::class, 'history']);
         Route::post('/games/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
 
         // Rematch Requests

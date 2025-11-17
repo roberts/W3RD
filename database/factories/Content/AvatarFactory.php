@@ -36,7 +36,7 @@ class AvatarFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => AvatarType::FREE,
-            'name' => 'System Avatar ' . fake()->numberBetween(1, 100),
+            'name' => 'System Avatar '.fake()->numberBetween(1, 100),
         ]);
     }
 
@@ -47,7 +47,7 @@ class AvatarFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => AvatarType::PREMIUM,
-            'name' => 'Premium ' . fake()->word(),
+            'name' => 'Premium '.fake()->word(),
         ]);
     }
 

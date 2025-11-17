@@ -41,7 +41,7 @@ class BadgeFactory extends Factory
     public function winStreak(): static
     {
         return $this->state(fn (array $attributes) => [
-            'slug' => 'win-streak-' . fake()->numberBetween(5, 20),
+            'slug' => 'win-streak-'.fake()->numberBetween(5, 20),
             'name' => 'Win Streak Champion',
             'condition_json' => [
                 'type' => 'win_streak',
@@ -56,7 +56,7 @@ class BadgeFactory extends Factory
     public function milestone(): static
     {
         return $this->state(fn (array $attributes) => [
-            'slug' => 'milestone-' . fake()->randomElement(['100', '500', '1000']),
+            'slug' => 'milestone-'.fake()->randomElement(['100', '500', '1000']),
             'name' => 'Milestone Achievement',
             'condition_json' => [
                 'type' => 'total_wins',

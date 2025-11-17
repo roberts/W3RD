@@ -38,7 +38,7 @@ class PointFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'change' => fake()->numberBetween(10, 100),
-            'description' => 'Points earned from ' . fake()->randomElement(['winning', 'completing', 'achieving']),
+            'description' => 'Points earned from '.fake()->randomElement(['winning', 'completing', 'achieving']),
         ]);
     }
 
@@ -49,7 +49,7 @@ class PointFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'change' => fake()->numberBetween(-50, -5),
-            'description' => 'Points deducted for ' . fake()->randomElement(['forfeiting', 'timeout', 'penalty']),
+            'description' => 'Points deducted for '.fake()->randomElement(['forfeiting', 'timeout', 'penalty']),
         ]);
     }
 

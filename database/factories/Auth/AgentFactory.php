@@ -20,7 +20,7 @@ class AgentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => 'Agent ' . fake()->firstName(),
+            'name' => 'Agent '.fake()->firstName(),
             'description' => fake()->sentence(),
             'version' => fake()->semver(),
             'difficulty' => fake()->numberBetween(1, 10),
@@ -29,7 +29,7 @@ class AgentFactory extends Factory
                 'defensive' => fake()->boolean(),
                 'think_time_ms' => fake()->numberBetween(100, 5000),
             ],
-            'ai_logic_path' => 'App\\AI\\' . fake()->word() . 'Strategy',
+            'ai_logic_path' => 'App\\AI\\'.fake()->word().'Strategy',
             'strategy_type' => fake()->randomElement(['minimax', 'mcts', 'neural', 'hybrid']),
             'supported_game_titles' => [fake()->randomElement(['validate-four', 'chess', 'checkers'])],
             'available_hour_est' => fake()->numberBetween(0, 23),

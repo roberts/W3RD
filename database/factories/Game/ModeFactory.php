@@ -26,7 +26,7 @@ class ModeFactory extends Factory
         return [
             'title_slug' => $title,
             'slug' => $modeSlug,
-            'name' => ucfirst($modeSlug) . ' Mode',
+            'name' => ucfirst($modeSlug).' Mode',
             'is_active' => true,
         ];
     }

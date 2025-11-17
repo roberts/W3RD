@@ -24,9 +24,9 @@ class SubscriptionFactory extends Factory
             'billable_id' => User::factory(),
             'billable_type' => User::class,
             'type' => 'premium',
-            'stripe_id' => 'sub_' . fake()->unique()->regexify('[A-Za-z0-9]{14}'),
+            'stripe_id' => 'sub_'.fake()->unique()->regexify('[A-Za-z0-9]{14}'),
             'stripe_status' => 'active',
-            'stripe_price' => 'price_' . fake()->regexify('[A-Za-z0-9]{14}'),
+            'stripe_price' => 'price_'.fake()->regexify('[A-Za-z0-9]{14}'),
             'quantity' => 1,
             'trial_ends_at' => null,
             'ends_at' => null,
@@ -95,7 +95,7 @@ class SubscriptionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'provider' => 'admin',
-            'stripe_id' => 'admin_' . fake()->uuid(),
+            'stripe_id' => 'admin_'.fake()->uuid(),
         ]);
     }
 }

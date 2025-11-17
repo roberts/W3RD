@@ -1,11 +1,8 @@
 <?php
 
-use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-
-use function Pest\Laravel\postJson;
 
 describe('Rematch Management', function () {
     describe('Rematch Request', function () {
@@ -114,7 +111,7 @@ describe('Rematch Management', function () {
             // Verify new game was created
             $newGame = Game::where('ulid', $response->json('data.new_game_ulid'))->first();
             expect($newGame)->not->toBeNull();
-            
+
             // Verify positions are swapped
             $newPlayers = $newGame->players()->orderBy('position_id')->get();
             expect($newPlayers[0]->user_id)->toBe($player2->id);

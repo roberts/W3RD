@@ -1,19 +1,15 @@
 <?php
 
-use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-
 describe('Game Lifecycle', function () {
     describe('Game Retrieval', function () {
         it('lists user games with pagination', function () {
             $user = User::factory()->create();
-            
+
             // Create games where user is a player
             Game::factory()->count(15)->create(['creator_id' => $user->id])->each(function ($game) use ($user) {
                 Player::factory()->create([

@@ -154,8 +154,8 @@ class ProcessQuickplayQueue implements ShouldQueue
         // Store match metadata for game creation including each player's client_id
         Redis::hset($matchKey, 'game_title', $gameTitle->value);
         Redis::hset($matchKey, 'game_mode', $mode);
-        Redis::hset($matchKey, 'player_' . $userId1 . '_client', $client1 ?: '1');
-        Redis::hset($matchKey, 'player_' . $userId2 . '_client', $client2 ?: '1');
+        Redis::hset($matchKey, 'player_'.$userId1.'_client', $client1 ?: '1');
+        Redis::hset($matchKey, 'player_'.$userId2.'_client', $client2 ?: '1');
         Redis::expire($matchKey, self::MATCH_CONFIRMATION_TIMEOUT);
 
         // Remove both players from queue

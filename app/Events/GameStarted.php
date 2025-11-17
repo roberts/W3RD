@@ -20,12 +20,12 @@ class GameStarted implements ShouldBroadcast
     public function broadcastOn(): array
     {
         $channels = [];
-        
+
         // Broadcast to each player
         foreach ($this->game->players as $player) {
             $channels[] = new Channel("user.{$player->user_id}");
         }
-        
+
         return $channels;
     }
 

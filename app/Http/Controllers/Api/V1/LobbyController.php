@@ -74,7 +74,7 @@ class LobbyController extends Controller
 
             // Add host as first player (auto-accepted, defaults to client_id 1 for AI agents)
             $clientId = (int) $request->header('X-Client-Key') ?: 1;
-            
+
             LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
                 'user_id' => $user->id,

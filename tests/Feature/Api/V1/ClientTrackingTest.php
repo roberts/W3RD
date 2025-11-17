@@ -53,7 +53,7 @@ describe('Client Tracking', function () {
             ]);
 
         $lobbyUlid = $lobbyResponse->json('lobby.ulid');
-        
+
         $lobbyResponse->assertStatus(201);
         expect($lobbyUlid)->not->toBeNull();
 

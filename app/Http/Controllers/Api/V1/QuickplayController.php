@@ -116,7 +116,7 @@ class QuickplayController extends Controller
         if (count($acceptances) === 2 && ! in_array('0', $acceptances)) {
             // Both players accepted - create the game
             $playerIds = array_keys($acceptances);
-            
+
             $this->createGame($playerIds, $matchId);
 
             return response()->json([
@@ -151,13 +151,14 @@ class QuickplayController extends Controller
         // Get game title and mode from match ID stored in Redis
         $matchKey = "quickplay:match:{$matchId}";
         $matchData = Redis::hgetall($matchKey);
-        
+
         $gameTitle = GameTitle::from($matchData['game_title'] ?? 'validate-four');
         $gameMode = $matchData['game_mode'] ?? 'standard';
 
         // Prepare player data with each player's specific client_id
         $playerData = array_map(function ($userId) use ($matchData) {
-            $clientKey = 'player_' . $userId . '_client';
+            $clientKey = 'player_'.$userId.'_client';
+
             return [
                 'user_id' => (int) $userId,
                 'client_id' => (int) ($matchData[$clientKey] ?? 1), // Defaults to Gamer Protocol Web for AI

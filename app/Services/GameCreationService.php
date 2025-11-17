@@ -19,9 +19,6 @@ class GameCreationService
      * Create a game from quickplay match.
      *
      * @param  array  $playerData  Array of ['user_id' => int, 'client_id' => int]
-     * @param  GameTitle  $gameTitle
-     * @param  string  $gameMode
-     * @return Game
      */
     public function createFromQuickplay(array $playerData, GameTitle $gameTitle, string $gameMode = 'standard'): Game
     {
@@ -65,7 +62,7 @@ class GameCreationService
                 $playerUlids[] = $player->ulid;
             }
             $initialState = $handler->createInitialState(...$playerUlids);
-            
+
             // Update game with proper initial state
             $game->update([
                 'game_state' => $initialState,
@@ -80,9 +77,6 @@ class GameCreationService
 
     /**
      * Create a game from a lobby.
-     *
-     * @param  Lobby  $lobby
-     * @return Game
      */
     public function createFromLobby(Lobby $lobby): Game
     {
@@ -133,7 +127,7 @@ class GameCreationService
                 $playerUlids[] = $player->ulid;
             }
             $initialState = $handler->createInitialState(...$playerUlids);
-            
+
             // Update game with proper initial state
             $game->update([
                 'game_state' => $initialState,

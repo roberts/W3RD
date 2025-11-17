@@ -93,7 +93,7 @@ class LobbyPlayerController extends Controller
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
             $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
-            
+
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
                 'user_id' => $user->id,
@@ -122,7 +122,7 @@ class LobbyPlayerController extends Controller
         // Update status
         if ($validated['status'] === 'accepted') {
             $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
-            
+
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 

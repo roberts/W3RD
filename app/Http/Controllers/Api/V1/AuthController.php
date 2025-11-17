@@ -162,7 +162,8 @@ class AuthController extends Controller
         $token = $user->currentAccessToken();
 
         // Mark the entry as logged out (skip for test tokens)
-        if ($token && property_exists($token, 'id') && $token->id) {
+        // @phpstan-ignore-next-line booleanAnd.leftAlwaysTrue - defensive check for test tokens
+        if ($token && property_exists($token, 'id')) {
             Entry::where('token_id', $token->id)
                 ->where('user_id', $user->id)
                 ->latest('logged_in_at')
@@ -171,6 +172,7 @@ class AuthController extends Controller
         }
 
         // Delete the token if it's a real token (not a transient test token)
+        // @phpstan-ignore-next-line if.alwaysTrue - defensive check for test tokens
         if ($token && method_exists($token, 'delete')) {
             $token->delete();
         }

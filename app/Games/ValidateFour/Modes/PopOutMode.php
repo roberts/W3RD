@@ -148,7 +148,7 @@ class PopOutMode extends BaseValidateFour
             return ValidationResult::invalid(
                 'NOT_YOUR_PIECE',
                 'You can only pop out your own pieces',
-                ['column' => $column, 'disc_owner' => $bottomDisc]
+                ['column' => $column, 'piece_owner' => $bottomPiece]
             );
         }
 

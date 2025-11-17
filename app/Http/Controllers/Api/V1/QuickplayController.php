@@ -49,10 +49,10 @@ class QuickplayController extends Controller
         $queueKey = "quickplay:{$gameTitle->value}:{$gameMode}";
         $skillLevel = $this->getUserSkillLevel($user, $gameTitle);
 
-        Redis::zadd($queueKey, $skillLevel, $user->id);
+        Redis::zadd($queueKey, $skillLevel, (string) $user->id);
 
         // Store join timestamp
-        Redis::hset('quickplay:timestamps', $user->id, now()->timestamp);
+        Redis::hset('quickplay:timestamps', (string) $user->id, now()->timestamp);
 
         return response()->json([
             'message' => 'Successfully joined the queue',
@@ -73,12 +73,12 @@ class QuickplayController extends Controller
         foreach ($gameTitles as $gameTitle) {
             foreach (['standard', 'blitz', 'rapid'] as $mode) {
                 $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
-                Redis::zrem($queueKey, $user->id);
+                Redis::zrem($queueKey, (string) $user->id);
             }
         }
 
         // Remove timestamp
-        Redis::hdel('quickplay:timestamps', $user->id);
+        Redis::hdel('quickplay:timestamps', (string) $user->id);
 
         return response()->json(null, 204);
     }
@@ -102,7 +102,7 @@ class QuickplayController extends Controller
         }
 
         // Mark this user as accepted
-        Redis::hset($confirmKey, $user->id, '1');
+        Redis::hset($confirmKey, (string) $user->id, '1');
 
         // Check if both players have accepted
         $acceptances = Redis::hgetall($confirmKey);
@@ -183,7 +183,7 @@ class QuickplayController extends Controller
         foreach ($gameTitles as $gameTitle) {
             foreach (['standard', 'blitz', 'rapid'] as $mode) {
                 $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
-                Redis::zrem($queueKey, $userId);
+                Redis::zrem($queueKey, (string) $userId);
             }
         }
     }

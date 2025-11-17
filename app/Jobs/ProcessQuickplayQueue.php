@@ -41,7 +41,7 @@ class ProcessQuickplayQueue implements ShouldQueue
         $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
 
         // Get all players in queue
-        $players = Redis::zrange($queueKey, 0, -1, 'WITHSCORES');
+        $players = Redis::zrange($queueKey, 0, -1, ['WITHSCORES' => true]);
 
         if (empty($players)) {
             return;
@@ -78,7 +78,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private function getWaitTime(int $userId): int
     {
-        $joinTimestamp = Redis::hget('quickplay:timestamps', $userId);
+        $joinTimestamp = Redis::hget('quickplay:timestamps', (string) $userId);
 
         if (! $joinTimestamp) {
             return 0;
@@ -125,8 +125,8 @@ class ProcessQuickplayQueue implements ShouldQueue
     private function matchWithAI(int $userId, GameTitle $gameTitle, string $mode, string $queueKey): void
     {
         // Remove from queue
-        Redis::zrem($queueKey, $userId);
-        Redis::hdel('quickplay:timestamps', $userId);
+        Redis::zrem($queueKey, (string) $userId);
+        Redis::hdel('quickplay:timestamps', (string) $userId);
 
         // TODO: Call SchedulingService to find AI agent
         // For now, just log that we would match with AI
@@ -141,12 +141,12 @@ class ProcessQuickplayQueue implements ShouldQueue
         $confirmKey = "quickplay:accept:{$matchId}";
 
         // Create confirmation hash with TTL
-        Redis::hset($confirmKey, $userId1, '0');
-        Redis::hset($confirmKey, $userId2, '0');
+        Redis::hset($confirmKey, (string) $userId1, '0');
+        Redis::hset($confirmKey, (string) $userId2, '0');
         Redis::expire($confirmKey, self::MATCH_CONFIRMATION_TIMEOUT);
 
         // Remove both players from queue
-        Redis::zrem($queueKey, $userId1, $userId2);
+        Redis::zrem($queueKey, (string) $userId1, (string) $userId2);
 
         // Update recent opponents lists
         Redis::lpush("recent_opponents:{$userId1}", $userId2);

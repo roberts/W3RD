@@ -27,15 +27,18 @@ class LobbyInvitation implements ShouldBroadcast
 
     public function broadcastWith(): array
     {
+        /** @var \App\Models\Auth\User $host */
+        $host = $this->lobby->host;
+
         return [
             'lobby' => [
                 'ulid' => $this->lobby->ulid,
                 'game_title' => $this->lobby->game_title->value,
                 'game_mode' => $this->lobby->game_mode,
                 'host' => [
-                    'id' => $this->lobby->host->id,
-                    'name' => $this->lobby->host->name,
-                    'username' => $this->lobby->host->username,
+                    'id' => $host->id,
+                    'name' => $host->name,
+                    'username' => $host->username,
                 ],
                 'is_public' => $this->lobby->is_public,
                 'min_players' => $this->lobby->min_players,

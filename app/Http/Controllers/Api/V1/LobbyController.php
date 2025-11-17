@@ -31,15 +31,18 @@ class LobbyController extends Controller
             ->where('status', LobbyStatus::PENDING)
             ->latest()
             ->get()
-            ->map(function ($lobby) {
+            ->map(function (Lobby $lobby) {
+                /** @var \App\Models\Auth\User $host */
+                $host = $lobby->host;
+
                 return [
                     'ulid' => $lobby->ulid,
                     'game_title' => $lobby->game_title->value,
                     'game_mode' => $lobby->game_mode,
                     'host' => [
-                        'id' => $lobby->host->id,
-                        'name' => $lobby->host->name,
-                        'username' => $lobby->host->username,
+                        'id' => $host->id,
+                        'name' => $host->name,
+                        'username' => $host->username,
                     ],
                     'min_players' => $lobby->min_players,
                     'current_players' => $lobby->acceptedPlayers()->count(),
@@ -139,30 +142,42 @@ class LobbyController extends Controller
             ->where('ulid', $lobbyUlid)
             ->firstOrFail();
 
+        /** @var \App\Models\Auth\User $host */
+        $host = $lobby->host;
+
         return response()->json([
             'lobby' => [
                 'ulid' => $lobby->ulid,
                 'game_title' => $lobby->game_title->value,
                 'game_mode' => $lobby->game_mode,
                 'host' => [
-                    'id' => $lobby->host->id,
-                    'name' => $lobby->host->name,
-                    'username' => $lobby->host->username,
+                    'id' => $host->id,
+                    'name' => $host->name,
+                    'username' => $host->username,
                 ],
                 'is_public' => $lobby->is_public,
                 'min_players' => $lobby->min_players,
                 'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
                 'status' => $lobby->status->value,
-                'players' => $lobby->players->map(function ($player) {
-                    return [
-                        'user' => [
-                            'id' => $player->user->id,
-                            'name' => $player->user->name,
-                            'username' => $player->user->username,
-                        ],
-                        'status' => $player->status->value,
-                    ];
-                }),
+                'players' => (function () use ($lobby) {
+                    /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\LobbyPlayer> $players */
+                    $players = $lobby->players;
+
+                    /** @phpstan-ignore-next-line */
+                    return $players->map(function (LobbyPlayer $player) {
+                        /** @var \App\Models\Auth\User $user */
+                        $user = $player->user;
+
+                        return [
+                            'user' => [
+                                'id' => $user->id,
+                                'name' => $user->name,
+                                'username' => $user->username,
+                            ],
+                            'status' => $player->status->value,
+                        ];
+                    });
+                })(),
             ],
         ]);
     }

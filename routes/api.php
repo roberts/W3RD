@@ -2,10 +2,16 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\GameActionController;
+use App\Http\Controllers\Api\V1\GameController;
 use App\Http\Controllers\Api\V1\GameRulesController;
+use App\Http\Controllers\Api\V1\LeaderboardController;
 use App\Http\Controllers\Api\V1\LobbyController;
 use App\Http\Controllers\Api\V1\LobbyPlayerController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuickplayController;
+use App\Http\Controllers\Api\V1\TitleController;
+use App\Http\Controllers\Api\V1\UserLevelsController;
+use App\Http\Controllers\Api\V1\UserStatsController;
 use Illuminate\Support\Facades\Route;
 
 // API Version 1
@@ -26,11 +32,27 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    // Public Game Information
+    Route::get('/titles', [TitleController::class, 'index']);
+    Route::get('/leaderboards/{gameTitle}', [LeaderboardController::class, 'show']);
+
     // Game Rules API
     Route::get('/games/{gameTitle}/rules', [GameRulesController::class, 'show']);
 
     // Game Actions API (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
+        // User Stats & Levels
+        Route::get('/me/stats', [UserStatsController::class, 'show']);
+        Route::get('/me/levels', [UserLevelsController::class, 'show']);
+
+        // User Profile
+        Route::get('/me/profile', [ProfileController::class, 'show']);
+        Route::patch('/me/profile', [ProfileController::class, 'update']);
+
+        // Games
+        Route::get('/games', [GameController::class, 'index']);
+        Route::get('/games/{gameUlid}', [GameController::class, 'show']);
+
         Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
         Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
 

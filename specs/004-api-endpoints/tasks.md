@@ -10,51 +10,51 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 
 ## Phase 2: Foundational - Database & Models
 
-- [ ] T004 Create migration for the `notifications` table in `database/migrations/`
-- [ ] T005 Create migration to add `bio` and `social_links` to the `users` table in `database/migrations/`
-- [ ] T006 Create migration to add `provider` column to the `subscriptions` table in `database/migrations/`
-- [ ] T007 Create migration for the `rematch_requests` table in `database/migrations/`
-- [ ] T008 Run migrations with `php artisan migrate`
-- [ ] T009 Create the `App\Models\Notification` model
-- [ ] T010 Create the `App\Models\RematchRequest` model with relationships
-- [ ] T011 Update the `App\Models\User` model to include `bio`, `social_links`, and the `notifications()` relationship
-- [ ] T012 Update the `App\Models\Subscription` model to include `provider` in the `$fillable` array
+- [X] T004 Create migration for the `notifications` table in `database/migrations/`
+- [X] T005 Create migration to add `bio` and `social_links` to the `users` table in `database/migrations/`
+- [X] T006 Create migration to add `provider` column to the `subscriptions` table in `database/migrations/`
+- [X] T007 Create migration for the `rematch_requests` table in `database/migrations/`
+- [X] T008 Run migrations with `php artisan migrate`
+- [X] T009 Create the `App\Models\Notification` model
+- [X] T010 Create the `App\Models\RematchRequest` model with relationships
+- [X] T011 Update the `App\Models\User` model to include `bio`, `social_links`, and the `notifications()` relationship
+- [X] T012 Update the `App\Models\Subscription` model to include `provider` in the `$fillable` array
 
 ## Phase 3: User Story 1 - Player Explores Games and Profiles
 
 **Goal**: A user can browse games, leaderboards, and their own stats.
 **Independent Test**: A client can make `GET` requests to `/v1/titles`, `/v1/leaderboards/{gameTitle}`, `/v1/me/stats`, and `/v1/me/levels` and receive valid data.
 
-- [ ] T013 [US1] Create `App\Http\Controllers\Api\V1\TitleController`
-- [ ] T014 [US1] Implement `TitleController@index` to return a list of game titles from `config/protocol.php`
-- [ ] T015 [US1] Create `App\Http\Controllers\Api\V1\LeaderboardController`
-- [ ] T016 [US1] Implement `LeaderboardController@show` to return ranked users for a given game title
-- [ ] T017 [US1] Create `App\Http\Controllers\Api\V1\UserStatsController`
-- [ ] T018 [US1] Implement `UserStatsController@show` to return global stats for the authenticated user
-- [ ] T019 [US1] Create `App\Http\Controllers\Api\V1\UserLevelsController`
-- [ ] T020 [US1] Implement `UserLevelsController@show` to return game-specific levels for the authenticated user
-- [ ] T021 [US1] Add routes for `titles`, `leaderboards`, `me/stats`, and `me/levels` to `routes/api.php`
+- [X] T013 [US1] Create `App\Http\Controllers\Api\V1\TitleController`
+- [X] T014 [US1] Implement `TitleController@index` to return a list of game titles from `config/protocol.php`
+- [X] T015 [US1] Create `App\Http\Controllers\Api\V1\LeaderboardController`
+- [X] T016 [US1] Implement `LeaderboardController@show` to return ranked users for a given game title
+- [X] T017 [US1] Create `App\Http\Controllers\Api\V1\UserStatsController`
+- [X] T018 [US1] Implement `UserStatsController@show` to return global stats for the authenticated user
+- [X] T019 [US1] Create `App\Http\Controllers\Api\V1\UserLevelsController`
+- [X] T020 [US1] Implement `UserLevelsController@show` to return game-specific levels for the authenticated user
+- [X] T021 [US1] Add routes for `titles`, `leaderboards`, `me/stats`, and `me/levels` to `routes/api.php`
 
 ## Phase 4: User Story 2 - Player Manages and Resumes Active Games
 
 **Goal**: A user can see their active games and resume a session.
 **Independent Test**: A client can call `GET /v1/games` to list games and `GET /v1/games/{gameUlid}` to get details for a specific game.
 
-- [ ] T022 [US2] Create `App\Http\Controllers\Api\V1\GameController`
-- [ ] T023 [US2] Implement `GameController@index` to list games for the authenticated user
-- [ ] T024 [US2] Implement `GameController@show` to return the state of a specific game
-- [ ] T025 [US2] Add routes for `games` and `games/{gameUlid}` to `routes/api.php`
+- [X] T022 [US2] Create `App\Http\Controllers\Api\V1\GameController`
+- [X] T023 [US2] Implement `GameController@index` to list games for the authenticated user
+- [X] T024 [US2] Implement `GameController@show` to return the state of a specific game
+- [X] T025 [US2] Add routes for `games` and `games/{gameUlid}` to `routes/api.php`
 
 ## Phase 5: User Story 10 - User Customizes Their Public Profile
 
 **Goal**: A user can view and update their public-facing profile.
 **Independent Test**: A client can `GET` profile data from `/v1/me/profile`, `PATCH` new data to it, and see the changes reflected.
 
-- [ ] T026 [US10] Create `App\Services\ProfileService` to handle profile update logic
-- [ ] T027 [US10] Create `App\Http\Controllers\Api\V1\ProfileController`
-- [ ] T028 [US10] Implement `ProfileController@show` to return the authenticated user's public profile
-- [ ] T029 [US10] Implement `ProfileController@update` using `ProfileService`
-- [ ] T030 [US10] Add `GET` and `PATCH` routes for `/v1/me/profile` to `routes/api.php`
+- [X] T026 [US10] Create `App\Services\ProfileService` to handle profile update logic
+- [X] T027 [US10] Create `App\Http\Controllers\Api\V1\ProfileController`
+- [X] T028 [US10] Implement `ProfileController@show` to return the authenticated user's public profile
+- [X] T029 [US10] Implement `ProfileController@update` using `ProfileService`
+- [X] T030 [US10] Add `GET` and `PATCH` routes for `/v1/me/profile` to `routes/api.php`
 
 ## Phase 6: User Story 11 - Player Requests a Rematch
 

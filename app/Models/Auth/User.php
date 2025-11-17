@@ -11,6 +11,7 @@ use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
+use App\Models\Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -31,6 +32,8 @@ class User extends Authenticatable
         'password',
         'agent_id',
         'avatar_id',
+        'bio',
+        'social_links',
         'deactivated_at',
         'registration_client_id',
     ];
@@ -43,6 +46,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'deactivated_at' => 'datetime',
+        'social_links' => 'array',
     ];
 
     // Relationships
@@ -100,6 +104,11 @@ class User extends Authenticatable
     public function socialAccounts()
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
     public function registrationClient()

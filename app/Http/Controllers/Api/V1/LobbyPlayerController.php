@@ -10,14 +10,16 @@ use App\Http\Requests\Lobby\RespondToInvitationRequest;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
+use App\Services\GameCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class LobbyPlayerController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected GameCreationService $gameCreationService
+    ) {
         $this->middleware('auth:sanctum');
     }
 
@@ -90,9 +92,12 @@ class LobbyPlayerController extends Controller
 
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
+            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
                 'user_id' => $user->id,
+                'client_id' => $clientId,
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
@@ -116,6 +121,9 @@ class LobbyPlayerController extends Controller
 
         // Update status
         if ($validated['status'] === 'accepted') {
+            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            
+            $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
             // Check if minimum players met for immediate (non-scheduled) game
@@ -174,8 +182,8 @@ class LobbyPlayerController extends Controller
 
         $lobby->markAsReady();
 
-        // TODO: Create Game and GamePlayer records
-        // TODO: Broadcast GameStarted event to all accepted players
-        // TODO: Mark lobby as completed
+        // Each player has their own client_id stored in lobby_players table
+        // GameCreationService will read from there
+        $this->gameCreationService->createFromLobby($lobby);
     }
 }

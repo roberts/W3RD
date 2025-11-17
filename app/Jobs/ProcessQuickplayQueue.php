@@ -127,6 +127,7 @@ class ProcessQuickplayQueue implements ShouldQueue
         // Remove from queue
         Redis::zrem($queueKey, (string) $userId);
         Redis::hdel('quickplay:timestamps', (string) $userId);
+        Redis::hdel('quickplay:clients', (string) $userId);
 
         // TODO: Call SchedulingService to find AI agent
         // For now, just log that we would match with AI
@@ -139,11 +140,23 @@ class ProcessQuickplayQueue implements ShouldQueue
     {
         $matchId = (string) Str::ulid();
         $confirmKey = "quickplay:accept:{$matchId}";
+        $matchKey = "quickplay:match:{$matchId}";
+
+        // Get client_ids for both players
+        $client1 = Redis::hget('quickplay:clients', (string) $userId1);
+        $client2 = Redis::hget('quickplay:clients', (string) $userId2);
 
         // Create confirmation hash with TTL
         Redis::hset($confirmKey, (string) $userId1, '0');
         Redis::hset($confirmKey, (string) $userId2, '0');
         Redis::expire($confirmKey, self::MATCH_CONFIRMATION_TIMEOUT);
+
+        // Store match metadata for game creation including each player's client_id
+        Redis::hset($matchKey, 'game_title', $gameTitle->value);
+        Redis::hset($matchKey, 'game_mode', $mode);
+        Redis::hset($matchKey, 'player_' . $userId1 . '_client', $client1 ?: '1');
+        Redis::hset($matchKey, 'player_' . $userId2 . '_client', $client2 ?: '1');
+        Redis::expire($matchKey, self::MATCH_CONFIRMATION_TIMEOUT);
 
         // Remove both players from queue
         Redis::zrem($queueKey, (string) $userId1, (string) $userId2);

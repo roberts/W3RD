@@ -24,6 +24,7 @@ class LobbyPlayer extends Model
     protected $fillable = [
         'lobby_id',
         'user_id',
+        'client_id',
         'status',
     ];
 

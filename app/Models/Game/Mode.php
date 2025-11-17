@@ -3,14 +3,12 @@
 namespace App\Models\Game;
 
 use App\Enums\GameTitle;
-use App\Interfaces\GameTitleContract;
+use App\Games\BaseGameTitle;
+use App\Providers\GameServiceProvider;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * @property string $handler_class
- */
 class Mode extends Model
 {
     use HasFactory;
@@ -37,22 +35,16 @@ class Mode extends Model
 
     /**
      * Get the handler class instance for this mode.
+     * Requires a Game instance to determine the proper handler.
      *
-     * @throws \Exception if handler class doesn't exist or doesn't implement GameTitleContract
+     * @param  Game  $game  The game instance using this mode
+     * @return BaseGameTitle The mode handler instance
+     *
+     * @throws \Exception if handler class is not registered
      */
-    public function getHandler(): GameTitleContract
+    public function getHandler(Game $game): BaseGameTitle
     {
-        if (! class_exists($this->handler_class)) {
-            throw new \Exception("Handler class {$this->handler_class} does not exist");
-        }
-
-        $handler = new $this->handler_class;
-
-        if (! $handler instanceof GameTitleContract) {
-            throw new \Exception("Handler class {$this->handler_class} must implement GameTitleContract");
-        }
-
-        return $handler;
+        return GameServiceProvider::getMode($game);
     }
 
     /**

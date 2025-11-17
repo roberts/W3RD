@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Game\LobbyPlayer
+ * @mixin LobbyPlayer
  */
 class LobbyPlayerResource extends JsonResource
 {

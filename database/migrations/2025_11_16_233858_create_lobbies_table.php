@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('lobbies', function (Blueprint $table) {
@@ -25,13 +22,5 @@ return new class extends Migration
 
             $table->index(['game_title', 'is_public', 'status']);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('lobbies');
     }
 };

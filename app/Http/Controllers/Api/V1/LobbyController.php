@@ -10,6 +10,7 @@ use App\Events\LobbyReadyCheck;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Resources\LobbyPlayerResource;
 use App\Http\Resources\UserResource;
+use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -71,10 +72,13 @@ class LobbyController extends Controller
                 'status' => LobbyStatus::PENDING,
             ]);
 
-            // Add host as first player (auto-accepted)
+            // Add host as first player (auto-accepted, defaults to client_id 1 for AI agents)
+            $clientId = (int) $request->header('X-Client-Key') ?: 1;
+            
             LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
                 'user_id' => $user->id,
+                'client_id' => $clientId,
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
@@ -125,7 +129,7 @@ class LobbyController extends Controller
             ->where('ulid', $lobbyUlid)
             ->firstOrFail();
 
-        /** @var \App\Models\Auth\User $host */
+        /** @var User $host */
         $host = $lobby->host;
 
         return response()->json([

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\LobbyStatus;
 use App\Models\Game\Lobby;
+use App\Services\GameCreationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +15,7 @@ class ProcessScheduledLobbies implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function handle(): void
+    public function handle(GameCreationService $gameCreationService): void
     {
         // Find all scheduled lobbies that are due to start
         $dueLobbies = Lobby::where('status', LobbyStatus::PENDING)
@@ -23,16 +24,16 @@ class ProcessScheduledLobbies implements ShouldQueue
             ->get();
 
         foreach ($dueLobbies as $lobby) {
-            $this->processScheduledLobby($lobby);
+            $this->processScheduledLobby($lobby, $gameCreationService);
         }
     }
 
-    private function processScheduledLobby(Lobby $lobby): void
+    private function processScheduledLobby(Lobby $lobby, GameCreationService $gameCreationService): void
     {
         // Check if minimum players requirement is met
         if ($lobby->hasMinimumPlayers()) {
             // Start the game
-            $this->startGame($lobby);
+            $this->startGame($lobby, $gameCreationService);
         } else {
             // Cancel the lobby - not enough players
             $lobby->markAsCancelled();
@@ -42,13 +43,12 @@ class ProcessScheduledLobbies implements ShouldQueue
         }
     }
 
-    private function startGame(Lobby $lobby): void
+    private function startGame(Lobby $lobby, GameCreationService $gameCreationService): void
     {
         $lobby->markAsReady();
 
-        // TODO: Create Game and GamePlayer records
-        // TODO: Broadcast GameStarted event to all accepted players
-        // TODO: Mark lobby as completed
+        // Each player's client_id is already stored in their lobby_player record
+        $gameCreationService->createFromLobby($lobby);
 
         \Log::info("Started scheduled game for lobby {$lobby->ulid}");
     }

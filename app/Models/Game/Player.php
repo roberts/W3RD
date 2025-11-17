@@ -2,6 +2,7 @@
 
 namespace App\Models\Game;
 
+use App\Models\Access\Client;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,10 +15,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $ulid
  * @property int $game_id
  * @property int $user_id
+ * @property int $client_id
  * @property string|null $name
  * @property int|null $position_id
  * @property string|null $color
  * @property User $user
+ * @property Client $client
  * @property Game $game
  */
 class Player extends Model
@@ -28,6 +31,7 @@ class Player extends Model
         'ulid',
         'game_id',
         'user_id',
+        'client_id',
         'name',
         'position_id',
         'color',
@@ -75,6 +79,11 @@ class Player extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function actions(): HasMany

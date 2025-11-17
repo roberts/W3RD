@@ -128,11 +128,11 @@ class RematchService
             ]);
 
             // Copy players to new game (swap positions for fairness)
-            /** @var \App\Models\Game\Player $player */
+            /** @var Player $player */
             foreach ($originalGame->players as $player) {
                 $newGame->players()->create([
                     'user_id' => $player->user_id,
-                    'name' => $player->name,
+                    'client_id' => $player->client_id, // Maintains client from original game (1 = Gamer Protocol Web for AI)
                     'color' => $player->color,
                     'position_id' => $player->position_id === 1 ? 2 : 1, // Swap positions
                 ]);

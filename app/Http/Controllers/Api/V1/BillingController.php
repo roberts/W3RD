@@ -7,6 +7,7 @@ use App\Http\Requests\Billing\CreateStripeSubscriptionRequest;
 use App\Http\Requests\Billing\VerifyAppleReceiptRequest;
 use App\Http\Requests\Billing\VerifyGoogleReceiptRequest;
 use App\Http\Requests\Billing\VerifyTelegramReceiptRequest;
+use App\Models\Billing\Subscription;
 use App\Services\AppleReceiptValidator;
 use App\Services\GooglePurchaseValidator;
 use App\Services\TelegramPaymentValidator;
@@ -40,7 +41,7 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
-        /** @var \App\Models\Billing\Subscription|null $subscription */
+        /** @var Subscription|null $subscription */
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
 
         if (! $subscription) {
@@ -138,7 +139,7 @@ class BillingController extends Controller
             $result = $this->appleValidator->validate($request->input('transaction_id'));
 
             // Create or update subscription
-            /** @var \App\Models\Billing\Subscription $subscription */
+            /** @var Subscription $subscription */
             $subscription = $user->subscriptions()->updateOrCreate(
                 ['stripe_id' => $request->input('transaction_id')],
                 [
@@ -183,7 +184,7 @@ class BillingController extends Controller
             }
 
             // Create or update subscription
-            /** @var \App\Models\Billing\Subscription $subscription */
+            /** @var Subscription $subscription */
             $subscription = $user->subscriptions()->updateOrCreate(
                 ['stripe_id' => $result['order_id']],
                 [
@@ -230,7 +231,7 @@ class BillingController extends Controller
             $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
 
             // Create or update subscription
-            /** @var \App\Models\Billing\Subscription $subscription */
+            /** @var Subscription $subscription */
             $subscription = $user->subscriptions()->updateOrCreate(
                 ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
                 [

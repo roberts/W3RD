@@ -13,7 +13,7 @@ return new class extends Migration
             $table->ulid('ulid')->unique();
             $table->foreignId('game_id')->constrained('games');
             $table->foreignId('user_id')->constrained('users');
-            $table->string('name', 50);
+            $table->foreignId('client_id')->constrained('clients'); // record which client user played game through
             $table->tinyInteger('position_id')->comment('Turn order: 1, 2, 3, 4');
             $table->string('color', 20);
 

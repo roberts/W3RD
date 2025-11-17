@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Game;
 
+use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -29,7 +30,7 @@ class PlayerFactory extends Factory
         return [
             'game_id' => Game::factory(),
             'user_id' => User::factory(),
-            'name' => fake()->firstName(),
+            'client_id' => Client::factory(),
             'position_id' => 1,
             'color' => 'red',
         ];

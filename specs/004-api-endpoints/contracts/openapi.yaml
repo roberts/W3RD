@@ -473,6 +473,32 @@ components:
         created_at:
           type: string
           format: date-time
+    RematchRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: ulid
+        original_game_id:
+          type: string
+          format: ulid
+        requesting_user_id:
+          type: integer
+        opponent_user_id:
+          type: integer
+        status:
+          type: string
+          enum: [pending, accepted, declined, expired]
+        new_game_id:
+          type: string
+          format: ulid
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
     ApiStatus:
       type: object
       properties:

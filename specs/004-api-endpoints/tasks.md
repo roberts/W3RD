@@ -4,9 +4,9 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 
 ## Phase 1: Setup & Configuration
 
-- [ ] T001 Install dependencies with `composer require google/apiclient web-token/jwt-framework`
-- [ ] T002 Add Google Cloud, App Store Connect, and Telegram Bot credentials to `config/services.php` and `.env.example`
-- [ ] T003 Create `config/protocol.php` for storing game titles and other platform-specific settings
+- [X] T001 Install dependencies with `composer require google/apiclient web-token/jwt-framework`
+- [X] T002 Add Google Cloud, App Store Connect, and Telegram Bot credentials to `config/services.php` and `.env.example`
+- [X] T003 Create `config/protocol.php` for storing game titles and other platform-specific settings
 
 ## Phase 2: Foundational - Database & Models
 

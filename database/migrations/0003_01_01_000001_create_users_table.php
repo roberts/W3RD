@@ -15,24 +15,23 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->foreignId('registration_client_id')->constrained('clients');
+            $table->foreignId('agent_id')->nullable()->unique()->index()->constrained('agents');
+            $table->text('bio')->nullable();
+            $table->json('social_links')->nullable();
+            $table->unsignedBigInteger('avatar_id')->nullable()->index();
             $table->text('two_factor_secret')->nullable();
             $table->text('two_factor_recovery_codes')->nullable();
             $table->timestamp('two_factor_confirmed_at')->nullable();
-            $table->foreignId('registration_client_id')->constrained('clients');
-            $table->foreignId('agent_id')->nullable()->unique()->index()->constrained('agents');
-            $table->rememberToken();
-            $table->timestamps();
-
-            // Avatar reference (no constraint, will be added later)
-            $table->unsignedBigInteger('avatar_id')->nullable()->index();
 
             // Laravel Cashier fields
             $table->string('stripe_id')->nullable()->index();
             $table->string('pm_type')->nullable();
             $table->string('pm_last_four', 4)->nullable();
 
-            // Deactivation and soft deletes
+            $table->rememberToken();
             $table->timestamp('deactivated_at')->nullable()->index();
+            $table->timestamps();
             $table->softDeletes();
         });
 

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
-describe('Authentication', function () {
+describe('Auth', function () {
     describe('Registration', function () {
         describe('Valid Input', function () {
             it('creates user with valid data and returns 201 with token', function () {

@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Models\Alert;
 use App\Models\Billing\Subscription;
-use Illuminate\Http\Request;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 
 class StripeWebhookController extends CashierWebhookController
@@ -51,7 +49,7 @@ class StripeWebhookController extends CashierWebhookController
 
         // Send payment failed alert
         $subscription = $this->findSubscription($payload['data']['object']['subscription'] ?? null);
-        
+
         if ($subscription && $subscription->user) {
             Alert::create([
                 'user_id' => $subscription->user->id,
@@ -69,7 +67,7 @@ class StripeWebhookController extends CashierWebhookController
      */
     private function findSubscription(?string $stripeId)
     {
-        if (!$stripeId) {
+        if (! $stripeId) {
             return null;
         }
 

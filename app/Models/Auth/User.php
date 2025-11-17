@@ -3,6 +3,7 @@
 namespace App\Models\Auth;
 
 use App\Models\Access\Client;
+use App\Models\Alert;
 use App\Models\Billing\Quota;
 use App\Models\Billing\Strike;
 use App\Models\Content\Avatar;
@@ -11,7 +12,6 @@ use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
-use App\Models\Alert;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;

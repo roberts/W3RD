@@ -11,7 +11,7 @@ class GooglePurchaseValidator
 
     public function __construct()
     {
-        $this->client = new GoogleClient();
+        $this->client = new GoogleClient;
         $this->client->setAuthConfig(json_decode(config('services.google.service_account_json'), true));
         $this->client->addScope(AndroidPublisher::ANDROIDPUBLISHER);
     }

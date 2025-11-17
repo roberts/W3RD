@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Auth\User;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
 
@@ -16,7 +15,7 @@ class LeaderboardController extends Controller
     {
         // Validate game title exists
         $validTitles = collect(config('protocol.game_titles'))->pluck('key')->toArray();
-        
+
         if (! in_array($gameTitle, $validTitles)) {
             return response()->json([
                 'message' => 'Game title not found.',

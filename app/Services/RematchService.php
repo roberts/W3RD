@@ -26,7 +26,7 @@ class RematchService
 
         // Validate requesting user was a player
         $player = $game->players()->where('user_id', $requestingUser->id)->first();
-        if (!$player) {
+        if (! $player) {
             throw new \InvalidArgumentException('User was not a player in this game.');
         }
 
@@ -35,7 +35,7 @@ class RematchService
             ->where('user_id', '!=', $requestingUser->id)
             ->first();
 
-        if (!$opponent) {
+        if (! $opponent) {
             throw new \InvalidArgumentException('Could not find opponent for rematch.');
         }
 

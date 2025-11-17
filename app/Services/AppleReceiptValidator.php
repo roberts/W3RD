@@ -17,7 +17,7 @@ class AppleReceiptValidator
     public function validate(string $transactionId): array
     {
         $jwt = $this->generateJWT();
-        
+
         // Call Apple's App Store Server API
         $response = $this->callAppleAPI($jwt, $transactionId);
 
@@ -42,7 +42,7 @@ class AppleReceiptValidator
         ]);
 
         // Create algorithm manager
-        $algorithmManager = new AlgorithmManager([new ES256()]);
+        $algorithmManager = new AlgorithmManager([new ES256]);
 
         // Create JWS builder
         $jwsBuilder = new JWSBuilder($algorithmManager);
@@ -63,7 +63,7 @@ class AppleReceiptValidator
             ->build();
 
         // Serialize
-        $serializer = new CompactSerializer();
+        $serializer = new CompactSerializer;
 
         return $serializer->serialize($jws, 0);
     }

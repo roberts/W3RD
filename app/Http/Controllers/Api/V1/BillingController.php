@@ -16,6 +16,7 @@ class BillingController extends Controller
         protected GooglePurchaseValidator $googleValidator,
         protected TelegramPaymentValidator $telegramValidator
     ) {}
+
     /**
      * Get available subscription plans.
      */
@@ -37,7 +38,7 @@ class BillingController extends Controller
 
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
 
-        if (!$subscription) {
+        if (! $subscription) {
             return response()->json([
                 'data' => [
                     'subscribed' => false,
@@ -75,7 +76,7 @@ class BillingController extends Controller
         $plans = collect(config('protocol.subscription_plans'));
         $planConfig = $plans->firstWhere('id', $plan);
 
-        if (!$planConfig || !isset($planConfig['stripe_price_id'])) {
+        if (! $planConfig || ! isset($planConfig['stripe_price_id'])) {
             return response()->json([
                 'message' => 'Invalid plan selected.',
             ], 400);
@@ -176,7 +177,7 @@ class BillingController extends Controller
                         $request->input('token')
                     );
 
-                    if (!$result['valid']) {
+                    if (! $result['valid']) {
                         return response()->json([
                             'message' => 'Invalid Google Play purchase.',
                         ], 400);
@@ -218,7 +219,7 @@ class BillingController extends Controller
                         $request->input('hash')
                     );
 
-                    if (!$isValid) {
+                    if (! $isValid) {
                         return response()->json([
                             'message' => 'Invalid Telegram payment hash.',
                         ], 400);

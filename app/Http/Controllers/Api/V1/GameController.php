@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Game\Game;
+use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
+    public function __construct(
+        protected RematchService $rematchService
+    ) {}
     /**
      * List games for the authenticated user.
      */
@@ -96,5 +100,33 @@ class GameController extends Controller
                 'completed_at' => $game->completed_at,
             ],
         ]);
+    }
+
+    /**
+     * Request a rematch for a completed game.
+     */
+    public function requestRematch(Request $request, string $gameUlid): JsonResponse
+    {
+        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+
+        try {
+            $rematchRequest = $this->rematchService->createRematchRequest(
+                $game,
+                $request->user()
+            );
+
+            return response()->json([
+                'data' => [
+                    'id' => $rematchRequest->id,
+                    'status' => $rematchRequest->status,
+                    'expires_at' => $rematchRequest->expires_at,
+                ],
+                'message' => 'Rematch request sent.',
+            ], 201);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 }

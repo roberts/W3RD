@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\GameActionController;
 use App\Http\Controllers\Api\V1\GameController;
 use App\Http\Controllers\Api\V1\GameRulesController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\Api\V1\LobbyController;
 use App\Http\Controllers\Api\V1\LobbyPlayerController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuickplayController;
+use App\Http\Controllers\Api\V1\RematchController;
+use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\TitleController;
 use App\Http\Controllers\Api\V1\UserLevelsController;
 use App\Http\Controllers\Api\V1\UserStatsController;
@@ -39,6 +42,9 @@ Route::prefix('v1')->group(function () {
     // Game Rules API
     Route::get('/games/{gameTitle}/rules', [GameRulesController::class, 'show']);
 
+    // Stripe Webhook (no authentication)
+    Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handleWebhook']);
+
     // Game Actions API (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
         // User Stats & Levels
@@ -49,9 +55,23 @@ Route::prefix('v1')->group(function () {
         Route::get('/me/profile', [ProfileController::class, 'show']);
         Route::patch('/me/profile', [ProfileController::class, 'update']);
 
+        // Billing
+        Route::prefix('billing')->controller(BillingController::class)->group(function () {
+            Route::get('/plans', 'getPlans');
+            Route::get('/status', 'getStatus');
+            Route::post('/subscribe', 'createStripeSubscription');
+            Route::get('/manage', 'manageSubscription');
+            Route::post('/{provider}/verify', 'verifyReceipt');
+        });
+
         // Games
         Route::get('/games', [GameController::class, 'index']);
         Route::get('/games/{gameUlid}', [GameController::class, 'show']);
+        Route::post('/games/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
+
+        // Rematch Requests
+        Route::post('/rematch-requests/{requestId}/accept', [RematchController::class, 'accept']);
+        Route::post('/rematch-requests/{requestId}/decline', [RematchController::class, 'decline']);
 
         Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
         Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);

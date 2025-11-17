@@ -61,41 +61,41 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 **Goal**: A player can request a rematch after completing a game and the opponent can accept or decline.
 **Independent Test**: A client can create a rematch request from a completed game, and the opponent receives a notification and can respond.
 
-- [ ] T031 [US11] Create `App\Services\RematchService` to handle rematch logic
-- [ ] T032 [US11] Implement `GameController@requestRematch` in `App\Http\Controllers\Api\V1\GameController`
-- [ ] T033 [US11] Create `App\Http\Controllers\Api\V1\RematchController`
-- [ ] T034 [US11] Implement `RematchController@accept` to accept a rematch request
-- [ ] T035 [US11] Implement `RematchController@decline` to decline a rematch request
-- [ ] T036 [US11] Create `App\Jobs\ExpireRematchRequests` job to handle automatic expiration
-- [ ] T037 [US11] Create events: `RematchRequested`, `RematchAccepted`, `RematchDeclined`, `RematchExpired`
-- [ ] T038 [US11] Create listeners for rematch events to send notifications
-- [ ] T039 [US11] Add rematch routes to `routes/api.php`
-- [ ] T040 [US11] Schedule `ExpireRematchRequests` job in `app/Console/Kernel.php`
+- [X] T031 [US11] Create `App\Services\RematchService` to handle rematch logic
+- [X] T032 [US11] Implement `GameController@requestRematch` in `App\Http\Controllers\Api\V1\GameController`
+- [X] T033 [US11] Create `App\Http\Controllers\Api\V1\RematchController`
+- [X] T034 [US11] Implement `RematchController@accept` to accept a rematch request
+- [X] T035 [US11] Implement `RematchController@decline` to decline a rematch request
+- [X] T036 [US11] Create `App\Jobs\ExpireRematchRequests` job to handle automatic expiration
+- [X] T037 [US11] Create events: `RematchRequested`, `RematchAccepted`, `RematchDeclined`, `RematchExpired`
+- [X] T038 [US11] Create listeners for rematch events to send notifications
+- [X] T039 [US11] Add rematch routes to `routes/api.php`
+- [X] T040 [US11] Schedule `ExpireRematchRequests` job in `app/Console/Kernel.php`
 
 ## Phase 7: User Story 3 - Web User Subscribes via Stripe
 
 **Goal**: A web user can subscribe to a plan and manage their subscription via Stripe.
 **Independent Test**: A client can get a redirect URL from `/v1/billing/subscribe` and `/v1/billing/manage`. The `/webhooks/stripe` endpoint must correctly update user subscription status.
 
-- [ ] T041 [US3] Create `App\Http\Controllers\Api\V1\BillingController`
-- [ ] T042 [US3] Implement `BillingController@getPlans` to return subscription plans
-- [ ] T043 [US3] Implement `BillingController@getStatus` to return the user's subscription status
-- [ ] T044 [US3] Implement `BillingController@createStripeSubscription` to return a Stripe Checkout session URL
-- [ ] T045 [US3] Implement `BillingController@manageSubscription` to return a Stripe Customer Portal URL
-- [ ] T046 [US3] Create `App\Http\Controllers\Api\V1\StripeWebhookController`
-- [ ] T047 [US3] Implement `StripeWebhookController@handle` to process incoming Stripe events
-- [ ] T048 [US3] Add routes for billing endpoints and the Stripe webhook to `routes/api.php`
+- [X] T041 [US3] Create `App\Http\Controllers\Api\V1\BillingController`
+- [X] T042 [US3] Implement `BillingController@getPlans` to return subscription plans
+- [X] T043 [US3] Implement `BillingController@getStatus` to return the user's subscription status
+- [X] T044 [US3] Implement `BillingController@createStripeSubscription` to return a Stripe Checkout session URL
+- [X] T045 [US3] Implement `BillingController@manageSubscription` to return a Stripe Customer Portal URL
+- [X] T046 [US3] Create `App\Http\Controllers\Api\V1\StripeWebhookController`
+- [X] T047 [US3] Implement `StripeWebhookController@handle` to process incoming Stripe events
+- [X] T048 [US3] Add routes for billing endpoints and the Stripe webhook to `routes/api.php`
 
 ## Phase 8: User Story 4 & 5 - Mobile & Telegram Subscriptions
 
 **Goal**: A user can subscribe via native IAP (Apple/Google) or Telegram Stars.
 **Independent Test**: The `/v1/billing/{provider}/verify` endpoints must correctly validate a test receipt and update the user's subscription status.
 
-- [ ] T049 [P] [US4] Create `App\Services\AppleReceiptValidator` to communicate with the App Store Server API
-- [ ] T050 [P] [US4] Create `App\Services\GooglePurchaseValidator` to communicate with the Google Play Developer API
-- [ ] T051 [P] [US5] Create `App\Services\TelegramPaymentValidator` to validate Telegram payment data
-- [ ] T052 [US4, US5] Implement `BillingController@verifyReceipt` to use the appropriate validation service based on the provider
-- [ ] T053 [US4, US5] Add the `/v1/billing/{provider}/verify` route to `routes/api.php`
+- [X] T049 [P] [US4] Create `App\Services\AppleReceiptValidator` to communicate with the App Store Server API
+- [X] T050 [P] [US4] Create `App\Services\GooglePurchaseValidator` to communicate with the Google Play Developer API
+- [X] T051 [P] [US5] Create `App\Services\TelegramPaymentValidator` to validate Telegram payment data
+- [X] T052 [US4, US5] Implement `BillingController@verifyReceipt` to use the appropriate validation service based on the provider
+- [X] T053 [US4, US5] Add the `/v1/billing/{provider}/verify` route to `routes/api.php`
 
 ## Phase 9: User Story 8 & 9 - Notifications & Game History
 

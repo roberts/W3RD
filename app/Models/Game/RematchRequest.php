@@ -25,6 +25,20 @@ class RematchRequest extends Model
         'expires_at' => 'datetime',
     ];
 
+    // Use ULID for route model binding
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+
     public function originalGame(): BelongsTo
     {
         return $this->belongsTo(Game::class, 'original_game_id');

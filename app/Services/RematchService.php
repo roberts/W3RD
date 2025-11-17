@@ -13,6 +13,7 @@ use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchService
 {
@@ -71,7 +72,7 @@ class RematchService
      */
     public function acceptRematchRequest(RematchRequest $rematchRequest, User $acceptingUser): Game
     {
-        // Validate user is the opponent
+        // Validate user is the opponent by comparing user ID directly
         if ($rematchRequest->opponent_user_id !== $acceptingUser->id) {
             throw new \InvalidArgumentException('Only the opponent can accept this rematch request.');
         }
@@ -91,17 +92,48 @@ class RematchService
             /** @var Game $originalGame */
             $originalGame = $rematchRequest->originalGame;
 
+            // Get the mode to determine how to initialize game state
+            $mode = $originalGame->mode;
+            $players = $originalGame->players;
+
+            // Swap player positions for fairness
+            $player1 = $players->firstWhere('position_id', 1);
+            $player2 = $players->firstWhere('position_id', 2);
+
+            // Initialize game state based on game title
+            $gameState = [];
+            if ($originalGame->title_slug->value === 'validate-four') {
+                $gameState = [
+                    'board' => array_fill(0, 6, array_fill(0, 7, null)),
+                    'current_player_ulid' => $player2->ulid, // Swapped - was player2, now position 1
+                    'columns' => 7,
+                    'rows' => 6,
+                    'connect_count' => 4,
+                    'players' => [
+                        $player2->ulid => ['ulid' => $player2->ulid, 'position' => 1, 'color' => 'red'],
+                        $player1->ulid => ['ulid' => $player1->ulid, 'position' => 2, 'color' => 'yellow'],
+                    ],
+                    'phase' => 'active',
+                    'status' => 'pending',
+                ];
+            }
+
             // Create new game with same settings
             $newGame = Game::create([
+                'title_slug' => $originalGame->title_slug,
                 'mode_id' => $originalGame->mode_id,
+                'creator_id' => $originalGame->creator_id,
                 'status' => GameStatus::PENDING,
+                'game_state' => $gameState,
             ]);
 
             // Copy players to new game (swap positions for fairness)
-            /** @var \App\Models\Game\Player $player */
+            /** @var Player $player */
             foreach ($originalGame->players as $player) {
                 $newGame->players()->create([
                     'user_id' => $player->user_id,
+                    'client_id' => $player->client_id, // Maintains client from original game (1 = Gamer Protocol Web for AI)
+                    'color' => $player->color,
                     'position_id' => $player->position_id === 1 ? 2 : 1, // Swap positions
                 ]);
             }
@@ -123,9 +155,9 @@ class RematchService
      */
     public function declineRematchRequest(RematchRequest $rematchRequest, User $decliningUser): RematchRequest
     {
-        // Validate user is the opponent
+        // Validate user is the opponent by comparing user ID directly
         if ($rematchRequest->opponent_user_id !== $decliningUser->id) {
-            throw new \InvalidArgumentException('Only the opponent can decline this rematch request.');
+            throw new AccessDeniedHttpException('Only the opponent can decline this rematch request.');
         }
 
         // Validate request is still pending

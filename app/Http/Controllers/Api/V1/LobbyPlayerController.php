@@ -7,16 +7,19 @@ use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
+use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
+use App\Services\GameCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class LobbyPlayerController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected GameCreationService $gameCreationService
+    ) {
         $this->middleware('auth:sanctum');
     }
 
@@ -38,11 +41,12 @@ class LobbyPlayerController extends Controller
             return response()->json(['error' => 'Cannot invite players to a non-pending lobby'], 400);
         }
 
-        $inviteeId = $validated['user_id'];
+        // Resolve username to user
+        $invitee = User::where('username', $validated['username'])->firstOrFail();
 
         // Check if player is already in lobby
         $existing = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $inviteeId)
+            ->where('user_id', $invitee->id)
             ->first();
 
         if ($existing) {
@@ -52,12 +56,12 @@ class LobbyPlayerController extends Controller
         // Create invitation
         $lobbyPlayer = LobbyPlayer::create([
             'lobby_id' => $lobby->id,
-            'user_id' => $inviteeId,
+            'user_id' => $invitee->id,
             'status' => LobbyPlayerStatus::PENDING,
         ]);
 
         // Broadcast invitation
-        broadcast(new LobbyInvitation($inviteeId, $lobby));
+        broadcast(new LobbyInvitation($invitee->id, $lobby));
 
         return response()->json([
             'message' => 'Player invited successfully',
@@ -67,27 +71,33 @@ class LobbyPlayerController extends Controller
     /**
      * Respond to a lobby invitation or join a public lobby
      */
-    public function update(RespondToInvitationRequest $request, string $lobbyUlid, int $userId): JsonResponse
+    public function update(RespondToInvitationRequest $request, string $lobbyUlid, string $username): JsonResponse
     {
         $validated = $request->validated();
 
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();
 
+        // Resolve username to user
+        $user = User::where('username', strtolower($username))->firstOrFail();
+
         // Verify the user is responding for themselves
-        if ($currentUser->id !== $userId) {
+        if ($currentUser->id !== $user->id) {
             return response()->json(['error' => 'You can only respond for yourself'], 403);
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $userId)
+            ->where('user_id', $user->id)
             ->first();
 
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
+            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
-                'user_id' => $userId,
+                'user_id' => $user->id,
+                'client_id' => $clientId,
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
@@ -111,6 +121,9 @@ class LobbyPlayerController extends Controller
 
         // Update status
         if ($validated['status'] === 'accepted') {
+            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+
+            $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
             // Check if minimum players met for immediate (non-scheduled) game
@@ -133,7 +146,7 @@ class LobbyPlayerController extends Controller
     /**
      * Kick a player from a lobby (Host only)
      */
-    public function destroy(Request $request, string $lobbyUlid, int $userId): JsonResponse
+    public function destroy(Request $request, string $lobbyUlid, string $username): JsonResponse
     {
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();
@@ -142,12 +155,15 @@ class LobbyPlayerController extends Controller
             return response()->json(['error' => 'Only the host can kick players'], 403);
         }
 
-        if ($userId === $currentUser->id) {
+        // Resolve username to user
+        $user = User::where('username', strtolower($username))->firstOrFail();
+
+        if ($user->id === $currentUser->id) {
             return response()->json(['error' => 'Host cannot kick themselves'], 400);
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $userId)
+            ->where('user_id', $user->id)
             ->firstOrFail();
 
         $lobbyPlayer->delete();
@@ -166,8 +182,8 @@ class LobbyPlayerController extends Controller
 
         $lobby->markAsReady();
 
-        // TODO: Create Game and GamePlayer records
-        // TODO: Broadcast GameStarted event to all accepted players
-        // TODO: Mark lobby as completed
+        // Each player has their own client_id stored in lobby_players table
+        // GameCreationService will read from there
+        $this->gameCreationService->createFromLobby($lobby);
     }
 }

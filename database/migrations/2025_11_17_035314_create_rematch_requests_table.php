@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('rematch_requests', function (Blueprint $table) {
             $table->id();
-            $table->ulid();
+            $table->char('ulid', 26)->unique()->index();
             $table->foreignId('original_game_id')->constrained('games')->onDelete('cascade');
             $table->foreignId('requesting_user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('opponent_user_id')->constrained('users')->onDelete('cascade');

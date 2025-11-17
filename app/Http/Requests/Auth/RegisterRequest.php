@@ -15,7 +15,7 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'client_id' => ['required', 'ulid', 'exists:clients,id'],
+            'client_id' => ['required', 'exists:clients,id'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', 'unique:registrations,email'],
             'password' => ['required', 'string', Password::defaults(), 'confirmed'],
         ];

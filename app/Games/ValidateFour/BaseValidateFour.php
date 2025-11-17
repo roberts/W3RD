@@ -4,7 +4,7 @@ namespace App\Games\ValidateFour;
 
 use App\Games\BaseBoardGameTitle;
 use App\Games\GameOutcome;
-use App\Games\ValidateFour\Actions\DropDisc;
+use App\Games\ValidateFour\Actions\DropPiece;
 use App\Games\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
@@ -89,14 +89,14 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     {
         return [
             'title' => 'Validate Four',
-            'description' => 'Be the first player to connect four of your discs in a row—horizontally, vertically, or diagonally.',
+            'description' => 'Be the first player to connect four of your pieces in a row—horizontally, vertically, or diagonally.',
             'sections' => [
                 [
                     'title' => 'Core Gameplay',
                     'content' => <<<'MARKDOWN'
-                    *   Players take turns dropping one of their colored discs from the top into a column.
-                    *   The disc falls to the lowest available space within the column.
-                    *   The first player to form a line of four of their discs wins.
+                    *   Players take turns dropping one of their colored pieces from the top into a column.
+                    *   The piece falls to the lowest available space within the column.
+                    *   The first player to form a line of four of their pieces wins.
                     MARKDOWN,
                 ],
             ],
@@ -106,7 +106,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     /**
      * Validate a player's action.
      *
-     * @param  object  $action  The action DTO (DropDisc, PopOut, etc)
+     * @param  object  $action  The action DTO (DropPiece, PopOut, etc)
      */
     public function validateAction(object $gameState, object $action): ValidationResult
     {
@@ -117,8 +117,8 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
             );
         }
 
-        if ($action instanceof DropDisc) {
-            return $this->validateDropDisc($gameState, $action);
+        if ($action instanceof DropPiece) {
+            return $this->validateDropPiece($gameState, $action);
         }
 
         return ValidationResult::invalid(
@@ -136,8 +136,8 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
      */
     public function applyAction(object $gameState, object $action): object
     {
-        if ($action instanceof DropDisc) {
-            return $this->applyDropDisc($gameState, $action);
+        if ($action instanceof DropPiece) {
+            return $this->applyDropPiece($gameState, $action);
         }
 
         return $this->gameState;
@@ -194,16 +194,16 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
         }
 
         return [
-            'drop_disc' => [
+            'drop_piece' => [
                 'columns' => $availableColumns,
             ],
         ];
     }
 
     /**
-     * Validate a drop disc action.
+     * Validate a drop piece action.
      */
-    protected function validateDropDisc(GameState $state, DropDisc $action): ValidationResult
+    protected function validateDropPiece(GameState $state, DropPiece $action): ValidationResult
     {
         // Check if column index is valid
         if ($action->column < 0 || $action->column >= $state->columns) {
@@ -227,19 +227,19 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     }
 
     /**
-     * Apply a drop disc action to the game state.
+     * Apply a drop piece action to the game state.
      * Returns a new immutable game state.
      */
-    protected function applyDropDisc(GameState $state, DropDisc $action): GameState
+    protected function applyDropPiece(GameState $state, DropPiece $action): GameState
     {
         $row = $state->getLowestEmptyRow($action->column);
         if ($row === null) {
             return $state; // Should not happen if validation passed
         }
 
-        // Place the disc and switch player
+        // Place the piece and switch player
         return $state
-            ->withDiscAt($row, $action->column, $state->currentPlayerUlid)
+            ->withPieceAt($row, $action->column, $state->currentPlayerUlid)
             ->withNextPlayer();
     }
 
@@ -253,29 +253,29 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
         // Check all possible starting positions for winning lines
         for ($row = 0; $row < $state->rows; $row++) {
             for ($col = 0; $col < $state->columns; $col++) {
-                $disc = $state->getDiscAt($row, $col);
-                if ($disc === null) {
+                $piece = $state->getPieceAt($row, $col);
+                if ($piece === null) {
                     continue;
                 }
 
                 // Check horizontal (right)
-                if ($this->checkLine($state, $row, $col, 0, 1, $disc)) {
-                    return $disc;
+                if ($this->checkLine($state, $row, $col, 0, 1, $piece)) {
+                    return $piece;
                 }
 
                 // Check vertical (down)
-                if ($this->checkLine($state, $row, $col, 1, 0, $disc)) {
-                    return $disc;
+                if ($this->checkLine($state, $row, $col, 1, 0, $piece)) {
+                    return $piece;
                 }
 
                 // Check diagonal (down-right)
-                if ($this->checkLine($state, $row, $col, 1, 1, $disc)) {
-                    return $disc;
+                if ($this->checkLine($state, $row, $col, 1, 1, $piece)) {
+                    return $piece;
                 }
 
                 // Check diagonal (down-left)
-                if ($this->checkLine($state, $row, $col, 1, -1, $disc)) {
-                    return $disc;
+                if ($this->checkLine($state, $row, $col, 1, -1, $piece)) {
+                    return $piece;
                 }
             }
         }
@@ -303,7 +303,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
         $col = $startCol;
 
         while ($row >= 0 && $row < $state->rows && $col >= 0 && $col < $state->columns) {
-            if ($state->getDiscAt($row, $col) === $playerUlid) {
+            if ($state->getPieceAt($row, $col) === $playerUlid) {
                 $count++;
                 if ($count >= $state->connectCount) {
                     return true;

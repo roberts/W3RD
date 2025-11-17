@@ -7,15 +7,15 @@ use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use Database\Factories\Game\LobbyFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 
 class Lobby extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     /**
      * Create a new factory instance for the model.
@@ -44,15 +44,14 @@ class Lobby extends Model
         'status' => LobbyStatus::class,
     ];
 
-    protected static function boot()
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
+    public function uniqueIds(): array
     {
-        parent::boot();
-
-        static::creating(function ($lobby) {
-            if (empty($lobby->ulid)) {
-                $lobby->ulid = (string) Str::ulid();
-            }
-        });
+        return ['ulid'];
     }
 
     public function host(): BelongsTo

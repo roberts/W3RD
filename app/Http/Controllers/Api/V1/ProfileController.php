@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,14 +23,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'bio' => $user->bio,
-                'social_links' => $user->social_links,
-                'avatar_id' => $user->avatar_id,
-            ],
+            'data' => UserResource::make($user),
         ]);
     }
 
@@ -44,14 +38,7 @@ class ProfileController extends Controller
         );
 
         return response()->json([
-            'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'bio' => $user->bio,
-                'social_links' => $user->social_links,
-                'avatar_id' => $user->avatar_id,
-            ],
+            'data' => UserResource::make($user),
             'message' => 'Profile updated successfully.',
         ]);
     }

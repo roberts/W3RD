@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Games\BaseGameTitle;
+use App\Games\ValidateFour\Modes\EightBySevenMode;
+use App\Games\ValidateFour\Modes\FiveMode;
+use App\Games\ValidateFour\Modes\NineBySixMode;
 use App\Games\ValidateFour\Modes\PopOutMode;
 use App\Games\ValidateFour\Modes\StandardMode;
 use App\Models\Game\Game;
@@ -16,6 +19,9 @@ class GameServiceProvider extends ServiceProvider
             'validate-four' => [
                 'standard' => StandardMode::class,
                 'pop-out' => PopOutMode::class,
+                'five' => FiveMode::class,
+                'eight-by-seven' => EightBySevenMode::class,
+                'nine-by-six' => NineBySixMode::class,
             ],
         ];
 

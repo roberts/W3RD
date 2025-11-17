@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -27,7 +28,7 @@ class LobbyInvitation implements ShouldBroadcast
 
     public function broadcastWith(): array
     {
-        /** @var \App\Models\Auth\User $host */
+        /** @var User $host */
         $host = $this->lobby->host;
 
         return [

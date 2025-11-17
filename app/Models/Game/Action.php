@@ -3,6 +3,7 @@
 namespace App\Models\Game;
 
 use App\Enums\ActionType;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
+ * @property string $ulid
  * @property int $game_id
  * @property int $player_id
  * @property int $turn_number
@@ -23,7 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Action extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
         'game_id',
@@ -42,6 +44,22 @@ class Action extends Model
         'turn_number' => 'integer',
         'timestamp_client' => 'datetime',
     ];
+
+    /**
+     * Get the columns that should receive a unique identifier.
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
+    /**
+     * Get the route key name for Laravel route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
 
     // Relationships
     public function game(): BelongsTo

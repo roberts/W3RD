@@ -15,7 +15,7 @@ interface ActionFactoryContract
     /**
      * Create an action DTO from request data.
      *
-     * @param  string  $actionType  The type of action (e.g., 'drop_disc', 'move_piece', 'play_card')
+     * @param  string  $actionType  The type of action (e.g., 'drop_piece', 'move_piece', 'play_card')
      * @param  array<string, mixed>  $data  The action data from the request
      * @return GameActionContract The action DTO
      *

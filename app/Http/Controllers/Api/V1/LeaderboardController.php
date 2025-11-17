@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
 
@@ -24,7 +25,7 @@ class LeaderboardController extends Controller
 
         // Get top users by level for this game title
         $leaderboard = UserTitleLevel::where('game_title', $gameTitle)
-            ->with('user:id,name,username,avatar_id')
+            ->with('user.avatar.image')
             ->orderBy('level', 'desc')
             ->orderBy('experience_points', 'desc')
             ->limit(100)
@@ -32,12 +33,7 @@ class LeaderboardController extends Controller
             ->map(function (UserTitleLevel $titleLevel, $index) {
                 return [
                     'rank' => $index + 1,
-                    'user' => [
-                        'id' => $titleLevel->user->id,
-                        'name' => $titleLevel->user->name,
-                        'username' => $titleLevel->user->username,
-                        'avatar_id' => $titleLevel->user->avatar_id,
-                    ],
+                    'user' => UserResource::make($titleLevel->user)->resolve(),
                     'level' => $titleLevel->level,
                     'experience_points' => $titleLevel->xp_current,
                 ];

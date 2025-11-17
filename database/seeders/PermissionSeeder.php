@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'create-registration',
             'view-client-dashboard',
             'edit-any-user-profile',
+            'can-update-username',
         ];
 
         foreach ($permissions as $permission) {
@@ -53,6 +54,7 @@ class PermissionSeeder extends Seeder
             'create-registration',
             'view-client-dashboard',
             'edit-any-user-profile',
+            'can-update-username',
         ]);
 
         $clientMember = Role::findByName('Client Member');
@@ -67,12 +69,14 @@ class PermissionSeeder extends Seeder
             'create-registration',
             'view-client-dashboard',
             'edit-any-user-profile',
+            'can-update-username',
         ]);
 
         $masterPlayer = Role::findByName('Master Player');
         $masterPlayer->givePermissionTo([
             'create-clients',
             'create-avatars',
+            'can-update-username',
         ]);
 
         $player = Role::findByName('Player');

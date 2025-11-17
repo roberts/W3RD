@@ -66,6 +66,16 @@ class Game extends Model
         'duration_seconds' => 'integer',
     ];
 
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
     // Use ULID for route model binding
     public function getRouteKeyName()
     {

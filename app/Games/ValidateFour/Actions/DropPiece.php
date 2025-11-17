@@ -6,12 +6,12 @@ namespace App\Games\ValidateFour\Actions;
 
 use App\Interfaces\GameActionContract;
 
-class DropDisc implements GameActionContract
+class DropPiece implements GameActionContract
 {
     /**
-     * Create a new DropDisc action.
+     * Create a new DropPiece action.
      *
-     * @param  int  $column  The column index (0-based) to drop the disc into
+     * @param  int  $column  The column index (0-based) to drop the piece into
      *
      * @throws \InvalidArgumentException if column is negative
      */
@@ -25,10 +25,11 @@ class DropDisc implements GameActionContract
 
     /**
      * Get the action type identifier.
+     * Returns 'drop_piece' to match the ActionType enum.
      */
     public function getType(): string
     {
-        return 'drop_disc';
+        return 'drop_piece';
     }
 
     /**

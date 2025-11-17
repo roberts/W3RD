@@ -58,7 +58,7 @@ Complete API reference for the GamerProtocol.io platform. All endpoints use the 
 | `GET` | `/v1/me/stats` | Get user statistics (wins, losses, points, rank) | Bearer + Client Key |
 | `GET` | `/v1/me/levels` | Get user's title levels and XP progress | Bearer + Client Key |
 | `GET` | `/v1/me/alerts` | Get user's alert history (paginated) | Bearer + Client Key |
-| `POST` | `/v1/me/alerts/mark-as-read` | Mark alerts as read (specific IDs or all) | Bearer + Client Key |
+| `POST` | `/v1/me/alerts/mark-as-read` | Mark alerts as read (specific ULIDs or all) | Bearer + Client Key |
 
 ---
 
@@ -82,8 +82,8 @@ Complete API reference for the GamerProtocol.io platform. All endpoints use the 
 | `DELETE` | `/v1/games/lobbies/{lobby_ulid}` | Delete/leave a lobby | Bearer + Client Key |
 | `POST` | `/v1/games/lobbies/{lobby_ulid}/ready-check` | Initiate ready check for lobby | Bearer + Client Key |
 | `POST` | `/v1/games/lobbies/{lobby_ulid}/players` | Add player to lobby | Bearer + Client Key |
-| `PUT` | `/v1/games/lobbies/{lobby_ulid}/players/{user_id}` | Update player status in lobby | Bearer + Client Key |
-| `DELETE` | `/v1/games/lobbies/{lobby_ulid}/players/{user_id}` | Remove player from lobby | Bearer + Client Key |
+| `PUT` | `/v1/games/lobbies/{lobby_ulid}/players/{username}` | Update player status in lobby | Bearer + Client Key |
+| `DELETE` | `/v1/games/lobbies/{lobby_ulid}/players/{username}` | Remove player from lobby | Bearer + Client Key |
 
 ---
 
@@ -105,8 +105,8 @@ Complete API reference for the GamerProtocol.io platform. All endpoints use the 
 | HTTP Method | Endpoint | Purpose | Auth Requirements |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/v1/games/{gameUlid}/rematch` | Request rematch with same opponent | Bearer + Client Key |
-| `POST` | `/v1/games/rematch/{requestId}/accept` | Accept a rematch request | Bearer + Client Key |
-| `POST` | `/v1/games/rematch/{requestId}/decline` | Decline a rematch request | Bearer + Client Key |
+| `POST` | `/v1/games/rematch/{requestId}/accept` | Accept a rematch request (by ULID) | Bearer + Client Key |
+| `POST` | `/v1/games/rematch/{requestId}/decline` | Decline a rematch request (by ULID) | Bearer + Client Key |
 
 ---
 
@@ -176,11 +176,54 @@ Response:
 {
   "token": "1|abc123...",
   "user": {
-    "id": 1,
     "ulid": "01HQ...",
+    "username": "johndoe",
     "name": "John Doe",
-    "email": "user@example.com"
+    "email": "user@example.com",
+    "avatar": "https://res.cloudinary.com/..."
   }
+}
+```
+
+### Alerts
+
+**GET /v1/me/alerts**
+
+Response:
+```json
+{
+  "data": [
+    {
+      "ulid": "01HQ...",
+      "type": "game_invite",
+      "data": {
+        "lobby_ulid": "01HQ...",
+        "host_username": "player1"
+      },
+      "read_at": null,
+      "created_at": "2025-11-17T10:30:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 20,
+    "total": 1
+  }
+}
+```
+
+**POST /v1/me/alerts/mark-as-read**
+```json
+{
+  "alert_ulids": ["01HQ...", "01HQ..."]
+}
+```
+
+Response:
+```json
+{
+  "message": "Alerts marked as read."
 }
 ```
 
@@ -200,20 +243,116 @@ Response:
 ```json
 {
   "action": {
-    "id": 123,
-    "game_id": 456,
-    "player_id": 789,
+    "ulid": "01HQ...",
     "action_type": "drop_piece",
-    "action_details": {"column": 3},
-    "created_at": "2025-11-17T10:30:00Z"
+    "action_details": {"column": 3}
   },
   "game_state": {
     "status": "active",
     "current_turn": 2,
     "board": [[],[],[],...]
+  },
+  "message": "Action recorded successfully"
+}
+```
+
+### Rematch System
+
+**POST /v1/games/{gameUlid}/rematch**
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01HQ...",
+    "status": "pending",
+    "expires_at": "2025-11-17T11:00:00Z"
+  },
+  "message": "Rematch request sent."
+}
+```
+
+**POST /v1/games/rematch/{requestId}/accept**
+
+Response:
+```json
+{
+  "data": {
+    "rematch_request_ulid": "01HQ...",
+    "new_game_ulid": "01HQ...",
+    "status": "accepted"
+  },
+  "message": "Rematch accepted. New game created."
+}
+```
+
+### Lobby Management
+
+**POST /v1/games/lobbies**
+```json
+{
+  "game_title": "connect-four",
+  "game_mode": "standard",
+  "is_public": true,
+  "min_players": 2
+}
+```
+
+Response:
+```json
+{
+  "lobby": {
+    "ulid": "01HQ...",
+    "game_title": "connect-four",
+    "game_mode": "standard",
+    "host": {
+      "username": "johndoe",
+      "name": "John Doe",
+      "avatar": "https://res.cloudinary.com/..."
+    },
+    "is_public": true,
+    "min_players": 2,
+    "status": "pending",
+    "players": [
+      {
+        "username": "johndoe",
+        "name": "John Doe",
+        "avatar": "https://res.cloudinary.com/...",
+        "status": "accepted"
+      }
+    ]
   }
 }
 ```
+
+---
+
+## Important Notes
+
+### ULID Usage
+All resources (Games, Lobbies, Actions, Alerts, RematchRequests) use **ULIDs** as public identifiers instead of internal database IDs. ULIDs are:
+- Lexicographically sortable
+- URL-safe
+- 26-character strings (e.g., `01HQ5X9K3G2YM4N6P7Q8R9S0T1`)
+
+### Username-based User Identification
+User resources are identified by **username** in API endpoints (e.g., `/lobbies/{lobby_ulid}/players/{username}`), not by user ID. This:
+- Prevents user enumeration attacks
+- Provides a consistent, human-readable identifier
+- Maintains security while enabling social features
+
+### Authentication
+All authenticated endpoints return:
+- `401 Unauthorized` if the Bearer token is missing or invalid
+- `403 Forbidden` if the user is not authorized to access the resource
+- `404 Not Found` if the resource ULID doesn't exist
+
+### WebSocket Events
+The platform uses Laravel Broadcasting for real-time updates. Key events include:
+- `GameActionProcessed` - Broadcasts game actions with `action_ulid`
+- `LobbyInvitation` - Notifies users of lobby invites
+- `LobbyReadyCheck` - Initiates ready check for lobby players
+- `RematchRequested` - Notifies opponent of rematch request
 
 ---
 

@@ -34,6 +34,21 @@ class Alert extends Model
         'read_at' => 'datetime',
     ];
 
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

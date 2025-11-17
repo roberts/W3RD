@@ -99,17 +99,82 @@ An administrator needs to grant a specific user a lifetime subscription for prom
 1.  **Given** an administrator has identified a user to receive lifetime access, **When** the admin executes the grant action (e.g., clicks a button in an admin panel or runs a command), **Then** the user's subscription record is created or updated to reflect a lifetime plan.
 2.  **Given** a user has been granted lifetime membership, **When** they or the client calls `GET /v1/billing/status`, **Then** the status correctly indicates a non-expiring, permanent subscription.
 
+---
+
+### User Story 7 - A Developer or Admin Checks API Health (Priority: P7)
+
+A client developer or a system administrator needs a simple way to confirm that the API is online and operational.
+
+**Why this priority**: This is a non-user-facing but critical endpoint for monitoring, automated health checks, and client-side connection validation.
+
+**Independent Test**: Can be tested with any HTTP client (like `curl`) without authentication. A successful test is receiving a `200 OK` response with the expected JSON body.
+
+**Acceptance Scenarios**:
+
+1.  **Given** the API is running, **When** a request is made to `GET /v1/status`, **Then** the system returns a `200 OK` response with a body of `{"status": "ok"}`.
+
+---
+
+### User Story 8 - A User Checks Their Notifications (Priority: P8)
+
+A user wants to see a summary of events that occurred while they were offline, such as friend requests, game invites, or when it becomes their turn in a game.
+
+**Why this priority**: This is crucial for re-engaging users and ensuring they don't miss important social or gameplay interactions, especially for asynchronous games.
+
+**Independent Test**: Can be tested with a user who has received notifications. The client should be able to fetch, display, and mark notifications as read.
+
+**Acceptance Scenarios**:
+
+1.  **Given** a user has unread notifications, **When** they open their notifications screen, **Then** the app calls `GET /v1/me/notifications` and displays the list of notifications.
+2.  **Given** the user has viewed their notifications, **When** they take an action to clear them, **Then** the app calls `POST /v1/me/notifications/mark-as-read` and the notifications are marked as read on the backend.
+
+---
+
+### User Story 9 - A Player Reviews a Game's Move History (Priority: P9)
+
+A player in a complex or asynchronous game wants to review the entire sequence of moves to understand how the game reached its current state.
+
+**Why this priority**: This is essential for strategy in turn-based games and provides a great replay/review feature for all games.
+
+**Independent Test**: Can be tested on any game that has at least one move. The client should be able to fetch and display the list of moves in chronological order.
+
+**Acceptance Scenarios**:
+
+1.  **Given** a user is viewing a game, **When** they select the "History" option, **Then** the app calls `GET /v1/games/{gameUlid}/history` and displays a chronological list of all moves made in that game.
+
+---
+
+### User Story 10 - A User Customizes Their Public Profile (Priority: P5)
+
+A user wants to personalize their public-facing profile by changing their avatar, writing a bio, and setting social links.
+
+**Why this priority**: This is a key social and personalization feature that allows users to express their identity on the platform.
+
+**Independent Test**: Can be tested by an authenticated user on their profile editing screen. The user should be able to fetch their current profile data, make changes, save them, and see the changes reflected.
+
+**Acceptance Scenarios**:
+
+1.  **Given** a user navigates to their "Edit Profile" screen, **When** the page loads, **Then** the app calls `GET /v1/me/profile` and populates the form with their current username, bio, and avatar.
+2.  **Given** the user changes their bio and saves, **When** the action is triggered, **Then** the app calls `PATCH /v1/me/profile` with the new data, and a subsequent fetch confirms the update.
+
 ### Edge Cases
 
 -   **Invalid IDs**: How does the system respond when a request is made with a non-existent `gameUlid`, `title_slug`, etc.? (Should return a 404 Not Found).
 -   **Authorization**: What happens if User A tries to access a resource belonging to User B? (Should return a 403 Forbidden or 404 Not Found).
--   **Billing Verification**: How does the system handle an invalid, expired, or already-used receipt/token sent to the `/verify` endpoints? (Should return a 422 Unprocessable Entity or 409 Conflict).
--   **Webhook Failures**: What happens if a Stripe webhook is received but processing fails? (The system should log the error and be able to retry the webhook processing).
--   **Duplicate Webhooks**: How does the system handle receiving the same webhook event from Stripe multiple times? (It must be idempotent and not process the same event twice).
+-   **Billing Verification**: How does the system handle an invalid or expired receipt/token sent to the `/verify` endpoints? (Should return a 422 Unprocessable Entity with a clear error message).
+-   **Empty States**: How do list endpoints (`/games`, `/titles`) respond when there is no data to return? (Should return a 200 OK with an empty array).
+-   **Notifications**: What happens when a user with no notifications calls the `GET /v1/me/notifications` endpoint? (Should return a 200 OK with an empty array).
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
+
+#### API Design Clarification: `/auth/user` vs. `/me/profile`
+
+To ensure clarity for client developers, the distinction between these two resource paths is as follows:
+
+*   **/v1/auth/user**: These endpoints manage a user's **private account and authentication credentials**. They are used for actions related to security and identity verification, such as updating an email address or changing a password. Data here is considered sensitive and is never exposed publicly.
+*   **/v1/me/profile**: These endpoints manage a user's **public-facing social persona**. This includes customizable, non-sensitive data that other players can see, such as a username, bio, selected avatar, or social links.
 
 #### Core API
 -   **FR-001**: The system **MUST** provide a `GET /v1/titles` endpoint to list all available game titles.
@@ -121,6 +186,10 @@ An administrator needs to grant a specific user a lifetime subscription for prom
 -   **FR-007**: The system **MUST** provide a `GET /v1/leaderboards/{gameTitle}` endpoint for game leaderboards.
 -   **FR-013**: The existing `GET /v1/games/{gameTitle}/rules` endpoint **MUST** be permanently redirected (301) or removed.
 
+#### User Profile & Persona
+-   **FR-022**: The system **MUST** provide a `GET /v1/me/profile` endpoint to return the authenticated user's public-facing profile data (e.g., username, bio, avatar, join date, social links).
+-   **FR-023**: The system **MUST** provide a `PATCH /v1/me/profile` endpoint for the authenticated user to update their public profile data.
+
 #### Billing & Subscriptions
 -   **FR-008**: The system **MUST** provide a `GET /v1/billing/plans` endpoint to list all purchasable subscription plans.
 -   **FR-009**: The system **MUST** provide a `GET /v1/billing/status` endpoint to show the user's current subscription status.
@@ -131,16 +200,24 @@ An administrator needs to grant a specific user a lifetime subscription for prom
 -   **FR-015**: The system **MUST** provide a mechanism for administrators to grant or revoke lifetime memberships for any user.
 -   **FR-016**: The `Subscription` model **MUST** support a "lifetime" status where the subscription does not expire.
 
+#### New Foundational & Gameplay Endpoints
+-   **FR-017**: The system **MUST** provide an unauthenticated `GET /v1/status` endpoint that returns a JSON object indicating the API's operational status.
+-   **FR-018**: The system **MUST** provide a `GET /v1/me/notifications` endpoint to list all notifications for the authenticated user.
+-   **FR-019**: The system **MUST** provide an endpoint (e.g., `POST /v1/me/notifications/mark-as-read`) to mark notifications as read.
+-   **FR-020**: The system **MUST** generate and persist notifications for key asynchronous events (e.g., friend request received, game invite, turn reminder).
+-   **FR-021**: The system **MUST** provide a `GET /v1/games/{gameUlid}/history` endpoint that returns a chronological list of all moves/actions taken in that game.
+
 ### Key Entities *(include if feature involves data)*
 
 -   **Title**: The definition and rules of a game that can be played.
 -   **Game**: A specific instance of a Title being played by users.
--   **User**: A registered player on the platform.
+-   **User**: A registered player on the platform. The user entity contains both private account data (email, password hash) and public profile data (username, bio, avatar_id).
 -   **Leaderboard**: A ranked list of Users for a specific Title.
 -   **Plan**: A definition of a subscription tier.
     -   Attributes: `name`, `price`, `currency`, `provider_plan_id` (e.g., Stripe Price ID), `description`.
--   **Subscription**: The record of a User's active Plan.
-    -   Attributes: `user_id`, `plan_id`, `provider` (e.g., 'stripe', 'apple', 'google', 'telegram', 'admin'), `provider_subscription_id`, `status` (e.g., 'active', 'canceled', 'expired'), `expires_at` (nullable for lifetime).
+-   **Subscription**: The record of a User's active Plan, including its start and end dates.
+-   **Notification**: A record of an event that a user should be made aware of.
+    -   Attributes: `id`, `user_id`, `type` (e.g., 'friend_request', 'game_invite'), `data` (JSON with context), `read_at` (nullable).
 
 ## Success Criteria *(mandatory)*
 
@@ -151,4 +228,6 @@ An administrator needs to grant a specific user a lifetime subscription for prom
 -   **SC-003**: The user's subscription status, as returned by `GET /v1/billing/status`, must be updated and consistent across the platform within 30 seconds of a successful purchase confirmation from any provider (Stripe webhook, Apple/Google verification, etc.).
 -   **SC-004**: The API error rate for all new endpoints must remain below 0.1% under normal operating load.
 -   **SC-005**: The system must successfully process 99.9% of incoming Stripe webhooks without manual intervention.
+-   **SC-006**: The `GET /v1/status` endpoint must have an average response time of under 50ms.
+-   **SC-007**: A new notification must be available via the `GET /v1/me/notifications` endpoint within 5 seconds of the triggering event.
 

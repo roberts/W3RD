@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\LobbyPlayerController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuickplayController;
 use App\Http\Controllers\Api\V1\RematchController;
+use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\TitleController;
 use App\Http\Controllers\Api\V1\UserLevelsController;
@@ -35,6 +36,9 @@ Route::prefix('v1')->group(function () {
             Route::patch('user', 'updateUser');
         });
     });
+
+    // API Health Check
+    Route::get('/status', [StatusController::class, 'index']);
 
     // Public Game Information
     Route::get('/titles', [TitleController::class, 'index']);

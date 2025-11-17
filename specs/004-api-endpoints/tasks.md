@@ -113,9 +113,9 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 **Goal**: A developer or admin can check the API's health.
 **Independent Test**: A `GET` request to `/v1/status` returns a `200 OK` with `{"status": "ok"}`.
 
-- [ ] T059 [US7] Create `App\Http\Controllers\Api\V1\StatusController`
-- [ ] T060 [US7] Implement `StatusController@index` to return the API status
-- [ ] T061 [US7] Add the `/v1/status` route to `routes/api.php`
+- [X] T059 [US7] Create `App\Http\Controllers\Api\V1\StatusController`
+- [X] T060 [US7] Implement `StatusController@index` to return the API status
+- [X] T061 [US7] Add the `/v1/status` route to `routes/api.php`
 
 ## Phase 11: Polish & Finalization
 

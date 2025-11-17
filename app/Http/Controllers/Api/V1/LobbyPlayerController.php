@@ -7,6 +7,7 @@ use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
+use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -38,11 +39,12 @@ class LobbyPlayerController extends Controller
             return response()->json(['error' => 'Cannot invite players to a non-pending lobby'], 400);
         }
 
-        $inviteeId = $validated['user_id'];
+        // Resolve username to user
+        $invitee = User::where('username', $validated['username'])->firstOrFail();
 
         // Check if player is already in lobby
         $existing = LobbyPlayer::where('lobby_id', $lobby->id)
-            ->where('user_id', $inviteeId)
+            ->where('user_id', $invitee->id)
             ->first();
 
         if ($existing) {
@@ -52,12 +54,12 @@ class LobbyPlayerController extends Controller
         // Create invitation
         $lobbyPlayer = LobbyPlayer::create([
             'lobby_id' => $lobby->id,
-            'user_id' => $inviteeId,
+            'user_id' => $invitee->id,
             'status' => LobbyPlayerStatus::PENDING,
         ]);
 
         // Broadcast invitation
-        broadcast(new LobbyInvitation($inviteeId, $lobby));
+        broadcast(new LobbyInvitation($invitee->id, $lobby));
 
         return response()->json([
             'message' => 'Player invited successfully',

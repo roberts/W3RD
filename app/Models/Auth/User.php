@@ -53,6 +53,39 @@ class User extends Authenticatable
         'social_links' => 'array',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->username)) {
+                // Generate temporary username, will be updated after creation
+                $user->username = 'player' . str_pad((string) rand(1, 9999999), 7, '0', STR_PAD_LEFT);
+            }
+        });
+
+        static::created(function ($user) {
+            // Update with proper username based on ID
+            $properUsername = self::generateUsername($user->id);
+            if ($user->username !== $properUsername) {
+                $user->username = $properUsername;
+                $user->saveQuietly(); // Save without triggering events again
+            }
+        });
+    }
+
+    /**
+     * Generate a username in format: player0000000
+     * Takes user ID, adds 69420, and pads with leading zeros to 7 digits
+     */
+    public static function generateUsername(int $userId): string
+    {
+        $number = $userId + 69420;
+        $paddedNumber = str_pad((string) $number, 7, '0', STR_PAD_LEFT);
+
+        return 'player' . $paddedNumber;
+    }
+
     // Relationships
     public function avatar(): BelongsTo
     {
@@ -141,5 +174,14 @@ class User extends Authenticatable
         }
 
         return $initials;
+    }
+
+    /**
+     * Check if user can update their username.
+     * Requires the 'can-update-username' permission.
+     */
+    public function canUpdateUsername(): bool
+    {
+        return $this->hasPermissionTo('can-update-username');
     }
 }

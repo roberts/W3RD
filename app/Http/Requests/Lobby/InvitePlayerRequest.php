@@ -14,15 +14,15 @@ class InvitePlayerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer|exists:users,id',
+            'username' => 'required|string|exists:users,username',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'user_id.required' => 'User ID is required',
-            'user_id.exists' => 'The specified user does not exist',
+            'username.required' => 'Username is required',
+            'username.exists' => 'The specified user does not exist',
         ];
     }
 }

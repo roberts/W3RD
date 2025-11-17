@@ -16,6 +16,10 @@ class ProfileService
             $user->name = $data['name'];
         }
 
+        if (isset($data['username'])) {
+            $user->username = $data['username'];
+        }
+
         if (array_key_exists('bio', $data)) {
             $user->bio = $data['bio'];
         }

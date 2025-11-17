@@ -151,7 +151,6 @@ class LobbyController extends Controller
                     /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Game\LobbyPlayer> $players */
                     $players = $lobby->players;
 
-                    /** @phpstan-ignore-next-line */
                     return $players->map(function (LobbyPlayer $player) {
                         /** @var \App\Models\Auth\User $user */
                         $user = $player->user;

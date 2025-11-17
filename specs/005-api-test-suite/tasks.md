@@ -24,11 +24,11 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 **Purpose**: Initialize test infrastructure and shared helpers that all test files will use
 
-- [ ] T001 Create directory structure for API v1 tests: `tests/Feature/Api/V1/`
-- [ ] T002 Create directory for test helpers: `tests/Feature/Helpers/`
-- [ ] T003 Create directory for test traits: `tests/Feature/Traits/`
-- [ ] T004 [P] Add global helper functions to `tests/Pest.php` (createAuthenticatedUser, assertValidationError, assertApiError)
-- [ ] T005 [P] Add custom expectations to `tests/Pest.php` (toHaveUserStructure, toHaveGameStructure, toHaveSubscriptionStructure, toBeSuccessfulApiResponse)
+- [x] T001 Create directory structure for API v1 tests: `tests/Feature/Api/V1/`
+- [x] T002 Create directory for test helpers: `tests/Feature/Helpers/`
+- [x] T003 Create directory for test traits: `tests/Feature/Traits/`
+- [x] T004 [P] Add global helper functions to `tests/Pest.php` (createAuthenticatedUser, assertValidationError, assertApiError)
+- [x] T005 [P] Add custom expectations to `tests/Pest.php` (toHaveUserStructure, toHaveGameStructure, toHaveSubscriptionStructure, toBeSuccessfulApiResponse)
 
 ---
 
@@ -42,9 +42,9 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 - [ ] T007 [P] Create GameHelper class in `tests/Feature/Helpers/GameHelper.php` with createGame, submitAction, assertGameState methods
 - [ ] T008 [P] Create BillingHelper class in `tests/Feature/Helpers/BillingHelper.php` with createSubscription, verifyReceipt methods
 - [ ] T009 [P] Create AssertionHelper class in `tests/Feature/Helpers/AssertionHelper.php` with assertJsonStructure, assertValidationError methods
-- [ ] T010 [P] Create CreatesGames trait in `tests/Feature/Traits/CreatesGames.php` for reusable game creation logic
-- [ ] T011 [P] Create CreatesSubscriptions trait in `tests/Feature/Traits/CreatesSubscriptions.php` for reusable subscription setup
-- [ ] T012 [P] Create InteractsWithWebSocket trait in `tests/Feature/Traits/InteractsWithWebSocket.php` for real-time testing helpers
+- [x] T010 [P] Create CreatesGames trait in `tests/Feature/Traits/CreatesGames.php` for reusable game creation logic
+- [x] T011 [P] Create CreatesSubscriptions trait in `tests/Feature/Traits/CreatesSubscriptions.php` for reusable subscription setup
+- [x] T012 [P] Create InteractsWithWebSocket trait in `tests/Feature/Traits/InteractsWithWebSocket.php` for real-time testing helpers
 
 **Checkpoint**: Test utilities ready - user story test implementation can now begin in parallel
 

@@ -30,6 +30,33 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('toHaveUserStructure', function () {
+    return $this->toHaveKeys([
+        'id', 'ulid', 'name', 'email', 'avatar_url',
+        'created_at', 'updated_at',
+    ]);
+});
+
+expect()->extend('toHaveGameStructure', function () {
+    return $this->toHaveKeys([
+        'ulid', 'title_slug', 'status', 'current_turn',
+        'game_state', 'created_at',
+    ]);
+});
+
+expect()->extend('toHaveSubscriptionStructure', function () {
+    return $this->toHaveKeys([
+        'id', 'user_id', 'platform', 'status',
+        'created_at', 'updated_at',
+    ]);
+});
+
+expect()->extend('toBeSuccessfulApiResponse', function () {
+    $this->value->assertSuccessful();
+    $this->value->assertJson([]);
+    return $this;
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -41,7 +68,31 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+use App\Models\Auth\User;
+use Illuminate\Testing\TestResponse;
+
+/**
+ * Create and authenticate a user for API requests
+ */
+function createAuthenticatedUser(array $attributes = []): User
 {
-    // ..
+    return User::factory()->create($attributes);
+}
+
+/**
+ * Assert validation error in JSON response
+ */
+function assertValidationError(TestResponse $response, string $field): void
+{
+    $response->assertStatus(422)
+             ->assertJsonValidationErrors($field);
+}
+
+/**
+ * Assert standard JSON API error structure
+ */
+function assertApiError(TestResponse $response, int $status, string $message): void
+{
+    $response->assertStatus($status)
+             ->assertJson(['message' => $message]);
 }

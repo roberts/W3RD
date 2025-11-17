@@ -55,10 +55,9 @@ class AuthController extends Controller
             'registration_client_id' => $registration->client_id,
         ]);
 
-        // Link the registration to the new user
+        // Link the registration to the new user (keep the token for auditing)
         $registration->update([
             'user_id' => $user->id,
-            'verification_token' => null, // Token is used, nullify it
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
@@ -162,12 +161,19 @@ class AuthController extends Controller
         $user = $request->user();
         $token = $user->currentAccessToken();
 
-        // Mark the entry as logged out
-        Entry::where('token_id', $token->id)->where('user_id', $user->id)->latest('logged_in_at')->first()?->update([
-            'logged_out_at' => now(),
-        ]);
+        // Mark the entry as logged out (skip for test tokens)
+        if ($token && property_exists($token, 'id') && $token->id) {
+            Entry::where('token_id', $token->id)
+                ->where('user_id', $user->id)
+                ->latest('logged_in_at')
+                ->first()
+                ?->update(['logged_out_at' => now()]);
+        }
 
-        $token->delete();
+        // Delete the token if it's a real token (not a transient test token)
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }

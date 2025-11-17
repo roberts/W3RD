@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameTitle;
+use App\Http\Requests\Quickplay\AcceptMatchRequest;
+use App\Http\Requests\Quickplay\JoinQuickplayRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -18,12 +20,9 @@ class QuickplayController extends Controller
     /**
      * Join the public matchmaking queue
      */
-    public function join(Request $request): JsonResponse
+    public function join(JoinQuickplayRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'game_title' => 'required|string',
-            'game_mode' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $user = $request->user();
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
@@ -86,11 +85,9 @@ class QuickplayController extends Controller
     /**
      * Accept a found match
      */
-    public function accept(Request $request): JsonResponse
+    public function accept(AcceptMatchRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'match_id' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         $user = $request->user();
         $matchId = $validated['match_id'];

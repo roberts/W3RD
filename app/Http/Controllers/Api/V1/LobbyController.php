@@ -7,6 +7,7 @@ use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
+use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Models\Lobby;
 use App\Models\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -57,17 +58,9 @@ class LobbyController extends Controller
     /**
      * Create a new lobby
      */
-    public function store(Request $request): JsonResponse
+    public function store(CreateLobbyRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'game_title' => 'required|string',
-            'game_mode' => 'nullable|string',
-            'is_public' => 'boolean',
-            'min_players' => 'integer|min:2|max:8',
-            'scheduled_at' => 'nullable|date|after:now',
-            'invitees' => 'array',
-            'invitees.*' => 'integer|exists:users,id',
-        ]);
+        $validated = $request->validated();
 
         $user = $request->user();
         $gameTitle = GameTitle::fromSlug($validated['game_title']);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
+use App\Http\Requests\Lobby\InvitePlayerRequest;
+use App\Http\Requests\Lobby\RespondToInvitationRequest;
 use App\Models\Lobby;
 use App\Models\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -21,11 +23,9 @@ class LobbyPlayerController extends Controller
     /**
      * Invite a player to a lobby (Host only)
      */
-    public function store(Request $request, string $lobbyUlid): JsonResponse
+    public function store(InvitePlayerRequest $request, string $lobbyUlid): JsonResponse
     {
-        $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
-        ]);
+        $validated = $request->validated();
 
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $user = $request->user();
@@ -67,11 +67,9 @@ class LobbyPlayerController extends Controller
     /**
      * Respond to a lobby invitation or join a public lobby
      */
-    public function update(Request $request, string $lobbyUlid, int $userId): JsonResponse
+    public function update(RespondToInvitationRequest $request, string $lobbyUlid, int $userId): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|in:accepted,declined',
-        ]);
+        $validated = $request->validated();
 
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
         $currentUser = $request->user();

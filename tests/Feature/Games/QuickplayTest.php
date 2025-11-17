@@ -2,6 +2,7 @@
 
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 
 test('authenticated user can join quickplay queue', function () {
     $user = User::factory()->create();
@@ -95,7 +96,7 @@ test('user on cooldown cannot join queue', function () {
 
 test('user can accept a match', function () {
     $user = User::factory()->create();
-    $matchId = 'test-match-id';
+    $matchId = (string) Str::ulid();
     $confirmKey = "quickplay:accept:{$matchId}";
 
     // Mock Redis responses for match acceptance
@@ -127,15 +128,16 @@ test('user can accept a match', function () {
 
 test('user cannot accept expired match', function () {
     $user = User::factory()->create();
+    $expiredMatchId = (string) Str::ulid();
 
     // Mock match doesn't exist
     Redis::shouldReceive('exists')
-        ->with('quickplay:accept:non-existent-match')
+        ->with("quickplay:accept:{$expiredMatchId}")
         ->once()
         ->andReturn(false);
 
     $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay/accept', [
-        'match_id' => 'non-existent-match',
+        'match_id' => $expiredMatchId,
     ]);
 
     $response->assertStatus(404)

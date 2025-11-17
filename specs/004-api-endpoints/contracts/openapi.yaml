@@ -117,7 +117,7 @@ paths:
           description: Bad request (e.g., game not completed, already pending rematch).
         '404':
           $ref: '#/components/responses/NotFound'
-  /rematch-requests/{requestId}/accept:
+  /games/rematch/{requestId}/accept:
     post:
       summary: Accept a Rematch Request
       description: Accept a pending rematch request from an opponent.
@@ -148,7 +148,7 @@ paths:
           description: Bad request (e.g., request expired or already responded to).
         '404':
           $ref: '#/components/responses/NotFound'
-  /rematch-requests/{requestId}/decline:
+  /games/rematch/{requestId}/decline:
     post:
       summary: Decline a Rematch Request
       description: Decline a pending rematch request from an opponent.
@@ -218,7 +218,7 @@ paths:
                 $ref: '#/components/schemas/Profile'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-  /leaderboards/{gameTitle}:
+  /leaderboard/{gameTitle}:
     get:
       summary: Get Leaderboard
       description: Retrieve the leaderboard for a specific game title.

@@ -18,7 +18,7 @@ A user wants to browse the available games, check their own progress, and see ho
 **Acceptance Scenarios**:
 
 1.  **Given** a user is authenticated, **When** they open the app, **Then** the app can successfully call `GET /v1/titles` and display a list of playable games.
-2.  **Given** the user has selected a game, **When** they navigate to its leaderboard, **Then** the app can call `GET /v1/leaderboards/{gameTitle}` and display the top players.
+2.  **Given** the user has selected a game, **When** they navigate to its leaderboard, **Then** the app can call `GET /v1/leaderboard/{gameTitle}` and display the top players.
 3.  **Given** the user navigates to their profile, **When** the page loads, **Then** the app successfully calls `GET /v1/me/stats` and `GET /v1/me/levels` to display their rank and game-specific progress.
 
 ---
@@ -201,8 +201,8 @@ To ensure clarity for client developers, the distinction between these two resou
 -   **FR-004**: The system **MUST** provide a `GET /v1/games/{gameUlid}` endpoint to return the state of a specific game.
 -   **FR-005**: The system **MUST** provide a `GET /v1/me/stats` endpoint to return the user's global statistics.
 -   **FR-006**: The system **MUST** provide a `GET /v1/me/levels` endpoint to return the user's game-specific levels.
--   **FR-007**: The system **MUST** provide a `GET /v1/leaderboards/{gameTitle}` endpoint for game leaderboards.
--   **FR-013**: The existing `GET /v1/games/{gameTitle}/rules` endpoint **MUST** be permanently redirected (301) or removed.
+-   **FR-007**: The system **MUST** provide a `GET /v1/leaderboard/{gameTitle}` endpoint for game leaderboards.
+-   **FR-013**: The existing `GET /v1/games/{gameTitle}/rules` endpoint **MUST** be permanently redirected (301) or removed in favor of `GET /v1/titles/{gameTitle}/rules`.
 
 #### User Profile & Persona
 -   **FR-022**: The system **MUST** provide a `GET /v1/me/profile` endpoint to return the authenticated user's public-facing profile data (e.g., username, bio, avatar, join date, social links).
@@ -214,7 +214,7 @@ To ensure clarity for client developers, the distinction between these two resou
 -   **FR-010**: The system **MUST** provide a `POST /v1/billing/subscribe` endpoint that creates a Stripe Checkout session.
 -   **FR-011**: The system **MUST** provide a `POST /v1/billing/manage` endpoint that creates a Stripe Customer Portal session.
 -   **FR-012**: The system **MUST** provide verification endpoints: `POST /v1/billing/apple/verify`, `POST /v1/billing/google/verify`, and `POST /v1/billing/telegram/verify`.
--   **FR-014**: The system **MUST** provide a secure webhook endpoint (`/webhooks/stripe`) to receive and process subscription events from Stripe (e.g., `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`).
+-   **FR-014**: The system **MUST** provide a secure webhook endpoint (`/v1/stripe/webhook`) to receive and process subscription events from Stripe (e.g., `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`).
 -   **FR-015**: The system **MUST** provide a mechanism for administrators to grant or revoke lifetime memberships for any user.
 -   **FR-016**: The `Subscription` model **MUST** support a "lifetime" status where the subscription does not expire.
 
@@ -225,8 +225,8 @@ To ensure clarity for client developers, the distinction between these two resou
 -   **FR-020**: The system **MUST** generate and persist notifications for key asynchronous events (e.g., friend request received, game invite, turn reminder).
 -   **FR-021**: The system **MUST** provide a `GET /v1/games/{gameUlid}/history` endpoint that returns a chronological list of all moves/actions taken in that game.
 -   **FR-024**: The system **MUST** provide a `POST /v1/games/{gameUlid}/rematch` endpoint that creates a rematch request.
--   **FR-025**: The system **MUST** provide a `POST /v1/rematch-requests/{requestId}/accept` endpoint to accept a rematch request.
--   **FR-026**: The system **MUST** provide a `POST /v1/rematch-requests/{requestId}/decline` endpoint to decline a rematch request.
+-   **FR-025**: The system **MUST** provide a `POST /v1/games/rematch/{requestId}/accept` endpoint to accept a rematch request.
+-   **FR-026**: The system **MUST** provide a `POST /v1/games/rematch/{requestId}/decline` endpoint to decline a rematch request.
 -   **FR-027**: The system **MUST** automatically expire rematch requests after 5 minutes if not responded to.
 
 ### Key Entities *(include if feature involves data)*

@@ -23,7 +23,7 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 ## Phase 3: User Story 1 - Player Explores Games and Profiles
 
 **Goal**: A user can browse games, leaderboards, and their own stats.
-**Independent Test**: A client can make `GET` requests to `/v1/titles`, `/v1/leaderboards/{gameTitle}`, `/v1/me/stats`, and `/v1/me/levels` and receive valid data.
+**Independent Test**: A client can make `GET` requests to `/v1/titles`, `/v1/leaderboard/{gameTitle}`, `/v1/me/stats`, and `/v1/me/levels` and receive valid data.
 
 - [X] T013 [US1] Create `App\Http\Controllers\Api\V1\TitleController`
 - [X] T014 [US1] Implement `TitleController@index` to return a list of game titles from `config/protocol.php`
@@ -75,7 +75,7 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 ## Phase 7: User Story 3 - Web User Subscribes via Stripe
 
 **Goal**: A web user can subscribe to a plan and manage their subscription via Stripe.
-**Independent Test**: A client can get a redirect URL from `/v1/billing/subscribe` and `/v1/billing/manage`. The `/webhooks/stripe` endpoint must correctly update user subscription status.
+**Independent Test**: A client can get a redirect URL from `/v1/billing/subscribe` and `/v1/billing/manage`. The `/v1/stripe/webhook` endpoint must correctly update user subscription status.
 
 - [X] T041 [US3] Create `App\Http\Controllers\Api\V1\BillingController`
 - [X] T042 [US3] Implement `BillingController@getPlans` to return subscription plans
@@ -122,7 +122,7 @@ This document outlines the tasks required to implement the "Core API Endpoints" 
 - [ ] T062 Create Feature tests for all new API endpoints
 - [ ] T063 Create Unit tests for all new Service classes
 - [ ] T064 Review and update API documentation in `docs/api.md`
-- [ ] T065 Remove temporary or deprecated routes (e.g., `GET /v1/games/{gameTitle}/rules`)
+- [ ] T065 Remove temporary or deprecated routes (e.g., old `GET /v1/games/{gameTitle}/rules` if it existed)
 
 ---
 

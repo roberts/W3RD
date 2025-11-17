@@ -37,33 +37,14 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    // API Health Check
     Route::get('/status', [StatusController::class, 'index']);
-
-    // Public Game Information
+    Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
     Route::get('/titles', [TitleController::class, 'index']);
-    Route::get('/leaderboards/{gameTitle}', [LeaderboardController::class, 'show']);
+    Route::get('/titles/{gameTitle}/rules', [GameRulesController::class, 'show']);
+    Route::get('/leaderboard/{gameTitle}', [LeaderboardController::class, 'show']);
 
-    // Game Rules API
-    Route::get('/games/{gameTitle}/rules', [GameRulesController::class, 'show']);
-
-    // Stripe Webhook (no authentication)
-    Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handleWebhook']);
-
-    // Game Actions API (requires authentication)
+    // Gamer Protocol (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
-        // User Stats & Levels
-        Route::get('/me/stats', [UserStatsController::class, 'show']);
-        Route::get('/me/levels', [UserLevelsController::class, 'show']);
-
-        // User Profile
-        Route::get('/me/profile', [ProfileController::class, 'show']);
-        Route::patch('/me/profile', [ProfileController::class, 'update']);
-
-        // Alerts
-        Route::get('/me/alerts', [AlertController::class, 'index']);
-        Route::post('/me/alerts/mark-as-read', [AlertController::class, 'markAsRead']);
-
         // Billing
         Route::prefix('billing')->controller(BillingController::class)->group(function () {
             Route::get('/plans', 'getPlans');
@@ -73,38 +54,50 @@ Route::prefix('v1')->group(function () {
             Route::post('/{provider}/verify', 'verifyReceipt');
         });
 
-        // Quickplay (Public Matchmaking) - must be before /games/{gameUlid}
-        Route::prefix('games/quickplay')->controller(QuickplayController::class)->group(function () {
-            Route::post('/', 'join');
-            Route::delete('/', 'leave');
-            Route::post('/accept', 'accept');
+        // Personal User Endpoints
+        Route::prefix('me')->group(function () {
+            Route::get('/profile', [ProfileController::class, 'show']);
+            Route::patch('/profile', [ProfileController::class, 'update']);
+            Route::get('/stats', [UserStatsController::class, 'show']);
+            Route::get('/levels', [UserLevelsController::class, 'show']);
+            Route::get('/alerts', [AlertController::class, 'index']);
+            Route::post('/alerts/mark-as-read', [AlertController::class, 'markAsRead']);
         });
 
-        // Lobbies - must be before /games/{gameUlid}
-        Route::prefix('games/lobbies')->group(function () {
-            Route::get('/', [LobbyController::class, 'index']);
-            Route::post('/', [LobbyController::class, 'store']);
-            Route::get('/{lobby_ulid}', [LobbyController::class, 'show']);
-            Route::delete('/{lobby_ulid}', [LobbyController::class, 'destroy']);
-            Route::post('/{lobby_ulid}/ready-check', [LobbyController::class, 'readyCheck']);
+        // Game Routes
+        Route::prefix('games')->group(function () {
+            // Quickplay (Public Matchmaking) - must be before /games/{gameUlid}
+            Route::prefix('quickplay')->controller(QuickplayController::class)->group(function () {
+                Route::post('/', 'join');
+                Route::delete('/', 'leave');
+                Route::post('/accept', 'accept');
+            });
 
-            // Lobby Players
-            Route::post('/{lobby_ulid}/players', [LobbyPlayerController::class, 'store']);
-            Route::put('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'update']);
-            Route::delete('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'destroy']);
+            // Rematch Requests
+            Route::post('/rematch/{requestId}/accept', [RematchController::class, 'accept']);
+            Route::post('/rematch/{requestId}/decline', [RematchController::class, 'decline']);
+
+            // Lobbies - must be before /games/{gameUlid}
+            Route::prefix('lobbies')->group(function () {
+                Route::get('/', [LobbyController::class, 'index']);
+                Route::post('/', [LobbyController::class, 'store']);
+                Route::get('/{lobby_ulid}', [LobbyController::class, 'show']);
+                Route::delete('/{lobby_ulid}', [LobbyController::class, 'destroy']);
+                Route::post('/{lobby_ulid}/ready-check', [LobbyController::class, 'readyCheck']);
+
+                // Lobby Players
+                Route::post('/{lobby_ulid}/players', [LobbyPlayerController::class, 'store']);
+                Route::put('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'update']);
+                Route::delete('/{lobby_ulid}/players/{user_id}', [LobbyPlayerController::class, 'destroy']);
+            });
+
+            // Games
+            Route::get('/', [GameController::class, 'index']);
+            Route::get('/{gameUlid}', [GameController::class, 'show']);
+            Route::get('/{gameUlid}/history', [GameController::class, 'history']);
+            Route::post('/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
+            Route::post('/{gameUlid}/action', [GameActionController::class, 'store']);
+            Route::get('/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
         });
-
-        // Games
-        Route::get('/games', [GameController::class, 'index']);
-        Route::get('/games/{gameUlid}', [GameController::class, 'show']);
-        Route::get('/games/{gameUlid}/history', [GameController::class, 'history']);
-        Route::post('/games/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
-
-        // Rematch Requests
-        Route::post('/rematch-requests/{requestId}/accept', [RematchController::class, 'accept']);
-        Route::post('/rematch-requests/{requestId}/decline', [RematchController::class, 'decline']);
-
-        Route::post('/games/{gameUlid}/action', [GameActionController::class, 'store']);
-        Route::get('/games/{gameUlid}/available-actions', [GameActionController::class, 'availableActions']);
     });
 });

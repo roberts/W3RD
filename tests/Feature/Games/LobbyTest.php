@@ -194,7 +194,7 @@ describe('Lobby Management', function () {
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
             $response = $this->actingAs($host)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
-                'user_id' => $invitee->id,
+                'username' => $invitee->username,
             ]);
 
             $response->assertStatus(201);
@@ -213,7 +213,7 @@ describe('Lobby Management', function () {
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
             $response = $this->actingAs($otherUser)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
-                'user_id' => $invitee->id,
+                'username' => $invitee->username,
             ]);
 
             $response->assertStatus(403);

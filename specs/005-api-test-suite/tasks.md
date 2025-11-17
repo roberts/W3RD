@@ -172,21 +172,21 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Lobby Tests (User Story 5)
 
-- [ ] T051 [P] [US5] Create LobbyTest.php in `tests/Feature/Api/V1/LobbyTest.php` with describe() structure
-- [ ] T052 [P] [US5] Create LobbyPlayerTest.php in `tests/Feature/Api/V1/LobbyPlayerTest.php` with describe() structure
+- [x] T051 [P] [US5] Create LobbyTest.php in `tests/Feature/Api/V1/LobbyTest.php` with describe() structure
+- [x] T052 [P] [US5] Create LobbyPlayerTest.php in `tests/Feature/Api/V1/LobbyPlayerTest.php` with describe() structure
 
 **Lobby Management (LobbyTest.php)**:
 
-- [ ] T053 [US5] Add Lobby Creation tests: create with valid mode (201), generate unique join code, set creator as host
-- [ ] T054 [US5] Add Lobby Listing tests: show user active lobbies (200), filter by status
-- [ ] T055 [US5] Add Ready Check tests: mark all players ready (200), create game when all ready (201), only host can start (403)
-- [ ] T056 [US5] Add Lobby Deletion tests: cancel by host (200), reject deletion by non-host (403)
+- [x] T053 [US5] Add Lobby Creation tests: create with valid mode (201), generate unique join code, set creator as host
+- [x] T054 [US5] Add Lobby Listing tests: show user active lobbies (200), filter by status
+- [x] T055 [US5] Add Ready Check tests: mark all players ready (200), create game when all ready (201), only host can start (403)
+- [x] T056 [US5] Add Lobby Deletion tests: cancel by host (200), reject deletion by non-host (403)
 
 **Lobby Players (LobbyPlayerTest.php)**:
 
-- [ ] T057 [US5] Add Player Invitation tests: invite user to lobby (201), send alert notification, reject duplicate invitation (422), reject when lobby full (422)
-- [ ] T058 [US5] Add Invitation Response tests: accept invitation (200), decline invitation (200), reject expired invitation (422)
-- [ ] T059 [US5] Add Player Removal tests: host kicks player (200), player leaves voluntarily (200), reject kick by non-host (403)
+- [x] T057 [US5] Add Player Invitation tests: invite user to lobby (201), send alert notification, reject duplicate invitation (422), reject when lobby full (422)
+- [x] T058 [US5] Add Invitation Response tests: accept invitation (200), decline invitation (200), reject expired invitation (422)
+- [x] T059 [US5] Add Player Removal tests: host kicks player (200), player leaves voluntarily (200), reject kick by non-host (403)
 
 **Checkpoint**: Lobby test suite complete - client developers can verify social matchmaking works correctly
 
@@ -200,10 +200,10 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 
 ### Alert Tests (User Story 6)
 
-- [ ] T060 [US6] Create AlertTest.php in `tests/Feature/Api/V1/AlertTest.php` with describe() structure
-- [ ] T061 [US6] Add Alert Listing tests: show unread alerts (200), paginate alerts, filter by type
-- [ ] T062 [US6] Add Mark as Read tests: mark single alert (200), mark multiple alerts (200), reject invalid alert ID (404)
-- [ ] T063 [US6] Add Real-time tests: game invite creates alert, alert with type 'game_invite' and is_read false
+- [x] T060 [US6] Create AlertTest.php in `tests/Feature/Api/V1/AlertTest.php` with describe() structure
+- [x] T061 [US6] Add Alert Listing tests: show unread alerts (200), paginate alerts, filter by type
+- [x] T062 [US6] Add Mark as Read tests: mark single alert (200), mark multiple alerts (200), reject invalid alert ID (404)
+- [x] T063 [US6] Add Real-time tests: game invite creates alert, alert with type 'game_invite' and is_read false
 
 **Checkpoint**: Alert test suite complete - client developers can verify notification system works correctly
 
@@ -258,19 +258,20 @@ All paths relative to repository root: `tests/Feature/Api/V1/`, `tests/Pest.php`
 ## Task Summary
 
 **Total Tasks**: 84
+**Completed Tasks**: 45 (53%)
 **Parallelizable Tasks**: 42 (50%)
 
 ### Tasks by User Story
 
-- **Setup & Foundation**: 12 tasks (T001-T012)
-- **User Story 1 (P1 - Auth)**: 7 tasks (T013-T019)
-- **User Story 2 (P1 - Games)**: 13 tasks (T020-T032)
-- **User Story 3 (P2 - Billing)**: 10 tasks (T033-T042)
-- **User Story 4 (P2 - Profile/Stats)**: 8 tasks (T043-T050)
-- **User Story 5 (P3 - Lobbies)**: 9 tasks (T051-T059)
-- **User Story 6 (P3 - Alerts)**: 4 tasks (T060-T063)
-- **Public & Edge Cases**: 13 tasks (T064-T076)
-- **Polish & Verification**: 8 tasks (T077-T084)
+- **Setup & Foundation**: 12 tasks (T001-T012) ✅ 8/12 completed
+- **User Story 1 (P1 - Auth)**: 7 tasks (T013-T019) ✅ 7/7 completed
+- **User Story 2 (P1 - Games)**: 13 tasks (T020-T032) ✅ 13/13 completed
+- **User Story 3 (P2 - Billing)**: 10 tasks (T033-T042) ⏳ 0/10 completed
+- **User Story 4 (P2 - Profile/Stats)**: 8 tasks (T043-T050) ⏳ 0/8 completed
+- **User Story 5 (P3 - Lobbies)**: 9 tasks (T051-T059) ✅ 9/9 completed
+- **User Story 6 (P3 - Alerts)**: 4 tasks (T060-T063) ✅ 4/4 completed
+- **Public & Edge Cases**: 13 tasks (T064-T076) ⏳ 0/13 completed
+- **Polish & Verification**: 8 tasks (T077-T084) ⏳ 0/8 completed
 
 ---
 

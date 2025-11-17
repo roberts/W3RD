@@ -3,6 +3,7 @@
 namespace App\Models\Auth;
 
 use App\Models\Access\Client;
+use App\Models\Alert;
 use App\Models\Billing\Quota;
 use App\Models\Billing\Strike;
 use App\Models\Content\Avatar;
@@ -12,6 +13,10 @@ use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +36,8 @@ class User extends Authenticatable
         'password',
         'agent_id',
         'avatar_id',
+        'bio',
+        'social_links',
         'deactivated_at',
         'registration_client_id',
     ];
@@ -43,66 +50,72 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'deactivated_at' => 'datetime',
+        'social_links' => 'array',
     ];
 
     // Relationships
-    public function avatar()
+    public function avatar(): BelongsTo
     {
         return $this->belongsTo(Avatar::class);
     }
 
-    public function agent()
+    public function agent(): BelongsTo
     {
         return $this->belongsTo(Agent::class);
     }
 
-    public function entries()
+    public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
     }
 
-    public function players()
+    public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
-    public function strikes()
+    public function strikes(): HasMany
     {
         return $this->hasMany(Strike::class);
     }
 
-    public function quotas()
+    public function quotas(): HasMany
     {
         return $this->hasMany(Quota::class);
     }
 
-    public function points()
+    public function points(): HasMany
     {
         return $this->hasMany(Point::class);
     }
 
-    public function globalRank()
+    public function globalRank(): HasOne
     {
         return $this->hasOne(GlobalRank::class);
     }
 
-    public function badges()
+    public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class, 'user_badge')
             ->withPivot('earned_at');
     }
 
-    public function titleLevels()
+    public function titleLevels(): HasMany
     {
         return $this->hasMany(UserTitleLevel::class);
     }
 
-    public function socialAccounts()
+    public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
     }
 
-    public function registrationClient()
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    public function registrationClient(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'registration_client_id');
     }

@@ -6,6 +6,7 @@ use App\Enums\GameTitle;
 use App\Interfaces\GameTitleContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $handler_class
@@ -27,7 +28,7 @@ class Mode extends Model
     ];
 
     // Relationships
-    public function games()
+    public function games(): HasMany
     {
         return $this->hasMany(Game::class);
     }

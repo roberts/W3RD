@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'google' => [
+        'service_account_json' => env('GOOGLE_SERVICE_ACCOUNT_JSON'),
+        'package_name' => env('GOOGLE_PACKAGE_NAME'),
+    ],
+
+    'apple' => [
+        'key_id' => env('APPLE_KEY_ID'),
+        'issuer_id' => env('APPLE_ISSUER_ID'),
+        'bundle_id' => env('APPLE_BUNDLE_ID'),
+        'private_key' => env('APPLE_PRIVATE_KEY'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
 ];

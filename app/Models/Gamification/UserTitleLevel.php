@@ -5,6 +5,7 @@ namespace App\Models\Gamification;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * User progress tracking for game titles.
@@ -12,6 +13,13 @@ use Illuminate\Database\Eloquent\Model;
  * Uses a composite primary key (user_id, title_slug) which Laravel doesn't
  * natively support. The array assignment to $primaryKey triggers a PHPStan
  * warning but works correctly at runtime for our use case.
+ *
+ * @property int $user_id
+ * @property string $title_slug
+ * @property int $level
+ * @property int $xp_current
+ * @property \Illuminate\Support\Carbon|null $last_played_at
+ * @property User $user
  */
 class UserTitleLevel extends Model
 {
@@ -38,7 +46,7 @@ class UserTitleLevel extends Model
     public $incrementing = false;
 
     // Relationships
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

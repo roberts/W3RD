@@ -36,7 +36,7 @@ class GameFactory extends Factory
             'status' => 'pending',
             'creator_id' => User::factory(),
             'turn_number' => 1,
-            'game_state' => [],
+            'game_state' => json_encode([]),
             'expires_at' => now()->addHours(24),
             'player_count' => 2,
             'action_count' => 0,

@@ -4,8 +4,8 @@ namespace Database\Factories\Game;
 
 use App\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
-use App\Models\Lobby;
-use App\Models\LobbyPlayer;
+use App\Models\Game\Lobby;
+use App\Models\Game\LobbyPlayer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LobbyPlayerFactory extends Factory

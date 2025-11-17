@@ -8,8 +8,8 @@ use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
-use App\Models\Lobby;
-use App\Models\LobbyPlayer;
+use App\Models\Game\Lobby;
+use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -17,11 +17,6 @@ use Illuminate\Support\Facades\DB;
 
 class LobbyController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
-
     /**
      * List all public lobbies
      */
@@ -153,7 +148,7 @@ class LobbyController extends Controller
                 'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
                 'status' => $lobby->status->value,
                 'players' => (function () use ($lobby) {
-                    /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\LobbyPlayer> $players */
+                    /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Game\LobbyPlayer> $players */
                     $players = $lobby->players;
 
                     /** @phpstan-ignore-next-line */

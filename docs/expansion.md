@@ -8,15 +8,22 @@ This document outlines potential new features to expand the GamerProtocol.io API
 
 ### Friends System
 
-*   **Concept:** Allow users to build a friends list to facilitate challenges, track online status, and foster a social community.
+*   **Concept:** Allow users to build a friends list to facilitate challenges, track online status, and foster a social community. This creates a social graph that is foundational for many engagement features.
 *   **Database:**
-    *   A `friends` table would be required: `id`, `user_id` (requester), `friend_id` (recipient), `status` (enum: `pending`, `accepted`, `blocked`), `timestamps`.
-*   **API Endpoints:**
-    *   `POST /v1/friends`: Send a friend request. Body: `{ "user_id": "..." }`.
-    *   `GET /v1/friends`: List all friends with their current status.
-    *   `PATCH /v1/friends/{friendship_id}`: Accept or decline a pending request. Body: `{ "status": "accepted" }`.
-    *   `DELETE /v1/friends/{friendship_id}`: Remove a friend or cancel a request.
-*   **Integration:** The `POST /v1/games` endpoint could be updated to allow `opponent_id` to be a friend's ID, initiating a direct challenge.
+    *   A `friendships` table would be required: `id`, `user_id` (requester), `friend_id` (recipient), `status` (enum: `pending`, `accepted`, `blocked`), `timestamps`.
+*   **API Endpoints (RESTful approach):**
+    *   `GET /v1/me/friends`: List the authenticated user's friends. Can be filtered by status (e.g., `?status=pending` to see incoming requests).
+    *   `POST /v1/me/friends`: Send a friend request to another user.
+        *   **Body:** `{ "user_id": "..." }`
+    *   `PUT /v1/me/friends/{userId}`: Accept a pending friend request from the specified user.
+    *   `DELETE /v1/me/friends/{userId}`: Remove a friend, decline a pending request, or cancel an outgoing request.
+*   **Integration:**
+    *   The `POST /v1/lobbies` endpoint could be updated to allow inviting friends directly.
+    *   A new `POST /v1/challenges` endpoint could be created to directly challenge a friend to a game, creating a private lobby for both.
+*   **Real-Time Events:**
+    *   Use Laravel Reverb to push notifications on a private user channel (`private-user.{userId}`) for events like:
+        *   `FriendRequestReceived`
+        *   `FriendRequestAccepted`
 
 ### Real-Time Game Chat
 
@@ -202,3 +209,31 @@ return new class extends Migration
     }
 };
 ```
+
+---
+
+## 10. Client & API Infrastructure
+
+### Client Configuration Endpoint
+
+*   **Concept:** Provide a dynamic, server-driven configuration for all connected clients. This allows for remote control of client-side features, validation rules, and other settings without requiring a new app deployment.
+*   **API Endpoint:** `GET /v1/config`
+*   **Implementation:**
+    *   This unauthenticated endpoint would return a JSON object containing key-value pairs.
+    *   The configuration can be stored in a simple Laravel `config` file or a database table for more dynamic control.
+*   **Example Response:**
+    ```json
+    {
+      "features": {
+        "tournaments_enabled": true,
+        "chat_enabled": false
+      },
+      "validation": {
+        "username": {
+          "min_length": 3,
+          "max_length": 15
+        }
+      },
+      "auth_providers": ["google", "apple"]
+    }
+    ```

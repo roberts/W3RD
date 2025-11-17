@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Auth\User;
+
+class ProfileService
+{
+    /**
+     * Update user profile.
+     */
+    public function updateProfile(User $user, array $data): User
+    {
+        // Update only provided fields
+        if (isset($data['name'])) {
+            $user->name = $data['name'];
+        }
+
+        if (array_key_exists('bio', $data)) {
+            $user->bio = $data['bio'];
+        }
+
+        if (array_key_exists('social_links', $data)) {
+            $user->social_links = $data['social_links'];
+        }
+
+        $user->save();
+
+        return $user->fresh();
+    }
+}

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Game;
 
 use App\Enums\GameTitle;
+use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use Database\Factories\Game\LobbyFactory;
@@ -66,7 +67,7 @@ class Lobby extends Model
 
     public function acceptedPlayers(): HasMany
     {
-        return $this->players()->where('status', \App\Enums\LobbyPlayerStatus::ACCEPTED);
+        return $this->players()->where('status', LobbyPlayerStatus::ACCEPTED);
     }
 
     public function isHost(User $user): bool

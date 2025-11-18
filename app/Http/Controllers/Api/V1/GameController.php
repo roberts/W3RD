@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Game\FindGameByUlidAction;
 use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ForfeitGameRequest;
@@ -23,7 +24,8 @@ class GameController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected RematchService $rematchService
+        protected RematchService $rematchService,
+        protected FindGameByUlidAction $findGame
     ) {}
 
     /**
@@ -53,9 +55,7 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $game = Game::where('ulid', $gameUlid)
-            ->with(['players.user.avatar.image', 'mode'])
-            ->firstOrFail();
+        $game = $this->findGame->execute($gameUlid, ['players.user.avatar.image', 'mode']);
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
@@ -71,7 +71,7 @@ class GameController extends Controller
      */
     public function requestRematch(RequestRematchRequest $request, string $gameUlid): JsonResponse
     {
-        $game = Game::where('ulid', $gameUlid)->with('players')->firstOrFail();
+        $game = $this->findGame->execute($gameUlid, ['players']);
 
         $rematchRequest = $this->handleServiceCall(
             fn () => $this->rematchService->createRematchRequest(
@@ -98,7 +98,7 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = $this->findGame->execute($gameUlid);
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
@@ -121,7 +121,7 @@ class GameController extends Controller
     public function forfeit(ForfeitGameRequest $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = $this->findGame->execute($gameUlid);
 
         // Determine the winner (opponent of the forfeiting player)
         /** @var Player|null $opponent */

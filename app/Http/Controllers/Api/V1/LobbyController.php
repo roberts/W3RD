@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Client\ResolveClientIdAction;
+use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Enums\GameTitle;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
@@ -26,7 +27,8 @@ class LobbyController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected ResolveClientIdAction $resolveClientId
+        protected ResolveClientIdAction $resolveClientId,
+        protected FindLobbyByUlidAction $findLobby
     ) {}
 
     /**
@@ -123,9 +125,7 @@ class LobbyController extends Controller
      */
     public function show(Request $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = Lobby::with(['host.avatar.image', 'players.user.avatar.image'])
-            ->where('ulid', $lobbyUlid)
-            ->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid, ['host.avatar.image', 'players.user.avatar.image']);
 
         $data = [
             'lobby' => LobbyResource::make($lobby),
@@ -147,7 +147,7 @@ class LobbyController extends Controller
      */
     public function destroy(CancelLobbyRequest $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
 
         $lobby->markAsCancelled();
 
@@ -159,7 +159,7 @@ class LobbyController extends Controller
      */
     public function readyCheck(InitiateReadyCheckRequest $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
 
         // Broadcast ready check event
         broadcast(new LobbyReadyCheck($lobby));

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\Game\HandleTimeoutAction;
 use App\Actions\Game\ProcessCoordinatedActionAction;
 use App\Enums\GameStatus;
@@ -25,7 +26,8 @@ class GameActionController extends Controller
     public function __construct(
         protected GameActionRecorder $actionRecorder,
         protected HandleTimeoutAction $handleTimeout,
-        protected ProcessCoordinatedActionAction $processCoordinatedAction
+        protected ProcessCoordinatedActionAction $processCoordinatedAction,
+        protected FindGameByUlidAction $findGame
     ) {}
 
     /**
@@ -34,7 +36,7 @@ class GameActionController extends Controller
     public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID and load the mode relationship
-        $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
+        $game = $this->findGame->execute($gameUlid, ['mode']);
 
         // Get the mode handler
         $mode = $this->handleServiceCall(
@@ -211,7 +213,7 @@ class GameActionController extends Controller
     public function options(string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = $this->findGame->execute($gameUlid);
 
         // Get the mode handler
         $mode = $this->handleServiceCall(

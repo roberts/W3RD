@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Client\ResolveClientIdAction;
+use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
@@ -25,7 +26,8 @@ class LobbyPlayerController extends Controller
     public function __construct(
         protected GameCreationService $gameCreationService,
         protected ResolveUsernameAction $resolveUsername,
-        protected ResolveClientIdAction $resolveClientId
+        protected ResolveClientIdAction $resolveClientId,
+        protected FindLobbyByUlidAction $findLobby
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -37,7 +39,7 @@ class LobbyPlayerController extends Controller
     {
         $validated = $request->validated();
 
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $user = $request->user();
 
         if (! $lobby->isHost($user)) {
@@ -80,7 +82,7 @@ class LobbyPlayerController extends Controller
     {
         $validated = $request->validated();
 
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $currentUser = $request->user();
 
         // Resolve username to user
@@ -147,7 +149,7 @@ class LobbyPlayerController extends Controller
      */
     public function destroy(Request $request, string $lobbyUlid, string $username): JsonResponse
     {
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $currentUser = $request->user();
 
         if (! $lobby->isHost($currentUser)) {

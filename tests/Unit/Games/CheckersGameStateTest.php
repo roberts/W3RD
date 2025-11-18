@@ -256,10 +256,10 @@ describe('Checkers GameState', function () {
 
         test('withMovedPiece promotes red piece to king at row 0', function () {
             $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
-            
+
             // Place red piece at row 1
             $state = $state->withMovedPiece(5, 0, 1, 4);
-            
+
             // Move to row 0 (promotion row for red)
             $modified = $state->withMovedPiece(1, 4, 0, 5);
 
@@ -270,10 +270,10 @@ describe('Checkers GameState', function () {
 
         test('withMovedPiece promotes black piece to king at row 7', function () {
             $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
-            
+
             // Place black piece at row 6
             $state = $state->withMovedPiece(0, 1, 6, 5);
-            
+
             // Move to row 7 (promotion row for black)
             $modified = $state->withMovedPiece(6, 5, 7, 6);
 

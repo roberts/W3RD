@@ -326,7 +326,7 @@ describe('ValidateFour Win Conditions', function () {
     describe('Draw Condition', function () {
         test('prioritizes win detection over draw when board is full', function () {
             $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
-            
+
             // Fill most of the board in checkerboard pattern
             for ($row = 0; $row < 6; $row++) {
                 for ($col = 0; $col < 7; $col++) {

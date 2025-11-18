@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 describe('RematchService', function () {
     beforeEach(function () {
-        $this->service = new RematchService();
+        $this->service = new RematchService;
     });
 
     describe('Create Rematch Request Validation', function () {

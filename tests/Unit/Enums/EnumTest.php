@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\ActionType;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\LobbyStatus;
-use App\Enums\ActionType;
 
 describe('GameTitle Enum', function () {
     describe('Values', function () {
@@ -143,7 +143,7 @@ describe('LobbyStatus Enum', function () {
     describe('Values', function () {
         test('has all expected statuses', function () {
             $statuses = LobbyStatus::cases();
-            
+
             expect($statuses)->toContainEqual(LobbyStatus::PENDING)
                 ->and($statuses)->toContainEqual(LobbyStatus::READY)
                 ->and($statuses)->toContainEqual(LobbyStatus::CANCELLED)
@@ -166,7 +166,7 @@ describe('ActionType Enum', function () {
     describe('Values', function () {
         test('has common action types', function () {
             $types = ActionType::cases();
-            
+
             // Check for some expected action types
             expect($types)->toContain(ActionType::DROP_PIECE)
                 ->and($types)->toContain(ActionType::MOVE_PIECE);

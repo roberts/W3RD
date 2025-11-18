@@ -278,7 +278,7 @@ describe('ValidateFour GameState', function () {
 
         test('isBoardFull returns true when top row is filled', function () {
             $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
-            
+
             // Fill top row (row 0)
             for ($col = 0; $col < 7; $col++) {
                 $state = $state->withPieceAt(0, $col, $this->player1Ulid);
@@ -289,7 +289,7 @@ describe('ValidateFour GameState', function () {
 
         test('isBoardFull returns true when entire board is filled', function () {
             $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
-            
+
             for ($row = 0; $row < 6; $row++) {
                 for ($col = 0; $col < 7; $col++) {
                     $state = $state->withPieceAt($row, $col, $this->player1Ulid);

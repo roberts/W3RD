@@ -10,7 +10,6 @@ use App\Http\Traits\ApiResponses;
 use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchController extends Controller
 {

@@ -41,7 +41,7 @@ class UserStatsController extends Controller
         // TODO: Implement global rank calculation
         $globalRank = null;
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'total_games' => $totalGames,
             'wins' => $wins,
             'losses' => $losses,

@@ -25,9 +25,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        return response()->json([
-            'data' => UserResource::make($user),
-        ]);
+        return $this->resourceResponse(UserResource::make($user));
     }
 
     /**
@@ -35,14 +33,16 @@ class ProfileController extends Controller
      */
     public function update(UpdateProfileRequest $request): JsonResponse
     {
-        $user = $this->profileService->updateProfile(
-            $request->user(),
+        $user = $request->user();
+        
+        $this->profileService->updateProfile(
+            $user,
             $request->validated()
         );
 
-        return response()->json([
-            'data' => UserResource::make($user),
-            'message' => 'Profile updated successfully.',
-        ]);
+        return $this->resourceResponse(
+            UserResource::make($user->fresh()),
+            'Profile updated successfully'
+        );
     }
 }

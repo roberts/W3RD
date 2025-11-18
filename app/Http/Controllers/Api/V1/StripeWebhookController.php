@@ -64,7 +64,7 @@ class StripeWebhookController extends CashierWebhookController
             ]);
         }
 
-        return $this->successResponse(null, 'Webhook Handled');
+        return $this->messageResponse('Webhook Handled');
     }
 
     /**

@@ -25,15 +25,10 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return response()->json([
-            'data' => AlertResource::collection($alerts),
-            'meta' => [
-                'current_page' => $alerts->currentPage(),
-                'last_page' => $alerts->lastPage(),
-                'per_page' => $alerts->perPage(),
-                'total' => $alerts->total(),
-            ],
-        ]);
+        return $this->collectionResponse(
+            $alerts,
+            fn ($items) => AlertResource::collection($items)
+        );
     }
 
     /**
@@ -58,8 +53,6 @@ class AlertController extends Controller
                 ->update(['read_at' => now()]);
         }
 
-        return response()->json([
-            'message' => 'Alerts marked as read.',
-        ]);
+        return $this->messageResponse('Alerts marked as read.');
     }
 }

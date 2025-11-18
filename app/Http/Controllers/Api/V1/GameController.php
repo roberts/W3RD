@@ -39,15 +39,10 @@ class GameController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(20);
 
-        return response()->json([
-            'data' => GameResource::collection($games),
-            'meta' => [
-                'current_page' => $games->currentPage(),
-                'last_page' => $games->lastPage(),
-                'per_page' => $games->perPage(),
-                'total' => $games->total(),
-            ],
-        ]);
+        return $this->collectionResponse(
+            $games,
+            fn ($items) => GameResource::collection($items)
+        );
     }
 
     /**
@@ -68,9 +63,7 @@ class GameController extends Controller
             return $this->forbiddenResponse('You are not authorized to view this game.');
         }
 
-        return response()->json([
-            'data' => GameResource::make($game),
-        ]);
+        return $this->resourceResponse(GameResource::make($game));
     }
 
     /**
@@ -120,9 +113,7 @@ class GameController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        return response()->json([
-            'data' => ActionResource::collection($actions),
-        ]);
+        return $this->resourceResponse(ActionResource::collection($actions));
     }
 
     /**
@@ -150,14 +141,11 @@ class GameController extends Controller
         $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
 
-        return response()->json([
-            'data' => [
-                'ulid' => $game->ulid,
-                'status' => $game->status->value,
-                'winner_id' => $game->winner_id,
-                'finished_at' => $game->finished_at,
-            ],
-            'message' => 'Game forfeited successfully.',
-        ]);
+        return $this->dataResponse([
+            'ulid' => $game->ulid,
+            'status' => $game->status->value,
+            'winner_id' => $game->winner_id,
+            'finished_at' => $game->finished_at,
+        ], 'Game forfeited successfully.');
     }
 }

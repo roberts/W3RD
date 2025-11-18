@@ -28,7 +28,7 @@ describe('Hearts Game API', function () {
                 ]);
 
             $lobbyResponse->assertStatus(201);
-            $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+            $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             // Other players join
             foreach ([$users[1], $users[2], $users[3]] as $user) {
@@ -43,7 +43,7 @@ describe('Hearts Game API', function () {
             $lobbyCheck = $this->actingAs($users[0])
                 ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
-            $gameUlid = $lobbyCheck->json('game.ulid');
+            $gameUlid = $lobbyCheck->json('data.game.ulid');
 
             $response = $this->actingAs($users[0])
                 ->getJson("/api/v1/games/{$gameUlid}");
@@ -77,7 +77,7 @@ describe('Hearts Game API', function () {
                 ]);
 
             $lobbyResponse->assertStatus(201);
-            $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+            $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             // Only 2 other players join (3 total, need 4)
             foreach ([$users[1], $users[2]] as $user) {
@@ -93,8 +93,8 @@ describe('Hearts Game API', function () {
                 ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
             // Game should not be created (game.ulid should be null)
-            expect($lobbyCheck->json('lobby.status'))->toBe('pending')
-                ->and($lobbyCheck->json('game'))->toBeNull();
+            expect($lobbyCheck->json('data.lobby.status'))->toBe('pending')
+                ->and($lobbyCheck->json('data.game'))->toBeNull();
         });
     });
 
@@ -112,7 +112,7 @@ describe('Hearts Game API', function () {
                         'is_public' => true,
                     ]);
 
-                $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+                $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
                     $this->actingAs($user)
@@ -124,7 +124,7 @@ describe('Hearts Game API', function () {
                 $lobbyCheck = $this->actingAs($users[0])
                     ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
-                $gameUlid = $lobbyCheck->json('game.ulid');
+                $gameUlid = $lobbyCheck->json('data.game.ulid');
 
                 // Pass cards
                 $response = $this->actingAs($users[0])
@@ -138,14 +138,16 @@ describe('Hearts Game API', function () {
                 $response->assertStatus(200)
                     ->assertJsonStructure([
                         'message',
-                        'action' => ['ulid'],
-                        'game' => [
-                            'ulid',
-                            'status',
-                            'game_state',
+                        'data' => [
+                            'action' => ['ulid'],
+                            'game' => [
+                                'ulid',
+                                'status',
+                                'game_state',
+                            ],
+                            'next_action_deadline',
+                            'timeout',
                         ],
-                        'next_action_deadline',
-                        'timeout',
                     ]);
             });
         });
@@ -163,7 +165,7 @@ describe('Hearts Game API', function () {
                         'is_public' => true,
                     ]);
 
-                $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+                $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
                     $this->actingAs($user)
@@ -175,7 +177,7 @@ describe('Hearts Game API', function () {
                 $lobbyCheck = $this->actingAs($users[0])
                     ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
-                $gameUlid = $lobbyCheck->json('game.ulid');
+                $gameUlid = $lobbyCheck->json('data.game.ulid');
 
                 // Play a card
                 $response = $this->actingAs($users[0])
@@ -189,14 +191,16 @@ describe('Hearts Game API', function () {
                 $response->assertStatus(200)
                     ->assertJsonStructure([
                         'message',
-                        'action' => ['ulid'],
-                        'game' => [
-                            'ulid',
-                            'status',
-                            'game_state',
+                        'data' => [
+                            'action' => ['ulid'],
+                            'game' => [
+                                'ulid',
+                                'status',
+                                'game_state',
+                            ],
+                            'next_action_deadline',
+                            'timeout',
                         ],
-                        'next_action_deadline',
-                        'timeout',
                     ]);
             });
         });

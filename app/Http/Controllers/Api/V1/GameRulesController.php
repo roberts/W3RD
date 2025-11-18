@@ -58,7 +58,7 @@ class GameRulesController extends Controller
             }
         }
 
-        return response()->json($rules);
+        return $this->dataResponse($rules);
     }
 
     /**

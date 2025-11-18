@@ -15,6 +15,6 @@ class StatusController extends Controller
      */
     public function index(): JsonResponse
     {
-        return $this->successResponse(['status' => 'ok']);
+        return $this->dataResponse(['status' => 'ok']);
     }
 }

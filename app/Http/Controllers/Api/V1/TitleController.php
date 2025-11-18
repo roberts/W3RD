@@ -26,7 +26,7 @@ class TitleController extends Controller
             ];
         })->toArray();
 
-        return $this->successResponse($titles);
+        return $this->dataResponse($titles);
     }
 
     /**

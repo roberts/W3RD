@@ -32,7 +32,7 @@ class BillingController extends Controller
     {
         $plans = config('protocol.subscription_plans');
 
-        return $this->successResponse($plans);
+        return $this->dataResponse($plans);
     }
 
     /**
@@ -46,13 +46,13 @@ class BillingController extends Controller
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
 
         if (! $subscription) {
-            return $this->successResponse([
+            return $this->dataResponse([
                 'subscribed' => false,
                 'plan' => 'basic',
             ]);
         }
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'subscribed' => true,
             'plan' => $subscription->type,
             'provider' => $subscription->provider,
@@ -92,7 +92,7 @@ class BillingController extends Controller
             return $checkout;
         }
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'checkout_url' => $checkout->url,
         ]);
     }
@@ -113,7 +113,7 @@ class BillingController extends Controller
             return $portalSession;
         }
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'portal_url' => $portalSession,
         ]);
     }
@@ -146,7 +146,7 @@ class BillingController extends Controller
             ]
         );
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'verified' => true,
             'subscription_id' => $subscription->id,
         ], 'Apple receipt verified successfully.');
@@ -187,7 +187,7 @@ class BillingController extends Controller
             ]
         );
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'verified' => true,
             'subscription_id' => $subscription->id,
         ], 'Google Play purchase verified successfully.');
@@ -230,7 +230,7 @@ class BillingController extends Controller
             ]
         );
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'verified' => true,
             'subscription_id' => $subscription->id,
         ], 'Telegram payment verified successfully.');

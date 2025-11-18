@@ -42,7 +42,7 @@ class RematchController extends Controller
         $resourceData = RematchRequestResource::make($rematchRequest->fresh())->toArray($request);
         $resourceData['new_game_ulid'] = $newGame->ulid;
 
-        return $this->successResponse($resourceData, 'Rematch accepted. New game created.');
+        return $this->dataResponse($resourceData, 'Rematch accepted. New game created.');
     }
 
     /**
@@ -69,7 +69,7 @@ class RematchController extends Controller
             return $result;
         }
 
-        return $this->successResponse(
+        return $this->resourceResponse(
             RematchRequestResource::make($rematchRequest->fresh()),
             'Rematch request declined'
         );

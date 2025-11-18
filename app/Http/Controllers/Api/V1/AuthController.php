@@ -68,10 +68,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token, UserResource::make($user));
     }
 
     /**
@@ -95,10 +92,7 @@ class AuthController extends Controller
             'logged_in_at' => now(),
         ]);
 
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }
 
     /**
@@ -159,10 +153,7 @@ class AuthController extends Controller
             'logged_in_at' => now(),
         ]);
 
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }
 
     /**
@@ -189,7 +180,7 @@ class AuthController extends Controller
             $token->delete();
         }
 
-        return $this->successResponse(null, 'Logged out successfully');
+        return $this->messageResponse('Logged out successfully');
     }
 
     /**
@@ -197,7 +188,7 @@ class AuthController extends Controller
      */
     public function getUser(Request $request)
     {
-        return response()->json($request->user());
+        return $this->resourceResponse(UserResource::make($request->user()));
     }
 
     /**
@@ -208,6 +199,6 @@ class AuthController extends Controller
         $user = $request->user();
         $user->update($request->validated());
 
-        return response()->json($user);
+        return $this->resourceResponse(UserResource::make($user), 'User updated successfully');
     }
 }

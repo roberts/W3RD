@@ -19,7 +19,7 @@ describe('Lobby Management', function () {
             $response->assertStatus(201)
                 ->assertJsonStructure([
                     'message',
-                    'lobby' => ['ulid', 'game_title', 'is_public', 'min_players'],
+                    'data' => ['ulid', 'game_title', 'is_public', 'min_players'],
                 ]);
 
             $this->assertDatabaseHas('lobbies', [
@@ -110,13 +110,13 @@ describe('Lobby Management', function () {
 
             $response->assertStatus(200)
                 ->assertJsonStructure([
-                    'lobbies' => [
+                    'data' => [
                         '*' => ['ulid', 'game_title', 'host', 'min_players', 'current_players', 'status'],
                     ],
                 ]);
 
             // Should only return public lobbies
-            expect($response->json('lobbies'))->toHaveCount(2);
+            expect($response->json('data'))->toHaveCount(2);
         });
 
         test('can view lobby details', function () {
@@ -132,7 +132,9 @@ describe('Lobby Management', function () {
 
             $response->assertStatus(200)
                 ->assertJsonStructure([
-                    'lobby' => ['ulid', 'game_title', 'host', 'players', 'status'],
+                    'data' => [
+                        'lobby' => ['ulid', 'game_title', 'host', 'players', 'status'],
+                    ],
                 ]);
         });
     });

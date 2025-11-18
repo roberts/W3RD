@@ -35,7 +35,7 @@ class LobbyController extends Controller
             ->latest()
             ->get();
 
-        return response()->json(['lobbies' => LobbyResource::collection($lobbies)]);
+        return $this->resourceResponse(LobbyResource::collection($lobbies));
     }
 
     /**
@@ -107,10 +107,10 @@ class LobbyController extends Controller
             return $lobby;
         }
 
-        return response()->json([
-            'message' => 'Lobby created successfully',
-            'lobby' => LobbyResource::make($lobby),
-        ], 201);
+        return $this->createdResourceResponse(
+            LobbyResource::make($lobby),
+            'Lobby created successfully'
+        );
     }
 
     /**
@@ -122,19 +122,19 @@ class LobbyController extends Controller
             ->where('ulid', $lobbyUlid)
             ->firstOrFail();
 
-        $response = [
+        $data = [
             'lobby' => LobbyResource::make($lobby),
         ];
 
         // Include game information if lobby is completed and has a game
         $game = $lobby->game;
         if ($game instanceof Game) {
-            $response['game'] = [
+            $data['game'] = [
                 'ulid' => $game->ulid,
             ];
         }
 
-        return response()->json($response);
+        return $this->dataResponse($data);
     }
 
     /**
@@ -159,8 +159,10 @@ class LobbyController extends Controller
         // Broadcast ready check event
         broadcast(new LobbyReadyCheck($lobby));
 
-        return response()->json([
-            'message' => 'Ready check initiated',
-        ], 202);
+        return $this->dataResponse(
+            ['ready_check_initiated' => true],
+            'Ready check initiated',
+            202
+        );
     }
 }

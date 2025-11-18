@@ -64,7 +64,7 @@ class QuickplayController extends Controller
         $clientId = (int) $request->header('X-Client-Key') ?: 1;
         Redis::hset('quickplay:clients', (string) $user->id, (string) $clientId);
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'game_title' => $gameTitle->value,
             'game_mode' => $gameMode,
         ], 'Successfully joined the queue', 202);
@@ -123,12 +123,12 @@ class QuickplayController extends Controller
 
             $this->createGame($playerIds, $matchId);
 
-            return $this->successResponse([
+            return $this->dataResponse([
                 'match_id' => $matchId,
             ], 'Match accepted! Starting game...', 202);
         }
 
-        return $this->successResponse(null, 'Acceptance registered. Waiting for opponent...', 202);
+        return $this->messageResponse('Acceptance registered. Waiting for opponent...', 202);
     }
 
     /**

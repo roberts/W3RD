@@ -107,7 +107,7 @@ class LobbyPlayerController extends Controller
                 $this->startGame($lobby);
             }
 
-            return $this->successResponse(null, 'Successfully joined the lobby');
+            return $this->messageResponse('Successfully joined the lobby');
         }
 
         if (! $lobbyPlayer) {
@@ -130,11 +130,11 @@ class LobbyPlayerController extends Controller
                 $this->startGame($lobby);
             }
 
-            return $this->successResponse(null, 'Invitation accepted');
+            return $this->messageResponse('Invitation accepted');
         } else {
             $lobbyPlayer->decline();
 
-            return $this->successResponse(null, 'Invitation declined');
+            return $this->messageResponse('Invitation declined');
         }
     }
 

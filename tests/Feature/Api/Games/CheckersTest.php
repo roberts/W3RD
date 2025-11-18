@@ -28,7 +28,7 @@ describe('Checkers Game API', function () {
                 ]);
 
             $lobbyResponse->assertStatus(201);
-            $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+            $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             // Second player joins by accepting
             $this->actingAs($users[1])
@@ -41,7 +41,7 @@ describe('Checkers Game API', function () {
             $lobbyCheck = $this->actingAs($users[0])
                 ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
-            $gameUlid = $lobbyCheck->json('game.ulid');
+            $gameUlid = $lobbyCheck->json('data.game.ulid');
 
             $response = $this->actingAs($users[0])
                 ->getJson("/api/v1/games/{$gameUlid}");
@@ -75,7 +75,7 @@ describe('Checkers Game API', function () {
                     'is_public' => true,
                 ]);
 
-            $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+            $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             $this->actingAs($users[1])
                 ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
@@ -85,7 +85,7 @@ describe('Checkers Game API', function () {
             $lobbyCheck = $this->actingAs($users[0])
                 ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
 
-            $gameUlid = $lobbyCheck->json('game.ulid');
+            $gameUlid = $lobbyCheck->json('data.game.ulid');
 
             // Make a move
             $response = $this->actingAs($users[0])
@@ -102,14 +102,16 @@ describe('Checkers Game API', function () {
             $response->assertStatus(200)
                 ->assertJsonStructure([
                     'message',
-                    'action' => ['ulid'],
-                    'game' => [
-                        'ulid',
-                        'status',
-                        'game_state',
+                    'data' => [
+                        'action' => ['ulid'],
+                        'game' => [
+                            'ulid',
+                            'status',
+                            'game_state',
+                        ],
+                        'next_action_deadline',
+                        'timeout',
                     ],
-                    'next_action_deadline',
-                    'timeout',
                 ]);
         });
     });

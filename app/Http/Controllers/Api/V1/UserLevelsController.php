@@ -31,6 +31,6 @@ class UserLevelsController extends Controller
             ];
         });
 
-        return $this->successResponse($levels);
+        return $this->dataResponse($levels);
     }
 }

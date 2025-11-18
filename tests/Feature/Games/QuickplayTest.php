@@ -96,7 +96,7 @@ describe('Quickplay Matchmaking', function () {
             $response->assertStatus(429)
                 ->assertJsonStructure([
                     'message',
-                    'context',
+                    'errors',
                 ]);
         });
     });

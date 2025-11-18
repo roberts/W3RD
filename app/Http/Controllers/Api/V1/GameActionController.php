@@ -270,8 +270,7 @@ class GameActionController extends Controller
             actionUlid: $actionRecord->ulid,
         ));
 
-        return response()->json([
-            'message' => 'Action applied successfully',
+        return $this->dataResponse([
             'action' => [
                 'ulid' => $actionRecord->ulid,
             ],
@@ -289,7 +288,7 @@ class GameActionController extends Controller
                 'grace_period_seconds' => 2,
                 'penalty' => $mode->getTimeoutPenalty(),
             ],
-        ]);
+        ], 'Action applied successfully');
     }
 
     /**
@@ -327,7 +326,7 @@ class GameActionController extends Controller
         // Calculate deadline
         $deadline = $mode->getActionDeadline($gameState, $game);
 
-        return response()->json([
+        return $this->dataResponse([
             'options' => $actions,
             'is_your_turn' => $mode->getGameState()->currentPlayerUlid === $player->ulid,
             'phase' => $mode->getGameState()->phase->value ?? 'active',

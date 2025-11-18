@@ -41,7 +41,7 @@ class LeaderboardController extends Controller
                 ];
             });
 
-        return $this->successResponse([
+        return $this->dataResponse([
             'game_title' => $gameTitle,
             'entries' => $leaderboard,
         ]);

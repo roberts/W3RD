@@ -287,18 +287,11 @@ describe('Boundary Value Testing', function () {
 
         it('rejects username exceeding max length', function () {
             $user = User::factory()->create();
-            $tooLongUsername = str_repeat('a', 256);
+            $tooLongUsername = str_repeat('a', 51); // Over the 50 character limit
 
-            try {
-                $user->update(['username' => $tooLongUsername]);
-                $updated = true;
-            } catch (\Exception $e) {
-                $updated = false;
-            }
-
-            // Currently accepts long usernames - this test documents expected behavior
-            // TODO: Add validation to reject usernames > 255 characters
-            expect($updated)->toBeTrue();
+            // Database constraint should prevent this
+            expect(fn () => $user->update(['username' => $tooLongUsername]))
+                ->toThrow(\Exception::class);
         });
     });
 });

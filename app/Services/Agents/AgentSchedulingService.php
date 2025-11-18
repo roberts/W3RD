@@ -19,8 +19,8 @@ class AgentSchedulingService
     /**
      * Find an available agent for the specified game title.
      *
-     * @param string $gameSlug The game title slug (e.g., 'checkers', 'hearts')
-     * @param string|null $mode Optional game mode for mode-specific agent selection
+     * @param  string  $gameSlug  The game title slug (e.g., 'checkers', 'hearts')
+     * @param  string|null  $mode  Optional game mode for mode-specific agent selection
      * @return User|null Agent user if found, null otherwise
      */
     public function findAvailableAgent(string $gameSlug, ?string $mode = null): ?User
@@ -44,6 +44,7 @@ class AgentSchedulingService
                 if (is_array($agent->supported_game_titles) && in_array($gameSlug, $agent->supported_game_titles)) {
                     return true;
                 }
+
                 return false;
             })
             ->filter(function (Agent $agent) {
@@ -73,12 +74,13 @@ class AgentSchedulingService
         // Prefer time-specific agents over 24/7 agents
         $agent = $timeSpecificAgents->first() ?? $agent247->first();
 
-        if (!$agent) {
+        if (! $agent) {
             Log::info('No available agent found for game', [
                 'game_slug' => $gameSlug,
                 'mode' => $mode,
                 'current_hour_est' => $currentHourEst,
             ]);
+
             return null;
         }
 
@@ -98,7 +100,7 @@ class AgentSchedulingService
     /**
      * Check if an agent user is currently busy in an active game.
      *
-     * @param User $user The agent user to check
+     * @param  User  $user  The agent user to check
      * @return bool True if agent is currently playing
      */
     protected function isAgentBusy(User $user): bool
@@ -114,9 +116,6 @@ class AgentSchedulingService
     /**
      * Get the effective difficulty for an agent in a specific game mode.
      *
-     * @param Agent $agent
-     * @param string $gameSlug
-     * @param string|null $mode
      * @return int The difficulty level (1-10)
      */
     public function getEffectiveDifficulty(Agent $agent, string $gameSlug, ?string $mode = null): int
@@ -124,10 +123,10 @@ class AgentSchedulingService
         // Check for mode-specific difficulty override
         if ($mode && $agent->configuration) {
             $modeKey = "{$mode}_difficulty";
-            
+
             if (isset($agent->configuration[$gameSlug][$modeKey])) {
                 $modeDifficulty = $agent->configuration[$gameSlug][$modeKey];
-                
+
                 // Ensure it's within valid range
                 return max(1, min(10, $modeDifficulty));
             }
@@ -140,7 +139,6 @@ class AgentSchedulingService
     /**
      * Get count of available agents for a game title.
      *
-     * @param string $gameSlug
      * @return int Count of available agents
      */
     public function getAvailableAgentCount(string $gameSlug): int
@@ -158,6 +156,7 @@ class AgentSchedulingService
                 if (is_array($agent->supported_game_titles) && in_array($gameSlug, $agent->supported_game_titles)) {
                     return true;
                 }
+
                 return false;
             })
             ->filter(function (Agent $agent) {

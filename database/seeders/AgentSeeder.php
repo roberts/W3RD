@@ -48,12 +48,7 @@ class AgentSeeder extends Seeder
     /**
      * Create an agent with a corresponding user.
      *
-     * @param string $name
-     * @param string $logicClass Short class name (e.g., 'RandomLogic')
-     * @param int $difficulty
-     * @param array|string $supportedGames
-     * @param int|null $availableHour
-     * @return Agent
+     * @param  string  $logicClass  Short class name (e.g., 'RandomLogic')
      */
     protected function createAgent(
         string $name,
@@ -80,7 +75,7 @@ class AgentSeeder extends Seeder
 
         // Create corresponding user
         $username = strtolower(str_replace(' ', '_', $name));
-        $email = $username . '@agents.protocol.game';
+        $email = $username.'@agents.protocol.game';
 
         $user = User::create([
             'name' => $name,
@@ -99,9 +94,6 @@ class AgentSeeder extends Seeder
 
     /**
      * Get strategy type based on logic class name.
-     *
-     * @param string $logicClass
-     * @return string
      */
     protected function getStrategyType(string $logicClass): string
     {

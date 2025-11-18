@@ -12,7 +12,7 @@ class AgentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => 'Agent ' . fake()->firstName(),
+            'name' => 'Agent '.fake()->firstName(),
             'description' => fake()->sentence(),
             'version' => '1.0.0',
             'difficulty' => fake()->numberBetween(1, 10),
@@ -85,7 +85,7 @@ class AgentFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'configuration' => [
                 $gameSlug => [
-                    $mode . '_difficulty' => $difficulty,
+                    $mode.'_difficulty' => $difficulty,
                 ],
             ],
         ]);

@@ -18,8 +18,8 @@ class MinimaxLogic implements AgentContract
     /**
      * Calculate the next action using minimax algorithm.
      *
-     * @param Game $game The current game instance
-     * @param int $difficulty The difficulty level (1-10) determines search depth
+     * @param  Game  $game  The current game instance
+     * @param  int  $difficulty  The difficulty level (1-10) determines search depth
      * @return object An Action DTO representing the best calculated action
      *
      * @throws \Exception If no valid actions are available
@@ -81,12 +81,12 @@ class MinimaxLogic implements AgentContract
     /**
      * Minimax algorithm with alpha-beta pruning.
      *
-     * @param Game $gameState Current game state
-     * @param int $depth Remaining search depth
-     * @param int $alpha Alpha value for pruning
-     * @param int $beta Beta value for pruning
-     * @param bool $maximizing True if this is a maximizing node
-     * @param object $gameLogic Game-specific logic handler
+     * @param  Game  $gameState  Current game state
+     * @param  int  $depth  Remaining search depth
+     * @param  int  $alpha  Alpha value for pruning
+     * @param  int  $beta  Beta value for pruning
+     * @param  bool  $maximizing  True if this is a maximizing node
+     * @param  object  $gameLogic  Game-specific logic handler
      * @return int Evaluated score for this game state
      */
     protected function minimax(
@@ -115,6 +115,7 @@ class MinimaxLogic implements AgentContract
                     break; // Beta cutoff
                 }
             }
+
             return $maxScore;
         } else {
             $minScore = PHP_INT_MAX;
@@ -127,6 +128,7 @@ class MinimaxLogic implements AgentContract
                     break; // Alpha cutoff
                 }
             }
+
             return $minScore;
         }
     }
@@ -134,7 +136,7 @@ class MinimaxLogic implements AgentContract
     /**
      * Calculate search depth based on difficulty level.
      *
-     * @param int $difficulty 1-10 difficulty level
+     * @param  int  $difficulty  1-10 difficulty level
      * @return int Search depth in ply
      */
     protected function calculateSearchDepth(int $difficulty): int
@@ -151,8 +153,8 @@ class MinimaxLogic implements AgentContract
     /**
      * Get the game-specific logic handler based on the game title.
      *
-     * @param Game $game
      * @return object Game-specific logic handler
+     *
      * @throws \Exception If game type is not supported
      */
     protected function getGameLogic(Game $game): object

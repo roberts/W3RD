@@ -15,8 +15,8 @@ interface AgentContract
     /**
      * Calculate the next action for the agent in the given game.
      *
-     * @param Game $game The current game instance
-     * @param int $difficulty The difficulty level (1-10) for this agent's turn
+     * @param  Game  $game  The current game instance
+     * @param  int  $difficulty  The difficulty level (1-10) for this agent's turn
      * @return object An Action DTO (e.g., MoveAction, PlayCardAction) representing the agent's decision
      *
      * @throws \Exception If the agent cannot calculate a valid action

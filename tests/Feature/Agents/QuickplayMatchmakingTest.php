@@ -2,7 +2,6 @@
 
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -18,7 +17,7 @@ test('human player is matched with agent after timeout in quickplay', function (
     // Simulate Quickplay request for checkers
     // This would typically be an API call: POST /api/quickplay
     // For this test, we're testing the underlying service logic
-    
+
     // The actual Quickplay service integration will be tested once
     // we integrate with the existing Quickplay system
 
@@ -29,7 +28,7 @@ test('human player is matched with agent after timeout in quickplay', function (
 test('agent plays turn with human-like delay', function () {
     // This will be a more comprehensive test once CalculateAgentAction job is implemented
     // For now, we verify the basic structure
-    
+
     $agent = Agent::factory()->create();
     $agentUser = User::factory()->create(['agent_id' => $agent->id]);
 

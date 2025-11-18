@@ -18,8 +18,8 @@ class HeuristicLogic implements AgentContract
     /**
      * Calculate the next action using heuristic evaluation.
      *
-     * @param Game $game The current game instance
-     * @param int $difficulty The difficulty level (1-10) affects evaluation weights
+     * @param  Game  $game  The current game instance
+     * @param  int  $difficulty  The difficulty level (1-10) affects evaluation weights
      * @return object An Action DTO representing the best heuristically-evaluated action
      *
      * @throws \Exception If no valid actions are available
@@ -68,10 +68,10 @@ class HeuristicLogic implements AgentContract
     /**
      * Evaluate an action using heuristic scoring.
      *
-     * @param Game $game Current game state
-     * @param object $action The action to evaluate
-     * @param int $difficulty Affects evaluation sophistication
-     * @param object $gameLogic Game-specific logic handler
+     * @param  Game  $game  Current game state
+     * @param  object  $action  The action to evaluate
+     * @param  int  $difficulty  Affects evaluation sophistication
+     * @param  object  $gameLogic  Game-specific logic handler
      * @return float Heuristic score for this action
      */
     protected function evaluateAction(Game $game, object $action, int $difficulty, object $gameLogic): float
@@ -114,8 +114,8 @@ class HeuristicLogic implements AgentContract
     /**
      * Get the game-specific logic handler based on the game title.
      *
-     * @param Game $game
      * @return object Game-specific logic handler
+     *
      * @throws \Exception If game type is not supported
      */
     protected function getGameLogic(Game $game): object

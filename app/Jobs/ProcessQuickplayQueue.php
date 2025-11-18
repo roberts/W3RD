@@ -134,8 +134,8 @@ class ProcessQuickplayQueue implements ShouldQueue
         $schedulingService = app(\App\Services\Agents\AgentSchedulingService::class);
         $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode);
 
-        if (!$agentUser) {
-            \Log::warning("No agent available for matchmaking", [
+        if (! $agentUser) {
+            \Log::warning('No agent available for matchmaking', [
                 'user_id' => $userId,
                 'game_title' => $gameTitle->value,
                 'mode' => $mode,
@@ -146,7 +146,7 @@ class ProcessQuickplayQueue implements ShouldQueue
             return;
         }
 
-        \Log::info("Matched user with AI agent", [
+        \Log::info('Matched user with AI agent', [
             'user_id' => $userId,
             'agent_id' => $agentUser->id,
             'game_title' => $gameTitle->value,
@@ -230,11 +230,10 @@ class ProcessQuickplayQueue implements ShouldQueue
     /**
      * Create a game with an AI agent opponent.
      *
-     * @param int $humanUserId The human player's user ID
-     * @param int $agentUserId The agent user's ID
-     * @param GameTitle $gameTitle The game title
-     * @param string $mode The game mode
-     * @return void
+     * @param  int  $humanUserId  The human player's user ID
+     * @param  int  $agentUserId  The agent user's ID
+     * @param  GameTitle  $gameTitle  The game title
+     * @param  string  $mode  The game mode
      */
     private function createGameWithAgent(int $humanUserId, int $agentUserId, GameTitle $gameTitle, string $mode): void
     {
@@ -252,7 +251,7 @@ class ProcessQuickplayQueue implements ShouldQueue
             $gameCreationService = app(GameCreationService::class);
             $game = $gameCreationService->createFromQuickplay($playerData, $gameTitle, $mode);
 
-            \Log::info("Game created with agent opponent", [
+            \Log::info('Game created with agent opponent', [
                 'game_id' => $game->id,
                 'human_user_id' => $humanUserId,
                 'agent_user_id' => $agentUserId,
@@ -269,7 +268,7 @@ class ProcessQuickplayQueue implements ShouldQueue
             ]));
 
         } catch (\Exception $e) {
-            \Log::error("Failed to create game with agent", [
+            \Log::error('Failed to create game with agent', [
                 'human_user_id' => $humanUserId,
                 'agent_user_id' => $agentUserId,
                 'error' => $e->getMessage(),

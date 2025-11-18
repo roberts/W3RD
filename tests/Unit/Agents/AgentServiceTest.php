@@ -18,10 +18,10 @@ beforeEach(function () {
 test('dispatches CalculateAgentAction job when performing action', function () {
     $agent = Agent::factory()->create();
     $user = User::factory()->create(['agent_id' => $agent->id]);
-    
+
     // Create a real game for testing
     $game = Game::factory()->create();
-    
+
     $this->service->performAction($user, $game);
 
     Queue::assertPushed(CalculateAgentAction::class);

@@ -68,6 +68,7 @@ class CalculateAgentAction implements ShouldQueue
                     'user_id' => $this->user->id,
                     'game_id' => $this->game->id,
                 ]);
+
                 return;
             }
 
@@ -97,7 +98,7 @@ class CalculateAgentAction implements ShouldQueue
 
             // Simulate human thinking time with random delay (1-8 seconds)
             $delay = rand(1, 8);
-            
+
             Log::debug('Agent simulating thinking time', [
                 'game_id' => $this->game->id,
                 'delay_seconds' => $delay,
@@ -147,8 +148,7 @@ class CalculateAgentAction implements ShouldQueue
     /**
      * Apply the calculated action to the game.
      *
-     * @param object $action The action DTO to apply
-     * @return void
+     * @param  object  $action  The action DTO to apply
      */
     protected function applyAction(object $action): void
     {

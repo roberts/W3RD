@@ -47,7 +47,7 @@ test('skips agents that are currently busy in a game', function () {
     // Create two agents
     $agent1 = Agent::factory()->forGame('checkers')->create();
     $user1 = User::factory()->create(['agent_id' => $agent1->id]);
-    
+
     $agent2 = Agent::factory()->forGame('checkers')->create();
     $user2 = User::factory()->create(['agent_id' => $agent2->id]);
 
@@ -123,7 +123,7 @@ test('uses 24/7 agents as fallback when no time-specific agents are available', 
     // Create agents available at different times (not 10 AM)
     $agent1 = Agent::factory()->forGame('checkers')->create(['available_hour_est' => 14]); // 2 PM
     User::factory()->create(['agent_id' => $agent1->id]);
-    
+
     $agent2 = Agent::factory()->forGame('checkers')->create(['available_hour_est' => 18]); // 6 PM
     User::factory()->create(['agent_id' => $agent2->id]);
 
@@ -143,7 +143,7 @@ test('handles multiple time-specific agents at the same hour', function () {
         ->withDifficulty(3)
         ->create(['available_hour_est' => 16]);
     $user1 = User::factory()->create(['agent_id' => $agent1->id]);
-    
+
     $agent2 = Agent::factory()->forGame('checkers')
         ->withDifficulty(7)
         ->create(['available_hour_est' => 16]);
@@ -163,7 +163,7 @@ test('returns null when no agents are available at current hour and no 24/7 agen
     // Create agents available at different times (not 11 PM)
     $agent1 = Agent::factory()->forGame('checkers')->create(['available_hour_est' => 9]); // 9 AM
     User::factory()->create(['agent_id' => $agent1->id]);
-    
+
     $agent2 = Agent::factory()->forGame('checkers')->create(['available_hour_est' => 14]); // 2 PM
     User::factory()->create(['agent_id' => $agent2->id]);
 

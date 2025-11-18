@@ -17,8 +17,8 @@ class RandomLogic implements AgentContract
     /**
      * Calculate the next action by randomly selecting from valid actions.
      *
-     * @param Game $game The current game instance
-     * @param int $difficulty The difficulty level (ignored for random strategy)
+     * @param  Game  $game  The current game instance
+     * @param  int  $difficulty  The difficulty level (ignored for random strategy)
      * @return object An Action DTO representing the randomly selected action
      *
      * @throws \Exception If no valid actions are available
@@ -55,8 +55,8 @@ class RandomLogic implements AgentContract
     /**
      * Get the game-specific logic handler based on the game title.
      *
-     * @param Game $game
      * @return object Game-specific logic handler
+     *
      * @throws \Exception If game type is not supported
      */
     protected function getGameLogic(Game $game): object

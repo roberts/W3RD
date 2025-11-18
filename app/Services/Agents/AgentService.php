@@ -23,9 +23,8 @@ class AgentService
      * 2. Wait for a random delay (1-8 seconds) for human-like behavior
      * 3. Apply the action to the game
      *
-     * @param User $user The agent user
-     * @param Game $game The game instance
-     * @return void
+     * @param  User  $user  The agent user
+     * @param  Game  $game  The game instance
      *
      * @throws \InvalidArgumentException If user is not an agent
      */
@@ -49,8 +48,7 @@ class AgentService
     /**
      * Get the AI logic instance for an agent.
      *
-     * @param User $user The agent user
-     * @return \App\Interfaces\AgentContract
+     * @param  User  $user  The agent user
      *
      * @throws \Exception If logic class doesn't exist or doesn't implement AgentContract
      */

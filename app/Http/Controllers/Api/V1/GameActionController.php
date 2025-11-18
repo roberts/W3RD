@@ -255,11 +255,6 @@ class GameActionController extends Controller
 
     /**
      * Trigger agent action if the next player is an agent.
-     *
-     * @param Game $game
-     * @param object $gameState
-     * @param object $mode
-     * @return void
      */
     protected function triggerAgentActionIfNeeded(Game $game, object $gameState, object $mode): void
     {
@@ -270,23 +265,23 @@ class GameActionController extends Controller
 
         // Get the current player ULID from game state
         $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
-        
-        if (!$currentPlayerUlid) {
+
+        if (! $currentPlayerUlid) {
             return;
         }
 
         // Find the player record
         /** @var \App\Models\Game\Player|null $player */
         $player = $game->players()->where('ulid', $currentPlayerUlid)->first();
-        
-        if (!$player) {
+
+        if (! $player) {
             return;
         }
 
         /** @var \App\Models\Auth\User|null $user */
         $user = $player->user;
-        
-        if (!$user) {
+
+        if (! $user) {
             return;
         }
 
@@ -304,4 +299,3 @@ class GameActionController extends Controller
         }
     }
 }
-

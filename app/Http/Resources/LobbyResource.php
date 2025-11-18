@@ -24,11 +24,11 @@ class LobbyResource extends JsonResource
             'game_mode' => $this->game_mode,
             'host' => UserResource::make($this->host),
             'min_players' => $this->min_players,
-            'current_players' => $this->whenLoaded('players', fn() => $this->acceptedPlayers()->count()),
+            'current_players' => $this->whenLoaded('players', fn () => $this->acceptedPlayers()->count()),
             'is_public' => $this->is_public,
             'scheduled_at' => $this->scheduled_at?->toIso8601String(),
             'status' => $this->status->value,
-            'players' => $this->whenLoaded('players', fn() => LobbyPlayerResource::collection($this->players)),
+            'players' => $this->whenLoaded('players', fn () => LobbyPlayerResource::collection($this->players)),
         ];
     }
 }

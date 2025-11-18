@@ -8,7 +8,6 @@ use App\Http\Requests\Game\ForfeitGameRequest;
 use App\Http\Requests\Game\RequestRematchRequest;
 use App\Http\Resources\ActionResource;
 use App\Http\Resources\GameResource;
-use App\Http\Resources\PlayerResource;
 use App\Http\Resources\RematchRequestResource;
 use App\Models\Game\Action;
 use App\Models\Game\Game;

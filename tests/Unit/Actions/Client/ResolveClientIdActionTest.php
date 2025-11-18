@@ -11,7 +11,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $client->id,
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -23,7 +23,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -35,7 +35,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '123',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -47,7 +47,7 @@ describe('ResolveClientIdAction', function () {
     describe('Default Behavior', function () {
         it('returns default client id 1 when header is missing', function () {
             $request = Request::create('/', 'GET');
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -58,7 +58,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -69,7 +69,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => null,
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -80,7 +80,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '0',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -93,7 +93,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '007',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -104,7 +104,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '999999',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -115,7 +115,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => 'invalid',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -126,7 +126,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '-5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -140,7 +140,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             expect($action->execute($request))->toBe(5);
         });
@@ -149,7 +149,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'POST', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             expect($action->execute($request))->toBe(5);
         });
@@ -158,7 +158,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'PUT', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             expect($action->execute($request))->toBe(5);
         });
@@ -167,7 +167,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'DELETE', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => '5',
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             expect($action->execute($request))->toBe(5);
         });
@@ -179,7 +179,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $webClient->id,
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -191,7 +191,7 @@ describe('ResolveClientIdAction', function () {
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $mobileClient->id,
             ]);
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 
@@ -200,7 +200,7 @@ describe('ResolveClientIdAction', function () {
 
         it('defaults to 1 for AI agents without header', function () {
             $request = Request::create('/', 'GET');
-            $action = new ResolveClientIdAction();
+            $action = new ResolveClientIdAction;
 
             $clientId = $action->execute($request);
 

@@ -9,7 +9,7 @@ describe('ResolveUsernameAction', function () {
         it('resolves existing username to user', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('testuser');
 
@@ -20,7 +20,7 @@ describe('ResolveUsernameAction', function () {
         it('converts username to lowercase before lookup', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('TestUser');
 
@@ -30,7 +30,7 @@ describe('ResolveUsernameAction', function () {
         it('handles all uppercase username', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('TESTUSER');
 
@@ -40,7 +40,7 @@ describe('ResolveUsernameAction', function () {
         it('handles mixed case username', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('TeStUsEr');
 
@@ -48,13 +48,13 @@ describe('ResolveUsernameAction', function () {
         });
 
         it('throws ModelNotFoundException for non-existent username', function () {
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $action->execute('nonexistent');
         })->throws(ModelNotFoundException::class);
 
         it('throws ModelNotFoundException for empty string', function () {
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $action->execute('');
         })->throws(ModelNotFoundException::class);
@@ -64,7 +64,7 @@ describe('ResolveUsernameAction', function () {
         it('returns user for existing username', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->executeOrNull('testuser');
 
@@ -73,7 +73,7 @@ describe('ResolveUsernameAction', function () {
         });
 
         it('returns null for non-existent username', function () {
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $result = $action->executeOrNull('nonexistent');
 
@@ -83,7 +83,7 @@ describe('ResolveUsernameAction', function () {
         it('converts username to lowercase before lookup', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->executeOrNull('TestUser');
 
@@ -92,7 +92,7 @@ describe('ResolveUsernameAction', function () {
         });
 
         it('returns null for empty string', function () {
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $result = $action->executeOrNull('');
 
@@ -102,7 +102,7 @@ describe('ResolveUsernameAction', function () {
         it('handles all uppercase username', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->executeOrNull('TESTUSER');
 
@@ -114,7 +114,7 @@ describe('ResolveUsernameAction', function () {
     describe('Username Formats', function () {
         it('handles auto-generated usernames', function () {
             $user = User::factory()->create(); // Uses default pattern
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute($user->username);
 
@@ -124,7 +124,7 @@ describe('ResolveUsernameAction', function () {
         it('handles usernames with numbers', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'user12345']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('user12345');
 
@@ -134,7 +134,7 @@ describe('ResolveUsernameAction', function () {
         it('handles usernames with underscores', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'test_user']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('test_user');
 
@@ -144,7 +144,7 @@ describe('ResolveUsernameAction', function () {
         it('handles usernames with hyphens', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'test-user']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('test-user');
 
@@ -156,14 +156,14 @@ describe('ResolveUsernameAction', function () {
         it('finds correct user when multiple users exist', function () {
             $user1 = User::factory()->create();
             $user1->update(['username' => 'user1']);
-            
+
             $targetUser = User::factory()->create();
             $targetUser->update(['username' => 'user2']);
-            
+
             $user3 = User::factory()->create();
             $user3->update(['username' => 'user3']);
-            
-            $action = new ResolveUsernameAction();
+
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('user2');
 
@@ -173,7 +173,7 @@ describe('ResolveUsernameAction', function () {
         it('handles single character username', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'a']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute('a');
 
@@ -184,7 +184,7 @@ describe('ResolveUsernameAction', function () {
             $longUsername = str_repeat('a', 50);
             $user = User::factory()->create();
             $user->update(['username' => $longUsername]);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found = $action->execute($longUsername);
 
@@ -194,11 +194,11 @@ describe('ResolveUsernameAction', function () {
         it('distinguishes between similar usernames', function () {
             $user1 = User::factory()->create();
             $user1->update(['username' => 'testuser']);
-            
+
             $user2 = User::factory()->create();
             $user2->update(['username' => 'testuser2']);
-            
-            $action = new ResolveUsernameAction();
+
+            $action = new ResolveUsernameAction;
 
             $found1 = $action->execute('testuser');
             $found2 = $action->execute('testuser2');
@@ -213,7 +213,7 @@ describe('ResolveUsernameAction', function () {
         it('returns same user on repeated calls', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'testuser']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             $found1 = $action->execute('testuser');
             $found2 = $action->execute('testuser');
@@ -224,7 +224,7 @@ describe('ResolveUsernameAction', function () {
         it('executes case-insensitive query', function () {
             $user = User::factory()->create();
             $user->update(['username' => 'mixedcase']);
-            $action = new ResolveUsernameAction();
+            $action = new ResolveUsernameAction;
 
             // All of these should find the same user
             $lower = $action->execute('mixedcase');

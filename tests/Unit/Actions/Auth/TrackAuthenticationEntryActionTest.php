@@ -4,8 +4,6 @@ use App\Actions\Auth\TrackAuthenticationEntryAction;
 use App\Models\Access\Client;
 use App\Models\Auth\Entry;
 use App\Models\Auth\User;
-use Laravel\Sanctum\NewAccessToken;
-use Laravel\Sanctum\PersonalAccessToken;
 
 describe('TrackAuthenticationEntryAction', function () {
     describe('Basic Entry Creation', function () {
@@ -13,7 +11,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $client = Client::factory()->create();
             $token = $user->createToken('test-token');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute(
                 $user,
@@ -37,7 +35,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $client = Client::factory()->create();
             $token = $user->createToken('test-token');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute(
                 $user,
@@ -56,7 +54,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('accepts valid IPv4 address', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, '192.168.1.1', null);
 
@@ -66,7 +64,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('accepts valid IPv6 address', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, '2001:0db8:85a3:0000:0000:8a2e:0370:7334', null);
 
@@ -76,7 +74,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('accepts null IP address', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, null);
 
@@ -89,7 +87,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
             $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, $userAgent);
 
@@ -100,7 +98,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
             $userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)';
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, $userAgent);
 
@@ -110,7 +108,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('accepts null device info', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, null);
 
@@ -123,7 +121,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $client = Client::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, $client->id, null, null);
 
@@ -135,7 +133,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $client = Client::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, (string) $client->id, null, null);
 
@@ -145,7 +143,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('defaults to client ID 1 when null provided', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, null, null, null);
 
@@ -157,7 +155,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('stores token ID from NewAccessToken', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test-token');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, null);
 
@@ -169,7 +167,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $user = User::factory()->create();
             $token1 = $user->createToken('token-1');
             $token2 = $user->createToken('token-2');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry1 = $action->execute($user, $token1, 1, null, null);
             $entry2 = $action->execute($user, $token2, 1, null, null);
@@ -183,7 +181,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('sets logged_in_at to current time', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $before = now()->subSecond();
             $entry = $action->execute($user, $token, 1, null, null);
@@ -196,7 +194,7 @@ describe('TrackAuthenticationEntryAction', function () {
         it('leaves logged_out_at as null on creation', function () {
             $user = User::factory()->create();
             $token = $user->createToken('test');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry = $action->execute($user, $token, 1, null, null);
 
@@ -211,7 +209,7 @@ describe('TrackAuthenticationEntryAction', function () {
             $client2 = Client::factory()->create();
             $token1 = $user->createToken('web');
             $token2 = $user->createToken('mobile');
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entry1 = $action->execute($user, $token1, $client1->id, '192.168.1.1', 'Web Browser');
             $entry2 = $action->execute($user, $token2, $client2->id, '192.168.1.2', 'Mobile App');
@@ -222,7 +220,7 @@ describe('TrackAuthenticationEntryAction', function () {
 
         it('tracks login history chronologically', function () {
             $user = User::factory()->create();
-            $action = new TrackAuthenticationEntryAction();
+            $action = new TrackAuthenticationEntryAction;
 
             $entries = collect();
             for ($i = 0; $i < 3; $i++) {

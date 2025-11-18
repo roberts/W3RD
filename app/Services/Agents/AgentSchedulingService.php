@@ -70,6 +70,7 @@ class AgentSchedulingService
                 if (empty($recentOpponents)) {
                     return true;
                 }
+
                 return ! in_array($agent->user->id, $recentOpponents);
             });
 
@@ -93,14 +94,14 @@ class AgentSchedulingService
 
         if (! $agent) {
             // If no agent found and we filtered by recent opponents, try again without that filter (lenient fallback)
-            if (!empty($recentOpponents)) {
+            if (! empty($recentOpponents)) {
                 Log::info('No agent found excluding recent opponents, trying without filter', [
                     'game_slug' => $gameSlug,
                     'mode' => $mode,
                     'human_user_id' => $humanUserId,
                     'recent_opponents' => $recentOpponents,
                 ]);
-                
+
                 return $this->findAvailableAgent($gameSlug, $mode, null);
             }
 
@@ -121,7 +122,7 @@ class AgentSchedulingService
             'availability_type' => $agent->available_hour_est === null ? '24/7' : 'time-specific',
             'available_hour_est' => $agent->available_hour_est,
             'current_hour_est' => $currentHourEst,
-            'excluded_recent_opponents' => !empty($recentOpponents),
+            'excluded_recent_opponents' => ! empty($recentOpponents),
         ]);
 
         return $agent->user;

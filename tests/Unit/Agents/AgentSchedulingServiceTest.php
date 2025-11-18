@@ -198,7 +198,7 @@ describe('Recent Opponent Filtering', function () {
         Redis::shouldReceive('lrange')
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
-            ->andReturn([(string)$user1->id, (string)$user2->id]);
+            ->andReturn([(string) $user1->id, (string) $user2->id]);
 
         $foundAgent = $this->service->findAvailableAgent('checkers', null, $humanUser->id);
 
@@ -233,7 +233,7 @@ describe('Recent Opponent Filtering', function () {
         Redis::shouldReceive('lrange')
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
-            ->andReturn([(string)$user1->id, (string)$user2->id]);
+            ->andReturn([(string) $user1->id, (string) $user2->id]);
 
         // Since filtering will remove all agents, fallback will be triggered
         // The fallback calls findAvailableAgent again with humanUserId=null
@@ -267,7 +267,7 @@ describe('Recent Opponent Filtering', function () {
         Redis::shouldReceive('lrange')
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
-            ->andReturn([(string)$user1->id, (string)$user2->id, (string)$user3->id]);
+            ->andReturn([(string) $user1->id, (string) $user2->id, (string) $user3->id]);
 
         $foundAgent = $this->service->findAvailableAgent('checkers', null, $humanUser->id);
 
@@ -295,7 +295,7 @@ describe('Recent Opponent Filtering', function () {
         Redis::shouldReceive('lrange')
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
-            ->andReturn([(string)$user1->id]);
+            ->andReturn([(string) $user1->id]);
 
         $foundAgent = $this->service->findAvailableAgent('checkers', null, $humanUser->id);
 
@@ -304,4 +304,3 @@ describe('Recent Opponent Filtering', function () {
             ->and($foundAgent->id)->toBe($user247->id);
     });
 });
-

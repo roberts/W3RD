@@ -74,9 +74,9 @@ describe('Recent Opponent Tracking', function () {
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([
-                (string)$agentUsers[2]->id, // Most recent
-                (string)$agentUsers[1]->id,
-                (string)$agentUsers[0]->id, // 3rd most recent
+                (string) $agentUsers[2]->id, // Most recent
+                (string) $agentUsers[1]->id,
+                (string) $agentUsers[0]->id, // 3rd most recent
             ]);
 
         // Now find an agent for the next game
@@ -110,9 +110,9 @@ describe('Recent Opponent Tracking', function () {
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([
-                (string)$agentUsers[3]->id, // Most recent
-                (string)$agentUsers[2]->id,
-                (string)$agentUsers[1]->id,
+                (string) $agentUsers[3]->id, // Most recent
+                (string) $agentUsers[2]->id,
+                (string) $agentUsers[1]->id,
             ]);
 
         // Now find an agent for the next game
@@ -139,7 +139,7 @@ describe('Recent Opponent Tracking', function () {
         Redis::shouldReceive('lrange')
             ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
-            ->andReturn([(string)$agentUser1->id, (string)$agentUser2->id]);
+            ->andReturn([(string) $agentUser1->id, (string) $agentUser2->id]);
 
         // Try to find an agent - should use lenient fallback
         $service = app(AgentSchedulingService::class);

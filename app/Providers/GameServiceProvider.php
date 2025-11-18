@@ -3,11 +3,6 @@
 namespace App\Providers;
 
 use App\Games\BaseGameTitle;
-use App\Games\ValidateFour\Modes\EightBySevenMode;
-use App\Games\ValidateFour\Modes\FiveMode;
-use App\Games\ValidateFour\Modes\NineBySixMode;
-use App\Games\ValidateFour\Modes\PopOutMode;
-use App\Games\ValidateFour\Modes\StandardMode;
 use App\Models\Game\Game;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,12 +11,18 @@ class GameServiceProvider extends ServiceProvider
     public static function getMode(Game $game): BaseGameTitle
     {
         $map = [
+            'checkers' => [
+                'standard' => \App\Games\Checkers\Modes\StandardMode::class,
+            ],
+            'hearts' => [
+                'standard' => \App\Games\Hearts\Modes\StandardMode::class,
+            ],
             'validate-four' => [
-                'standard' => StandardMode::class,
-                'pop-out' => PopOutMode::class,
-                'five' => FiveMode::class,
-                'eight-by-seven' => EightBySevenMode::class,
-                'nine-by-six' => NineBySixMode::class,
+                'standard' => \App\Games\ValidateFour\Modes\StandardMode::class,
+                'pop-out' => \App\Games\ValidateFour\Modes\PopOutMode::class,
+                'five' => \App\Games\ValidateFour\Modes\FiveMode::class,
+                'eight-by-seven' => \App\Games\ValidateFour\Modes\EightBySevenMode::class,
+                'nine-by-six' => \App\Games\ValidateFour\Modes\NineBySixMode::class,
             ],
         ];
 

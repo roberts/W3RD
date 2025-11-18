@@ -50,7 +50,10 @@ specs/007-agent-implementation/
 ```text
 app/
 ├── Agents/                  # New directory for all AI logic
-│   ├── Implementations/     # Concrete AI strategy classes (e.g., Minimax, Random)
+│   ├── Logic/               # Concrete AI strategy classes
+│   │   ├── RandomLogic.php
+│   │   ├── MinimaxLogic.php
+│   │   └── HeuristicLogic.php
 │   └── Agent.php            # The Agent Eloquent model
 ├── Http/
 │   └── Controllers/

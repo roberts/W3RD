@@ -48,5 +48,5 @@ test('agent respects game compatibility in matchmaking', function () {
     $allGamesUser = User::factory()->create(['agent_id' => $allGamesAgent->id]);
 
     expect($heartsAgent->supported_game_titles)->toBe(['hearts'])
-        ->and($allGamesAgent->supported_game_titles)->toBe('all');
+        ->and($allGamesAgent->supported_game_titles)->toBe(['all']);
 });

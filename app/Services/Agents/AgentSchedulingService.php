@@ -30,8 +30,10 @@ class AgentSchedulingService
             'mode' => $mode,
         ]);
 
-        // Get agents that support this game title
-        $agents = Agent::query()
+        $currentHourEst = now('America/New_York')->hour;
+
+        // Get all agents that support this game title
+        $allAgents = Agent::query()
             ->with('user') // Eager load the user relationship
             ->get()
             ->filter(function (Agent $agent) use ($gameSlug) {
@@ -45,25 +47,37 @@ class AgentSchedulingService
                 return false;
             })
             ->filter(function (Agent $agent) {
-                // Filter by availability schedule
-                return $agent->isAvailableNow();
-            })
-            ->filter(function (Agent $agent) {
                 // Must have an associated user
                 return $agent->user !== null;
             })
             ->filter(function (Agent $agent) {
                 // Filter out agents currently in active games
                 return ! $this->isAgentBusy($agent->user);
+            });
+
+        // Separate agents into time-specific and 24/7 (null availability)
+        $timeSpecificAgents = $allAgents
+            ->filter(function (Agent $agent) use ($currentHourEst) {
+                // Only agents with a specific time slot that matches current hour
+                return $agent->available_hour_est !== null && $agent->available_hour_est === $currentHourEst;
             })
-            ->sortByDesc('difficulty'); // Prefer higher difficulty agents for variety
-        
-        $agent = $agents->first();
+            ->sortByDesc('difficulty');
+
+        $agent247 = $allAgents
+            ->filter(function (Agent $agent) {
+                // Only agents with null availability (24/7)
+                return $agent->available_hour_est === null;
+            })
+            ->sortByDesc('difficulty');
+
+        // Prefer time-specific agents over 24/7 agents
+        $agent = $timeSpecificAgents->first() ?? $agent247->first();
 
         if (!$agent) {
             Log::info('No available agent found for game', [
                 'game_slug' => $gameSlug,
                 'mode' => $mode,
+                'current_hour_est' => $currentHourEst,
             ]);
             return null;
         }
@@ -73,6 +87,9 @@ class AgentSchedulingService
             'agent_name' => $agent->name,
             'user_id' => $agent->user->id,
             'difficulty' => $agent->difficulty,
+            'availability_type' => $agent->available_hour_est === null ? '24/7' : 'time-specific',
+            'available_hour_est' => $agent->available_hour_est,
+            'current_hour_est' => $currentHourEst,
         ]);
 
         return $agent->user;
@@ -128,15 +145,33 @@ class AgentSchedulingService
      */
     public function getAvailableAgentCount(string $gameSlug): int
     {
+        $currentHourEst = now('America/New_York')->hour;
+
         return Agent::query()
-            ->where(function ($query) use ($gameSlug) {
-                $query->where('supported_game_titles', 'all')
-                    ->orWhereJsonContains('supported_game_titles', $gameSlug);
-            })
-            ->whereHas('user')
+            ->with('user')
             ->get()
-            ->filter(fn (Agent $agent) => $agent->isAvailableNow())
-            ->filter(fn (Agent $agent) => ! $this->isAgentBusy($agent->user))
+            ->filter(function (Agent $agent) use ($gameSlug) {
+                // Check if agent supports this game
+                if ($agent->supported_game_titles === ['all']) {
+                    return true;
+                }
+                if (is_array($agent->supported_game_titles) && in_array($gameSlug, $agent->supported_game_titles)) {
+                    return true;
+                }
+                return false;
+            })
+            ->filter(function (Agent $agent) {
+                // Must have an associated user
+                return $agent->user !== null;
+            })
+            ->filter(function (Agent $agent) {
+                // Filter out agents currently in active games
+                return ! $this->isAgentBusy($agent->user);
+            })
+            ->filter(function (Agent $agent) use ($currentHourEst) {
+                // Include agents available at current hour OR 24/7 agents
+                return $agent->available_hour_est === null || $agent->available_hour_est === $currentHourEst;
+            })
             ->count();
     }
 }

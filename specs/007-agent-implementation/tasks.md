@@ -64,12 +64,12 @@
 
 ### Tests for User Story 3 (Test-First)
 
-- [ ] T023 [US3] Update the unit test in `tests/Unit/Agents/AgentSchedulingServiceTest.php` to include scenarios for time-based availability, mocking the current time to test inside and outside the available hour.
+- [X] T023 [US3] Updated the unit test in `tests/Unit/Agents/AgentSchedulingServiceTest.php` to include scenarios for time-based availability, mocking the current time to test inside and outside the available hour.
 
-- [ ] T024 [US3] Agents that have the availability of null should only be chosen last if all the agents during that hour slot are not available.
+- [X] T024 [US3] Implemented prioritization so agents with `available_hour_est = null` (24/7 agents) are chosen last when time-specific agents are available.
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Update the agent-finding logic in `AgentSchedulingService` to filter agents based on their `available_hour_est` against the current time in the `America/New_York` timezone.
+- [X] T025 [US3] Updated the agent-finding logic in `AgentSchedulingService` to filter agents based on their `available_hour_est` against the current time in the `America/New_York` timezone, with proper prioritization of time-specific over 24/7 agents.
 
 **Checkpoint**: All user stories are implemented and tested. The feature is complete.

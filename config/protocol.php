@@ -4,25 +4,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Game Titles
-    |--------------------------------------------------------------------------
-    |
-    | This array defines all available game titles in the protocol platform.
-    | Each game has a key (used in URLs/API), name (display), and description.
-    |
-    */
-
-    'game_titles' => [
-        [
-            'key' => 'validate-four',
-            'name' => 'Validate Four',
-            'description' => 'Classic connect four game where players compete to align four pieces in a row.',
-        ],
-        // Add more game titles here as they become available
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Subscription Plans
     |--------------------------------------------------------------------------
     |

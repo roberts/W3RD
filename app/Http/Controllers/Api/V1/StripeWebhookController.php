@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Traits\ApiResponses;
 use App\Models\Alert;
 use App\Models\Billing\Subscription;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
@@ -9,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StripeWebhookController extends CashierWebhookController
 {
+    use ApiResponses;
+
     /**
      * Handle subscription created.
      */
@@ -61,7 +64,7 @@ class StripeWebhookController extends CashierWebhookController
             ]);
         }
 
-        return response('Webhook Handled', 200);
+        return $this->messageResponse('Webhook Handled');
     }
 
     /**

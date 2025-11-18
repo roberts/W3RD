@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Client\ResolveClientIdAction;
+use App\Actions\Lobby\FindLobbyByUlidAction;
+use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
+use App\Http\Traits\ApiResponses;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
@@ -17,8 +21,13 @@ use Illuminate\Routing\Controller;
 
 class LobbyPlayerController extends Controller
 {
+    use ApiResponses;
+
     public function __construct(
-        protected GameCreationService $gameCreationService
+        protected GameCreationService $gameCreationService,
+        protected ResolveUsernameAction $resolveUsername,
+        protected ResolveClientIdAction $resolveClientId,
+        protected FindLobbyByUlidAction $findLobby
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -30,19 +39,19 @@ class LobbyPlayerController extends Controller
     {
         $validated = $request->validated();
 
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $user = $request->user();
 
         if (! $lobby->isHost($user)) {
-            return response()->json(['error' => 'Only the host can invite players'], 403);
+            return $this->forbiddenResponse('Only the host can invite players');
         }
 
         if ($lobby->status !== LobbyStatus::PENDING) {
-            return response()->json(['error' => 'Cannot invite players to a non-pending lobby'], 400);
+            return $this->errorResponse('Cannot invite players to a non-pending lobby');
         }
 
         // Resolve username to user
-        $invitee = User::where('username', $validated['username'])->firstOrFail();
+        $invitee = $this->resolveUsername->execute($validated['username']);
 
         // Check if player is already in lobby
         $existing = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -50,7 +59,7 @@ class LobbyPlayerController extends Controller
             ->first();
 
         if ($existing) {
-            return response()->json(['error' => 'Player is already in this lobby'], 400);
+            return $this->errorResponse('Player is already in this lobby');
         }
 
         // Create invitation
@@ -63,9 +72,7 @@ class LobbyPlayerController extends Controller
         // Broadcast invitation
         broadcast(new LobbyInvitation($invitee->id, $lobby));
 
-        return response()->json([
-            'message' => 'Player invited successfully',
-        ], 201);
+        return $this->createdResponse(null, 'Player invited successfully');
     }
 
     /**
@@ -75,15 +82,15 @@ class LobbyPlayerController extends Controller
     {
         $validated = $request->validated();
 
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $currentUser = $request->user();
 
         // Resolve username to user
-        $user = User::where('username', strtolower($username))->firstOrFail();
+        $user = $this->resolveUsername->execute($username);
 
         // Verify the user is responding for themselves
         if ($currentUser->id !== $user->id) {
-            return response()->json(['error' => 'You can only respond for yourself'], 403);
+            return $this->forbiddenResponse('You can only respond for yourself');
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -92,7 +99,7 @@ class LobbyPlayerController extends Controller
 
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
-            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            $clientId = $this->resolveClientId->execute($request);
 
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
@@ -101,45 +108,39 @@ class LobbyPlayerController extends Controller
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
-            // Check if minimum players met
-            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
+            // Check if we can start the game (exact player count for games that require it)
+            if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 
-            return response()->json([
-                'message' => 'Successfully joined the lobby',
-            ]);
+            return $this->messageResponse('Successfully joined the lobby');
         }
 
         if (! $lobbyPlayer) {
-            return response()->json(['error' => 'You are not invited to this lobby'], 404);
+            return $this->notFoundResponse('You are not invited to this lobby');
         }
 
         if ($lobbyPlayer->status !== LobbyPlayerStatus::PENDING) {
-            return response()->json(['error' => 'You have already responded to this invitation'], 400);
+            return $this->errorResponse('You have already responded to this invitation');
         }
 
         // Update status
         if ($validated['status'] === 'accepted') {
-            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            $clientId = $this->resolveClientId->execute($request);
 
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
-            // Check if minimum players met for immediate (non-scheduled) game
-            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
+            // Check if we can start the game (exact player count for games that require it)
+            if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 
-            return response()->json([
-                'message' => 'Invitation accepted',
-            ]);
+            return $this->messageResponse('Invitation accepted');
         } else {
             $lobbyPlayer->decline();
 
-            return response()->json([
-                'message' => 'Invitation declined',
-            ]);
+            return $this->messageResponse('Invitation declined');
         }
     }
 
@@ -148,18 +149,18 @@ class LobbyPlayerController extends Controller
      */
     public function destroy(Request $request, string $lobbyUlid, string $username): JsonResponse
     {
-        $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
+        $lobby = $this->findLobby->execute($lobbyUlid);
         $currentUser = $request->user();
 
         if (! $lobby->isHost($currentUser)) {
-            return response()->json(['error' => 'Only the host can kick players'], 403);
+            return $this->forbiddenResponse('Only the host can kick players');
         }
 
         // Resolve username to user
-        $user = User::where('username', strtolower($username))->firstOrFail();
+        $user = $this->resolveUsername->execute($username);
 
         if ($user->id === $currentUser->id) {
-            return response()->json(['error' => 'Host cannot kick themselves'], 400);
+            return $this->errorResponse('Host cannot kick themselves');
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -168,7 +169,7 @@ class LobbyPlayerController extends Controller
 
         $lobbyPlayer->delete();
 
-        return response()->json(null, 204);
+        return $this->noContentResponse();
     }
 
     /**

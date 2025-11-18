@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Game\FindGameByUlidAction;
 use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PlayerResource;
+use App\Http\Requests\Game\ForfeitGameRequest;
+use App\Http\Requests\Game\RequestRematchRequest;
+use App\Http\Resources\ActionResource;
+use App\Http\Resources\GameResource;
+use App\Http\Resources\RematchRequestResource;
+use App\Http\Traits\ApiResponses;
+use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -14,8 +21,11 @@ use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
+    use ApiResponses, GamePlayerAuthorization;
+
     public function __construct(
-        protected RematchService $rematchService
+        protected RematchService $rematchService,
+        protected FindGameByUlidAction $findGame
     ) {}
 
     /**
@@ -32,26 +42,10 @@ class GameController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(20);
 
-        return response()->json([
-            'data' => $games->map(function (Game $game) {
-                return [
-                    'ulid' => $game->ulid,
-                    'game_title' => $game->mode->game_title ?? null,
-                    'status' => $game->status->value,
-                    'turn_number' => $game->turn_number,
-                    'winner_id' => $game->winner_id,
-                    'players' => PlayerResource::collection($game->players)->resolve(),
-                    'created_at' => $game->created_at,
-                    'updated_at' => $game->updated_at,
-                ];
-            })->values(),
-            'meta' => [
-                'current_page' => $games->currentPage(),
-                'last_page' => $games->lastPage(),
-                'per_page' => $games->perPage(),
-                'total' => $games->total(),
-            ],
-        ]);
+        return $this->collectionResponse(
+            $games,
+            fn ($items) => GameResource::collection($items)
+        );
     }
 
     /**
@@ -61,61 +55,40 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $game = Game::where('ulid', $gameUlid)
-            ->with(['players.user.avatar.image', 'mode'])
-            ->firstOrFail();
+        $game = $this->findGame->execute($gameUlid, ['players.user.avatar.image', 'mode']);
 
         // Verify user is a player in this game
-        $isPlayer = $game->players->contains('user_id', $user->id);
-
-        if (! $isPlayer) {
-            return response()->json([
-                'message' => 'You are not authorized to view this game.',
-            ], 403);
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
-        return response()->json([
-            'data' => [
-                'ulid' => $game->ulid,
-                'game_title' => $game->mode->game_title ?? null,
-                'status' => $game->status->value,
-                'turn_number' => $game->turn_number,
-                'winner_id' => $game->winner_id,
-                'game_state' => $game->game_state,
-                'players' => PlayerResource::collection($game->players)->resolve(),
-                'created_at' => $game->created_at,
-                'updated_at' => $game->updated_at,
-                'finished_at' => $game->finished_at,
-            ],
-        ]);
+        return $this->resourceResponse(GameResource::make($game));
     }
 
     /**
      * Request a rematch for a completed game.
      */
-    public function requestRematch(Request $request, string $gameUlid): JsonResponse
+    public function requestRematch(RequestRematchRequest $request, string $gameUlid): JsonResponse
     {
-        $game = Game::where('ulid', $gameUlid)->with('players')->firstOrFail();
+        $game = $this->findGame->execute($gameUlid, ['players']);
 
-        try {
-            $rematchRequest = $this->rematchService->createRematchRequest(
+        $rematchRequest = $this->handleServiceCall(
+            fn () => $this->rematchService->createRematchRequest(
                 $game,
                 $request->user()
-            );
+            ),
+            'Failed to create rematch request'
+        );
 
-            return response()->json([
-                'data' => [
-                    'ulid' => $rematchRequest->ulid,
-                    'status' => $rematchRequest->status,
-                    'expires_at' => $rematchRequest->expires_at,
-                ],
-                'message' => 'Rematch request sent.',
-            ], 201);
-        } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 400);
+        if ($rematchRequest instanceof JsonResponse) {
+            return $rematchRequest;
         }
+
+        return $this->createdResponse(
+            RematchRequestResource::make($rematchRequest),
+            'Rematch request sent.'
+        );
     }
 
     /**
@@ -125,15 +98,12 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
+        $game = $this->findGame->execute($gameUlid);
 
         // Verify user is a player in this game
-        $isPlayer = $game->players->contains('user_id', $user->id);
-
-        if (! $isPlayer) {
-            return response()->json([
-                'message' => 'You are not authorized to view this game history.',
-            ], 403);
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
         $actions = Action::where('game_id', $game->id)
@@ -142,46 +112,16 @@ class GameController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        return response()->json([
-            'data' => $actions->map(function (Action $action) {
-                return [
-                    'ulid' => $action->ulid,
-                    'turn_number' => $action->turn_number,
-                    'action_type' => $action->action_type->value,
-                    'action_details' => $action->action_details,
-                    'player' => PlayerResource::make($action->player)->resolve(),
-                    'status' => $action->status,
-                    'created_at' => $action->created_at->toIso8601String(),
-                ];
-            }),
-        ]);
+        return $this->resourceResponse(ActionResource::collection($actions));
     }
 
     /**
      * Forfeit/concede a game.
      */
-    public function forfeit(Request $request, string $gameUlid): JsonResponse
+    public function forfeit(ForfeitGameRequest $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
-
-        $game = Game::where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify user is a player in this game
-        /** @var Player|null $player */
-        $player = $game->players()->where('user_id', $user->id)->first();
-
-        if (! $player) {
-            return response()->json([
-                'message' => 'You are not authorized to forfeit this game.',
-            ], 403);
-        }
-
-        // Can only forfeit active games
-        if ($game->status->value !== 'active') {
-            return response()->json([
-                'message' => 'Can only forfeit active games.',
-            ], 400);
-        }
+        $game = $this->findGame->execute($gameUlid);
 
         // Determine the winner (opponent of the forfeiting player)
         /** @var Player|null $opponent */
@@ -190,9 +130,7 @@ class GameController extends Controller
             ->first();
 
         if (! $opponent) {
-            return response()->json([
-                'message' => 'Cannot determine opponent.',
-            ], 400);
+            return $this->errorResponse('Cannot determine opponent.');
         }
 
         // Update game status
@@ -202,14 +140,11 @@ class GameController extends Controller
         $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
 
-        return response()->json([
-            'data' => [
-                'ulid' => $game->ulid,
-                'status' => $game->status->value,
-                'winner_id' => $game->winner_id,
-                'finished_at' => $game->finished_at,
-            ],
-            'message' => 'Game forfeited successfully.',
-        ]);
+        return $this->dataResponse([
+            'ulid' => $game->ulid,
+            'status' => $game->status->value,
+            'winner_id' => $game->winner_id,
+            'finished_at' => $game->finished_at,
+        ], 'Game forfeited successfully.');
     }
 }

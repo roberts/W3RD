@@ -12,6 +12,7 @@ use App\Models\Game\Mode;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class GameCreationService
 {
@@ -133,13 +134,54 @@ class GameCreationService
                 'game_state' => $initialState,
             ]);
 
-            // Update lobby status
-            $lobby->update(['status' => 'completed']);
+            // Update lobby status and link to game
+            $lobby->update([
+                'status' => 'completed',
+                'game_id' => $game->id,
+            ]);
 
             // Broadcast game started event
             broadcast(new GameStarted($game));
 
             return $game;
         });
+    }
+
+    /**
+     * Create a game from a quickplay match by match ID.
+     */
+    public function createFromQuickplayMatch(array $playerIds, string $matchId): Game
+    {
+        // Get game title and mode from match ID stored in Redis
+        $matchKey = "quickplay:match:{$matchId}";
+        $matchData = Redis::hgetall($matchKey);
+
+        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'validate-four');
+        $gameMode = $matchData['game_mode'] ?? 'standard';
+
+        // Prepare player data with each player's specific client_id
+        $playerData = array_map(function ($userId) use ($matchData) {
+            $clientKey = 'player_'.$userId.'_client';
+
+            return [
+                'user_id' => (int) $userId,
+                'client_id' => (int) ($matchData[$clientKey] ?? 1), // Defaults to Gamer Protocol Web for AI
+            ];
+        }, $playerIds);
+
+        // Create the game using the existing quickplay method
+        $game = $this->createFromQuickplay($playerData, $gameTitle, $gameMode);
+
+        // Clean up Redis
+        Redis::del("quickplay:accept:{$matchId}");
+        Redis::del($matchKey);
+
+        // Remove players from queue and client tracking
+        foreach ($playerIds as $playerId) {
+            Redis::hdel('quickplay:timestamps', $playerId);
+            Redis::hdel('quickplay:clients', $playerId);
+        }
+
+        return $game;
     }
 }

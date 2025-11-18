@@ -7,6 +7,7 @@ use App\Http\Requests\Billing\CreateStripeSubscriptionRequest;
 use App\Http\Requests\Billing\VerifyAppleReceiptRequest;
 use App\Http\Requests\Billing\VerifyGoogleReceiptRequest;
 use App\Http\Requests\Billing\VerifyTelegramReceiptRequest;
+use App\Http\Traits\ApiResponses;
 use App\Models\Billing\Subscription;
 use App\Services\AppleReceiptValidator;
 use App\Services\GooglePurchaseValidator;
@@ -16,6 +17,8 @@ use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {
+    use ApiResponses;
+
     public function __construct(
         protected AppleReceiptValidator $appleValidator,
         protected GooglePurchaseValidator $googleValidator,
@@ -29,9 +32,7 @@ class BillingController extends Controller
     {
         $plans = config('protocol.subscription_plans');
 
-        return response()->json([
-            'data' => $plans,
-        ]);
+        return $this->dataResponse($plans);
     }
 
     /**
@@ -45,24 +46,20 @@ class BillingController extends Controller
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
 
         if (! $subscription) {
-            return response()->json([
-                'data' => [
-                    'subscribed' => false,
-                    'plan' => 'basic',
-                ],
+            return $this->dataResponse([
+                'subscribed' => false,
+                'plan' => 'basic',
             ]);
         }
 
-        return response()->json([
-            'data' => [
-                'subscribed' => true,
-                'plan' => $subscription->type,
-                'provider' => $subscription->provider,
-                'status' => $subscription->stripe_status,
-                'trial_ends_at' => $subscription->trial_ends_at,
-                'ends_at' => $subscription->ends_at,
-                'is_lifetime' => $subscription->ends_at === null,
-            ],
+        return $this->dataResponse([
+            'subscribed' => true,
+            'plan' => $subscription->type,
+            'provider' => $subscription->provider,
+            'status' => $subscription->stripe_status,
+            'trial_ends_at' => $subscription->trial_ends_at,
+            'ends_at' => $subscription->ends_at,
+            'is_lifetime' => $subscription->ends_at === null,
         ]);
     }
 
@@ -79,29 +76,25 @@ class BillingController extends Controller
         $planConfig = $plans->firstWhere('id', $plan);
 
         if (! $planConfig || ! isset($planConfig['stripe_price_id'])) {
-            return response()->json([
-                'message' => 'Invalid plan selected.',
-            ], 400);
+            return $this->errorResponse('Invalid plan selected.');
         }
 
-        try {
-            $checkout = $user->newSubscription($plan, $planConfig['stripe_price_id'])
+        $checkout = $this->handleServiceCall(
+            fn () => $user->newSubscription($plan, $planConfig['stripe_price_id'])
                 ->checkout([
                     'success_url' => config('app.url').'/billing/success?session_id={CHECKOUT_SESSION_ID}',
                     'cancel_url' => config('app.url').'/billing/cancel',
-                ]);
+                ]),
+            'Failed to create checkout session'
+        );
 
-            return response()->json([
-                'data' => [
-                    /** @phpstan-ignore-next-line */
-                    'checkout_url' => $checkout->url,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create checkout session: '.$e->getMessage(),
-            ], 500);
+        if ($checkout instanceof JsonResponse) {
+            return $checkout;
         }
+
+        return $this->dataResponse([
+            'checkout_url' => $checkout->url,
+        ]);
     }
 
     /**
@@ -111,21 +104,18 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
-        try {
-            $portalSession = $user->billingPortalUrl(
-                config('app.url').'/billing'
-            );
+        $portalSession = $this->handleServiceCall(
+            fn () => $user->billingPortalUrl(config('app.url').'/billing'),
+            'Failed to create portal session'
+        );
 
-            return response()->json([
-                'data' => [
-                    'portal_url' => $portalSession,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create portal session: '.$e->getMessage(),
-            ], 500);
+        if ($portalSession instanceof JsonResponse) {
+            return $portalSession;
         }
+
+        return $this->dataResponse([
+            'portal_url' => $portalSession,
+        ]);
     }
 
     /**
@@ -135,33 +125,31 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
-        try {
-            $result = $this->appleValidator->validate($request->input('transaction_id'));
+        $result = $this->handleServiceCall(
+            fn () => $this->appleValidator->validate($request->input('transaction_id')),
+            'Failed to verify Apple receipt'
+        );
 
-            // Create or update subscription
-            /** @var Subscription $subscription */
-            $subscription = $user->subscriptions()->updateOrCreate(
-                ['stripe_id' => $request->input('transaction_id')],
-                [
-                    'type' => 'premium',
-                    'stripe_status' => 'active',
-                    'provider' => 'apple',
-                    'ends_at' => null, // Set based on Apple response if needed
-                ]
-            );
-
-            return response()->json([
-                'data' => [
-                    'verified' => true,
-                    'subscription_id' => $subscription->id,
-                ],
-                'message' => 'Apple receipt verified successfully.',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to verify Apple receipt: '.$e->getMessage(),
-            ], 400);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
+
+        // Create or update subscription
+        /** @var Subscription $subscription */
+        $subscription = $user->subscriptions()->updateOrCreate(
+            ['stripe_id' => $request->input('transaction_id')],
+            [
+                'type' => 'premium',
+                'stripe_status' => 'active',
+                'provider' => 'apple',
+                'ends_at' => null, // Set based on Apple response if needed
+            ]
+        );
+
+        return $this->dataResponse([
+            'verified' => true,
+            'subscription_id' => $subscription->id,
+        ], 'Apple receipt verified successfully.');
     }
 
     /**
@@ -171,42 +159,38 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
-        try {
-            $result = $this->googleValidator->validate(
+        $result = $this->handleServiceCall(
+            fn () => $this->googleValidator->validate(
                 $request->input('product_id'),
                 $request->input('token')
-            );
+            ),
+            'Failed to verify Google Play purchase'
+        );
 
-            if (! $result['valid']) {
-                return response()->json([
-                    'message' => 'Invalid Google Play purchase.',
-                ], 400);
-            }
-
-            // Create or update subscription
-            /** @var Subscription $subscription */
-            $subscription = $user->subscriptions()->updateOrCreate(
-                ['stripe_id' => $result['order_id']],
-                [
-                    'type' => 'premium',
-                    'stripe_status' => 'active',
-                    'provider' => 'google',
-                    'ends_at' => null, // Set based on Google response if needed
-                ]
-            );
-
-            return response()->json([
-                'data' => [
-                    'verified' => true,
-                    'subscription_id' => $subscription->id,
-                ],
-                'message' => 'Google Play purchase verified successfully.',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to verify Google Play purchase: '.$e->getMessage(),
-            ], 400);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
+
+        if (! $result['valid']) {
+            return $this->errorResponse('Invalid Google Play purchase.');
+        }
+
+        // Create or update subscription
+        /** @var Subscription $subscription */
+        $subscription = $user->subscriptions()->updateOrCreate(
+            ['stripe_id' => $result['order_id']],
+            [
+                'type' => 'premium',
+                'stripe_status' => 'active',
+                'provider' => 'google',
+                'ends_at' => null, // Set based on Google response if needed
+            ]
+        );
+
+        return $this->dataResponse([
+            'verified' => true,
+            'subscription_id' => $subscription->id,
+        ], 'Google Play purchase verified successfully.');
     }
 
     /**
@@ -216,43 +200,39 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
-        try {
-            $isValid = $this->telegramValidator->validate(
+        $isValid = $this->handleServiceCall(
+            fn () => $this->telegramValidator->validate(
                 $request->input('data'),
                 $request->input('hash')
-            );
+            ),
+            'Failed to verify Telegram payment'
+        );
 
-            if (! $isValid) {
-                return response()->json([
-                    'message' => 'Invalid Telegram payment hash.',
-                ], 400);
-            }
-
-            $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
-
-            // Create or update subscription
-            /** @var Subscription $subscription */
-            $subscription = $user->subscriptions()->updateOrCreate(
-                ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
-                [
-                    'type' => 'premium',
-                    'stripe_status' => 'active',
-                    'provider' => 'telegram',
-                    'ends_at' => null,
-                ]
-            );
-
-            return response()->json([
-                'data' => [
-                    'verified' => true,
-                    'subscription_id' => $subscription->id,
-                ],
-                'message' => 'Telegram payment verified successfully.',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to verify Telegram payment: '.$e->getMessage(),
-            ], 400);
+        if ($isValid instanceof JsonResponse) {
+            return $isValid;
         }
+
+        if (! $isValid) {
+            return $this->errorResponse('Invalid Telegram payment hash.');
+        }
+
+        $paymentDetails = $this->telegramValidator->extractPaymentDetails($request->input('data'));
+
+        // Create or update subscription
+        /** @var Subscription $subscription */
+        $subscription = $user->subscriptions()->updateOrCreate(
+            ['stripe_id' => $paymentDetails['telegram_payment_charge_id']],
+            [
+                'type' => 'premium',
+                'stripe_status' => 'active',
+                'provider' => 'telegram',
+                'ends_at' => null,
+            ]
+        );
+
+        return $this->dataResponse([
+            'verified' => true,
+            'subscription_id' => $subscription->id,
+        ], 'Telegram payment verified successfully.');
     }
 }

@@ -26,6 +26,8 @@ class GameActionRecorder
      * @param  GameActionContract  $action  The action that was performed
      * @param  ValidationResult  $validationResult  The validation result
      * @param  int  $turnNumber  The current turn number
+     * @param  string|null  $coordinationGroup  Optional coordination group identifier
+     * @param  int|null  $coordinationSequence  Optional sequence within coordination group
      * @return Action The created action
      */
     public function record(
@@ -33,10 +35,11 @@ class GameActionRecorder
         Player $player,
         GameActionContract $action,
         ValidationResult $validationResult,
-        int $turnNumber
+        int $turnNumber,
+        ?string $coordinationGroup = null,
+        ?int $coordinationSequence = null,
     ): Action {
-        /** @var Action */
-        return $game->actions()->create([
+        $actionData = [
             'player_id' => $player->id,
             'turn_number' => $turnNumber,
             'action_type' => $action->getType(),
@@ -44,7 +47,19 @@ class GameActionRecorder
             'status' => $validationResult->isValid ? 'success' : 'invalid',
             'error_code' => $validationResult->errorCode,
             'timestamp_client' => now(),
-        ]);
+        ];
+
+        // Add coordination fields if provided
+        if ($coordinationGroup !== null) {
+            $actionData['coordination_group'] = $coordinationGroup;
+            $actionData['is_coordinated'] = true;
+            if ($coordinationSequence !== null) {
+                $actionData['coordination_sequence'] = $coordinationSequence;
+            }
+        }
+
+        /** @var Action */
+        return $game->actions()->create($actionData);
     }
 
     /**
@@ -54,9 +69,19 @@ class GameActionRecorder
         Game $game,
         Player $player,
         GameActionContract $action,
-        int $turnNumber
+        int $turnNumber,
+        ?string $coordinationGroup = null,
+        ?int $coordinationSequence = null,
     ): Action {
-        return $this->record($game, $player, $action, ValidationResult::valid(), $turnNumber);
+        return $this->record(
+            $game,
+            $player,
+            $action,
+            ValidationResult::valid(),
+            $turnNumber,
+            $coordinationGroup,
+            $coordinationSequence
+        );
     }
 
     /**

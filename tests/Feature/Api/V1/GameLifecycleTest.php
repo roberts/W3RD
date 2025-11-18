@@ -119,7 +119,8 @@ describe('Game Lifecycle', function () {
 
             $response->assertOk()
                 ->assertJsonStructure([
-                    'game' => ['game_state'],
+                    'data' => ['game'],
+                    'message',
                 ]);
         });
 
@@ -322,7 +323,7 @@ describe('Game Lifecycle', function () {
 
             $response->assertStatus(400) // API returns 400 for invalid moves
                 ->assertJson([
-                    'error' => 'Invalid move',
+                    'message' => 'Column must be between 0 and 6',
                     'error_code' => 'INVALID_COLUMN',
                 ]);
         });
@@ -384,12 +385,11 @@ describe('Game Lifecycle', function () {
 
             $response->assertOk()
                 ->assertJsonStructure([
-                    'options' => [],
-                    'is_your_turn',
+                    'data' => ['options', 'is_your_turn'],
                 ]);
 
             // All columns should be available in empty board
-            expect($response->json('options'))->toBeArray();
+            expect($response->json('data.options'))->toBeArray();
         });
 
         it('returns empty array when not player turn', function () {
@@ -412,8 +412,8 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($player2)->getJson("/api/v1/games/{$game->ulid}/options");
 
             $response->assertOk();
-            expect($response->json('options'))->toBe([]);
-            expect($response->json('is_your_turn'))->toBeFalse();
+            expect($response->json('data.options'))->toBe([]);
+            expect($response->json('data.is_your_turn'))->toBeFalse();
         });
     });
 

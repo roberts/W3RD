@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\GameTitle;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
 
 class LeaderboardController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Get leaderboard for a specific game title.
      */
     public function show(string $gameTitle): JsonResponse
     {
         // Validate game title exists
-        $validTitles = collect(config('protocol.game_titles'))->pluck('key')->toArray();
+        $title = GameTitle::tryFrom($gameTitle);
 
-        if (! in_array($gameTitle, $validTitles)) {
-            return response()->json([
-                'message' => 'Game title not found.',
-            ], 404);
+        if (! $title) {
+            return $this->notFoundResponse('Game title not found.');
         }
 
         // Get top users by level for this game title
@@ -39,11 +41,9 @@ class LeaderboardController extends Controller
                 ];
             });
 
-        return response()->json([
-            'data' => [
-                'game_title' => $gameTitle,
-                'entries' => $leaderboard,
-            ],
+        return $this->dataResponse([
+            'game_title' => $gameTitle,
+            'entries' => $leaderboard,
         ]);
     }
 }

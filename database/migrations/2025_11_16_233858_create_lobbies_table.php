@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('min_players')->default(2);
             $table->timestamp('scheduled_at')->nullable();
             $table->string('status')->default('pending')->index();
+            $table->foreignId('game_id')->nullable()->constrained('games');
             $table->timestamps();
 
             $table->index(['game_title', 'is_public', 'status']);

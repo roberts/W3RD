@@ -36,6 +36,10 @@ class Action extends Model
         'status',
         'error_code',
         'timestamp_client',
+        'coordination_group',
+        'coordination_sequence',
+        'is_coordinated',
+        'coordination_completed_at',
     ];
 
     protected $casts = [
@@ -43,6 +47,9 @@ class Action extends Model
         'action_details' => 'array',
         'turn_number' => 'integer',
         'timestamp_client' => 'datetime',
+        'is_coordinated' => 'boolean',
+        'coordination_sequence' => 'integer',
+        'coordination_completed_at' => 'datetime',
     ];
 
     /**

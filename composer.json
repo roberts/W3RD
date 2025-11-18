@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "drewroberts/media": "^12.1",
         "filament/filament": "^4.2",
         "google/apiclient": "^2.18",
@@ -73,7 +73,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test --testsuite=Unit,Feature"
+            "@php -d memory_limit=512M ./vendor/bin/pest --testsuite=Unit,Feature,Integration"
         ],
         "test-browser": [
             "@php artisan config:clear --ansi",

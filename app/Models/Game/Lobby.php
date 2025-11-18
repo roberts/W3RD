@@ -30,6 +30,7 @@ class Lobby extends Model
         'game_title',
         'game_mode',
         'host_id',
+        'game_id',
         'is_public',
         'min_players',
         'scheduled_at',
@@ -69,6 +70,11 @@ class Lobby extends Model
         return $this->players()->where('status', LobbyPlayerStatus::ACCEPTED);
     }
 
+    public function game(): BelongsTo
+    {
+        return $this->belongsTo(Game::class);
+    }
+
     public function isHost(User $user): bool
     {
         return $this->host_id === $user->id;
@@ -77,6 +83,19 @@ class Lobby extends Model
     public function hasMinimumPlayers(): bool
     {
         return $this->acceptedPlayers()->count() >= $this->min_players;
+    }
+
+    public function canStartGame(): bool
+    {
+        $acceptedCount = $this->acceptedPlayers()->count();
+
+        // If the game requires an exact player count, check for exact match
+        if ($this->game_title->requiresExactPlayerCount()) {
+            return $acceptedCount === $this->game_title->minPlayers();
+        }
+
+        // Otherwise, just check if we have minimum players
+        return $acceptedCount >= $this->min_players;
     }
 
     public function isReady(): bool

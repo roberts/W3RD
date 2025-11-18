@@ -34,7 +34,7 @@ describe('Rematch Management', function () {
 
             $response = $this->actingAs($player1)->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $response->assertStatus(400); // RematchService returns 400 for invalid game state
+            $response->assertStatus(403); // Form Request returns 403 for invalid game state
         });
 
         it('rejects rematch request from non-player', function () {
@@ -45,7 +45,7 @@ describe('Rematch Management', function () {
 
             $response = $this->actingAs($nonPlayer)->postJson("/api/v1/games/{$game->ulid}/rematch");
 
-            $response->assertStatus(400); // RematchService returns 400 for non-players
+            $response->assertStatus(403); // Form Request returns 403 for non-players
         });
     });
 

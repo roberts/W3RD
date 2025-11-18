@@ -25,6 +25,12 @@ return new class extends Migration
 
             // Game State Snapshot - json (new state after action)?
 
+            // Coordination fields (for multi-player synchronous actions)
+            $table->string('coordination_group', 100)->nullable()->index(); // e.g., "game:01JCXXX:pass:round:1"
+            $table->integer('coordination_sequence')->nullable(); // Sequence within the coordination group
+            $table->boolean('is_coordinated')->default(false)->index(); // Quick flag for coordinated actions
+            $table->timestamp('coordination_completed_at')->nullable(); // When the coordination group was completed
+
             // Temporal Data
             $table->timestamp('timestamp_client')->nullable();
             $table->softDeletes();
@@ -34,6 +40,8 @@ return new class extends Migration
             $table->index(['game_id', 'turn_number']);
             $table->index(['player_id', 'timestamp_client']);
             $table->index(['game_id', 'action_type']);
+            $table->index(['coordination_group', 'coordination_completed_at']);
+            $table->unique(['coordination_group', 'player_id']); // Prevent duplicate submissions per coordination group
         });
     }
 };

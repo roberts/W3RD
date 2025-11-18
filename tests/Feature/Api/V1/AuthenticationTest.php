@@ -190,7 +190,7 @@ describe('Auth', function () {
             $response = $this->actingAs($user)->getJson('/api/v1/auth/user');
 
             $response->assertOk();
-            expect($response->json('email'))->toBe('test@example.com');
+            expect($response->json('data.name'))->toBe('Test User');
         });
 
         it('updates user profile with valid token', function () {
@@ -201,7 +201,7 @@ describe('Auth', function () {
             ]);
 
             $response->assertOk();
-            expect($response->json('name'))->toBe('Updated Name');
+            expect($response->json('data.name'))->toBe('Updated Name');
         });
 
         it('logs out and revokes tokens', function () {

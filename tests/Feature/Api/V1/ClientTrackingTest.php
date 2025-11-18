@@ -52,7 +52,7 @@ describe('Client Tracking', function () {
                 'max_players' => 2,
             ]);
 
-        $lobbyUlid = $lobbyResponse->json('lobby.ulid');
+        $lobbyUlid = $lobbyResponse->json('data.ulid');
 
         $lobbyResponse->assertStatus(201);
         expect($lobbyUlid)->not->toBeNull();

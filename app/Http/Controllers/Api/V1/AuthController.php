@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Auth\TrackAuthenticationEntryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -9,10 +10,12 @@ use App\Http\Requests\Auth\SocialLoginRequest;
 use App\Http\Requests\Auth\UpdateUserRequest;
 use App\Http\Requests\Auth\VerifyRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
 use App\Models\Auth\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -21,6 +24,12 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    use ApiResponses;
+
+    public function __construct(
+        protected TrackAuthenticationEntryAction $trackEntry
+    ) {}
+
     /**
      * Register a new user.
      */
@@ -36,9 +45,10 @@ class AuthController extends Controller
         // In production, dispatch a job to send an email.
         // Mail::to($registration->email)->send(new VerifyEmail($registration->verification_token));
 
-        return response()->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
-        ], 201);
+        return $this->createdResponse(
+            null,
+            'Registration successful. Please check your email to verify your account.'
+        );
     }
 
     /**
@@ -63,10 +73,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token, UserResource::make($user));
     }
 
     /**
@@ -75,25 +82,21 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         if (! Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return $this->unauthorizedResponse('Invalid credentials');
         }
 
         $user = Auth::user();
         $token = $user->createToken($request->ip() ?? 'api-token');
 
-        Entry::create([
-            'user_id' => $user->id,
-            'client_id' => $request->header('X-Client-Key'),
-            'token_id' => $token->accessToken->id,
-            'ip_address' => $request->ip(),
-            'device_info' => $request->userAgent(),
-            'logged_in_at' => now(),
-        ]);
+        $this->trackEntry->execute(
+            $user,
+            $token,
+            $request->header('X-Client-Key'),
+            $request->ip(),
+            $request->userAgent()
+        );
 
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }
 
     /**
@@ -101,12 +104,18 @@ class AuthController extends Controller
      */
     public function socialLogin(SocialLoginRequest $request)
     {
-        try {
-            // userFromToken exists in Socialite but isn't in type definitions
-            /** @phpstan-ignore-next-line */
-            $providerUser = Socialite::driver($request->provider)->userFromToken($request->access_token);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid provider token.'], 401);
+        $providerUser = $this->handleServiceCall(
+            function () use ($request) {
+                // userFromToken exists in Socialite but isn't in type definitions
+                /** @phpstan-ignore-next-line */
+                return Socialite::driver($request->provider)->userFromToken($request->access_token);
+            },
+            'Invalid provider token',
+            401
+        );
+
+        if ($providerUser instanceof JsonResponse) {
+            return $providerUser;
         }
 
         // Find or create the social account
@@ -139,19 +148,15 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->ip() ?? 'api-token');
 
-        Entry::create([
-            'user_id' => $user->id,
-            'client_id' => $request->header('X-Client-Key'),
-            'token_id' => $token->accessToken->id,
-            'ip_address' => $request->ip(),
-            'device_info' => $request->userAgent(),
-            'logged_in_at' => now(),
-        ]);
+        $this->trackEntry->execute(
+            $user,
+            $token,
+            $request->header('X-Client-Key'),
+            $request->ip(),
+            $request->userAgent()
+        );
 
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'user' => UserResource::make($user),
-        ]);
+        return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }
 
     /**
@@ -178,7 +183,7 @@ class AuthController extends Controller
             $token->delete();
         }
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return $this->messageResponse('Logged out successfully');
     }
 
     /**
@@ -186,7 +191,7 @@ class AuthController extends Controller
      */
     public function getUser(Request $request)
     {
-        return response()->json($request->user());
+        return $this->resourceResponse(UserResource::make($request->user()));
     }
 
     /**
@@ -197,6 +202,6 @@ class AuthController extends Controller
         $user = $request->user();
         $user->update($request->validated());
 
-        return response()->json($user);
+        return $this->resourceResponse(UserResource::make($user), 'User updated successfully');
     }
 }

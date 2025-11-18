@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
+use App\Http\Resources\AlertResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Get list of alerts for the authenticated user.
      */
@@ -21,26 +25,10 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        /** @var \Illuminate\Support\Collection<int, Alert> $alertItems */
-        $alertItems = $alerts->getCollection();
-
-        return response()->json([
-            'data' => $alertItems->map(function (Alert $alert) {
-                return [
-                    'ulid' => $alert->ulid,
-                    'type' => $alert->type,
-                    'data' => $alert->data,
-                    'read_at' => $alert->read_at?->toIso8601String(),
-                    'created_at' => $alert->created_at->toIso8601String(),
-                ];
-            }),
-            'meta' => [
-                'current_page' => $alerts->currentPage(),
-                'last_page' => $alerts->lastPage(),
-                'per_page' => $alerts->perPage(),
-                'total' => $alerts->total(),
-            ],
-        ]);
+        return $this->collectionResponse(
+            $alerts,
+            fn ($items) => AlertResource::collection($items)
+        );
     }
 
     /**
@@ -65,8 +53,6 @@ class AlertController extends Controller
                 ->update(['read_at' => now()]);
         }
 
-        return response()->json([
-            'message' => 'Alerts marked as read.',
-        ]);
+        return $this->messageResponse('Alerts marked as read.');
     }
 }

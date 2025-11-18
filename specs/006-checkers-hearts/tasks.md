@@ -6,24 +6,24 @@ This document outlines the development tasks for implementing the Checkers and H
 
 These tasks establish the core contracts and base classes required for the extensible game framework.
 
-- [ ] T001 Create interface `app/Interfaces/GameModeContract.php`.
-- [ ] T002 Create abstract class `app/Games/BaseCardGameTitle.php` for shared card game logic.
-- [ ] T003 Create directory `app/Games/Checkers/Modes` for Checkers game modes.
-- [ ] T004 Create directory `app/Games/Hearts/Modes` for Hearts game modes.
-- [ ] T005 Create test file `tests/Feature/Games/CheckersTest.php`.
-- [ ] T006 Create test file `tests/Feature/Games/HeartsTest.php`.
+- [X] T001 Create interface `app/Interfaces/GameModeContract.php`.
+- [X] T002 Create abstract class `app/Games/BaseCardGameTitle.php` for shared card game logic.
+- [X] T003 Create directory `app/Games/Checkers/Modes` for Checkers game modes.
+- [X] T004 Create directory `app/Games/Hearts/Modes` for Hearts game modes.
+- [X] T005 Create test file `tests/Feature/Games/CheckersTest.php`.
+- [X] T006 Create test file `tests/Feature/Games/HeartsTest.php`.
 
 ## Phase 2: User Story 1 - Checkers Implementation (P1)
 
 **Goal**: Implement a complete, playable game of standard Checkers.
 **Independent Test**: Two players can start, play, and finish a game of Checkers, with the correct winner declared.
 
-- [ ] T010 [US1] Create data object `app/Games/Checkers/PlayerState.php` as defined in the data model.
-- [ ] T011 [US1] Create data object `app/Games/Checkers/GameState.php` as defined in the data model.
-- [ ] T012 [US1] Create class `app/Games/Checkers/CheckersTitle.php` that implements `App\Interfaces\GameTitleContract`.
-- [ ] T013 [US1] Create class `app/Games/Checkers/Modes/Standard.php` that implements `App\Interfaces\GameModeContract`.
-- [ ] T014 [US1] Implement the Checkers game logic and assertions in `tests/Feature/Games/CheckersTest.php`.
-- [ ] T015 [US1] Implement the Checkers API endpoint tests in `tests/Feature/Api/Games/CheckersTest.php`.
+- [X] T010 [US1] Create data object `app/Games/Checkers/PlayerState.php` as defined in the data model.
+- [X] T011 [US1] Create data object `app/Games/Checkers/GameState.php` as defined in the data model.
+- [X] T012 [US1] Create class `app/Games/Checkers/CheckersTitle.php` that implements `App\Interfaces\GameTitleContract`.
+- [X] T013 [US1] Create class `app/Games/Checkers/Modes/Standard.php` that implements `App\Interfaces\GameModeContract`.
+- [X] T014 [US1] Implement the Checkers game logic and assertions in `tests/Feature/Games/CheckersTest.php`.
+- [X] T015 [US1] Implement the Checkers API endpoint tests in `tests/Feature/Api/Games/CheckersTest.php`.
 
 ## Phase 3: User Story 2 - Hearts Implementation (P2)
 

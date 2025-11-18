@@ -9,7 +9,7 @@ This plan outlines the implementation of a flexible and extensible game framewor
 
 ## Technical Context
 
-**Language/Version**: PHP 8.3
+**Language/Version**: PHP 8.4
 **Primary Dependencies**: Laravel Framework v12.10, Pest v4.1
 **Storage**: PostgreSQL (via Eloquent ORM)
 **Testing**: Pest
@@ -75,6 +75,10 @@ app/
 
 tests/
 ├── Feature/
+│   ├── Api/
+│   │   └── Games/
+│   │       ├── CheckersTest.php
+│   │       └── HeartsTest.php
 │   ├── Games/
 │   │   ├── CheckersTest.php
 │   │   └── HeartsTest.php
@@ -82,6 +86,27 @@ tests/
 ```
 
 **Structure Decision**: The existing Laravel project structure will be used. New game logic will be added within the `app/Games` directory, with each game in its own subdirectory. This keeps the game logic organized and modular. New contracts will be placed in `app/Games/Contracts` to be accessible by all games.
+
+## API Endpoint Testing
+
+To ensure the games are fully playable via the API, a suite of Pest feature tests will be created. These tests will simulate a full game flow by making requests to the API endpoints, verifying the game state transitions, and asserting the final outcomes.
+
+**Testing Strategy**:
+
+-   **`tests/Feature/Api/Games/CheckersTest.php`**: This test will cover the full lifecycle of a Checkers game.
+    -   It will create two users and authenticate them.
+    -   It will simulate creating a new game match via a `POST` request to an endpoint like `/api/matches`.
+    -   It will then send a series of `POST` requests to an endpoint like `/api/matches/{matchId}/actions` to simulate each player making moves.
+    -   After each move, it will make a `GET` request to `/api/matches/{matchId}` to fetch the updated game state and assert that it is correct.
+    -   Finally, it will assert that the game ends with the correct winner.
+
+-   **`tests/Feature/Api/Games/HeartsTest.php`**: This test will cover the full lifecycle of a Hearts game.
+    -   It will create four users and authenticate them.
+    -   It will simulate creating a new game match.
+    -   It will test the card passing phase.
+    -   It will simulate multiple rounds of trick-taking.
+    -   It will assert that scores are calculated correctly after each round.
+    -   It will assert that the game ends when a player reaches the score limit.
 
 ## Complexity Tracking
 

@@ -15,12 +15,8 @@ use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use App\Services\GameActionRecorder;
-use App\Services\Timeouts\ForfeitHandler;
-use App\Services\Timeouts\NoneHandler;
-use App\Services\Timeouts\PassHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class GameActionController extends Controller
 {

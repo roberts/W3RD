@@ -5,7 +5,6 @@ namespace App\Actions\Game;
 use App\DataTransferObjects\Game\TimeoutResult;
 use App\Enums\GameStatus;
 use App\Http\Traits\ApiResponses;
-use App\Interfaces\GameModeInterface;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Services\Timeouts\ForfeitHandler;
@@ -19,10 +18,7 @@ class HandleTimeoutAction
     /**
      * Check if the current turn has timed out and handle accordingly.
      *
-     * @param  Game  $game
      * @param  mixed  $mode  The game mode handler
-     * @param  mixed  $gameState
-     * @return TimeoutResult
      */
     public function execute(Game $game, mixed $mode, mixed $gameState): TimeoutResult
     {

@@ -11,12 +11,6 @@ class JoinQuickplayQueueAction
 {
     /**
      * Add a user to the quickplay queue.
-     *
-     * @param  User  $user
-     * @param  GameTitle  $gameTitle
-     * @param  string  $gameMode
-     * @param  int  $clientId
-     * @return QueueJoinResult
      */
     public function execute(User $user, GameTitle $gameTitle, string $gameMode, int $clientId): QueueJoinResult
     {

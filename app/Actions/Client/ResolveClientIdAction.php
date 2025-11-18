@@ -11,7 +11,6 @@ class ResolveClientIdAction
      *
      * Defaults to 1 (Gamer Protocol Web) for AI agents or when header is missing.
      *
-     * @param  Request  $request
      * @return int The client ID (defaults to 1)
      */
     public function execute(Request $request): int

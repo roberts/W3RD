@@ -3,7 +3,6 @@
 namespace App\Actions\Game;
 
 use App\DataTransferObjects\Game\CoordinatedActionResult;
-use App\Interfaces\GameModeInterface;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 
@@ -12,11 +11,8 @@ class ProcessCoordinatedActionAction
     /**
      * Process coordinated actions (e.g., Hearts pass_cards).
      *
-     * @param  Game  $game
      * @param  object  $action  The action DTO
      * @param  mixed  $mode  The game mode handler
-     * @param  mixed  $gameState
-     * @return CoordinatedActionResult
      */
     public function execute(Game $game, object $action, mixed $mode, mixed $gameState): CoordinatedActionResult
     {

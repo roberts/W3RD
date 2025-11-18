@@ -9,9 +9,6 @@ class ApplyDodgePenaltyAction
 {
     /**
      * Apply escalating dodge penalty to a user.
-     *
-     * @param  int  $userId
-     * @return void
      */
     public function execute(int $userId): void
     {

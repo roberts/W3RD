@@ -10,9 +10,6 @@ class LeaveQuickplayQueueAction
 {
     /**
      * Remove a user from all quickplay queues.
-     *
-     * @param  User  $user
-     * @return void
      */
     public function execute(User $user): void
     {

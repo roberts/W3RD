@@ -18,7 +18,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private const AI_FALLBACK_THRESHOLD = 30; // seconds
+    private const AI_FALLBACK_THRESHOLD = 20; // seconds
 
     private const MATCH_CONFIRMATION_TIMEOUT = 15; // seconds
 
@@ -125,26 +125,26 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private function matchWithAI(int $userId, GameTitle $gameTitle, string $mode, string $queueKey): void
     {
-        // Remove from queue
-        Redis::zrem($queueKey, (string) $userId);
-        Redis::hdel('quickplay:timestamps', (string) $userId);
-        Redis::hdel('quickplay:clients', (string) $userId);
-
-        // Find available agent
+        // Find available agent FIRST before removing from queue
         $schedulingService = app(\App\Services\Agents\AgentSchedulingService::class);
         $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode, $userId);
 
         if (! $agentUser) {
-            \Log::warning('No agent available for matchmaking', [
+            \Log::info('No agent available for matchmaking, keeping user in queue', [
                 'user_id' => $userId,
                 'game_title' => $gameTitle->value,
                 'mode' => $mode,
             ]);
 
-            // TODO: Notify user that no opponents are available
-            // Could put them back in queue or show message
+            // Keep user in queue - they'll continue waiting for human or agent
+            // Agent might become available on next job run, or human might join
             return;
         }
+
+        // Only remove from queue once we successfully found an agent
+        Redis::zrem($queueKey, (string) $userId);
+        Redis::hdel('quickplay:timestamps', (string) $userId);
+        Redis::hdel('quickplay:clients', (string) $userId);
 
         \Log::info('Matched user with AI agent', [
             'user_id' => $userId,

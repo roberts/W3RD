@@ -20,7 +20,7 @@ class TrackAuthenticationEntryAction
     ): Entry {
         return Entry::create([
             'user_id' => $user->id,
-            'client_id' => $clientId,
+            'client_id' => $clientId ? (int) $clientId : 1,
             'token_id' => $token->accessToken->id,
             'ip_address' => $ipAddress,
             'device_info' => $deviceInfo,

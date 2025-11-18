@@ -1,0 +1,153 @@
+<?php
+
+use App\Actions\Lobby\FindLobbyByUlidAction;
+use App\Models\Auth\User;
+use App\Models\Game\Lobby;
+use App\Models\Game\LobbyPlayer;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+describe('FindLobbyByUlidAction', function () {
+    describe('Basic Lookup', function () {
+        it('finds lobby by ulid without eager loading', function () {
+            $lobby = Lobby::factory()->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid);
+
+            expect($found->id)->toBe($lobby->id)
+                ->and($found->ulid)->toBe($lobby->ulid);
+        });
+
+        it('throws ModelNotFoundException for invalid ulid', function () {
+            $action = new FindLobbyByUlidAction();
+
+            $action->execute('invalid-ulid-12345');
+        })->throws(ModelNotFoundException::class);
+
+        it('throws ModelNotFoundException for non-existent ulid', function () {
+            $action = new FindLobbyByUlidAction();
+
+            $action->execute('01234567890123456789012345');
+        })->throws(ModelNotFoundException::class);
+    });
+
+    describe('Eager Loading', function () {
+        it('loads host relationship when requested', function () {
+            $host = User::factory()->create();
+            $lobby = Lobby::factory()->for($host, 'host')->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['host']);
+
+            expect($found->relationLoaded('host'))->toBeTrue()
+                ->and($found->host->id)->toBe($host->id);
+        });
+
+        it('loads players relationship when requested', function () {
+            $lobby = Lobby::factory()->create();
+            LobbyPlayer::factory()->count(2)->for($lobby)->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['players']);
+
+            expect($found->relationLoaded('players'))->toBeTrue()
+                ->and($found->players)->toHaveCount(2);
+        });
+
+        it('loads nested relationships when requested', function () {
+            $lobby = Lobby::factory()->create();
+            $lobbyPlayer = LobbyPlayer::factory()->for($lobby)->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['players.user']);
+
+            expect($found->relationLoaded('players'))->toBeTrue()
+                ->and($found->players->first()->relationLoaded('user'))->toBeTrue()
+                ->and($found->players->first()->user->id)->toBe($lobbyPlayer->user_id);
+        });
+
+        it('loads host avatar image when requested', function () {
+            $host = User::factory()->create();
+            $lobby = Lobby::factory()->for($host, 'host')->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['host.avatar.image']);
+
+            expect($found->relationLoaded('host'))->toBeTrue()
+                ->and($found->host->relationLoaded('avatar'))->toBeTrue();
+        });
+
+        it('loads multiple relationships when requested', function () {
+            $host = User::factory()->create();
+            $lobby = Lobby::factory()->for($host, 'host')->create();
+            LobbyPlayer::factory()->for($lobby)->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['host', 'players']);
+
+            expect($found->relationLoaded('host'))->toBeTrue()
+                ->and($found->relationLoaded('players'))->toBeTrue();
+        });
+
+        it('does not load relationships when empty array provided', function () {
+            $lobby = Lobby::factory()->create();
+            LobbyPlayer::factory()->for($lobby)->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, []);
+
+            expect($found->relationLoaded('host'))->toBeFalse()
+                ->and($found->relationLoaded('players'))->toBeFalse();
+        });
+
+        it('handles complex nested player relationships', function () {
+            $lobby = Lobby::factory()->create();
+            LobbyPlayer::factory()->for($lobby)->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid, ['players.user.avatar.image']);
+
+            expect($found->relationLoaded('players'))->toBeTrue()
+                ->and($found->players->first()->relationLoaded('user'))->toBeTrue();
+        });
+    });
+
+    describe('Edge Cases', function () {
+        it('handles lobbies with no players', function () {
+            $lobby = Lobby::factory()->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid);
+
+            expect($found->id)->toBe($lobby->id);
+        });
+
+        it('handles public lobbies', function () {
+            $lobby = Lobby::factory()->create(['is_public' => true]);
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid);
+
+            expect($found->is_public)->toBeTrue();
+        });
+
+        it('handles private lobbies', function () {
+            $lobby = Lobby::factory()->create(['is_public' => false]);
+            $action = new FindLobbyByUlidAction();
+
+            $found = $action->execute($lobby->ulid);
+
+            expect($found->is_public)->toBeFalse();
+        });
+
+        it('returns same lobby instance for multiple calls with same ulid', function () {
+            $lobby = Lobby::factory()->create();
+            $action = new FindLobbyByUlidAction();
+
+            $found1 = $action->execute($lobby->ulid);
+            $found2 = $action->execute($lobby->ulid);
+
+            expect($found1->id)->toBe($found2->id);
+        });
+    });
+});

@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponses;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected ProfileService $profileService
     ) {}

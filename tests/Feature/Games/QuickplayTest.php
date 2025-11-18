@@ -21,8 +21,10 @@ describe('Quickplay Matchmaking', function () {
 
             $response->assertStatus(202)
                 ->assertJson([
+                    'data' => [
+                        'game_title' => 'validate-four',
+                    ],
                     'message' => 'Successfully joined the queue',
-                    'game_title' => 'validate-four',
                 ]);
         });
 
@@ -42,7 +44,9 @@ describe('Quickplay Matchmaking', function () {
 
             $response->assertStatus(202)
                 ->assertJson([
-                    'game_mode' => 'blitz',
+                    'data' => [
+                        'game_mode' => 'blitz',
+                    ],
                 ]);
         });
 
@@ -55,7 +59,7 @@ describe('Quickplay Matchmaking', function () {
 
             $response->assertStatus(400)
                 ->assertJson([
-                    'error' => 'Invalid game title',
+                    'message' => 'Invalid game title',
                 ]);
         });
 
@@ -91,8 +95,8 @@ describe('Quickplay Matchmaking', function () {
 
             $response->assertStatus(429)
                 ->assertJsonStructure([
-                    'error',
-                    'cooldown_remaining',
+                    'message',
+                    'context',
                 ]);
         });
     });
@@ -146,7 +150,7 @@ describe('Quickplay Matchmaking', function () {
 
             $response->assertStatus(404)
                 ->assertJson([
-                    'error' => 'Match confirmation has expired',
+                    'message' => 'Match confirmation has expired',
                 ]);
         });
     });

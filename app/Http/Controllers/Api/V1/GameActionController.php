@@ -6,6 +6,7 @@ use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
+use App\Http\Traits\ApiResponses;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
 class GameActionController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected GameActionRecorder $actionRecorder
     ) {}
@@ -36,28 +38,19 @@ class GameActionController extends Controller
         try {
             $mode = GameServiceProvider::getMode($game);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'Unable to load game mode handler.',
-            ], 500);
+            return $this->errorResponse('Unable to load game mode handler.', 500, 'configuration_error');
         }
 
         // Verify the authenticated user is a player in this game
         /** @var Player|null $player */
         $player = $game->players()->where('user_id', Auth::id())->first();
         if (! $player) {
-            return response()->json([
-                'error' => 'Forbidden',
-                'message' => 'You are not a player in this game.',
-            ], 403);
+            return $this->forbiddenResponse('You are not a player in this game.');
         }
 
         // Check if game is still active
         if ($game->status !== GameStatus::ACTIVE) {
-            return response()->json([
-                'error' => 'Invalid game state',
-                'message' => 'This game is not active.',
-            ], 400);
+            return $this->errorResponse('This game is not active.', 400, 'invalid_game_state');
         }
 
         // Validate request - basic validation, game-specific validation happens in the action factory
@@ -94,12 +87,12 @@ class GameActionController extends Controller
 
                 $game->save();
 
-                return response()->json([
-                    'error' => 'Action timeout',
-                    'message' => 'Your turn has timed out. You have forfeited the game.',
-                    'game_status' => 'completed',
-                    'penalty' => $penalty,
-                ], 408);
+                return $this->errorResponse(
+                    'Your turn has timed out. You have forfeited the game.',
+                    408,
+                    'action_timeout',
+                    ['game_status' => 'completed', 'penalty' => $penalty]
+                );
             }
 
             // Pass strategy - advance to next player
@@ -108,20 +101,18 @@ class GameActionController extends Controller
                 $game->game_state = $gameState->toArray();
                 $game->save();
 
-                return response()->json([
-                    'error' => 'Action timeout',
-                    'message' => 'Your turn has timed out and has been passed.',
-                    'penalty' => 'pass',
-                ], 408);
+                return $this->errorResponse(
+                    'Your turn has timed out and has been passed.',
+                    408,
+                    'action_timeout',
+                    ['penalty' => 'pass']
+                );
             }
         }
 
         // Verify it's this player's turn
         if ($mode->getGameState()->currentPlayerUlid !== $player->ulid) {
-            return response()->json([
-                'error' => 'Invalid turn',
-                'message' => 'It is not your turn.',
-            ], 400);
+            return $this->errorResponse('It is not your turn.', 400, 'invalid_turn');
         }
 
         // Get the action factory for this game and create the action DTO
@@ -132,10 +123,7 @@ class GameActionController extends Controller
                 $validated['action_details']
             );
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'error' => 'Invalid action',
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse($e->getMessage(), 400, 'invalid_action');
         }
 
         // Validate the action with rich error feedback
@@ -150,12 +138,12 @@ class GameActionController extends Controller
                 $game->turn_number ?? 1
             );
 
-            return response()->json([
-                'error' => 'Invalid move',
-                'error_code' => $validationResult->errorCode,
-                'message' => $validationResult->message,
-                'context' => $validationResult->context,
-            ], 400);
+            return $this->errorResponse(
+                $validationResult->message,
+                400,
+                $validationResult->errorCode,
+                $validationResult->context
+            );
         }
 
         // Apply the action
@@ -307,21 +295,14 @@ class GameActionController extends Controller
         try {
             $mode = GameServiceProvider::getMode($game);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Configuration error',
-                'message' => 'Unable to load game mode handler.',
-            ], 500);
+            return $this->errorResponse('Unable to load game mode handler.', 500, 'configuration_error');
         }
 
         // Get the player
         /** @var Player|null $player */
         $player = $game->players()->where('user_id', Auth::id())->first();
         if (! $player) {
-            return response()->json([
-                'options' => [],
-                'is_your_turn' => false,
-                'message' => 'You are not a player in this game.',
-            ], 403);
+            return $this->forbiddenResponse('You are not a player in this game.');
         }
 
         // Get the current game state

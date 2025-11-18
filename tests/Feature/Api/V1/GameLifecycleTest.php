@@ -322,7 +322,7 @@ describe('Game Lifecycle', function () {
 
             $response->assertStatus(400) // API returns 400 for invalid moves
                 ->assertJson([
-                    'error' => 'Invalid move',
+                    'message' => 'Column must be between 0 and 6',
                     'error_code' => 'INVALID_COLUMN',
                 ]);
         });

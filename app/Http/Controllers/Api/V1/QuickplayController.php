@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\GameTitle;
 use App\Http\Requests\Quickplay\AcceptMatchRequest;
 use App\Http\Requests\Quickplay\JoinQuickplayRequest;
+use App\Http\Traits\ApiResponses;
 use App\Services\GameCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Redis;
 
 class QuickplayController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected GameCreationService $gameCreationService
     ) {
@@ -30,7 +32,7 @@ class QuickplayController extends Controller
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
         if (! $gameTitle) {
-            return response()->json(['error' => 'Invalid game title'], 400);
+            return $this->errorResponse('Invalid game title');
         }
 
         $gameMode = $validated['game_mode'] ?? 'standard';
@@ -40,10 +42,12 @@ class QuickplayController extends Controller
         if (Redis::exists($cooldownKey)) {
             $ttl = Redis::ttl($cooldownKey);
 
-            return response()->json([
-                'error' => 'You are on a matchmaking cooldown',
-                'cooldown_remaining' => $ttl,
-            ], 429);
+            return $this->errorResponse(
+                'You are on a matchmaking cooldown',
+                429,
+                null,
+                ['cooldown_remaining' => $ttl]
+            );
         }
 
         // Add to queue (sorted set by skill level)
@@ -59,11 +63,10 @@ class QuickplayController extends Controller
         $clientId = (int) $request->header('X-Client-Key') ?: 1;
         Redis::hset('quickplay:clients', (string) $user->id, (string) $clientId);
 
-        return response()->json([
-            'message' => 'Successfully joined the queue',
+        return $this->successResponse([
             'game_title' => $gameTitle->value,
             'game_mode' => $gameMode,
-        ], 202);
+        ], 'Successfully joined the queue', 202);
     }
 
     /**
@@ -88,7 +91,7 @@ class QuickplayController extends Controller
         // Remove client_id
         Redis::hdel('quickplay:clients', (string) $user->id);
 
-        return response()->json(null, 204);
+        return $this->noContentResponse();
     }
 
     /**
@@ -104,7 +107,7 @@ class QuickplayController extends Controller
 
         // Check if match still exists
         if (! Redis::exists($confirmKey)) {
-            return response()->json(['error' => 'Match confirmation has expired'], 404);
+            return $this->notFoundResponse('Match confirmation has expired');
         }
 
         // Mark this user as accepted
@@ -119,15 +122,12 @@ class QuickplayController extends Controller
 
             $this->createGame($playerIds, $matchId);
 
-            return response()->json([
-                'message' => 'Match accepted! Starting game...',
+            return $this->successResponse([
                 'match_id' => $matchId,
-            ], 202);
+            ], 'Match accepted! Starting game...', 202);
         }
 
-        return response()->json([
-            'message' => 'Acceptance registered. Waiting for opponent...',
-        ], 202);
+        return $this->successResponse(null, 'Acceptance registered. Waiting for opponent...', 202);
     }
 
     /**

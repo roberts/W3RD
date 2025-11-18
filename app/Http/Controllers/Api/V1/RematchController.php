@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Rematch\AcceptRematchRequest;
 use App\Http\Requests\Rematch\DeclineRematchRequest;
 use App\Http\Resources\RematchRequestResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected RematchService $rematchService
     ) {}
@@ -33,14 +35,9 @@ class RematchController extends Controller
             $resourceData = RematchRequestResource::make($rematchRequest->fresh())->toArray($request);
             $resourceData['new_game_ulid'] = $newGame->ulid;
 
-            return response()->json([
-                'data' => $resourceData,
-                'message' => 'Rematch accepted. New game created.',
-            ]);
+            return $this->successResponse($resourceData, 'Rematch accepted. New game created.');
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse($e->getMessage());
         }
     }
 
@@ -57,18 +54,14 @@ class RematchController extends Controller
                 $request->user()
             );
 
-            return response()->json([
-                'data' => RematchRequestResource::make($rematchRequest->fresh()),
-                'message' => 'Rematch request declined',
-            ]);
+            return $this->successResponse(
+                RematchRequestResource::make($rematchRequest->fresh()),
+                'Rematch request declined'
+            );
         } catch (AccessDeniedHttpException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 403);
+            return $this->forbiddenResponse($e->getMessage());
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse($e->getMessage());
         }
     }
 }

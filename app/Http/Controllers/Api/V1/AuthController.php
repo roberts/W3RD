@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\SocialLoginRequest;
 use App\Http\Requests\Auth\UpdateUserRequest;
 use App\Http\Requests\Auth\VerifyRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
@@ -21,6 +22,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    use ApiResponses;
     /**
      * Register a new user.
      */
@@ -36,9 +38,10 @@ class AuthController extends Controller
         // In production, dispatch a job to send an email.
         // Mail::to($registration->email)->send(new VerifyEmail($registration->verification_token));
 
-        return response()->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
-        ], 201);
+        return $this->createdResponse(
+            null,
+            'Registration successful. Please check your email to verify your account.'
+        );
     }
 
     /**
@@ -75,7 +78,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         if (! Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return $this->unauthorizedResponse('Invalid credentials');
         }
 
         $user = Auth::user();
@@ -106,7 +109,7 @@ class AuthController extends Controller
             /** @phpstan-ignore-next-line */
             $providerUser = Socialite::driver($request->provider)->userFromToken($request->access_token);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid provider token.'], 401);
+            return $this->unauthorizedResponse('Invalid provider token.');
         }
 
         // Find or create the social account
@@ -178,7 +181,7 @@ class AuthController extends Controller
             $token->delete();
         }
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return $this->successResponse(null, 'Logged out successfully');
     }
 
     /**

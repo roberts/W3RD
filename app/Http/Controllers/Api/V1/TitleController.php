@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameTitle;
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 
 class TitleController extends Controller
 {
+    use ApiResponses;
     /**
      * Get list of available game titles.
      */
@@ -23,9 +25,7 @@ class TitleController extends Controller
             ];
         })->toArray();
 
-        return response()->json([
-            'data' => $titles,
-        ]);
+        return $this->successResponse($titles);
     }
 
     /**

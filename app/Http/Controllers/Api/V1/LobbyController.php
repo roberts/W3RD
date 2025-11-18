@@ -11,6 +11,7 @@ use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
 use App\Http\Resources\LobbyResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 
 class LobbyController extends Controller
 {
+    use ApiResponses;
     /**
      * List all public lobbies
      */
@@ -46,7 +48,7 @@ class LobbyController extends Controller
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
         if (! $gameTitle) {
-            return response()->json(['error' => 'Invalid game title'], 400);
+            return $this->errorResponse('Invalid game title');
         }
 
         DB::beginTransaction();
@@ -98,7 +100,7 @@ class LobbyController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Failed to create lobby'], 500);
+            return $this->errorResponse('Failed to create lobby', 500);
         }
     }
 
@@ -135,7 +137,7 @@ class LobbyController extends Controller
 
         $lobby->markAsCancelled();
 
-        return response()->json(null, 204);
+        return $this->noContentResponse();
     }
 
     /**

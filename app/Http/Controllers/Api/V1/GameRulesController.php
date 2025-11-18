@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\File;
 
 class GameRulesController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Get the rules for a specific game title.
      *
@@ -22,10 +25,7 @@ class GameRulesController extends Controller
         $rulesPath = app_path("Games/{$gameDirName}/rules.php");
 
         if (! File::exists($rulesPath)) {
-            return response()->json([
-                'error' => 'Game not found',
-                'message' => "No rules found for game '{$gameTitle}'",
-            ], 404);
+            return $this->notFoundResponse("No rules found for game '{$gameTitle}'");
         }
 
         // Load the base rules

@@ -7,6 +7,7 @@ use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
+use App\Http\Traits\ApiResponses;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
@@ -17,6 +18,7 @@ use Illuminate\Routing\Controller;
 
 class LobbyPlayerController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected GameCreationService $gameCreationService
     ) {
@@ -34,11 +36,11 @@ class LobbyPlayerController extends Controller
         $user = $request->user();
 
         if (! $lobby->isHost($user)) {
-            return response()->json(['error' => 'Only the host can invite players'], 403);
+            return $this->forbiddenResponse('Only the host can invite players');
         }
 
         if ($lobby->status !== LobbyStatus::PENDING) {
-            return response()->json(['error' => 'Cannot invite players to a non-pending lobby'], 400);
+            return $this->errorResponse('Cannot invite players to a non-pending lobby');
         }
 
         // Resolve username to user
@@ -50,7 +52,7 @@ class LobbyPlayerController extends Controller
             ->first();
 
         if ($existing) {
-            return response()->json(['error' => 'Player is already in this lobby'], 400);
+            return $this->errorResponse('Player is already in this lobby');
         }
 
         // Create invitation
@@ -63,9 +65,7 @@ class LobbyPlayerController extends Controller
         // Broadcast invitation
         broadcast(new LobbyInvitation($invitee->id, $lobby));
 
-        return response()->json([
-            'message' => 'Player invited successfully',
-        ], 201);
+        return $this->createdResponse(null, 'Player invited successfully');
     }
 
     /**
@@ -83,7 +83,7 @@ class LobbyPlayerController extends Controller
 
         // Verify the user is responding for themselves
         if ($currentUser->id !== $user->id) {
-            return response()->json(['error' => 'You can only respond for yourself'], 403);
+            return $this->forbiddenResponse('You can only respond for yourself');
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -106,17 +106,15 @@ class LobbyPlayerController extends Controller
                 $this->startGame($lobby);
             }
 
-            return response()->json([
-                'message' => 'Successfully joined the lobby',
-            ]);
+            return $this->successResponse(null, 'Successfully joined the lobby');
         }
 
         if (! $lobbyPlayer) {
-            return response()->json(['error' => 'You are not invited to this lobby'], 404);
+            return $this->notFoundResponse('You are not invited to this lobby');
         }
 
         if ($lobbyPlayer->status !== LobbyPlayerStatus::PENDING) {
-            return response()->json(['error' => 'You have already responded to this invitation'], 400);
+            return $this->errorResponse('You have already responded to this invitation');
         }
 
         // Update status
@@ -131,15 +129,11 @@ class LobbyPlayerController extends Controller
                 $this->startGame($lobby);
             }
 
-            return response()->json([
-                'message' => 'Invitation accepted',
-            ]);
+            return $this->successResponse(null, 'Invitation accepted');
         } else {
             $lobbyPlayer->decline();
 
-            return response()->json([
-                'message' => 'Invitation declined',
-            ]);
+            return $this->successResponse(null, 'Invitation declined');
         }
     }
 
@@ -152,14 +146,14 @@ class LobbyPlayerController extends Controller
         $currentUser = $request->user();
 
         if (! $lobby->isHost($currentUser)) {
-            return response()->json(['error' => 'Only the host can kick players'], 403);
+            return $this->forbiddenResponse('Only the host can kick players');
         }
 
         // Resolve username to user
         $user = User::where('username', strtolower($username))->firstOrFail();
 
         if ($user->id === $currentUser->id) {
-            return response()->json(['error' => 'Host cannot kick themselves'], 400);
+            return $this->errorResponse('Host cannot kick themselves');
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -168,7 +162,7 @@ class LobbyPlayerController extends Controller
 
         $lobbyPlayer->delete();
 
-        return response()->json(null, 204);
+        return $this->noContentResponse();
     }
 
     /**

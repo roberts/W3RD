@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserLevelsController extends Controller
 {
+    use ApiResponses;
     /**
      * Get game-specific levels for the authenticated user.
      */
@@ -28,8 +30,6 @@ class UserLevelsController extends Controller
             ];
         });
 
-        return response()->json([
-            'data' => $levels,
-        ]);
+        return $this->successResponse($levels);
     }
 }

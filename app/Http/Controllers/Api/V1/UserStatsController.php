@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserStatsController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Get global stats for the authenticated user.
      */
@@ -38,15 +41,13 @@ class UserStatsController extends Controller
         // TODO: Implement global rank calculation
         $globalRank = null;
 
-        return response()->json([
-            'data' => [
-                'total_games' => $totalGames,
-                'wins' => $wins,
-                'losses' => $losses,
-                'win_rate' => $totalGames > 0 ? round(($wins / $totalGames) * 100, 2) : 0,
-                'total_points' => $totalPoints,
-                'global_rank' => $globalRank,
-            ],
+        return $this->successResponse([
+            'total_games' => $totalGames,
+            'wins' => $wins,
+            'losses' => $losses,
+            'win_rate' => $totalGames > 0 ? round(($wins / $totalGames) * 100, 2) : 0,
+            'total_points' => $totalPoints,
+            'global_rank' => $globalRank,
         ]);
     }
 }

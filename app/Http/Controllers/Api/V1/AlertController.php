@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
 use App\Http\Resources\AlertResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
 {
+    use ApiResponses;
     /**
      * Get list of alerts for the authenticated user.
      */

@@ -9,6 +9,7 @@ use App\Http\Requests\Game\RequestRematchRequest;
 use App\Http\Resources\ActionResource;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\RematchRequestResource;
+use App\Http\Traits\ApiResponses;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
+    use ApiResponses;
     public function __construct(
         protected RematchService $rematchService
     ) {}
@@ -62,9 +64,7 @@ class GameController extends Controller
         $isPlayer = $game->players->contains('user_id', $user->id);
 
         if (! $isPlayer) {
-            return response()->json([
-                'message' => 'You are not authorized to view this game.',
-            ], 403);
+            return $this->forbiddenResponse('You are not authorized to view this game.');
         }
 
         return response()->json([
@@ -85,14 +85,12 @@ class GameController extends Controller
                 $request->user()
             );
 
-            return response()->json([
-                'data' => RematchRequestResource::make($rematchRequest),
-                'message' => 'Rematch request sent.',
-            ], 201);
+            return $this->createdResponse(
+                RematchRequestResource::make($rematchRequest),
+                'Rematch request sent.'
+            );
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse($e->getMessage());
         }
     }
 
@@ -109,9 +107,7 @@ class GameController extends Controller
         $isPlayer = $game->players->contains('user_id', $user->id);
 
         if (! $isPlayer) {
-            return response()->json([
-                'message' => 'You are not authorized to view this game history.',
-            ], 403);
+            return $this->forbiddenResponse('You are not authorized to view this game history.');
         }
 
         $actions = Action::where('game_id', $game->id)
@@ -140,9 +136,7 @@ class GameController extends Controller
             ->first();
 
         if (! $opponent) {
-            return response()->json([
-                'message' => 'Cannot determine opponent.',
-            ], 400);
+            return $this->errorResponse('Cannot determine opponent.');
         }
 
         // Update game status

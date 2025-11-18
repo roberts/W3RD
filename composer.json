@@ -73,7 +73,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test --testsuite=Unit,Feature"
+            "@php -d memory_limit=512M ./vendor/bin/pest --testsuite=Unit,Feature"
         ],
         "test-browser": [
             "@php artisan config:clear --ansi",

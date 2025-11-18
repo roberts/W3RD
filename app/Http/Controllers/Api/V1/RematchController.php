@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rematch\AcceptRematchRequest;
 use App\Http\Requests\Rematch\DeclineRematchRequest;
+use App\Http\Resources\RematchRequestResource;
 use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
@@ -29,12 +30,11 @@ class RematchController extends Controller
                 $request->user()
             );
 
+            $resourceData = RematchRequestResource::make($rematchRequest->fresh())->toArray($request);
+            $resourceData['new_game_ulid'] = $newGame->ulid;
+
             return response()->json([
-                'data' => [
-                    'rematch_request_ulid' => $rematchRequest->ulid,
-                    'new_game_ulid' => $newGame->ulid,
-                    'status' => $rematchRequest->fresh()->status,
-                ],
+                'data' => $resourceData,
                 'message' => 'Rematch accepted. New game created.',
             ]);
         } catch (\InvalidArgumentException $e) {
@@ -58,10 +58,7 @@ class RematchController extends Controller
             );
 
             return response()->json([
-                'data' => [
-                    'rematch_request_ulid' => $rematchRequest->ulid,
-                    'status' => $rematchRequest->fresh()->status,
-                ],
+                'data' => RematchRequestResource::make($rematchRequest->fresh()),
                 'message' => 'Rematch request declined',
             ]);
         } catch (AccessDeniedHttpException $e) {

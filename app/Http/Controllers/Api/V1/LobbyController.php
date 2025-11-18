@@ -11,6 +11,7 @@ use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
 use App\Http\Resources\LobbyPlayerResource;
+use App\Http\Resources\LobbyResource;
 use App\Http\Resources\UserResource;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -32,21 +33,9 @@ class LobbyController extends Controller
             ->where('is_public', true)
             ->where('status', LobbyStatus::PENDING)
             ->latest()
-            ->get()
-            ->map(function (Lobby $lobby) {
-                return [
-                    'ulid' => $lobby->ulid,
-                    'game_title' => $lobby->game_title->value,
-                    'game_mode' => $lobby->game_mode,
-                    'host' => UserResource::make($lobby->host),
-                    'min_players' => $lobby->min_players,
-                    'current_players' => $lobby->acceptedPlayers()->count(),
-                    'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
-                    'status' => $lobby->status->value,
-                ];
-            });
+            ->get();
 
-        return response()->json(['lobbies' => $lobbies]);
+        return response()->json(['lobbies' => LobbyResource::collection($lobbies)]);
     }
 
     /**
@@ -107,14 +96,7 @@ class LobbyController extends Controller
 
             return response()->json([
                 'message' => 'Lobby created successfully',
-                'lobby' => [
-                    'ulid' => $lobby->ulid,
-                    'game_title' => $lobby->game_title->value,
-                    'game_mode' => $lobby->game_mode,
-                    'is_public' => $lobby->is_public,
-                    'min_players' => $lobby->min_players,
-                    'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
-                ],
+                'lobby' => LobbyResource::make($lobby),
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -132,21 +114,8 @@ class LobbyController extends Controller
             ->where('ulid', $lobbyUlid)
             ->firstOrFail();
 
-        /** @var User $host */
-        $host = $lobby->host;
-
         $response = [
-            'lobby' => [
-                'ulid' => $lobby->ulid,
-                'game_title' => $lobby->game_title->value,
-                'game_mode' => $lobby->game_mode,
-                'host' => UserResource::make($host),
-                'is_public' => $lobby->is_public,
-                'min_players' => $lobby->min_players,
-                'scheduled_at' => $lobby->scheduled_at?->toIso8601String(),
-                'status' => $lobby->status->value,
-                'players' => LobbyPlayerResource::collection($lobby->players),
-            ],
+            'lobby' => LobbyResource::make($lobby),
         ];
 
         // Include game information if lobby is completed and has a game

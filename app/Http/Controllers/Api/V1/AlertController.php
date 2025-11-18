@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
+use App\Http\Resources\AlertResource;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,19 +22,8 @@ class AlertController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        /** @var \Illuminate\Support\Collection<int, Alert> $alertItems */
-        $alertItems = $alerts->getCollection();
-
         return response()->json([
-            'data' => $alertItems->map(function (Alert $alert) {
-                return [
-                    'ulid' => $alert->ulid,
-                    'type' => $alert->type,
-                    'data' => $alert->data,
-                    'read_at' => $alert->read_at?->toIso8601String(),
-                    'created_at' => $alert->created_at->toIso8601String(),
-                ];
-            }),
+            'data' => AlertResource::collection($alerts),
             'meta' => [
                 'current_page' => $alerts->currentPage(),
                 'last_page' => $alerts->lastPage(),

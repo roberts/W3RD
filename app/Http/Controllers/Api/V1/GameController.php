@@ -6,7 +6,10 @@ use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ForfeitGameRequest;
 use App\Http\Requests\Game\RequestRematchRequest;
+use App\Http\Resources\ActionResource;
+use App\Http\Resources\GameResource;
 use App\Http\Resources\PlayerResource;
+use App\Http\Resources\RematchRequestResource;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -35,18 +38,7 @@ class GameController extends Controller
             ->paginate(20);
 
         return response()->json([
-            'data' => $games->map(function (Game $game) {
-                return [
-                    'ulid' => $game->ulid,
-                    'game_title' => $game->mode->title_slug->value ?? null,
-                    'status' => $game->status->value,
-                    'turn_number' => $game->turn_number,
-                    'winner_id' => $game->winner_id,
-                    'players' => PlayerResource::collection($game->players)->resolve(),
-                    'created_at' => $game->created_at,
-                    'updated_at' => $game->updated_at,
-                ];
-            })->values(),
+            'data' => GameResource::collection($games),
             'meta' => [
                 'current_page' => $games->currentPage(),
                 'last_page' => $games->lastPage(),
@@ -77,18 +69,7 @@ class GameController extends Controller
         }
 
         return response()->json([
-            'data' => [
-                'ulid' => $game->ulid,
-                'game_title' => $game->mode->title_slug->value ?? null,
-                'status' => $game->status->value,
-                'turn_number' => $game->turn_number,
-                'winner_id' => $game->winner_id,
-                'game_state' => $game->game_state,
-                'players' => PlayerResource::collection($game->players)->resolve(),
-                'created_at' => $game->created_at,
-                'updated_at' => $game->updated_at,
-                'finished_at' => $game->finished_at,
-            ],
+            'data' => GameResource::make($game),
         ]);
     }
 
@@ -106,11 +87,7 @@ class GameController extends Controller
             );
 
             return response()->json([
-                'data' => [
-                    'ulid' => $rematchRequest->ulid,
-                    'status' => $rematchRequest->status,
-                    'expires_at' => $rematchRequest->expires_at,
-                ],
+                'data' => RematchRequestResource::make($rematchRequest),
                 'message' => 'Rematch request sent.',
             ], 201);
         } catch (\InvalidArgumentException $e) {
@@ -145,17 +122,7 @@ class GameController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $actions->map(function (Action $action) {
-                return [
-                    'ulid' => $action->ulid,
-                    'turn_number' => $action->turn_number,
-                    'action_type' => $action->action_type->value,
-                    'action_details' => $action->action_details,
-                    'player' => PlayerResource::make($action->player)->resolve(),
-                    'status' => $action->status,
-                    'created_at' => $action->created_at->toIso8601String(),
-                ];
-            }),
+            'data' => ActionResource::collection($actions),
         ]);
     }
 

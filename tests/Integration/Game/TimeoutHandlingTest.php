@@ -1,6 +1,5 @@
 <?php
 
-use App\Actions\Game\HandleTimeoutAction;
 use App\Enums\GameStatusEnum;
 use App\Games\Hearts\Handlers\ForfeitHandler;
 use App\Games\Hearts\Handlers\NoneHandler;
@@ -18,14 +17,14 @@ describe('Timeout Handling Across Game States', function () {
                     'pass_direction' => 'left',
                 ],
             ]);
-            
+
             $players = collect([]);
             for ($i = 1; $i <= 4; $i++) {
                 $players->push(Player::factory()->for($game)->position($i)->create());
             }
-            
+
             $timeoutPlayer = $players->first();
-            
+
             // Set up game waiting for this player
             $game->update([
                 'game_state' => array_merge($game->game_state, [
@@ -35,12 +34,12 @@ describe('Timeout Handling Across Game States', function () {
                     ],
                 ]),
             ]);
-            
-            $handler = new PassHandler();
+
+            $handler = new PassHandler;
             $handler->handle($game, $timeoutPlayer);
-            
+
             $game->refresh();
-            
+
             // Verify cards were auto-passed
             expect($game->game_state)->toHaveKey('passed_cards')
                 ->and($game->game_state['passed_cards'][(string) $timeoutPlayer->id])->toHaveCount(3);
@@ -51,26 +50,26 @@ describe('Timeout Handling Across Game States', function () {
                 'status' => GameStatusEnum::IN_PROGRESS,
                 'game_state' => ['phase' => 'pass'],
             ]);
-            
+
             $players = collect([]);
             for ($i = 1; $i <= 4; $i++) {
                 $players->push(Player::factory()->for($game)->position($i)->create());
             }
-            
+
             $timeoutPlayer = $players->first();
-            
+
             // Other players already submitted
             $game->update([
                 'game_state' => array_merge($game->game_state, [
                     'waiting_for_players' => [(string) $timeoutPlayer->id],
                 ]),
             ]);
-            
-            $handler = new PassHandler();
+
+            $handler = new PassHandler;
             $handler->handle($game, $timeoutPlayer);
-            
+
             $game->refresh();
-            
+
             // Game should advance to play phase
             expect($game->game_state['phase'])->toBe('play')
                 ->and($game->game_state)->not->toHaveKey('waiting_for_players');
@@ -86,14 +85,14 @@ describe('Timeout Handling Across Game States', function () {
                     'current_turn' => 1,
                 ],
             ]);
-            
+
             $player = Player::factory()->for($game)->position(1)->create();
-            
-            $handler = new ForfeitHandler();
+
+            $handler = new ForfeitHandler;
             $handler->handle($game, $player);
-            
+
             $game->refresh();
-            
+
             // Verify forfeit was recorded
             expect($game->game_state)->toHaveKey('forfeits')
                 ->and($game->game_state['forfeits'])->toContain((string) $player->id);
@@ -108,15 +107,15 @@ describe('Timeout Handling Across Game States', function () {
                     'turn_order' => [1, 2, 3, 4],
                 ],
             ]);
-            
+
             $player1 = Player::factory()->for($game)->position(1)->create();
             Player::factory()->for($game)->position(2)->create();
-            
-            $handler = new ForfeitHandler();
+
+            $handler = new ForfeitHandler;
             $handler->handle($game, $player1);
-            
+
             $game->refresh();
-            
+
             // Turn should advance to player 2
             expect($game->game_state['current_turn'])->toBe(2);
         });
@@ -128,12 +127,12 @@ describe('Timeout Handling Across Game States', function () {
                 'status' => GameStatusEnum::COMPLETED,
                 'game_state' => ['phase' => 'end'],
             ]);
-            
+
             $player = Player::factory()->for($game)->position(1)->create();
-            
-            $handler = new NoneHandler();
+
+            $handler = new NoneHandler;
             $result = $handler->handle($game, $player);
-            
+
             // Should return without making changes
             expect($result)->toBeNull();
         });
@@ -145,23 +144,23 @@ describe('Timeout Handling Across Game States', function () {
                 'status' => GameStatusEnum::IN_PROGRESS,
                 'game_state' => ['phase' => 'play'],
             ]);
-            
+
             $player = Player::factory()->for($game)->position(1)->create();
-            
-            $handler = new ForfeitHandler();
-            
+
+            $handler = new ForfeitHandler;
+
             // First timeout
             $handler->handle($game, $player);
             $game->refresh();
-            
+
             $firstTimeoutCount = $game->game_state['timeout_count'][(string) $player->id] ?? 0;
-            
+
             // Second timeout
             $handler->handle($game, $player);
             $game->refresh();
-            
+
             $secondTimeoutCount = $game->game_state['timeout_count'][(string) $player->id] ?? 0;
-            
+
             expect($secondTimeoutCount)->toBeGreaterThan($firstTimeoutCount);
         });
 
@@ -173,11 +172,11 @@ describe('Timeout Handling Across Game States', function () {
                     'timeout_count' => [],
                 ],
             ]);
-            
+
             $player = Player::factory()->for($game)->position(1)->create();
-            
-            $handler = new ForfeitHandler();
-            
+
+            $handler = new ForfeitHandler;
+
             // Simulate 5 consecutive timeouts
             for ($i = 0; $i < 5; $i++) {
                 $game->update([
@@ -187,11 +186,11 @@ describe('Timeout Handling Across Game States', function () {
                         ],
                     ]),
                 ]);
-                
+
                 $handler->handle($game, $player);
                 $game->refresh();
             }
-            
+
             // Player should be marked as removed or game forfeited
             expect($game->game_state['timeout_count'][(string) $player->id])->toBeGreaterThanOrEqual(5);
         });
@@ -206,9 +205,9 @@ describe('Timeout Handling Across Game States', function () {
                     'waiting_for_players' => ['1'],
                 ],
             ]);
-            
+
             $player = Player::factory()->for($game)->position(1)->create();
-            
+
             // Player submits action
             $game->update([
                 'game_state' => array_merge($game->game_state, [
@@ -218,13 +217,13 @@ describe('Timeout Handling Across Game States', function () {
                     'waiting_for_players' => [], // Action processed
                 ]),
             ]);
-            
+
             // Timeout handler fires (race condition)
-            $handler = new ForfeitHandler();
+            $handler = new ForfeitHandler;
             $handler->handle($game, $player);
-            
+
             $game->refresh();
-            
+
             // Should not override player's action
             expect($game->game_state['actions'][(string) $player->id])->toBe(['card' => '2H']);
         });

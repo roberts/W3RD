@@ -169,13 +169,13 @@ class GameActionController extends Controller
         $coordinationGroup = null;
         $coordinationSequence = null;
         $isCoordinated = false;
-        
+
         if ($action->getType() === 'pass_cards') {
             $isCoordinated = true;
             // Build coordination group for Hearts card passing
             $roundNumber = $gameState->roundNumber ?? 1;
             $coordinationGroup = "game:{$game->id}:pass:round:{$roundNumber}";
-            
+
             // Get current sequence number (how many have submitted so far, before this one)
             $coordinationSequence = Action::where('game_id', $game->id)
                 ->where('coordination_group', $coordinationGroup)
@@ -201,7 +201,7 @@ class GameActionController extends Controller
 
             // For Hearts pass_cards, we need all 4 players
             $requiredCount = 4;
-            
+
             if ($completedCount >= $requiredCount) {
                 // All players have submitted - process the coordination
                 $passActions = Action::where('game_id', $game->id)
@@ -213,13 +213,13 @@ class GameActionController extends Controller
                 // Process the coordinated action
                 if (method_exists($mode, 'processPassCards')) {
                     $gameState = $mode->processPassCards($gameState, $passActions);
-                    
+
                     // Mark all pass actions as completed
                     Action::where('game_id', $game->id)
                         ->where('coordination_group', $coordinationGroup)
                         ->whereNull('coordination_completed_at')
                         ->update(['coordination_completed_at' => now()]);
-                    
+
                     // Save the updated game state after coordination
                     $game->game_state = $gameState->toArray();
                     $game->save();
@@ -253,7 +253,7 @@ class GameActionController extends Controller
             } else {
                 $game->game_state = $gameState->toArray();
             }
-            
+
             $game->save();
         }
 

@@ -13,7 +13,6 @@ use App\Models\Auth\User;
  * - Verifying state changes
  * - Detecting game end conditions
  */
-
 describe('Checkers Game API', function () {
     describe('Game Creation', function () {
         test('can create checkers game through lobby and play moves', function () {

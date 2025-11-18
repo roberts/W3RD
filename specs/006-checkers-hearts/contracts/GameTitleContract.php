@@ -17,7 +17,7 @@ interface GameTitleContract
     /**
      * Create the initial game state for a new match.
      *
-     * @param string ...$playerUlids The ULIDs of the players joining the game.
+     * @param  string  ...$playerUlids  The ULIDs of the players joining the game.
      * @return object The initial GameState object.
      */
     public function createInitialState(string ...$playerUlids): object;

@@ -123,7 +123,6 @@ final class GameState extends BaseGameState
      * Create game state from array.
      *
      * @param  array<string, mixed>  $data  Serialized game state
-     * @return static
      */
     public static function fromArray(array $data): static
     {
@@ -186,7 +185,7 @@ final class GameState extends BaseGameState
     {
         $newBoard = $this->board;
         $piece = $newBoard[$fromRow][$fromCol];
-        
+
         // Check for king promotion
         if ($piece !== null) {
             // Red pieces king at row 0, black pieces king at row 7
@@ -197,7 +196,7 @@ final class GameState extends BaseGameState
                 $piece['king'] = true;
             }
         }
-        
+
         $newBoard[$toRow][$toCol] = $piece;
         $newBoard[$fromRow][$fromCol] = null;
 
@@ -249,7 +248,6 @@ final class GameState extends BaseGameState
      * Create new state with updated phase.
      *
      * @param  GamePhase  $phase  New game phase
-     * @return static
      */
     public function withPhase(GamePhase $phase): static
     {
@@ -268,7 +266,6 @@ final class GameState extends BaseGameState
      * Create new state with updated status.
      *
      * @param  GameStatus  $status  New game status
-     * @return static
      */
     public function withStatus(GameStatus $status): static
     {

@@ -195,7 +195,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             $playerUlids = array_keys($newState->players);
             $shouldPromote = ($piece['player'] === $playerUlids[0] && $action->toRow === 7) ||
                            ($piece['player'] === $playerUlids[1] && $action->toRow === 0);
-            
+
             if ($shouldPromote && ! $piece['king']) {
                 // Promote to king by moving again (which preserves everything but sets king)
                 $board = $newState->board;
@@ -232,7 +232,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
     {
         // Remove the captured piece first
         $newState = $gameState->withRemovedPiece($action->capturedRow, $action->capturedCol);
-        
+
         // Move the jumping piece
         $newState = $newState->withMovedPiece(
             $action->fromRow,
@@ -247,7 +247,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             $playerUlids = array_keys($newState->players);
             $shouldPromote = ($piece['player'] === $playerUlids[0] && $action->toRow === 7) ||
                            ($piece['player'] === $playerUlids[1] && $action->toRow === 0);
-            
+
             if ($shouldPromote && ! $piece['king']) {
                 $board = $newState->board;
                 $board[$action->toRow][$action->toCol]['king'] = true;
@@ -285,7 +285,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
         $newState = $gameState
             ->withRemovedPiece($action->capturedRow1, $action->capturedCol1)
             ->withRemovedPiece($action->capturedRow2, $action->capturedCol2);
-        
+
         // Move through mid point to final position
         $newState = $newState->withMovedPiece(
             $action->fromRow,
@@ -300,7 +300,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             $playerUlids = array_keys($newState->players);
             $shouldPromote = ($piece['player'] === $playerUlids[0] && $action->toRow === 7) ||
                            ($piece['player'] === $playerUlids[1] && $action->toRow === 0);
-            
+
             if ($shouldPromote && ! $piece['king']) {
                 $board = $newState->board;
                 $board[$action->toRow][$action->toCol]['king'] = true;
@@ -339,7 +339,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             ->withRemovedPiece($action->capturedRow1, $action->capturedCol1)
             ->withRemovedPiece($action->capturedRow2, $action->capturedCol2)
             ->withRemovedPiece($action->capturedRow3, $action->capturedCol3);
-        
+
         // Move to final position
         $newState = $newState->withMovedPiece(
             $action->fromRow,
@@ -354,7 +354,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             $playerUlids = array_keys($newState->players);
             $shouldPromote = ($piece['player'] === $playerUlids[0] && $action->toRow === 7) ||
                            ($piece['player'] === $playerUlids[1] && $action->toRow === 0);
-            
+
             if ($shouldPromote && ! $piece['king']) {
                 $board = $newState->board;
                 $board[$action->toRow][$action->toCol]['king'] = true;
@@ -390,12 +390,13 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
     {
         $playerUlids = array_keys($gameState->players);
         $currentIndex = array_search($gameState->currentPlayerUlid, $playerUlids);
-        
+
         if ($currentIndex === false) {
             return $playerUlids[0];
         }
-        
+
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
+
         return $playerUlids[$nextIndex];
     }
 

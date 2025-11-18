@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour\Actions;
 
-use App\Games\ValidateFour\Actions\DropPiece;
-use App\Games\ValidateFour\Actions\PopOut;
 use App\Interfaces\ActionFactoryContract;
 use App\Interfaces\GameActionContract;
 

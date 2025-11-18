@@ -88,12 +88,12 @@ class Lobby extends Model
     public function canStartGame(): bool
     {
         $acceptedCount = $this->acceptedPlayers()->count();
-        
+
         // If the game requires an exact player count, check for exact match
         if ($this->game_title->requiresExactPlayerCount()) {
             return $acceptedCount === $this->game_title->minPlayers();
         }
-        
+
         // Otherwise, just check if we have minimum players
         return $acceptedCount >= $this->min_players;
     }

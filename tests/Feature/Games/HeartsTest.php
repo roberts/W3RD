@@ -112,7 +112,7 @@ describe('Hearts Game Logic', function () {
 
             foreach ($suits as $suit) {
                 foreach ($ranks as $rank) {
-                    $deck[] = $suit . '_' . $rank;
+                    $deck[] = $suit.'_'.$rank;
                 }
             }
 
@@ -132,7 +132,7 @@ describe('Hearts Game Logic', function () {
             // Round 2 (mod 4 = 2): right
             // Round 3 (mod 4 = 3): across
             // Round 4 (mod 4 = 0): hold
-            
+
             // The passing direction is derived from round number in the game logic
             // This test validates the concept exists
             expect(1 % 4)->toBe(1) // left

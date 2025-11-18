@@ -10,7 +10,7 @@ use App\Interfaces\GameActionContract;
  * Play card action for Hearts.
  *
  * During trick-taking, players play one card from their hand.
- * 
+ *
  * Rules:
  * - Must follow suit if possible
  * - Can't lead hearts until hearts are broken (unless only hearts remain)

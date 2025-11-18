@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Games\Checkers\Modes\StandardMode;
 use App\Games\Checkers\GameState;
+use App\Games\Checkers\Modes\StandardMode;
 use App\Models\Game\Game;
-use Illuminate\Support\Str;
 
 describe('Checkers Game Logic', function () {
     test('can create initial game state', function () {
@@ -182,4 +181,3 @@ describe('Checkers Game Logic', function () {
             ->and($newState->players['p2']->piecesRemaining)->toBe(11);
     });
 });
-

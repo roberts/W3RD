@@ -13,7 +13,6 @@ use App\Models\Auth\User;
  * - Playing cards during trick-taking
  * - Verifying proper game state management
  */
-
 describe('Hearts Game API', function () {
     describe('Game Creation', function () {
         test('can create hearts game through lobby', function () {

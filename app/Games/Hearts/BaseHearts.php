@@ -291,7 +291,7 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
         $hands = $gameState->hands;
         $playerHand = $hands[$gameState->currentPlayerUlid] ?? [];
         $cardIndex = array_search($action->card, $playerHand);
-        
+
         if ($cardIndex !== false) {
             array_splice($playerHand, $cardIndex, 1);
             $hands[$gameState->currentPlayerUlid] = $playerHand;
@@ -311,10 +311,10 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
         if (count($currentTrick) === 4) {
             // Determine trick winner
             $trickWinnerUlid = $this->determineTrickWinner($currentTrick, $trickLeaderUlid);
-            
+
             // Calculate points from this trick
             $trickPoints = $this->calculateTrickPoints($currentTrick);
-            
+
             // Update player scores
             $players = $gameState->players;
             foreach ($players as $ulid => $player) {
@@ -376,13 +376,13 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
     {
         $leadCard = $trick[$leadPlayerUlid];
         $leadSuit = $leadCard[0];
-        
+
         $highestCard = $leadCard;
         $winnerUlid = $leadPlayerUlid;
-        
+
         foreach ($trick as $playerUlid => $card) {
             $suit = $card[0];
-            
+
             // Only cards of the led suit can win
             if ($suit === $leadSuit) {
                 if ($this->compareCards($card, $highestCard, $leadSuit) > 0) {
@@ -391,7 +391,7 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
                 }
             }
         }
-        
+
         return $winnerUlid;
     }
 
@@ -402,13 +402,13 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
     protected function compareCards(string $card1, string $card2, string $suit): int
     {
         $rankOrder = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
-        
+
         $rank1 = substr($card1, 1);
         $rank2 = substr($card2, 1);
-        
+
         $value1 = array_search($rank1, $rankOrder);
         $value2 = array_search($rank2, $rankOrder);
-        
+
         return $value1 - $value2;
     }
 
@@ -418,22 +418,22 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
     protected function calculateTrickPoints(array $trick): int
     {
         $points = 0;
-        
+
         foreach ($trick as $card) {
             $suit = $card[0];
             $rank = substr($card, 1);
-            
+
             // Hearts are worth 1 point each
             if ($suit === 'H') {
                 $points += 1;
             }
-            
+
             // Queen of Spades is worth 13 points
             if ($card === 'SQ') {
                 $points += 13;
             }
         }
-        
+
         return $points;
     }
 
@@ -444,12 +444,13 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
     {
         $playerUlids = array_keys($gameState->players);
         $currentIndex = array_search($gameState->currentPlayerUlid, $playerUlids);
-        
+
         if ($currentIndex === false) {
             return $playerUlids[0];
         }
-        
+
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
+
         return $playerUlids[$nextIndex];
     }
 

@@ -112,7 +112,7 @@ final class GameState extends BaseGameState
 
         $players = [];
         $hands = [];
-        
+
         foreach ($playerUlids as $index => $ulid) {
             $players[$ulid] = new PlayerState($ulid, $index + 1, 0, 0);
             $hands[$ulid] = [];
@@ -137,7 +137,6 @@ final class GameState extends BaseGameState
      * Create game state from array.
      *
      * @param  array<string, mixed>  $data  Serialized game state
-     * @return static
      */
     public static function fromArray(array $data): static
     {
@@ -187,7 +186,6 @@ final class GameState extends BaseGameState
      * Create new state with dealt hands.
      *
      * @param  array<string, array<string>>  $hands  New hands
-     * @return self
      */
     public function withDealtHands(array $hands): self
     {
@@ -210,7 +208,6 @@ final class GameState extends BaseGameState
      * Create new state with updated phase.
      *
      * @param  GamePhase  $phase  New phase
-     * @return static
      */
     public function withPhase(GamePhase $phase): static
     {
@@ -233,7 +230,6 @@ final class GameState extends BaseGameState
      * Create new state with updated status.
      *
      * @param  GameStatus  $status  New game status
-     * @return static
      */
     public function withStatus(GameStatus $status): static
     {
@@ -280,7 +276,6 @@ final class GameState extends BaseGameState
      * Create new state with winner.
      *
      * @param  string  $winnerUlid  Winner's ULID
-     * @return static
      */
     public function withWinner(string $winnerUlid): static
     {

@@ -27,7 +27,7 @@ class ActionFactory
             'play_card' => new PlayCard(
                 card: $data['card'],
             ),
-            'claim_remaining_tricks' => new ClaimRemainingTricks(),
+            'claim_remaining_tricks' => new ClaimRemainingTricks,
             default => throw new \InvalidArgumentException("Unknown action type: {$type}"),
         };
     }

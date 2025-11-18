@@ -36,7 +36,7 @@ class GameController extends Controller
             'data' => $games->map(function (Game $game) {
                 return [
                     'ulid' => $game->ulid,
-                    'game_title' => $game->mode->game_title ?? null,
+                    'game_title' => $game->mode->title_slug->value ?? null,
                     'status' => $game->status->value,
                     'turn_number' => $game->turn_number,
                     'winner_id' => $game->winner_id,
@@ -77,7 +77,7 @@ class GameController extends Controller
         return response()->json([
             'data' => [
                 'ulid' => $game->ulid,
-                'game_title' => $game->mode->game_title ?? null,
+                'game_title' => $game->mode->title_slug->value ?? null,
                 'status' => $game->status->value,
                 'turn_number' => $game->turn_number,
                 'winner_id' => $game->winner_id,

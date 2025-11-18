@@ -29,6 +29,26 @@ enum GameTitle: string
         };
     }
 
+    public function minPlayers(): int
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => 2,
+            self::CHECKERS => 2,
+            self::HEARTS => 4,
+            self::SPADES => 4,
+        };
+    }
+
+    public function requiresExactPlayerCount(): bool
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => true,
+            self::CHECKERS => true,
+            self::HEARTS => true,
+            self::SPADES => true,
+        };
+    }
+
     public static function fromSlug(string $slug): ?self
     {
         return self::tryFrom($slug);

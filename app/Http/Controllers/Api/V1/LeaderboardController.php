@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\GameTitle;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Gamification\UserTitleLevel;
@@ -15,9 +16,9 @@ class LeaderboardController extends Controller
     public function show(string $gameTitle): JsonResponse
     {
         // Validate game title exists
-        $validTitles = collect(config('protocol.game_titles'))->pluck('key')->toArray();
+        $title = GameTitle::tryFrom($gameTitle);
 
-        if (! in_array($gameTitle, $validTitles)) {
+        if (! $title) {
             return response()->json([
                 'message' => 'Game title not found.',
             ], 404);

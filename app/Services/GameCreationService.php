@@ -133,8 +133,11 @@ class GameCreationService
                 'game_state' => $initialState,
             ]);
 
-            // Update lobby status
-            $lobby->update(['status' => 'completed']);
+            // Update lobby status and link to game
+            $lobby->update([
+                'status' => 'completed',
+                'game_id' => $game->id,
+            ]);
 
             // Broadcast game started event
             broadcast(new GameStarted($game));

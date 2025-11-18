@@ -11,6 +11,7 @@ use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Resources\LobbyPlayerResource;
 use App\Http\Resources\UserResource;
 use App\Models\Auth\User;
+use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use Illuminate\Http\JsonResponse;
@@ -132,7 +133,7 @@ class LobbyController extends Controller
         /** @var User $host */
         $host = $lobby->host;
 
-        return response()->json([
+        $response = [
             'lobby' => [
                 'ulid' => $lobby->ulid,
                 'game_title' => $lobby->game_title->value,
@@ -144,7 +145,17 @@ class LobbyController extends Controller
                 'status' => $lobby->status->value,
                 'players' => LobbyPlayerResource::collection($lobby->players),
             ],
-        ]);
+        ];
+
+        // Include game information if lobby is completed and has a game
+        $game = $lobby->game;
+        if ($game instanceof Game) {
+            $response['game'] = [
+                'ulid' => $game->ulid,
+            ];
+        }
+
+        return response()->json($response);
     }
 
     /**

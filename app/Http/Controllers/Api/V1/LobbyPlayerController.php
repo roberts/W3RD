@@ -101,8 +101,8 @@ class LobbyPlayerController extends Controller
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
-            // Check if minimum players met
-            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
+            // Check if we can start the game (exact player count for games that require it)
+            if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 
@@ -126,8 +126,8 @@ class LobbyPlayerController extends Controller
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
-            // Check if minimum players met for immediate (non-scheduled) game
-            if ($lobby->hasMinimumPlayers() && ! $lobby->scheduled_at) {
+            // Check if we can start the game (exact player count for games that require it)
+            if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
             }
 

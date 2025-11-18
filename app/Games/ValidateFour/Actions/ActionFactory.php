@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Games\ValidateFour;
+namespace App\Games\ValidateFour\Actions;
 
 use App\Games\ValidateFour\Actions\DropPiece;
 use App\Games\ValidateFour\Actions\PopOut;

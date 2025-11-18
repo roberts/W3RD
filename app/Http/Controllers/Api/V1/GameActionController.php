@@ -6,6 +6,7 @@ use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
+use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
@@ -160,6 +161,72 @@ class GameActionController extends Controller
         // Apply the action
         $gameState = $mode->applyAction($gameState, $action);
 
+        // Save the updated game state (may be unchanged for coordinated actions)
+        $game->game_state = $gameState->toArray();
+        $game->save();
+
+        // Determine coordination parameters for coordinated actions
+        $coordinationGroup = null;
+        $coordinationSequence = null;
+        $isCoordinated = false;
+        
+        if ($action->getType() === 'pass_cards') {
+            $isCoordinated = true;
+            // Build coordination group for Hearts card passing
+            $roundNumber = $gameState->roundNumber ?? 1;
+            $coordinationGroup = "game:{$game->id}:pass:round:{$roundNumber}";
+            
+            // Get current sequence number (how many have submitted so far, before this one)
+            $coordinationSequence = Action::where('game_id', $game->id)
+                ->where('coordination_group', $coordinationGroup)
+                ->count() + 1;
+        }
+
+        // Record the action using the service
+        $actionRecord = $this->actionRecorder->recordSuccess(
+            $game,
+            $player,
+            $action,
+            $game->turn_number ?? 1,
+            $coordinationGroup,
+            $coordinationSequence
+        );
+
+        // Check if coordination is complete for coordinated actions
+        if ($isCoordinated && $coordinationGroup) {
+            $completedCount = Action::where('game_id', $game->id)
+                ->where('coordination_group', $coordinationGroup)
+                ->whereNull('coordination_completed_at')
+                ->count();
+
+            // For Hearts pass_cards, we need all 4 players
+            $requiredCount = 4;
+            
+            if ($completedCount >= $requiredCount) {
+                // All players have submitted - process the coordination
+                $passActions = Action::where('game_id', $game->id)
+                    ->where('coordination_group', $coordinationGroup)
+                    ->whereNull('coordination_completed_at')
+                    ->with('player')
+                    ->get();
+
+                // Process the coordinated action
+                if (method_exists($mode, 'processPassCards')) {
+                    $gameState = $mode->processPassCards($gameState, $passActions);
+                    
+                    // Mark all pass actions as completed
+                    Action::where('game_id', $game->id)
+                        ->where('coordination_group', $coordinationGroup)
+                        ->whereNull('coordination_completed_at')
+                        ->update(['coordination_completed_at' => now()]);
+                    
+                    // Save the updated game state after coordination
+                    $game->game_state = $gameState->toArray();
+                    $game->save();
+                }
+            }
+        }
+
         // Check for end condition using new GameOutcome
         $outcome = $mode->checkEndCondition($gameState);
         if ($outcome->isFinished) {
@@ -186,15 +253,9 @@ class GameActionController extends Controller
             } else {
                 $game->game_state = $gameState->toArray();
             }
-        } else {
-            // Save the updated game state
-            $game->game_state = $gameState->toArray();
+            
+            $game->save();
         }
-
-        $game->save();
-
-        // Record the action using the service
-        $actionRecord = $this->actionRecorder->recordSuccess($game, $player, $action, $game->turn_number ?? 1);
 
         // Increment turn number
         $game->increment('turn_number');

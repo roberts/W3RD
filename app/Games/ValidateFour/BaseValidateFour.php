@@ -4,6 +4,7 @@ namespace App\Games\ValidateFour;
 
 use App\Games\BaseBoardGameTitle;
 use App\Games\GameOutcome;
+use App\Games\ValidateFour\Actions\ActionFactory;
 use App\Games\ValidateFour\Actions\DropPiece;
 use App\Games\ValidationResult;
 use App\Models\Game\Action;

@@ -9,9 +9,7 @@ class FindLobbyByUlidAction
     /**
      * Find a lobby by its ULID.
      *
-     * @param  string  $ulid
      * @param  array  $with  Optional relationships to eager load
-     * @return Lobby
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */

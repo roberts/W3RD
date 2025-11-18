@@ -9,9 +9,7 @@ class FindGameByUlidAction
     /**
      * Find a game by its ULID.
      *
-     * @param  string  $ulid
      * @param  array  $with  Optional relationships to eager load
-     * @return Game
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */

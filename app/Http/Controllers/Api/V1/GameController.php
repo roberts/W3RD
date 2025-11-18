@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Game\ForfeitGameRequest;
+use App\Http\Requests\Game\RequestRematchRequest;
 use App\Http\Resources\PlayerResource;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
@@ -93,7 +95,7 @@ class GameController extends Controller
     /**
      * Request a rematch for a completed game.
      */
-    public function requestRematch(Request $request, string $gameUlid): JsonResponse
+    public function requestRematch(RequestRematchRequest $request, string $gameUlid): JsonResponse
     {
         $game = Game::where('ulid', $gameUlid)->with('players')->firstOrFail();
 
@@ -160,28 +162,10 @@ class GameController extends Controller
     /**
      * Forfeit/concede a game.
      */
-    public function forfeit(Request $request, string $gameUlid): JsonResponse
+    public function forfeit(ForfeitGameRequest $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
-
         $game = Game::where('ulid', $gameUlid)->firstOrFail();
-
-        // Verify user is a player in this game
-        /** @var Player|null $player */
-        $player = $game->players()->where('user_id', $user->id)->first();
-
-        if (! $player) {
-            return response()->json([
-                'message' => 'You are not authorized to forfeit this game.',
-            ], 403);
-        }
-
-        // Can only forfeit active games
-        if ($game->status->value !== 'active') {
-            return response()->json([
-                'message' => 'Can only forfeit active games.',
-            ], 400);
-        }
 
         // Determine the winner (opponent of the forfeiting player)
         /** @var Player|null $opponent */

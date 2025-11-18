@@ -7,7 +7,9 @@ use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
+use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
+use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
 use App\Http\Resources\LobbyPlayerResource;
 use App\Http\Resources\UserResource;
 use App\Models\Auth\User;
@@ -161,18 +163,9 @@ class LobbyController extends Controller
     /**
      * Cancel a lobby (Host only)
      */
-    public function destroy(Request $request, string $lobbyUlid): JsonResponse
+    public function destroy(CancelLobbyRequest $request, string $lobbyUlid): JsonResponse
     {
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
-        $user = $request->user();
-
-        if (! $lobby->isHost($user)) {
-            return response()->json(['error' => 'Only the host can cancel the lobby'], 403);
-        }
-
-        if ($lobby->status !== LobbyStatus::PENDING) {
-            return response()->json(['error' => 'Cannot cancel a lobby that is not pending'], 400);
-        }
 
         $lobby->markAsCancelled();
 
@@ -182,18 +175,9 @@ class LobbyController extends Controller
     /**
      * Initiate a ready check (Host only)
      */
-    public function readyCheck(Request $request, string $lobbyUlid): JsonResponse
+    public function readyCheck(InitiateReadyCheckRequest $request, string $lobbyUlid): JsonResponse
     {
         $lobby = Lobby::where('ulid', $lobbyUlid)->firstOrFail();
-        $user = $request->user();
-
-        if (! $lobby->isHost($user)) {
-            return response()->json(['error' => 'Only the host can initiate a ready check'], 403);
-        }
-
-        if ($lobby->status !== LobbyStatus::PENDING) {
-            return response()->json(['error' => 'Lobby must be pending to initiate ready check'], 400);
-        }
 
         // Broadcast ready check event
         broadcast(new LobbyReadyCheck($lobby));

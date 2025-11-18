@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rematch\AcceptRematchRequest;
+use App\Http\Requests\Rematch\DeclineRematchRequest;
 use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchController extends Controller
@@ -18,7 +19,7 @@ class RematchController extends Controller
     /**
      * Accept a rematch request.
      */
-    public function accept(Request $request, RematchRequest $requestId): JsonResponse
+    public function accept(AcceptRematchRequest $request, RematchRequest $requestId): JsonResponse
     {
         $rematchRequest = $requestId;
 
@@ -46,7 +47,7 @@ class RematchController extends Controller
     /**
      * Decline a rematch request.
      */
-    public function decline(Request $request, RematchRequest $requestId): JsonResponse
+    public function decline(DeclineRematchRequest $request, RematchRequest $requestId): JsonResponse
     {
         $rematchRequest = $requestId;
 

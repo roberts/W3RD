@@ -24,7 +24,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private const SKILL_RANGE = 5; // Skill level difference tolerance
 
-    private const RECENT_OPPONENT_LIMIT = 5; // Remember last N opponents
+    private const RECENT_OPPONENT_LIMIT = 3; // Remember last N opponents
 
     public function handle(): void
     {
@@ -132,7 +132,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
         // Find available agent
         $schedulingService = app(\App\Services\Agents\AgentSchedulingService::class);
-        $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode);
+        $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode, $userId);
 
         if (! $agentUser) {
             \Log::warning('No agent available for matchmaking', [
@@ -250,6 +250,13 @@ class ProcessQuickplayQueue implements ShouldQueue
             // Create the game
             $gameCreationService = app(GameCreationService::class);
             $game = $gameCreationService->createFromQuickplay($playerData, $gameTitle, $mode);
+
+            // Track recent opponents for both human and agent
+            Redis::lpush("recent_opponents:{$humanUserId}", $agentUserId);
+            Redis::ltrim("recent_opponents:{$humanUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
+
+            Redis::lpush("recent_opponents:{$agentUserId}", $humanUserId);
+            Redis::ltrim("recent_opponents:{$agentUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
 
             \Log::info('Game created with agent opponent', [
                 'game_id' => $game->id,

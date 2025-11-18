@@ -15,34 +15,36 @@ beforeEach(function () {
     Queue::fake();
 });
 
-test('dispatches CalculateAgentAction job when performing action', function () {
-    $agent = Agent::factory()->create();
-    $user = User::factory()->create(['agent_id' => $agent->id]);
+describe('Agent Action Handling', function () {
+    it('dispatches CalculateAgentAction job when performing action', function () {
+        $agent = Agent::factory()->create();
+        $user = User::factory()->create(['agent_id' => $agent->id]);
 
-    // Create a real game for testing
-    $game = Game::factory()->create();
+        // Create a real game for testing
+        $game = Game::factory()->create();
 
-    $this->service->performAction($user, $game);
+        $this->service->performAction($user, $game);
 
-    Queue::assertPushed(CalculateAgentAction::class);
-});
+        Queue::assertPushed(CalculateAgentAction::class);
+    });
 
-test('throws exception if user is not an agent', function () {
-    $user = User::factory()->create(['agent_id' => null]);
-    $game = Game::factory()->create();
+    it('throws exception if user is not an agent', function () {
+        $user = User::factory()->create(['agent_id' => null]);
+        $game = Game::factory()->create();
 
-    expect(fn () => $this->service->performAction($user, $game))
-        ->toThrow(\InvalidArgumentException::class);
-});
+        expect(fn () => $this->service->performAction($user, $game))
+            ->toThrow(\InvalidArgumentException::class);
+    });
 
-test('job is dispatched with correct parameters', function () {
-    $agent = Agent::factory()->withDifficulty(7)->create();
-    $user = User::factory()->create(['agent_id' => $agent->id]);
-    $game = Game::factory()->create();
+    it('is dispatched with correct parameters', function () {
+        $agent = Agent::factory()->withDifficulty(7)->create();
+        $user = User::factory()->create(['agent_id' => $agent->id]);
+        $game = Game::factory()->create();
 
-    $this->service->performAction($user, $game);
+        $this->service->performAction($user, $game);
 
-    Queue::assertPushed(CalculateAgentAction::class, function ($job) use ($user) {
-        return $job->user->id === $user->id;
+        Queue::assertPushed(CalculateAgentAction::class, function ($job) use ($user) {
+            return $job->user->id === $user->id;
+        });
     });
 });

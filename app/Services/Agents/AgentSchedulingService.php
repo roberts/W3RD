@@ -6,6 +6,7 @@ use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * AgentSchedulingService
@@ -21,16 +22,25 @@ class AgentSchedulingService
      *
      * @param  string  $gameSlug  The game title slug (e.g., 'checkers', 'hearts')
      * @param  string|null  $mode  Optional game mode for mode-specific agent selection
+     * @param  int|null  $humanUserId  Optional human user ID to avoid recent opponents
      * @return User|null Agent user if found, null otherwise
      */
-    public function findAvailableAgent(string $gameSlug, ?string $mode = null): ?User
+    public function findAvailableAgent(string $gameSlug, ?string $mode = null, ?int $humanUserId = null): ?User
     {
         Log::debug('AgentSchedulingService searching for agent', [
             'game_slug' => $gameSlug,
             'mode' => $mode,
+            'human_user_id' => $humanUserId,
         ]);
 
         $currentHourEst = now('America/New_York')->hour;
+
+        // Get recent opponents if humanUserId is provided
+        $recentOpponents = [];
+        if ($humanUserId) {
+            $recentOpponents = Redis::lrange("recent_opponents:{$humanUserId}", 0, 2); // Last 3 opponents (0-2)
+            $recentOpponents = array_map('intval', $recentOpponents); // Convert to integers
+        }
 
         // Get all agents that support this game title
         $allAgents = Agent::query()
@@ -54,6 +64,13 @@ class AgentSchedulingService
             ->filter(function (Agent $agent) {
                 // Filter out agents currently in active games
                 return ! $this->isAgentBusy($agent->user);
+            })
+            ->filter(function (Agent $agent) use ($recentOpponents) {
+                // Filter out recent opponents if provided
+                if (empty($recentOpponents)) {
+                    return true;
+                }
+                return ! in_array($agent->user->id, $recentOpponents);
             });
 
         // Separate agents into time-specific and 24/7 (null availability)
@@ -75,6 +92,18 @@ class AgentSchedulingService
         $agent = $timeSpecificAgents->first() ?? $agent247->first();
 
         if (! $agent) {
+            // If no agent found and we filtered by recent opponents, try again without that filter (lenient fallback)
+            if (!empty($recentOpponents)) {
+                Log::info('No agent found excluding recent opponents, trying without filter', [
+                    'game_slug' => $gameSlug,
+                    'mode' => $mode,
+                    'human_user_id' => $humanUserId,
+                    'recent_opponents' => $recentOpponents,
+                ]);
+                
+                return $this->findAvailableAgent($gameSlug, $mode, null);
+            }
+
             Log::info('No available agent found for game', [
                 'game_slug' => $gameSlug,
                 'mode' => $mode,
@@ -92,6 +121,7 @@ class AgentSchedulingService
             'availability_type' => $agent->available_hour_est === null ? '24/7' : 'time-specific',
             'available_hour_est' => $agent->available_hour_est,
             'current_hour_est' => $currentHourEst,
+            'excluded_recent_opponents' => !empty($recentOpponents),
         ]);
 
         return $agent->user;

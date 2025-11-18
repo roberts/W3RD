@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\GameTitle;
 use App\Events\GameFound;
 use App\Http\Controllers\Api\V1\QuickplayController;
+use App\Services\GameCreationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -129,11 +130,31 @@ class ProcessQuickplayQueue implements ShouldQueue
         Redis::hdel('quickplay:timestamps', (string) $userId);
         Redis::hdel('quickplay:clients', (string) $userId);
 
-        // TODO: Call SchedulingService to find AI agent
-        // For now, just log that we would match with AI
-        \Log::info("Would match user {$userId} with AI for {$gameTitle->value}:{$mode}");
+        // Find available agent
+        $schedulingService = app(\App\Services\Agents\AgentSchedulingService::class);
+        $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode);
 
-        // TODO: Create game with AI opponent
+        if (!$agentUser) {
+            \Log::warning("No agent available for matchmaking", [
+                'user_id' => $userId,
+                'game_title' => $gameTitle->value,
+                'mode' => $mode,
+            ]);
+
+            // TODO: Notify user that no opponents are available
+            // Could put them back in queue or show message
+            return;
+        }
+
+        \Log::info("Matched user with AI agent", [
+            'user_id' => $userId,
+            'agent_id' => $agentUser->id,
+            'game_title' => $gameTitle->value,
+            'mode' => $mode,
+        ]);
+
+        // Create game with AI opponent
+        $this->createGameWithAgent($userId, $agentUser->id, $gameTitle, $mode);
     }
 
     private function createMatchConfirmation(int $userId1, int $userId2, GameTitle $gameTitle, string $mode, string $queueKey): void
@@ -204,5 +225,55 @@ class ProcessQuickplayQueue implements ShouldQueue
             // Clean up
             Redis::del($confirmKey);
         })->delay(now()->addSeconds(self::MATCH_CONFIRMATION_TIMEOUT + 1));
+    }
+
+    /**
+     * Create a game with an AI agent opponent.
+     *
+     * @param int $humanUserId The human player's user ID
+     * @param int $agentUserId The agent user's ID
+     * @param GameTitle $gameTitle The game title
+     * @param string $mode The game mode
+     * @return void
+     */
+    private function createGameWithAgent(int $humanUserId, int $agentUserId, GameTitle $gameTitle, string $mode): void
+    {
+        try {
+            // Get client ID for human player
+            $clientId = Redis::hget('quickplay:clients', (string) $humanUserId) ?: 1;
+
+            // Prepare player data
+            $playerData = [
+                ['user_id' => $humanUserId, 'client_id' => (int) $clientId],
+                ['user_id' => $agentUserId, 'client_id' => 1], // Agents use default client
+            ];
+
+            // Create the game
+            $gameCreationService = app(GameCreationService::class);
+            $game = $gameCreationService->createFromQuickplay($playerData, $gameTitle, $mode);
+
+            \Log::info("Game created with agent opponent", [
+                'game_id' => $game->id,
+                'human_user_id' => $humanUserId,
+                'agent_user_id' => $agentUserId,
+                'game_title' => $gameTitle->value,
+                'mode' => $mode,
+            ]);
+
+            // Broadcast game found to human player
+            broadcast(new GameFound($humanUserId, $game->ulid, [
+                'game_title' => $gameTitle->value,
+                'game_mode' => $mode,
+                'opponent_id' => $agentUserId,
+                'game_id' => $game->ulid,
+            ]));
+
+        } catch (\Exception $e) {
+            \Log::error("Failed to create game with agent", [
+                'human_user_id' => $humanUserId,
+                'agent_user_id' => $agentUserId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

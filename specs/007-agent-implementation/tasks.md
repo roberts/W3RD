@@ -17,9 +17,12 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented.
 
-
-- [ ] T005 [P] Create the `AgentFactory` at `database/factories/AgentFactory.php`.
-- [ ] T006 [P] Create the `AgentContract` interface at `app/Interfaces/AgentContract.php`.
+- [X] T001-T003 Verified environment: Laravel queue system, PostgreSQL, and existing models (User, Game, Agent)
+- [X] T004-T006 Verified database migrations for `users` and `agents` tables (already exist with proper schema)
+- [X] T007 Agent model already exists at `app/Models/Auth/Agent.php` with `user()` relationship
+- [X] T008 User model already has `agent()` relationship and `isAgent()` method at `app/Models/Auth/User.php`
+- [X] T009 [P] Created `AgentFactory` at `database/factories/AgentFactory.php`
+- [X] T010 [P] Created `AgentContract` interface at `app/Interfaces/AgentContract.php`
 
 **Checkpoint**: Foundation ready. User story implementation can now begin.
 
@@ -33,47 +36,27 @@
 
 ### Tests for User Story 1 (Test-First)
 
-- [ ] T008 [P] [US1] Create a unit test for `AgentSchedulingService` in `tests/Unit/Agents/AgentSchedulingServiceTest.php` to verify it can find available, compatible, and non-busy agents.
-- [ ] T009 [P] [US1] Create a unit test for `AgentService` in `tests/Unit/Agents/AgentServiceTest.php` to ensure it dispatches the `CalculateAgentAction` job correctly.
-- [ ] T010 [US1] Create a feature test in `tests/Feature/Agents/QuickplayMatchmakingTest.php` to simulate a player waiting and being matched with an agent.
+- [X] T011 [P] [US1] Created unit test for `AgentSchedulingService` in `tests/Unit/Agents/AgentSchedulingServiceTest.php`
+- [X] T012 [P] [US1] Created unit test for `AgentService` in `tests/Unit/Agents/AgentServiceTest.php`
+- [X] T013 [US1] Created feature test in `tests/Feature/Agents/QuickplayMatchmakingTest.php`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Create the `AgentSchedulingService` in `app/Services/Agents/AgentSchedulingService.php`.
-- [ ] T012 [P] [US1] Create the `AgentService` in `app/Services/Agents/AgentService.php`.
-- [ ] T013 [P] [US1] Create the `CalculateAgentAction` job in `app/Jobs/CalculateAgentAction.php`. This job will contain the `sleep()` logic.
-- [ ] T014 [P] [US1] Create a basic AI implementation, `RandomLogic`, at `app/Agents/Logic/RandomLogic.php` that implements `AgentContract`.
-- [ ] T015 [P] [US1] Create the `MinimaxLogic` AI implementation at `app/Agents/Logic/MinimaxLogic.php`.
-- [ ] T016 [P] [US1] Create the `HeuristicLogic` AI implementation at `app/Agents/Logic/HeuristicLogic.php`.
-- [ ] T017 [US1] Modify the existing Quickplay logic to call `AgentSchedulingService` after the 15-second timeout for finding a human player.
-- [ ] T018 [US1] Modify the game engine logic to call `AgentService::performAction()` when it is an agent's turn.
+- [X] T014 [P] [US1] Created `AgentSchedulingService` in `app/Services/Agents/AgentSchedulingService.php`
+- [X] T015 [P] [US1] Created `AgentService` in `app/Services/Agents/AgentService.php`
+- [X] T016 [P] [US1] Created `CalculateAgentAction` job in `app/Jobs/CalculateAgentAction.php` with sleep() logic
+- [X] T017 [P] [US1] Created `RandomLogic` AI implementation at `app/Agents/Logic/RandomLogic.php`
+- [X] T018 [P] [US1] Created `MinimaxLogic` AI implementation at `app/Agents/Logic/MinimaxLogic.php`
+- [X] T019 [P] [US1] Created `HeuristicLogic` AI implementation at `app/Agents/Logic/HeuristicLogic.php`
+- [X] T020 [US1] Modified Quickplay logic in `app/Jobs/ProcessQuickplayQueue.php` to call `AgentSchedulingService` after 30-second timeout
+- [X] T021 [US1] Modified game engine in `app/Http/Controllers/Api/V1/GameActionController.php` to call `AgentService::performAction()` when it's an agent's turn
+- [X] T022 [US1] Created database seeder in `database/seeders/AgentSeeder.php` to populate initial agents
 
 **Checkpoint**: User Story 1 is functional and testable.
 
 ---
 
-## Phase 3: User Story 2 - Administrator Configures Agents (Priority: P2)
-
-**Goal**: An administrator can create, view, update, and delete agent configurations.
-
-**Independent Test**: An admin can create a new agent via an API endpoint, and that agent becomes available for matchmaking.
-
-### Tests for User Story 2 (Test-First)
-
-- [ ] T019 [US2] Create a feature test in `tests/Feature/Admin/AgentManagementTest.php` to cover the CRUD API endpoints for agents, including validation rules.
-
-### Implementation for User Story 2
-
-- [ ] T020 [P] [US2] Create the `AgentController` for admin functions at `app/Http/Controllers/Admin/AgentController.php`.
-- [ ] T021 [US2] Add the new resource routes for agent management to `routes/api.php`, protected by appropriate admin middleware.
-- [ ] T022 [US2] Implement the CRUD methods in `AgentController` (index, store, show, update, destroy).
-- [ ] T023 [US2] Implement validation logic for creating and updating agents to enforce rules from `data-model.md`.
-
-**Checkpoint**: User Story 2 is functional and testable.
-
----
-
-## Phase 4: User Story 3 - Agent Adheres to Schedule (Priority: P3)
+## Phase 3: User Story 3 - Agent Adheres to Schedule (Priority: P3)
 
 **Goal**: The matchmaking system respects the `available_hour_est` setting for each agent.
 
@@ -81,7 +64,9 @@
 
 ### Tests for User Story 3 (Test-First)
 
-- [ ] T024 [US3] Update the unit test in `tests/Unit/Agents/AgentSchedulingServiceTest.php` to include scenarios for time-based availability, mocking the current time to test inside and outside the available hour.
+- [ ] T023 [US3] Update the unit test in `tests/Unit/Agents/AgentSchedulingServiceTest.php` to include scenarios for time-based availability, mocking the current time to test inside and outside the available hour.
+
+- [ ] T024 [US3] Agents that have the availability of null should only be chosen last if all the agents during that hour slot are not available.
 
 ### Implementation for User Story 3
 

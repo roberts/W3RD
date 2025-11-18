@@ -177,6 +177,9 @@ class GameActionController extends Controller
         $game->refresh();
         $nextDeadline = $mode->getActionDeadline($gameState, $game);
 
+        // Check if the next player is an agent and trigger their action
+        $this->triggerAgentActionIfNeeded($game, $gameState, $mode);
+
         // Broadcast the action to all players via websocket
         broadcast(new GameActionProcessed(
             game: $game,
@@ -249,4 +252,56 @@ class GameActionController extends Controller
             'timelimit_seconds' => $mode->getTimelimit(),
         ]);
     }
+
+    /**
+     * Trigger agent action if the next player is an agent.
+     *
+     * @param Game $game
+     * @param object $gameState
+     * @param object $mode
+     * @return void
+     */
+    protected function triggerAgentActionIfNeeded(Game $game, object $gameState, object $mode): void
+    {
+        // Skip if game is finished
+        if ($game->status === GameStatus::COMPLETED) {
+            return;
+        }
+
+        // Get the current player ULID from game state
+        $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
+        
+        if (!$currentPlayerUlid) {
+            return;
+        }
+
+        // Find the player record
+        /** @var \App\Models\Game\Player|null $player */
+        $player = $game->players()->where('ulid', $currentPlayerUlid)->first();
+        
+        if (!$player) {
+            return;
+        }
+
+        /** @var \App\Models\Auth\User|null $user */
+        $user = $player->user;
+        
+        if (!$user) {
+            return;
+        }
+
+        // Check if the player is an agent
+        if ($user->isAgent()) {
+            \Log::debug('Next player is an agent, triggering action', [
+                'game_id' => $game->id,
+                'player_ulid' => $currentPlayerUlid,
+                'agent_id' => $user->agent_id,
+            ]);
+
+            // Dispatch agent action via AgentService
+            $agentService = app(\App\Services\Agents\AgentService::class);
+            $agentService->performAction($user, $game);
+        }
+    }
 }
+

@@ -70,23 +70,23 @@ This service orchestrates an agent's turn, introducing human-like delays via a b
 ```php
 namespace App\Services\Agents;
 
-use App\Jobs\CalculateAgentMove;
+use App\Jobs\CalculateAgentAction;
 use App\Models\Game;
 use App\Models\User;
 
 class AgentService
 {
     /**
-     * Dispatches a job to calculate and perform an agent's move.
+     * Dispatches a job to calculate and perform an agent's action.
      */
     public function performMove(Game $game, User $agentUser): void
     {
-        CalculateAgentMove::dispatch($game, $agentUser);
+        CalculateAgentAction::dispatch($game, $agentUser);
     }
 }
 ```
 
-**`app/Jobs/CalculateAgentMove.php`**
+**`app/Jobs/CalculateAgentAction.php`**
 This job runs in the background to prevent the game from freezing while the AI "thinks".
 
 ```php
@@ -94,7 +94,7 @@ namespace App\Jobs;
 
 // ... use statements for Queueable, SerializesModels, etc.
 
-class CalculateAgentMove implements ShouldQueue
+class CalculateAgentAction implements ShouldQueue
 {
     public function __construct(public Game $game, public User $agentUser) {}
 

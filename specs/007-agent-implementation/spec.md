@@ -18,7 +18,7 @@ A human player enters the Quickplay queue for a game. After a short wait, no oth
 **Acceptance Scenarios**:
 
 1.  **Given** a human player is in the Quickplay queue for more than 15 seconds, **When** no other human players are available, **Then** the system matches them with an available and compatible AI Agent.
-2.  **Given** a game has started between a human and an agent, **When** it is the agent's turn to move, **Then** the system waits for a random delay between 1-8 seconds before applying the agent's calculated move.
+2.  **Given** a game has started between a human and an agent, **When** it is the agent's turn to move, **Then** the system waits for a random delay between 1-8 seconds before applying the agent's calculated action.
 3.  **Given** an agent is selected for a game, **Then** its difficulty level for that game title and mode is correctly determined from its profile.
 
 ---
@@ -58,7 +58,7 @@ An agent is configured to only be available to start new games during a specific
 ### Edge Cases
 
 -   What happens if all available agents for a specific game are already busy? The player should be notified that no opponents are available at this time.
--   How does the system handle an error within an agent's AI logic class during move calculation? The job should fail gracefully, the game should be marked with an error state, and the human opponent should be notified.
+-   How does the system handle an error within an agent's AI logic class during action calculation? The job should fail gracefully, the game should be marked with an error state, and the human opponent should be notified.
 -   What happens if an agent's `ai_logic_path` points to a non-existent class? The system should log a critical error, and that agent should be ignored by the matchmaking service.
 
 ## Requirements *(mandatory)*
@@ -68,8 +68,8 @@ An agent is configured to only be available to start new games during a specific
 -   **FR-001**: The system MUST provide a mechanism to define AI agents with distinct user profiles, making them indistinguishable from human users.
 -   **FR-002**: The system MUST allow administrators to configure an agent's AI logic, difficulty, game compatibility, and mode-specific behavior via its database record.
 -   **FR-003**: The matchmaking service MUST wait at least 15 seconds to find a human opponent before considering an AI agent.
--   **FR-004**: The system MUST execute an agent's move calculation in a background job to prevent blocking the main game process.
--   **FR-005**: The system MUST introduce an artificial, random delay (1-8 seconds) before an agent's move is applied to the game state.
+-   **FR-004**: The system MUST execute an agent's action calculation in a background job to prevent blocking the main game process.
+-   **FR-005**: The system MUST introduce an artificial, random delay (1-8 seconds) before an agent's action is applied to the game state.
 -   **FR-006**: The system MUST respect an agent's configured `available_hour_est` and only allow it to start new games within that hour.
 -   **FR-007**: All agent AI logic classes MUST implement a common `AgentContract` interface.
 

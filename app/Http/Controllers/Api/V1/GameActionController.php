@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 class GameActionController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected GameActionRecorder $actionRecorder
     ) {}

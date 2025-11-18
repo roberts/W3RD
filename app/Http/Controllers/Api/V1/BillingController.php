@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 class BillingController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected AppleReceiptValidator $appleValidator,
         protected GooglePurchaseValidator $googleValidator,

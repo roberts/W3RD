@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 class LeaderboardController extends Controller
 {
     use ApiResponses;
+
     /**
      * Get leaderboard for a specific game title.
      */

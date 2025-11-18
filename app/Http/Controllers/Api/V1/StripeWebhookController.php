@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 class StripeWebhookController extends CashierWebhookController
 {
     use ApiResponses;
+
     /**
      * Handle subscription created.
      */

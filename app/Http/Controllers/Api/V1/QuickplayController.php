@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redis;
 class QuickplayController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected GameCreationService $gameCreationService
     ) {

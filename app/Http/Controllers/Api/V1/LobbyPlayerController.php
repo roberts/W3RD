@@ -19,6 +19,7 @@ use Illuminate\Routing\Controller;
 class LobbyPlayerController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected GameCreationService $gameCreationService
     ) {

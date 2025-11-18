@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 class TitleController extends Controller
 {
     use ApiResponses;
+
     /**
      * Get list of available game titles.
      */

@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 class LobbyController extends Controller
 {
     use ApiResponses;
+
     /**
      * List all public lobbies
      */

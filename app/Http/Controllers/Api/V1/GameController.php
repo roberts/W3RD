@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 class GameController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected RematchService $rematchService
     ) {}

@@ -23,6 +23,7 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthController extends Controller
 {
     use ApiResponses;
+
     /**
      * Register a new user.
      */

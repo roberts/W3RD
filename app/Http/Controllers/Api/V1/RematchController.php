@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class RematchController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected RematchService $rematchService
     ) {}

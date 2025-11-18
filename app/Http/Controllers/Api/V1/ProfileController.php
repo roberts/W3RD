@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
     use ApiResponses;
+
     public function __construct(
         protected ProfileService $profileService
     ) {}

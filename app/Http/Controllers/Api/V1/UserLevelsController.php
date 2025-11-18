@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 class UserLevelsController extends Controller
 {
     use ApiResponses;
+
     /**
      * Get game-specific levels for the authenticated user.
      */

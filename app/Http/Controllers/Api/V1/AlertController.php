@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 class AlertController extends Controller
 {
     use ApiResponses;
+
     /**
      * Get list of alerts for the authenticated user.
      */

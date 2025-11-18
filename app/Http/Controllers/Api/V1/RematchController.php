@@ -27,19 +27,22 @@ class RematchController extends Controller
     {
         $rematchRequest = $requestId;
 
-        try {
-            $newGame = $this->rematchService->acceptRematchRequest(
+        $newGame = $this->handleServiceCall(
+            fn () => $this->rematchService->acceptRematchRequest(
                 $rematchRequest,
                 $request->user()
-            );
+            ),
+            'Failed to accept rematch request'
+        );
 
-            $resourceData = RematchRequestResource::make($rematchRequest->fresh())->toArray($request);
-            $resourceData['new_game_ulid'] = $newGame->ulid;
-
-            return $this->successResponse($resourceData, 'Rematch accepted. New game created.');
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage());
+        if ($newGame instanceof JsonResponse) {
+            return $newGame;
         }
+
+        $resourceData = RematchRequestResource::make($rematchRequest->fresh())->toArray($request);
+        $resourceData['new_game_ulid'] = $newGame->ulid;
+
+        return $this->successResponse($resourceData, 'Rematch accepted. New game created.');
     }
 
     /**
@@ -49,20 +52,26 @@ class RematchController extends Controller
     {
         $rematchRequest = $requestId;
 
-        try {
-            $this->rematchService->declineRematchRequest(
-                $rematchRequest,
-                $request->user()
-            );
+        $result = $this->handleServiceCall(
+            function () use ($rematchRequest, $request) {
+                $this->rematchService->declineRematchRequest(
+                    $rematchRequest,
+                    $request->user()
+                );
 
-            return $this->successResponse(
-                RematchRequestResource::make($rematchRequest->fresh()),
-                'Rematch request declined'
-            );
-        } catch (AccessDeniedHttpException $e) {
-            return $this->forbiddenResponse($e->getMessage());
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage());
+                return true;
+            },
+            'Failed to decline rematch request',
+            403
+        );
+
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
+
+        return $this->successResponse(
+            RematchRequestResource::make($rematchRequest->fresh()),
+            'Rematch request declined'
+        );
     }
 }

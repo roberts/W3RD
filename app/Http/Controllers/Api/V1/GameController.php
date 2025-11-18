@@ -80,19 +80,22 @@ class GameController extends Controller
     {
         $game = Game::where('ulid', $gameUlid)->with('players')->firstOrFail();
 
-        try {
-            $rematchRequest = $this->rematchService->createRematchRequest(
+        $rematchRequest = $this->handleServiceCall(
+            fn () => $this->rematchService->createRematchRequest(
                 $game,
                 $request->user()
-            );
+            ),
+            'Failed to create rematch request'
+        );
 
-            return $this->createdResponse(
-                RematchRequestResource::make($rematchRequest),
-                'Rematch request sent.'
-            );
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage());
+        if ($rematchRequest instanceof JsonResponse) {
+            return $rematchRequest;
         }
+
+        return $this->createdResponse(
+            RematchRequestResource::make($rematchRequest),
+            'Rematch request sent.'
+        );
     }
 
     /**

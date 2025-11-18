@@ -14,6 +14,7 @@ use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
 use App\Models\Auth\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -105,12 +106,18 @@ class AuthController extends Controller
      */
     public function socialLogin(SocialLoginRequest $request)
     {
-        try {
-            // userFromToken exists in Socialite but isn't in type definitions
-            /** @phpstan-ignore-next-line */
-            $providerUser = Socialite::driver($request->provider)->userFromToken($request->access_token);
-        } catch (\Exception $e) {
-            return $this->unauthorizedResponse('Invalid provider token.');
+        $providerUser = $this->handleServiceCall(
+            function () use ($request) {
+                // userFromToken exists in Socialite but isn't in type definitions
+                /** @phpstan-ignore-next-line */
+                return Socialite::driver($request->provider)->userFromToken($request->access_token);
+            },
+            'Invalid provider token',
+            401
+        );
+
+        if ($providerUser instanceof JsonResponse) {
+            return $providerUser;
         }
 
         // Find or create the social account

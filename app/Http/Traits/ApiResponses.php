@@ -103,4 +103,29 @@ trait ApiResponses
     {
         return $this->successResponse($data, $message, 201);
     }
+
+    /**
+     * Execute a service call with standardized error handling.
+     *
+     * @param  callable  $callback  The service call to execute
+     * @param  string  $errorMessage  The base error message to use if the call fails
+     * @param  int  $status  The HTTP status code to return on error
+     * @return mixed The result of the callback
+     *
+     * @throws \Exception When the service call fails, wrapped with context
+     */
+    protected function handleServiceCall(
+        callable $callback,
+        string $errorMessage = 'Operation failed',
+        int $status = 500
+    ): mixed {
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            // You can add logging here if needed
+            // Log::error($errorMessage, ['exception' => $e->getMessage()]);
+
+            return $this->errorResponse($errorMessage.': '.$e->getMessage(), $status);
+        }
+    }
 }

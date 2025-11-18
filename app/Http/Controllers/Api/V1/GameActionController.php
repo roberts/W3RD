@@ -36,10 +36,14 @@ class GameActionController extends Controller
         $game = Game::with('mode')->where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
-        try {
-            $mode = GameServiceProvider::getMode($game);
-        } catch (\Exception $e) {
-            return $this->errorResponse('Unable to load game mode handler.', 500, 'configuration_error');
+        $mode = $this->handleServiceCall(
+            fn () => GameServiceProvider::getMode($game),
+            'Unable to load game mode handler',
+            500
+        );
+
+        if ($mode instanceof JsonResponse) {
+            return $mode;
         }
 
         // Verify the authenticated user is a player in this game
@@ -118,13 +122,17 @@ class GameActionController extends Controller
 
         // Get the action factory for this game and create the action DTO
         $actionFactoryClass = $mode->getActionFactory();
-        try {
-            $action = $actionFactoryClass::create(
+        $action = $this->handleServiceCall(
+            fn () => $actionFactoryClass::create(
                 $validated['action_type'],
                 $validated['action_details']
-            );
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage(), 400, 'invalid_action');
+            ),
+            'Invalid action',
+            400
+        );
+
+        if ($action instanceof JsonResponse) {
+            return $action;
         }
 
         // Validate the action with rich error feedback
@@ -293,10 +301,14 @@ class GameActionController extends Controller
         $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Get the mode handler
-        try {
-            $mode = GameServiceProvider::getMode($game);
-        } catch (\Exception $e) {
-            return $this->errorResponse('Unable to load game mode handler.', 500, 'configuration_error');
+        $mode = $this->handleServiceCall(
+            fn () => GameServiceProvider::getMode($game),
+            'Unable to load game mode handler',
+            500
+        );
+
+        if ($mode instanceof JsonResponse) {
+            return $mode;
         }
 
         // Get the player

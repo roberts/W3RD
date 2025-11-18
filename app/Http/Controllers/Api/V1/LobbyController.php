@@ -53,56 +53,64 @@ class LobbyController extends Controller
         }
 
         DB::beginTransaction();
-        try {
-            $lobby = Lobby::create([
-                'game_title' => $gameTitle,
-                'game_mode' => $validated['game_mode'] ?? null,
-                'host_id' => $user->id,
-                'is_public' => $validated['is_public'] ?? false,
-                'min_players' => $validated['min_players'] ?? 2,
-                'scheduled_at' => $validated['scheduled_at'] ?? null,
-                'status' => LobbyStatus::PENDING,
-            ]);
 
-            // Add host as first player (auto-accepted, defaults to client_id 1 for AI agents)
-            $clientId = (int) $request->header('X-Client-Key') ?: 1;
+        $lobby = $this->handleServiceCall(
+            function () use ($validated, $user, $request) {
+                $lobby = Lobby::create([
+                    'game_title' => GameTitle::fromSlug($validated['game_title']),
+                    'game_mode' => $validated['game_mode'] ?? null,
+                    'host_id' => $user->id,
+                    'is_public' => $validated['is_public'] ?? false,
+                    'min_players' => $validated['min_players'] ?? 2,
+                    'scheduled_at' => $validated['scheduled_at'] ?? null,
+                    'status' => LobbyStatus::PENDING,
+                ]);
 
-            LobbyPlayer::create([
-                'lobby_id' => $lobby->id,
-                'user_id' => $user->id,
-                'client_id' => $clientId,
-                'status' => LobbyPlayerStatus::ACCEPTED,
-            ]);
+                // Add host as first player (auto-accepted, defaults to client_id 1 for AI agents)
+                $clientId = (int) $request->header('X-Client-Key') ?: 1;
 
-            // Add invitees
-            if (! empty($validated['invitees'])) {
-                foreach ($validated['invitees'] as $inviteeId) {
-                    if ($inviteeId === $user->id) {
-                        continue; // Skip host
+                LobbyPlayer::create([
+                    'lobby_id' => $lobby->id,
+                    'user_id' => $user->id,
+                    'client_id' => $clientId,
+                    'status' => LobbyPlayerStatus::ACCEPTED,
+                ]);
+
+                // Add invitees
+                if (! empty($validated['invitees'])) {
+                    foreach ($validated['invitees'] as $inviteeId) {
+                        if ($inviteeId === $user->id) {
+                            continue; // Skip host
+                        }
+
+                        $lobbyPlayer = LobbyPlayer::create([
+                            'lobby_id' => $lobby->id,
+                            'user_id' => $inviteeId,
+                            'status' => LobbyPlayerStatus::PENDING,
+                        ]);
+
+                        // Broadcast invitation
+                        broadcast(new LobbyInvitation($inviteeId, $lobby));
                     }
-
-                    $lobbyPlayer = LobbyPlayer::create([
-                        'lobby_id' => $lobby->id,
-                        'user_id' => $inviteeId,
-                        'status' => LobbyPlayerStatus::PENDING,
-                    ]);
-
-                    // Broadcast invitation
-                    broadcast(new LobbyInvitation($inviteeId, $lobby));
                 }
-            }
 
-            DB::commit();
+                DB::commit();
 
-            return response()->json([
-                'message' => 'Lobby created successfully',
-                'lobby' => LobbyResource::make($lobby),
-            ], 201);
-        } catch (\Exception $e) {
+                return $lobby;
+            },
+            'Failed to create lobby'
+        );
+
+        if ($lobby instanceof JsonResponse) {
             DB::rollBack();
 
-            return $this->errorResponse('Failed to create lobby', 500);
+            return $lobby;
         }
+
+        return response()->json([
+            'message' => 'Lobby created successfully',
+            'lobby' => LobbyResource::make($lobby),
+        ], 201);
     }
 
     /**

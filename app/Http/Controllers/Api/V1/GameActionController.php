@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Game\HandleTimeoutAction;
+use App\Actions\Game\ProcessCoordinatedActionAction;
 use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
@@ -25,7 +27,9 @@ class GameActionController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected GameActionRecorder $actionRecorder
+        protected GameActionRecorder $actionRecorder,
+        protected HandleTimeoutAction $handleTimeout,
+        protected ProcessCoordinatedActionAction $processCoordinatedAction
     ) {}
 
     /**
@@ -66,53 +70,9 @@ class GameActionController extends Controller
         $gameState = $stateClass::fromArray($game->game_state ?? []);
 
         // Check if current turn has timed out
-        $deadline = $mode->getActionDeadline($gameState, $game);
-        if (now()->isAfter($deadline)) {
-            $penalty = $mode->getTimeoutPenalty();
-
-            // Get timeout handler
-            $timeoutHandler = match ($penalty) {
-                'forfeit' => new ForfeitHandler,
-                'pass' => new PassHandler,
-                'none' => new NoneHandler,
-                default => new NoneHandler,
-            };
-
-            $outcome = $timeoutHandler->handleTimeout($game, $mode->getGameState(), $mode->getGameState()->currentPlayerUlid);
-
-            if ($outcome->isFinished) {
-                $game->status = GameStatus::COMPLETED;
-                $game->finish_reason = $outcome->reason;
-
-                if ($outcome->winnerUlid) {
-                    /** @var Player $winner */
-                    $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
-                    $game->winner_id = $winner->id;
-                }
-
-                $game->save();
-
-                return $this->errorResponse(
-                    'Your turn has timed out. You have forfeited the game.',
-                    408,
-                    'action_timeout',
-                    ['game_status' => 'completed', 'penalty' => $penalty]
-                );
-            }
-
-            // Pass strategy - advance to next player
-            if ($penalty === 'pass') {
-                $gameState = $mode->getGameState()->withNextPlayer();
-                $game->game_state = $gameState->toArray();
-                $game->save();
-
-                return $this->errorResponse(
-                    'Your turn has timed out and has been passed.',
-                    408,
-                    'action_timeout',
-                    ['penalty' => 'pass']
-                );
-            }
+        $timeoutResult = $this->handleTimeout->execute($game, $mode, $gameState);
+        if ($timeoutResult->hasTimedOut) {
+            return $timeoutResult->errorResponse;
         }
 
         // Verify it's this player's turn
@@ -162,22 +122,8 @@ class GameActionController extends Controller
         $game->game_state = $gameState->toArray();
         $game->save();
 
-        // Determine coordination parameters for coordinated actions
-        $coordinationGroup = null;
-        $coordinationSequence = null;
-        $isCoordinated = false;
-
-        if ($action->getType() === 'pass_cards') {
-            $isCoordinated = true;
-            // Build coordination group for Hearts card passing
-            $roundNumber = $gameState->roundNumber ?? 1;
-            $coordinationGroup = "game:{$game->id}:pass:round:{$roundNumber}";
-
-            // Get current sequence number (how many have submitted so far, before this one)
-            $coordinationSequence = Action::where('game_id', $game->id)
-                ->where('coordination_group', $coordinationGroup)
-                ->count() + 1;
-        }
+        // Handle coordinated actions
+        $coordinationResult = $this->processCoordinatedAction->execute($game, $action, $mode, $gameState);
 
         // Record the action using the service
         $actionRecord = $this->actionRecorder->recordSuccess(
@@ -185,43 +131,15 @@ class GameActionController extends Controller
             $player,
             $action,
             $game->turn_number ?? 1,
-            $coordinationGroup,
-            $coordinationSequence
+            $coordinationResult->coordinationGroup,
+            $coordinationResult->coordinationSequence
         );
 
-        // Check if coordination is complete for coordinated actions
-        if ($isCoordinated && $coordinationGroup) {
-            $completedCount = Action::where('game_id', $game->id)
-                ->where('coordination_group', $coordinationGroup)
-                ->whereNull('coordination_completed_at')
-                ->count();
-
-            // For Hearts pass_cards, we need all 4 players
-            $requiredCount = 4;
-
-            if ($completedCount >= $requiredCount) {
-                // All players have submitted - process the coordination
-                $passActions = Action::where('game_id', $game->id)
-                    ->where('coordination_group', $coordinationGroup)
-                    ->whereNull('coordination_completed_at')
-                    ->with('player')
-                    ->get();
-
-                // Process the coordinated action
-                if (method_exists($mode, 'processPassCards')) {
-                    $gameState = $mode->processPassCards($gameState, $passActions);
-
-                    // Mark all pass actions as completed
-                    Action::where('game_id', $game->id)
-                        ->where('coordination_group', $coordinationGroup)
-                        ->whereNull('coordination_completed_at')
-                        ->update(['coordination_completed_at' => now()]);
-
-                    // Save the updated game state after coordination
-                    $game->game_state = $gameState->toArray();
-                    $game->save();
-                }
-            }
+        // Update game state if coordination is complete
+        if ($coordinationResult->coordinationComplete && $coordinationResult->updatedGameState) {
+            $gameState = $coordinationResult->updatedGameState;
+            $game->game_state = $gameState->toArray();
+            $game->save();
         }
 
         // Check for end condition using new GameOutcome

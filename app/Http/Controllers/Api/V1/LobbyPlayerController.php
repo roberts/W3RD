@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Client\ResolveClientIdAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
@@ -23,7 +24,8 @@ class LobbyPlayerController extends Controller
 
     public function __construct(
         protected GameCreationService $gameCreationService,
-        protected ResolveUsernameAction $resolveUsername
+        protected ResolveUsernameAction $resolveUsername,
+        protected ResolveClientIdAction $resolveClientId
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -95,7 +97,7 @@ class LobbyPlayerController extends Controller
 
         // If no existing record and lobby is public, allow joining
         if (! $lobbyPlayer && $lobby->is_public && $validated['status'] === 'accepted') {
-            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            $clientId = $this->resolveClientId->execute($request);
 
             $lobbyPlayer = LobbyPlayer::create([
                 'lobby_id' => $lobby->id,
@@ -122,7 +124,7 @@ class LobbyPlayerController extends Controller
 
         // Update status
         if ($validated['status'] === 'accepted') {
-            $clientId = (int) $request->header('X-Client-Key') ?: 1; // Defaults to Gamer Protocol Web for AI
+            $clientId = $this->resolveClientId->execute($request);
 
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();

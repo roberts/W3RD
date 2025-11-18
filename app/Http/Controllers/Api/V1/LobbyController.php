@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Client\ResolveClientIdAction;
 use App\Enums\GameTitle;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
@@ -23,6 +24,10 @@ use Illuminate\Support\Facades\DB;
 class LobbyController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(
+        protected ResolveClientIdAction $resolveClientId
+    ) {}
 
     /**
      * List all public lobbies
@@ -67,7 +72,7 @@ class LobbyController extends Controller
                 ]);
 
                 // Add host as first player (auto-accepted, defaults to client_id 1 for AI agents)
-                $clientId = (int) $request->header('X-Client-Key') ?: 1;
+                $clientId = $this->resolveClientId->execute($request);
 
                 LobbyPlayer::create([
                     'lobby_id' => $lobby->id,

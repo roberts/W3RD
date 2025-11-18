@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Client\ResolveClientIdAction;
+use App\Actions\Quickplay\ApplyDodgePenaltyAction;
+use App\Actions\Quickplay\JoinQuickplayQueueAction;
+use App\Actions\Quickplay\LeaveQuickplayQueueAction;
 use App\Enums\GameTitle;
 use App\Http\Requests\Quickplay\AcceptMatchRequest;
 use App\Http\Requests\Quickplay\JoinQuickplayRequest;
@@ -17,7 +21,11 @@ class QuickplayController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected GameCreationService $gameCreationService
+        protected GameCreationService $gameCreationService,
+        protected ResolveClientIdAction $resolveClientId,
+        protected JoinQuickplayQueueAction $joinQueue,
+        protected LeaveQuickplayQueueAction $leaveQueue,
+        protected ApplyDodgePenaltyAction $applyDodgePenalty
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -37,36 +45,22 @@ class QuickplayController extends Controller
         }
 
         $gameMode = $validated['game_mode'] ?? 'standard';
+        $clientId = $this->resolveClientId->execute($request);
 
-        // Check for cooldown
-        $cooldownKey = "cooldown:quickplay:{$user->id}";
-        if (Redis::exists($cooldownKey)) {
-            $ttl = Redis::ttl($cooldownKey);
+        $result = $this->joinQueue->execute($user, $gameTitle, $gameMode, $clientId);
 
+        if (! $result->success) {
             return $this->errorResponse(
-                'You are on a matchmaking cooldown',
+                $result->errorMessage,
                 429,
                 null,
-                ['cooldown_remaining' => $ttl]
+                ['cooldown_remaining' => $result->cooldownRemaining]
             );
         }
 
-        // Add to queue (sorted set by skill level)
-        $queueKey = "quickplay:{$gameTitle->value}:{$gameMode}";
-        $skillLevel = $this->getUserSkillLevel($user, $gameTitle);
-
-        Redis::zadd($queueKey, $skillLevel, (string) $user->id);
-
-        // Store join timestamp
-        Redis::hset('quickplay:timestamps', (string) $user->id, now()->timestamp);
-
-        // Store client_id for this player (defaults to 1 = Gamer Protocol Web for AI agents)
-        $clientId = (int) $request->header('X-Client-Key') ?: 1;
-        Redis::hset('quickplay:clients', (string) $user->id, (string) $clientId);
-
         return $this->dataResponse([
-            'game_title' => $gameTitle->value,
-            'game_mode' => $gameMode,
+            'game_title' => $result->gameTitle,
+            'game_mode' => $result->gameMode,
         ], 'Successfully joined the queue', 202);
     }
 
@@ -77,20 +71,7 @@ class QuickplayController extends Controller
     {
         $user = $request->user();
 
-        // Remove from all queues
-        $gameTitles = GameTitle::cases();
-        foreach ($gameTitles as $gameTitle) {
-            foreach (['standard', 'blitz', 'rapid'] as $mode) {
-                $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
-                Redis::zrem($queueKey, (string) $user->id);
-            }
-        }
-
-        // Remove timestamp
-        Redis::hdel('quickplay:timestamps', (string) $user->id);
-
-        // Remove client_id
-        Redis::hdel('quickplay:clients', (string) $user->id);
+        $this->leaveQueue->execute($user);
 
         return $this->noContentResponse();
     }
@@ -132,50 +113,10 @@ class QuickplayController extends Controller
     }
 
     /**
-     * Get user skill level for a game title
-     */
-    private function getUserSkillLevel($user, GameTitle $gameTitle): int
-    {
-        // Get user's skill level from their title level
-        $titleLevel = $user->titleLevels()
-            ->where('game_title', $gameTitle->value)
-            ->first();
-
-        return $titleLevel ? $titleLevel->level : 1;
-    }
-
-    /**
      * Apply dodge penalty to user
      */
     public function applyDodgePenalty(int $userId): void
     {
-        $penaltyKey = "cooldown:quickplay:{$userId}";
-        $offenseKey = "quickplay:offenses:{$userId}";
-
-        // Get offense count
-        $offenses = (int) Redis::get($offenseKey) ?: 0;
-        $offenses++;
-
-        // Determine penalty duration
-        $penaltyDuration = match (true) {
-            $offenses === 1 => 30,      // 30 seconds
-            $offenses === 2 => 120,     // 2 minutes
-            default => 300,             // 5 minutes
-        };
-
-        // Set cooldown
-        Redis::setex($penaltyKey, $penaltyDuration, '1');
-
-        // Update offense count (reset after 4 hours)
-        Redis::setex($offenseKey, 14400, $offenses);
-
-        // Remove from all queues
-        $gameTitles = GameTitle::cases();
-        foreach ($gameTitles as $gameTitle) {
-            foreach (['standard', 'blitz', 'rapid'] as $mode) {
-                $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
-                Redis::zrem($queueKey, (string) $userId);
-            }
-        }
+        $this->applyDodgePenalty->execute($userId);
     }
 }

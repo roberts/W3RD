@@ -7,6 +7,7 @@ use App\Events\GameActionProcessed;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
+use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Auth;
 
 class GameActionController extends Controller
 {
-    use ApiResponses;
+    use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
         protected GameActionRecorder $actionRecorder
@@ -47,15 +48,14 @@ class GameActionController extends Controller
         }
 
         // Verify the authenticated user is a player in this game
-        /** @var Player|null $player */
-        $player = $game->players()->where('user_id', Auth::id())->first();
-        if (! $player) {
-            return $this->forbiddenResponse('You are not a player in this game.');
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
         // Check if game is still active
-        if ($game->status !== GameStatus::ACTIVE) {
-            return $this->errorResponse('This game is not active.', 400, 'invalid_game_state');
+        if ($error = $this->authorizeActiveGame($game)) {
+            return $error;
         }
 
         // Validate request - basic validation, game-specific validation happens in the action factory
@@ -116,8 +116,8 @@ class GameActionController extends Controller
         }
 
         // Verify it's this player's turn
-        if ($mode->getGameState()->currentPlayerUlid !== $player->ulid) {
-            return $this->errorResponse('It is not your turn.', 400, 'invalid_turn');
+        if ($error = $this->authorizePlayerTurn($player, $mode->getGameState()->currentPlayerUlid)) {
+            return $error;
         }
 
         // Get the action factory for this game and create the action DTO
@@ -311,10 +311,9 @@ class GameActionController extends Controller
         }
 
         // Get the player
-        /** @var Player|null $player */
-        $player = $game->players()->where('user_id', Auth::id())->first();
-        if (! $player) {
-            return $this->forbiddenResponse('You are not a player in this game.');
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
         // Get the current game state

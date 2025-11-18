@@ -10,6 +10,7 @@ use App\Http\Resources\ActionResource;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\RematchRequestResource;
 use App\Http\Traits\ApiResponses;
+use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -19,7 +20,7 @@ use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
-    use ApiResponses;
+    use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
         protected RematchService $rematchService
@@ -57,10 +58,9 @@ class GameController extends Controller
             ->firstOrFail();
 
         // Verify user is a player in this game
-        $isPlayer = $game->players->contains('user_id', $user->id);
-
-        if (! $isPlayer) {
-            return $this->forbiddenResponse('You are not authorized to view this game.');
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
         return $this->resourceResponse(GameResource::make($game));
@@ -101,10 +101,9 @@ class GameController extends Controller
         $game = Game::where('ulid', $gameUlid)->firstOrFail();
 
         // Verify user is a player in this game
-        $isPlayer = $game->players->contains('user_id', $user->id);
-
-        if (! $isPlayer) {
-            return $this->forbiddenResponse('You are not authorized to view this game history.');
+        $player = $this->authorizeGamePlayer($game);
+        if ($player instanceof JsonResponse) {
+            return $player;
         }
 
         $actions = Action::where('game_id', $game->id)

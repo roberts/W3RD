@@ -121,7 +121,7 @@ class QuickplayController extends Controller
             // Both players accepted - create the game
             $playerIds = array_keys($acceptances);
 
-            $this->createGame($playerIds, $matchId);
+            $this->gameCreationService->createFromQuickplayMatch($playerIds, $matchId);
 
             return $this->dataResponse([
                 'match_id' => $matchId,
@@ -142,42 +142,6 @@ class QuickplayController extends Controller
             ->first();
 
         return $titleLevel ? $titleLevel->level : 1;
-    }
-
-    /**
-     * Create a game from accepted match
-     */
-    private function createGame(array $playerIds, string $matchId): void
-    {
-        // Get game title and mode from match ID stored in Redis
-        $matchKey = "quickplay:match:{$matchId}";
-        $matchData = Redis::hgetall($matchKey);
-
-        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'validate-four');
-        $gameMode = $matchData['game_mode'] ?? 'standard';
-
-        // Prepare player data with each player's specific client_id
-        $playerData = array_map(function ($userId) use ($matchData) {
-            $clientKey = 'player_'.$userId.'_client';
-
-            return [
-                'user_id' => (int) $userId,
-                'client_id' => (int) ($matchData[$clientKey] ?? 1), // Defaults to Gamer Protocol Web for AI
-            ];
-        }, $playerIds);
-
-        // Create the game using the service
-        $this->gameCreationService->createFromQuickplay($playerData, $gameTitle, $gameMode);
-
-        // Clean up Redis
-        Redis::del("quickplay:accept:{$matchId}");
-        Redis::del($matchKey);
-
-        // Remove players from queue and client tracking
-        foreach ($playerIds as $playerId) {
-            Redis::hdel('quickplay:timestamps', $playerId);
-            Redis::hdel('quickplay:clients', $playerId);
-        }
     }
 
     /**

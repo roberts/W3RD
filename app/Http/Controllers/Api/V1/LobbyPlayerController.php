@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Events\LobbyInvitation;
@@ -21,7 +22,8 @@ class LobbyPlayerController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected GameCreationService $gameCreationService
+        protected GameCreationService $gameCreationService,
+        protected ResolveUsernameAction $resolveUsername
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -45,7 +47,7 @@ class LobbyPlayerController extends Controller
         }
 
         // Resolve username to user
-        $invitee = User::where('username', $validated['username'])->firstOrFail();
+        $invitee = $this->resolveUsername->execute($validated['username']);
 
         // Check if player is already in lobby
         $existing = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -80,7 +82,7 @@ class LobbyPlayerController extends Controller
         $currentUser = $request->user();
 
         // Resolve username to user
-        $user = User::where('username', strtolower($username))->firstOrFail();
+        $user = $this->resolveUsername->execute($username);
 
         // Verify the user is responding for themselves
         if ($currentUser->id !== $user->id) {
@@ -151,7 +153,7 @@ class LobbyPlayerController extends Controller
         }
 
         // Resolve username to user
-        $user = User::where('username', strtolower($username))->firstOrFail();
+        $user = $this->resolveUsername->execute($username);
 
         if ($user->id === $currentUser->id) {
             return $this->errorResponse('Host cannot kick themselves');

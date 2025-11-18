@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Auth\TrackAuthenticationEntryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -24,6 +25,10 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(
+        protected TrackAuthenticationEntryAction $trackEntry
+    ) {}
 
     /**
      * Register a new user.
@@ -83,14 +88,13 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken($request->ip() ?? 'api-token');
 
-        Entry::create([
-            'user_id' => $user->id,
-            'client_id' => $request->header('X-Client-Key'),
-            'token_id' => $token->accessToken->id,
-            'ip_address' => $request->ip(),
-            'device_info' => $request->userAgent(),
-            'logged_in_at' => now(),
-        ]);
+        $this->trackEntry->execute(
+            $user,
+            $token,
+            $request->header('X-Client-Key'),
+            $request->ip(),
+            $request->userAgent()
+        );
 
         return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }
@@ -144,14 +148,13 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->ip() ?? 'api-token');
 
-        Entry::create([
-            'user_id' => $user->id,
-            'client_id' => $request->header('X-Client-Key'),
-            'token_id' => $token->accessToken->id,
-            'ip_address' => $request->ip(),
-            'device_info' => $request->userAgent(),
-            'logged_in_at' => now(),
-        ]);
+        $this->trackEntry->execute(
+            $user,
+            $token,
+            $request->header('X-Client-Key'),
+            $request->ip(),
+            $request->userAgent()
+        );
 
         return $this->tokenResponse($token->plainTextToken, UserResource::make($user));
     }

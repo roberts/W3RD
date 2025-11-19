@@ -19,7 +19,7 @@ describe('Concurrent Game Actions', function () {
     $createGameState = function ($players, $currentPlayerUlid, $boardState = null) {
         $board = $boardState ?? array_fill(0, 6, array_fill(0, 7, null));
         $playersData = [];
-        
+
         foreach ($players as $index => $player) {
             $playersData[$player->ulid] = [
                 'ulid' => $player->ulid,
@@ -233,7 +233,7 @@ describe('Database Transaction Safety', function () {
     $createGameState = function ($players, $currentPlayerUlid, $boardState = null) {
         $board = $boardState ?? array_fill(0, 6, array_fill(0, 7, null));
         $playersData = [];
-        
+
         foreach ($players as $index => $player) {
             $playersData[$player->ulid] = [
                 'ulid' => $player->ulid,

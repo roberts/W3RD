@@ -4,7 +4,6 @@ use App\Enums\GameTitle;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Mode;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\GameHelper;
 
@@ -93,7 +92,7 @@ describe('Quickplay Matchmaking', function () {
         it('prevents joining while already in game', function () {
             $user = User::factory()->create();
             $user2 = User::factory()->create();
-            
+
             $mode = Mode::firstOrCreate([
                 'title_slug' => GameTitle::VALIDATE_FOUR,
                 'slug' => 'standard',

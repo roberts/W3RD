@@ -205,12 +205,10 @@ describe('Activity Tracking in Game Creation', function () {
 
     describe('rematch flow', function () {
         it('maintains IDLE state during rematch request', function () {
-            $user1 = User::factory()->create();
-            $user2 = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers(2)->create();
+            $players = $game->players;
+            $user1 = $players[0]->user;
+            $user2 = $players[1]->user;
 
             // Both should be IDLE after game completion
             $this->activityService->setState($user1->id, PlayerActivityState::IDLE);

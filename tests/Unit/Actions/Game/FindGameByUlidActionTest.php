@@ -44,9 +44,7 @@ describe('FindGameByUlidAction', function () {
         });
 
         it('loads players relationship when requested', function () {
-            $game = Game::factory()->create();
-            Player::factory()->for($game)->position(1)->create();
-            Player::factory()->for($game)->position(2)->create();
+            $game = Game::factory()->withPlayers(2)->create();
             $action = new FindGameByUlidAction;
 
             $found = $action->execute($game->ulid, ['players']);

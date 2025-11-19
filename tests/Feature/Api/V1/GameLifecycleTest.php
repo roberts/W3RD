@@ -13,13 +13,7 @@ describe('Game Lifecycle', function () {
             $user = User::factory()->create();
 
             // Create games where user is a player
-            Game::factory()->count(15)->create(['creator_id' => $user->id])->each(function ($game) use ($user) {
-                Player::factory()->create([
-                    'game_id' => $game->id,
-                    'user_id' => $user->id,
-                    'position_id' => 1,
-                ]);
-            });
+            Game::factory()->count(15)->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             $response = $this->actingAs($user)->getJson('/api/v1/games?page=1&per_page=10');
 

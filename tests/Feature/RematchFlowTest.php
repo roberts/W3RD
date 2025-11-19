@@ -39,22 +39,11 @@ describe('Rematch Flow with Agents', function () {
 
     it('completes full rematch flow: game → request → auto-accept → new game', function () {
         // Create agent and human users
-        $agent = Agent::factory()->forGame('validate-four')->alwaysAvailable()->create();
-        $agentUser = User::factory()->create(['agent_id' => $agent->id]);
         $humanUser = User::factory()->create();
-
-        // Create completed game with players
-        $game = Game::factory()->completed()->create(['creator_id' => $humanUser->id]);
-        $player1 = Player::factory()->create([
-            'game_id' => $game->id,
-            'user_id' => $humanUser->id,
-            'position_id' => 1,
-        ]);
-        $player2 = Player::factory()->create([
-            'game_id' => $game->id,
-            'user_id' => $agentUser->id,
-            'position_id' => 2,
-        ]);
+        $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create(['creator_id' => $humanUser->id]);
+        
+        $agentUser = $game->agent_user;
+        $agent = $game->agent;
 
         // Mock Redis for cooldown and activity states
         $cooldownKey = "agent:{$agentUser->id}:cooldown";
@@ -114,13 +103,10 @@ describe('Rematch Flow with Agents', function () {
     });
 
     it('auto-accepts rematch only when both players are IDLE', function () {
-        $agent = Agent::factory()->alwaysAvailable()->create();
-        $agentUser = User::factory()->create(['agent_id' => $agent->id]);
         $humanUser = User::factory()->create();
-
-        $game = Game::factory()->completed()->create();
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+        $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create();
+        
+        $agentUser = $game->agent_user;
 
         // Create rematch request directly without validation (testing job behavior)
         $rematchRequest = RematchRequest::create([
@@ -149,13 +135,9 @@ describe('Rematch Flow with Agents', function () {
     });
 
     it('rejects rematch request if agent cooldown expired', function () {
-        $agent = Agent::factory()->alwaysAvailable()->create();
-        $agentUser = User::factory()->create(['agent_id' => $agent->id]);
         $humanUser = User::factory()->create();
-
-        $game = Game::factory()->completed()->create();
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+        $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+        $agentUser = $game->agent_user;
 
         // Mock no cooldown
         $cooldownKey = "agent:{$agentUser->id}:cooldown";
@@ -173,13 +155,10 @@ describe('Rematch Flow with Agents', function () {
     });
 
     it('cancels auto-accept if agent becomes unavailable', function () {
-        $agent = Agent::factory()->alwaysAvailable()->create();
-        $agentUser = User::factory()->create(['agent_id' => $agent->id]);
         $humanUser = User::factory()->create();
-
-        $game = Game::factory()->completed()->create();
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-        Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+        $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create();
+        
+        $agentUser = $game->agent_user;
 
         // Mock cooldown
         $cooldownKey = "agent:{$agentUser->id}:cooldown";

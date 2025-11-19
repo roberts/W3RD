@@ -71,13 +71,9 @@ describe('AgentAutoAcceptRematch Job', function () {
 
     describe('successful auto-accept', function () {
         it('accepts rematch when both players are IDLE', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
@@ -107,13 +103,9 @@ describe('AgentAutoAcceptRematch Job', function () {
         });
 
         it('clears agent cooldown after accepting', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
@@ -170,13 +162,9 @@ describe('AgentAutoAcceptRematch Job', function () {
         });
 
         it('cancels if agent not IDLE', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
@@ -201,13 +189,9 @@ describe('AgentAutoAcceptRematch Job', function () {
         });
 
         it('cancels if requester not IDLE', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
@@ -232,13 +216,9 @@ describe('AgentAutoAcceptRematch Job', function () {
         });
 
         it('cancels if both players not IDLE', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
@@ -286,13 +266,9 @@ describe('AgentAutoAcceptRematch Job', function () {
         });
 
         it('handles race condition where rematch accepted by another process', function () {
-            $agent = Agent::factory()->alwaysAvailable()->create();
-            $agentUser = User::factory()->create(['agent_id' => $agent->id]);
             $humanUser = User::factory()->create();
-
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $humanUser->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $agentUser->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
+            $agentUser = $game->agent_user;
 
             $rematchRequest = RematchRequest::factory()->accepted()->create([
                 'original_game_id' => $game->id,

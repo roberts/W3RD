@@ -12,19 +12,14 @@ describe('Rematch Chain Scenarios', function () {
     describe('Rematch Chain Tracking', function () {
         it('creates chain from game 1 to game 2 to game 3', function () {
             $mode = Mode::factory()->create();
-            $users = User::factory()->count(4)->create();
 
             // Game 1
-            $game1 = Game::factory()->create([
+            $game1 = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
 
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game1)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
+            $users = $game1->players->pluck('user');
 
             $rematchService = new RematchService;
 
@@ -104,19 +99,14 @@ describe('Rematch Chain Scenarios', function () {
     describe('Partial Rematch Acceptance', function () {
         it('creates new lobby with only accepting players', function () {
             $mode = Mode::factory()->create();
-            $users = User::factory()->count(4)->create();
 
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
 
-            $players = collect([]);
-            foreach ($users as $index => $user) {
-                $players->push(Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]));
-            }
+            $users = $game->players->pluck('user');
+            $players = $game->players;
 
             $rematchService = new RematchService;
 
@@ -136,18 +126,13 @@ describe('Rematch Chain Scenarios', function () {
 
         it('cancels rematch if not enough players accept', function () {
             $mode = Mode::factory()->create(['min_players' => 4]);
-            $users = User::factory()->count(4)->create();
 
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
 
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
+            $users = $game->players->pluck('user');
 
             $rematchService = new RematchService;
             $lobby = $rematchService->createRematchLobby($game);
@@ -172,18 +157,12 @@ describe('Rematch Chain Scenarios', function () {
             $mode1 = Mode::factory()->create(['title_slug' => 'hearts']);
             $mode2 = Mode::factory()->create(['title_slug' => 'checkers']);
 
-            $users = User::factory()->count(4)->create();
-
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode1->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
 
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
+            $users = $game->players->pluck('user');
 
             // Create rematch with different mode
             $lobby = Lobby::factory()->create([
@@ -198,18 +177,11 @@ describe('Rematch Chain Scenarios', function () {
 
         it('maintains player relationships from original game', function () {
             $mode = Mode::factory()->create();
-            $users = User::factory()->count(4)->create();
 
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
-
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
 
             $rematchService = new RematchService;
             $lobby = $rematchService->createRematchLobby($game);
@@ -225,18 +197,11 @@ describe('Rematch Chain Scenarios', function () {
     describe('Rematch Timeout', function () {
         it('expires lobby if players do not join within time limit', function () {
             $mode = Mode::factory()->create();
-            $users = User::factory()->count(4)->create();
 
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
-
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
 
             $rematchService = new RematchService;
             $lobby = $rematchService->createRematchLobby($game);
@@ -253,18 +218,11 @@ describe('Rematch Chain Scenarios', function () {
             Queue::fake();
 
             $mode = Mode::factory()->create();
-            $users = User::factory()->count(4)->create();
 
-            $game = Game::factory()->create([
+            $game = Game::factory()->withPlayers(4)->create([
                 'mode_id' => $mode->id,
                 'status' => GameStatusEnum::COMPLETED,
             ]);
-
-            foreach ($users as $index => $user) {
-                Player::factory()->for($game)->position($index + 1)->create([
-                    'user_id' => $user->id,
-                ]);
-            }
 
             $rematchService = new RematchService;
             $lobby = $rematchService->createRematchLobby($game);

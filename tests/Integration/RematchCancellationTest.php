@@ -32,16 +32,9 @@ describe('Automatic Rematch Cancellation', function () {
             $requester = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $requester->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $requester->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($requester, $opponent)
+                ->create();
 
             // Requester joins queue (triggers cancellation)
             $job = new CheckAndCancelPendingRematches($requester->id);
@@ -60,16 +53,9 @@ describe('Automatic Rematch Cancellation', function () {
             $requester = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $requester->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $requester->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($requester, $opponent)
+                ->create();
 
             // Opponent joins queue
             $job = new CheckAndCancelPendingRematches($opponent->id);
@@ -89,27 +75,13 @@ describe('Automatic Rematch Cancellation', function () {
             $opponent1 = User::factory()->create();
             $opponent2 = User::factory()->create();
 
-            $game1 = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game1->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game1->id, 'user_id' => $opponent1->id, 'position_id' => 2]);
+            $rematch1 = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent1)
+                ->create();
 
-            $game2 = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game2->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game2->id, 'user_id' => $opponent2->id, 'position_id' => 2]);
-
-            $rematch1 = RematchRequest::factory()->create([
-                'original_game_id' => $game1->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent1->id,
-                'status' => 'pending',
-            ]);
-
-            $rematch2 = RematchRequest::factory()->create([
-                'original_game_id' => $game2->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent2->id,
-                'status' => 'pending',
-            ]);
+            $rematch2 = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent2)
+                ->create();
 
             $job = new CheckAndCancelPendingRematches($user->id);
             $job->handle();
@@ -159,16 +131,9 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent)
+                ->create();
 
             // Setting to IN_QUEUE dispatches job (we need to manually execute for test)
             $this->activityService->setState($user->id, PlayerActivityState::IN_QUEUE);
@@ -184,16 +149,9 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent)
+                ->create();
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
 
@@ -207,16 +165,9 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $completedGame = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $completedGame->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $completedGame->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $completedGame->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent)
+                ->create();
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_GAME);
 
@@ -230,16 +181,9 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent)
+                ->create();
 
             // IDLE doesn't trigger cancellation job, but verify rematch stays pending
             $this->activityService->setState($user->id, PlayerActivityState::IDLE);
@@ -251,16 +195,9 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $game = Game::factory()->completed()->create();
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $opponent->id, 'position_id' => 2]);
-
-            $rematchRequest = RematchRequest::factory()->create([
-                'original_game_id' => $game->id,
-                'requesting_user_id' => $user->id,
-                'opponent_user_id' => $opponent->id,
-                'status' => 'pending',
-            ]);
+            $rematchRequest = RematchRequest::factory()
+                ->fromCompletedGame($user, $opponent)
+                ->create();
 
             // Logout sets OFFLINE (doesn't auto-trigger, handled by AuthController)
             $this->activityService->setState($user->id, PlayerActivityState::OFFLINE);

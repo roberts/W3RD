@@ -29,8 +29,7 @@ describe('RematchService', function () {
     describe('Create Rematch Request Validation', function () {
         test('throws exception for non-completed games', function () {
             $user = User::factory()->create();
-            $game = Game::factory()->active()->create(['creator_id' => $user->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id]);
+            $game = Game::factory()->active()->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $user))
                 ->toThrow(\InvalidArgumentException::class, 'completed games');
@@ -39,8 +38,7 @@ describe('RematchService', function () {
         test('throws exception when user was not a player', function () {
             $player = User::factory()->create();
             $nonPlayer = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $player->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $player->id]);
+            $game = Game::factory()->completed()->withPlayers([$player])->create(['creator_id' => $player->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $nonPlayer))
                 ->toThrow(\InvalidArgumentException::class, 'not a player');
@@ -48,8 +46,7 @@ describe('RematchService', function () {
 
         test('throws exception when opponent not found', function () {
             $user = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user->id]);
+            $game = Game::factory()->completed()->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $user))
                 ->toThrow(\InvalidArgumentException::class, 'opponent');
@@ -58,9 +55,7 @@ describe('RematchService', function () {
         test('throws exception when pending request already exists', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create first request
             $this->service->createRematchRequest($game, $user1);
@@ -75,9 +70,7 @@ describe('RematchService', function () {
         test('creates rematch request with correct data', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
 
@@ -90,9 +83,7 @@ describe('RematchService', function () {
         test('sets expiration time based on config', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             Carbon::setTestNow(Carbon::parse('2024-01-01 12:00:00'));
 
@@ -108,9 +99,7 @@ describe('RematchService', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
             $user3 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
 
@@ -121,9 +110,7 @@ describe('RematchService', function () {
         test('throws exception when requester tries to accept own request', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
 
@@ -134,9 +121,7 @@ describe('RematchService', function () {
         test('throws exception when request not pending', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = RematchRequest::create([
                 'original_game_id' => $game->id,
@@ -153,9 +138,7 @@ describe('RematchService', function () {
         test('throws exception when request expired', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = RematchRequest::create([
                 'original_game_id' => $game->id,
@@ -174,9 +157,7 @@ describe('RematchService', function () {
         test('creates new game with same settings', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
             $newGame = $this->service->acceptRematchRequest($request, $user2);
@@ -190,9 +171,7 @@ describe('RematchService', function () {
         test('swaps player positions for fairness', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
             $newGame = $this->service->acceptRematchRequest($request, $user2);
@@ -207,9 +186,7 @@ describe('RematchService', function () {
         test('updates request status to accepted', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $request = $this->service->createRematchRequest($game, $user1);
             $newGame = $this->service->acceptRematchRequest($request, $user2);
@@ -272,9 +249,7 @@ describe('RematchService', function () {
         test('expires requests past their expiration time', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create expired request
             $expiredRequest = RematchRequest::create([
@@ -295,9 +270,7 @@ describe('RematchService', function () {
         test('does not expire future requests', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             $futureRequest = $this->service->createRematchRequest($game, $user1);
 
@@ -311,9 +284,7 @@ describe('RematchService', function () {
         test('only expires pending requests', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create expired but non-pending request
             RematchRequest::create([
@@ -332,12 +303,8 @@ describe('RematchService', function () {
         test('returns correct count of expired requests', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
-            $game1 = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            $game2 = Game::factory()->completed()->create(['creator_id' => $user1->id]);
-            Player::factory()->create(['game_id' => $game1->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game1->id, 'user_id' => $user2->id, 'position_id' => 2]);
-            Player::factory()->create(['game_id' => $game2->id, 'user_id' => $user1->id, 'position_id' => 1]);
-            Player::factory()->create(['game_id' => $game2->id, 'user_id' => $user2->id, 'position_id' => 2]);
+            $game1 = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
+            $game2 = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create multiple expired requests
             RematchRequest::create([

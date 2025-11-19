@@ -10,7 +10,6 @@ use App\Models\Game\Game;
 use App\Models\Game\Mode;
 use App\Models\Game\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Collection;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Game>
@@ -183,18 +182,18 @@ class GameFactory extends Factory
 
     /**
      * Create game with players automatically.
-     * 
-     * @param array<User>|int $usersOrCount Array of User models or count to auto-create
-     * @param int|null $clientId Optional client ID for all players
-     * 
+     *
+     * @param  array<User>|int  $usersOrCount  Array of User models or count to auto-create
+     * @param  int|null  $clientId  Optional client ID for all players
+     *
      * Example:
      * ```php
      * // With existing users
      * Game::factory()->completed()->withPlayers([$user1, $user2])->create()
-     * 
+     *
      * // Auto-create 2 users
      * Game::factory()->withPlayers(2)->create()
-     * 
+     *
      * // With specific client
      * Game::factory()->withPlayers([$user1, $user2], clientId: $client->id)->create()
      * ```
@@ -208,7 +207,7 @@ class GameFactory extends Factory
 
             $users->each(function (User $user, int $index) use ($game, $clientId) {
                 $colors = ['red', 'yellow', 'blue', 'green'];
-                
+
                 Player::factory()->create([
                     'game_id' => $game->getKey(),
                     'user_id' => $user->getKey(),
@@ -222,13 +221,13 @@ class GameFactory extends Factory
 
     /**
      * Create game with an agent as opponent.
-     * 
-     * @param User $humanUser The human player
-     * @param string|null $gameTitle Game title for agent compatibility (defaults to 'validate-four')
-     * @param int|null $clientId Optional client ID
-     * 
+     *
+     * @param  User  $humanUser  The human player
+     * @param  string|null  $gameTitle  Game title for agent compatibility (defaults to 'validate-four')
+     * @param  int|null  $clientId  Optional client ID
+     *
      * Returns the created game with agent_user and agent properties attached.
-     * 
+     *
      * Example:
      * ```php
      * $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create()
@@ -240,19 +239,19 @@ class GameFactory extends Factory
     {
         return $this->afterCreating(function (Game $game) use ($humanUser, $gameTitle, $clientId) {
             $gameTitle = $gameTitle ?? 'validate-four';
-            
+
             // Create agent
             $agent = Agent::factory()
                 ->forGame($gameTitle)
                 ->alwaysAvailable()
                 ->create();
-            
+
             // Create agent user
             $agentUser = User::factory()->create(['agent_id' => $agent->getKey()]);
-            
+
             // Create players
             $colors = ['red', 'yellow'];
-            
+
             Player::factory()->create([
                 'game_id' => $game->getKey(),
                 'user_id' => $humanUser->getKey(),
@@ -260,7 +259,7 @@ class GameFactory extends Factory
                 'color' => $colors[0],
                 'client_id' => $clientId ?? Client::factory(),
             ]);
-            
+
             Player::factory()->create([
                 'game_id' => $game->getKey(),
                 'user_id' => $agentUser->getKey(),
@@ -268,7 +267,7 @@ class GameFactory extends Factory
                 'color' => $colors[1],
                 'client_id' => $clientId ?? Client::factory(),
             ]);
-            
+
             // Attach agent properties to game for easy access
             /** @var Agent $agent */
             /** @var User $agentUser */

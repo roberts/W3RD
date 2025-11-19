@@ -77,21 +77,21 @@ class RematchRequestFactory extends Factory
 
     /**
      * Create rematch request from a completed game with players.
-     * 
+     *
      * Creates: completed game -> 2 players -> rematch request
-     * 
-     * @param User|null $requestingUser Optional user who requests rematch (auto-created if null)
-     * @param User|null $opponentUser Optional opponent user (auto-created if null)
-     * @param int|null $clientId Optional client ID for players
-     * 
+     *
+     * @param  User|null  $requestingUser  Optional user who requests rematch (auto-created if null)
+     * @param  User|null  $opponentUser  Optional opponent user (auto-created if null)
+     * @param  int|null  $clientId  Optional client ID for players
+     *
      * Returns the created rematch request with game, requesting_user, and opponent_user properties attached.
-     * 
+     *
      * Example:
      * ```php
      * // Auto-create everything
      * $rematch = RematchRequest::factory()->fromCompletedGame()->create()
      * $game = $rematch->game; // Access the completed game
-     * 
+     *
      * // With specific users
      * $rematch = RematchRequest::factory()->fromCompletedGame($user1, $user2)->create()
      * ```
@@ -102,10 +102,10 @@ class RematchRequestFactory extends Factory
             // Create users if not provided
             $requestingUser = $requestingUser ?? User::factory()->create();
             $opponentUser = $opponentUser ?? User::factory()->create();
-            
+
             // Create completed game
             $game = Game::factory()->completed()->create();
-            
+
             Player::factory()->create([
                 'game_id' => $game->getKey(),
                 'user_id' => $requestingUser->getKey(),
@@ -113,7 +113,7 @@ class RematchRequestFactory extends Factory
                 'color' => 'red',
                 'client_id' => $clientId ?? Client::factory(),
             ]);
-            
+
             Player::factory()->create([
                 'game_id' => $game->getKey(),
                 'user_id' => $opponentUser->getKey(),
@@ -121,7 +121,7 @@ class RematchRequestFactory extends Factory
                 'color' => 'yellow',
                 'client_id' => $clientId ?? Client::factory(),
             ]);
-            
+
             return [
                 'original_game_id' => $game->getKey(),
                 'requesting_user_id' => $requestingUser->getKey(),

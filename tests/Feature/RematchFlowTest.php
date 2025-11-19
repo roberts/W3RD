@@ -8,7 +8,6 @@ use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
 use App\Services\PlayerActivityService;
 use App\Services\RematchService;
@@ -41,7 +40,7 @@ describe('Rematch Flow with Agents', function () {
         // Create agent and human users
         $humanUser = User::factory()->create();
         $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create(['creator_id' => $humanUser->id]);
-        
+
         $agentUser = $game->agent_user;
         $agent = $game->agent;
 
@@ -105,7 +104,7 @@ describe('Rematch Flow with Agents', function () {
     it('auto-accepts rematch only when both players are IDLE', function () {
         $humanUser = User::factory()->create();
         $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create();
-        
+
         $agentUser = $game->agent_user;
 
         // Create rematch request directly without validation (testing job behavior)
@@ -157,7 +156,7 @@ describe('Rematch Flow with Agents', function () {
     it('cancels auto-accept if agent becomes unavailable', function () {
         $humanUser = User::factory()->create();
         $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create();
-        
+
         $agentUser = $game->agent_user;
 
         // Mock cooldown

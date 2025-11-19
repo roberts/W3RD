@@ -9,7 +9,6 @@ use App\Enums\PlayerActivityState;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
-use App\Models\Game\Player;
 use App\Services\GameCreationService;
 use App\Services\PlayerActivityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

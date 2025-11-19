@@ -7,6 +7,7 @@ use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Actions\Quickplay\JoinQuickplayQueueAction;
 use App\Actions\Quickplay\LeaveQuickplayQueueAction;
 use App\Enums\GameTitle;
+use App\Exceptions\CooldownActiveException;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Requests\Quickplay\AcceptMatchRequest;
@@ -56,10 +57,10 @@ class QuickplayController extends Controller
         $result = $this->joinQueue->execute($user, $gameTitle, $gameMode, $clientId);
 
         if (! $result->success) {
-            return $this->errorResponse(
-                $result->errorMessage,
-                429,
-                null,
+            throw new CooldownActiveException(
+                $result->errorMessage ?? 'Please wait before joining another game',
+                'post_game',
+                $result->cooldownRemaining,
                 ['cooldown_remaining' => $result->cooldownRemaining]
             );
         }

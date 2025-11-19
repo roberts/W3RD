@@ -75,7 +75,9 @@ describe('Quickplay Matchmaking', function () {
             ]);
 
             $response->assertStatus(429)
-                ->assertJsonPath('errors.cooldown_remaining', 300);
+                ->assertJsonPath('errors.cooldown_remaining', 300)
+                ->assertJsonPath('errors.retry_after', 300)
+                ->assertHeader('Retry-After', '300');
         });
 
         it('rejects invalid game_title with 422', function () {

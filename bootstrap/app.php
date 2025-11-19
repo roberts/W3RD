@@ -1,12 +1,14 @@
 <?php
 
 use App\Exceptions\AgentConfigurationException;
+use App\Exceptions\CooldownActiveException;
 use App\Exceptions\GameAccessDeniedException;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyInvitationException;
 use App\Exceptions\LobbyStateException;
 use App\Exceptions\PaymentValidationException;
 use App\Exceptions\PlayerBusyException;
+use App\Exceptions\RateLimitExceededException;
 use App\Exceptions\RematchNotAvailableException;
 use App\Exceptions\ResourceNotFoundException;
 use Illuminate\Foundation\Application;
@@ -109,5 +111,42 @@ return Application::configure(basePath: dirname(__DIR__))
                     ...$e->context,
                 ]),
             ], 500);
+        });
+
+        $exceptions->render(function (RateLimitExceededException $e) {
+            $response = response()->json([
+                'message' => $e->getMessage(),
+                'errors' => array_filter([
+                    'retry_after' => $e->retryAfter,
+                    'limit' => $e->limit,
+                    'window' => $e->window,
+                    ...$e->context,
+                ]),
+            ], 429);
+
+            // Add Retry-After header if available
+            if ($e->retryAfter !== null) {
+                $response->header('Retry-After', (string) $e->retryAfter);
+            }
+
+            return $response;
+        });
+
+        $exceptions->render(function (CooldownActiveException $e) {
+            $response = response()->json([
+                'message' => $e->getMessage(),
+                'errors' => array_filter([
+                    'reason' => $e->reason,
+                    'retry_after' => $e->retryAfter,
+                    ...$e->context,
+                ]),
+            ], 429);
+
+            // Add Retry-After header
+            if ($e->retryAfter !== null) {
+                $response->header('Retry-After', (string) $e->retryAfter);
+            }
+
+            return $response;
         });
     })->create();

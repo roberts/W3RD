@@ -218,6 +218,9 @@ trait ApiResponses
         } catch (\App\Exceptions\RematchNotAvailableException $e) {
             // Re-throw custom exceptions to let the exception handler deal with them
             throw $e;
+        } catch (\App\Exceptions\InvalidActionDataException $e) {
+            // Re-throw action data validation exceptions
+            throw $e;
         } catch (\Exception $e) {
             // You can add logging here if needed
             // Log::error($errorMessage, ['exception' => $e->getMessage()]);

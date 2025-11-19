@@ -3,6 +3,8 @@
 use App\Exceptions\AgentConfigurationException;
 use App\Exceptions\CooldownActiveException;
 use App\Exceptions\GameAccessDeniedException;
+use App\Exceptions\GameActionDeniedException;
+use App\Exceptions\InvalidActionDataException;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyInvitationException;
 use App\Exceptions\LobbyStateException;
@@ -60,6 +62,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     ...$e->context,
                 ]),
             ], 403);
+        });
+
+        $exceptions->render(function (InvalidActionDataException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error_code' => $e->errorCode,
+                'game_title' => $e->gameTitle,
+                'errors' => $e->context,
+            ], 400);
         });
 
         $exceptions->render(function (InvalidGameConfigurationException $e) {
@@ -148,5 +159,16 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return $response;
+        });
+
+        $exceptions->render(function (GameActionDeniedException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error_code' => $e->errorCode,
+                'game_title' => $e->gameTitle,
+                'severity' => $e->severity,
+                'retryable' => $e->isRetryable(),
+                'errors' => $e->context,
+            ], 422);
         });
     })->create();

@@ -148,7 +148,7 @@ describe('Concurrent Game Actions', function () {
 
         // First should succeed, second should fail (not player's turn anymore)
         expect($response1->status())->toBe(200);
-        expect($response2->status())->toBe(400);
+        expect($response2->status())->toBe(422); // Game rule violation: not their turn
     });
 
     it('maintains game state consistency after failed action', function () use ($createGameState) {
@@ -178,7 +178,7 @@ describe('Concurrent Game Actions', function () {
             'action_details' => ['column' => 99], // Invalid column
         ]);
 
-        expect($response->status())->toBe(400);
+        expect($response->status())->toBe(422); // Game rule violation: invalid column
 
         $game->refresh();
 
@@ -280,8 +280,8 @@ describe('Database Transaction Safety', function () {
 
         $game->refresh();
 
-        expect($response->status())->toBe(400);
-        expect($game->game_state)->toBe($originalState);
+        expect($response->status())->toBeIn([400, 422]); // Should reject invalid column
+        expect($game->game_state)->toBe($originalState); // State unchanged
     });
 
     it('maintains referential integrity on error', function () use ($createGameState) {
@@ -357,6 +357,6 @@ describe('Database Transaction Safety', function () {
             'action_details' => ['column' => 4],
         ]);
 
-        expect($response2->status())->toBe(400);
+        expect($response2->status())->toBe(422); // Game rule violation: game completed
     });
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour\Actions;
 
+use App\Exceptions\InvalidActionDataException;
 use App\Interfaces\ActionFactoryContract;
 use App\Interfaces\GameActionContract;
 
@@ -16,18 +17,56 @@ class ActionFactory implements ActionFactoryContract
      * @param  array<string, mixed>  $data  The action data from the request
      * @return GameActionContract The action DTO
      *
-     * @throws \InvalidArgumentException If action type is unknown or data is invalid
+     * @throws InvalidActionDataException If action type is unknown or data is invalid
      */
     public static function create(string $actionType, array $data): GameActionContract
     {
+        // Validate action type
+        if (! in_array($actionType, self::getSupportedActionTypes(), true)) {
+            throw new InvalidActionDataException(
+                sprintf('Unknown action type: %s', $actionType),
+                'unknown_action_type',
+                'validate-four',
+                [
+                    'action_type' => $actionType,
+                    'supported_types' => self::getSupportedActionTypes(),
+                ]
+            );
+        }
+
+        // Validate required fields
+        if (! isset($data['column'])) {
+            throw new InvalidActionDataException(
+                sprintf('Missing required field: column for %s action', $actionType),
+                'missing_required_field',
+                'validate-four',
+                [
+                    'action_type' => $actionType,
+                    'missing_field' => 'column',
+                    'required_fields' => ['column'],
+                ]
+            );
+        }
+
+        // Validate field types
+        if (! is_int($data['column'])) {
+            throw new InvalidActionDataException(
+                sprintf('Field "column" must be an integer, %s provided', gettype($data['column'])),
+                'invalid_field_type',
+                'validate-four',
+                [
+                    'field' => 'column',
+                    'expected_type' => 'integer',
+                    'actual_type' => gettype($data['column']),
+                    'actual_value' => $data['column'],
+                ]
+            );
+        }
+
         return match ($actionType) {
-            'drop_piece' => new DropPiece(
-                column: $data['column'] ?? throw new \InvalidArgumentException('Missing column for drop_piece action')
-            ),
-            'pop_out' => new PopOut(
-                column: $data['column'] ?? throw new \InvalidArgumentException('Missing column for pop_out action')
-            ),
-            default => throw new \InvalidArgumentException("Unknown action type: {$actionType}"),
+            'drop_piece' => new DropPiece(column: $data['column']),
+            'pop_out' => new PopOut(column: $data['column']),
+            default => throw new \LogicException('Action type validation failed but match statement reached'),
         };
     }
 

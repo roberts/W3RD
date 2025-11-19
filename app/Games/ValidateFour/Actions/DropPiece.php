@@ -12,15 +12,12 @@ class DropPiece implements GameActionContract
      * Create a new DropPiece action.
      *
      * @param  int  $column  The column index (0-based) to drop the piece into
-     *
-     * @throws \InvalidArgumentException if column is negative
      */
     public function __construct(
         public readonly int $column,
     ) {
-        if ($this->column < 0) {
-            throw new \InvalidArgumentException('Column must be non-negative.');
-        }
+        // Validation happens in BaseValidateFour::validateDropPiece()
+        // This allows for consistent error responses with proper error codes
     }
 
     /**

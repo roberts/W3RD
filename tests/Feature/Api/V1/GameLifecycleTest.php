@@ -292,7 +292,7 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            $response->assertStatus(400); // API returns 400 for "not your turn"
+            $response->assertStatus(422); // API returns 422 for game rule violations
         });
 
         it('rejects invalid column with 400', function () {
@@ -338,10 +338,12 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 99],
             ]);
 
-            $response->assertStatus(400) // API returns 400 for invalid moves
+            $response->assertStatus(422) // API returns 422 for game rule violations
                 ->assertJson([
                     'message' => 'Column must be between 0 and 6',
-                    'error_code' => 'INVALID_COLUMN',
+                    'error_code' => 'invalid_column',
+                    'game_title' => 'validate-four',
+                    'severity' => 'error',
                 ]);
         });
 
@@ -361,7 +363,7 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            $response->assertStatus(400); // API returns 400 for "game not active"
+            $response->assertStatus(422); // API returns 422 for game rule violations (game not active)
         });
 
         it('rejects action by non-player with 403', function () {
@@ -486,8 +488,8 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            // Should reject because it's not their turn
-            expect($response->status())->toBeIn([400, 403]);
+            // Should reject because it's not their turn (422 for game rule violations)
+            expect($response->status())->toBeIn([422, 403]);
         });
 
         it('rejects malformed JSON in request body', function () {
@@ -547,7 +549,7 @@ describe('Game Lifecycle', function () {
 
             // First succeeds, second should fail (not their turn anymore)
             expect($response1->status())->toBe(200);
-            expect($response2->status())->toBe(400);
+            expect($response2->status())->toBe(422); // Game rule violation: not their turn
         });
 
         it('prevents action submission during opponent turn', function () use ($createGameState) {
@@ -574,8 +576,8 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 0],
             ]);
 
-            $response->assertStatus(400);
-            expect($response->json('error_code'))->toBe('invalid_turn');
+            $response->assertStatus(422); // API returns 422 for game rule violations
+            expect($response->json('error_code'))->toBe('not_player_turn');
         });
 
         it('validates action payload size limits', function () use ($createGameState) {
@@ -646,7 +648,7 @@ describe('Game Lifecycle', function () {
                 ]);
 
             expect($response1->status())->toBe(200);
-            expect($response2->status())->toBe(400);
+            expect($response2->status())->toBe(422); // Game rule violation: not their turn
         });
     });
 

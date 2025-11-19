@@ -16,7 +16,8 @@ class GameCompleted implements ShouldBroadcast
     public function __construct(
         public Game $game,
         public ?string $winnerUlid = null,
-        public bool $isDraw = false
+        public bool $isDraw = false,
+        public array $outcomeDetails = []
     ) {}
 
     /**
@@ -47,7 +48,7 @@ class GameCompleted implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return [
+        $data = [
             'game_ulid' => $this->game->ulid,
             'game_title' => $this->game->title_slug->value,
             'status' => $this->game->status->value,
@@ -55,5 +56,39 @@ class GameCompleted implements ShouldBroadcast
             'is_draw' => $this->isDraw,
             'finished_at' => $this->game->finished_at?->toIso8601String(),
         ];
+
+        // Add detailed outcome information if available
+        if (!empty($this->outcomeDetails)) {
+            $data['outcome'] = $this->outcomeDetails;
+            
+            // Add human-readable summary
+            $data['summary'] = $this->generateSummary();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Generate a human-readable summary of the game outcome.
+     */
+    protected function generateSummary(): string
+    {
+        if ($this->isDraw) {
+            return sprintf(
+                'Game ended in a draw. %s',
+                $this->outcomeDetails['finish_details']['reason_text'] ?? 'No winner'
+            );
+        }
+
+        if ($this->winnerUlid && isset($this->outcomeDetails['winner'])) {
+            $winner = $this->outcomeDetails['winner'];
+            return sprintf(
+                '%s won the game! %s',
+                $winner['username'] ?? 'Player',
+                $this->outcomeDetails['finish_details']['reason_text'] ?? ''
+            );
+        }
+
+        return 'Game completed';
     }
 }

@@ -4,6 +4,7 @@ namespace App\Games\ValidateFour\Modes;
 
 use App\Games\ValidateFour\Actions\PopOut;
 use App\Games\ValidateFour\BaseValidateFour;
+use App\Games\ValidateFour\ErrorCodes\PopOutModeError;
 use App\Games\ValidateFour\GameState;
 use App\Games\ValidationResult;
 
@@ -137,7 +138,7 @@ class PopOutMode extends BaseValidateFour
         $bottomPiece = $gameState->getPieceAt($bottomRow, $column);
         if ($bottomPiece === null) {
             return ValidationResult::invalid(
-                'NO_PIECE_AT_BOTTOM',
+                PopOutModeError::NO_PIECE_AT_BOTTOM->value,
                 sprintf('No piece at bottom of column %d', $column),
                 ['column' => $column]
             );
@@ -146,7 +147,7 @@ class PopOutMode extends BaseValidateFour
         // Check if bottom piece belongs to current player
         if ($bottomPiece !== $gameState->currentPlayerUlid) {
             return ValidationResult::invalid(
-                'NOT_YOUR_PIECE',
+                PopOutModeError::NOT_YOUR_PIECE->value,
                 'You can only pop out your own pieces',
                 ['column' => $column, 'piece_owner' => $bottomPiece]
             );

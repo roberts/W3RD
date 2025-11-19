@@ -5,6 +5,7 @@ namespace App\Enums;
 enum ActionType: string
 {
     case DROP_PIECE = 'drop_piece';
+    case POP_OUT = 'pop_out';
     case MOVE_PIECE = 'move_piece';
     case JUMP_PIECE = 'jump_piece';
     case DOUBLE_JUMP_PIECE = 'double_jump_piece';
@@ -20,6 +21,7 @@ enum ActionType: string
     {
         return match ($this) {
             self::DROP_PIECE => 'Drop Piece',
+            self::POP_OUT => 'Pop Out',
             self::MOVE_PIECE => 'Move Piece',
             self::JUMP_PIECE => 'Jump Piece',
             self::DOUBLE_JUMP_PIECE => 'Double Jump Piece',
@@ -37,6 +39,7 @@ enum ActionType: string
     {
         return match ($this) {
             self::DROP_PIECE => 'Place a piece on the board (e.g., Connect Four)',
+            self::POP_OUT => 'Remove a piece from the bottom of a column (PopOut mode)',
             self::MOVE_PIECE => 'Move a piece on the board (e.g., Checkers)',
             self::JUMP_PIECE => 'Jump over an opponent piece to capture it (Checkers)',
             self::DOUBLE_JUMP_PIECE => 'Jump over two opponent pieces in sequence (Checkers)',

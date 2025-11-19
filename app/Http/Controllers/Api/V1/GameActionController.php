@@ -8,6 +8,7 @@ use App\Actions\Game\ProcessCoordinatedActionAction;
 use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
 use App\Events\GameCompleted;
+use App\Exceptions\GameActionDeniedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
@@ -18,8 +19,10 @@ use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use App\Services\Agents\AgentService;
 use App\Services\GameActionRecorder;
+use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class GameActionController extends Controller
 {
@@ -29,7 +32,8 @@ class GameActionController extends Controller
         protected GameActionRecorder $actionRecorder,
         protected HandleTimeoutAction $handleTimeout,
         protected ProcessCoordinatedActionAction $processCoordinatedAction,
-        protected FindGameByUlidAction $findGame
+        protected FindGameByUlidAction $findGame,
+        protected GameResponseEnhancementService $enhancementService
     ) {}
 
     /**
@@ -104,11 +108,16 @@ class GameActionController extends Controller
                 $game->turn_number ?? 1
             );
 
-            return $this->errorResponse(
+            // Throw GameActionDeniedException with game-specific error code
+            // Convert error code to lowercase to match enum values (INVALID_COLUMN -> invalid_column)
+            $errorCode = strtolower($validationResult->errorCode);
+            
+            throw new GameActionDeniedException(
                 $validationResult->message,
-                400,
-                $validationResult->errorCode,
-                $validationResult->context
+                $errorCode,
+                $game->title_slug->value,
+                $validationResult->severity ?? 'error',
+                $validationResult->context ?? []
             );
         }
 
@@ -168,11 +177,15 @@ class GameActionController extends Controller
 
             $game->save();
 
+            // Generate detailed outcome information
+            $outcomeDetails = $this->enhancementService->generateOutcomeDetails($game, $outcome, $gameState);
+
             // Dispatch GameCompleted event for rematch cooldown and activity tracking
             event(new GameCompleted(
                 game: $game,
                 winnerUlid: $outcome->winnerUlid,
-                isDraw: $outcome->isDraw
+                isDraw: $outcome->isDraw,
+                outcomeDetails: $outcomeDetails
             ));
         }
 
@@ -186,6 +199,9 @@ class GameActionController extends Controller
         // Check if the next player is an agent and trigger their action
         $this->triggerAgentActionIfNeeded($game, $gameState, $mode);
 
+        // Generate rich context for the response
+        $actionContext = $this->enhancementService->generateActionContext($game, $gameState, $mode, $actionRecord);
+
         // Broadcast the action to all players via websocket
         broadcast(new GameActionProcessed(
             game: $game,
@@ -193,11 +209,14 @@ class GameActionController extends Controller
             actionDetails: $validated['action_details'],
             playerUlid: $player->ulid,
             actionUlid: $actionRecord->ulid,
+            actionContext: $actionContext,
+            outcomeDetails: isset($outcomeDetails) ? $outcomeDetails : null
         ));
 
         return $this->dataResponse([
             'action' => [
                 'ulid' => $actionRecord->ulid,
+                'summary' => $actionContext['action_summary'],
             ],
             'game' => [
                 'ulid' => $game->ulid,
@@ -207,6 +226,8 @@ class GameActionController extends Controller
                 'is_draw' => $gameState->isDraw ?? false,
                 'finish_reason' => $outcome->reason ?? null,
             ],
+            'context' => $actionContext,
+            'outcome' => isset($outcomeDetails) ? $outcomeDetails : null,
             'next_action_deadline' => $nextDeadline->toIso8601String(),
             'timeout' => [
                 'timelimit_seconds' => $mode->getTimelimit(),

@@ -86,7 +86,7 @@ trait GamePlayerAuthorization
             // Find the current player to get their username and position
             /** @var Player|null $currentPlayer */
             $currentPlayer = $player->game->players()->where('ulid', $currentPlayerUlid)->first();
-            
+
             throw new GameActionDeniedException(
                 'It is not your turn.',
                 BaseGameActionErrorCode::NOT_PLAYER_TURN->value,

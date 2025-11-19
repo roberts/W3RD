@@ -22,7 +22,6 @@ use App\Services\GameActionRecorder;
 use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class GameActionController extends Controller
 {
@@ -111,7 +110,7 @@ class GameActionController extends Controller
             // Throw GameActionDeniedException with game-specific error code
             // Convert error code to lowercase to match enum values (INVALID_COLUMN -> invalid_column)
             $errorCode = strtolower($validationResult->errorCode);
-            
+
             throw new GameActionDeniedException(
                 $validationResult->message,
                 $errorCode,

@@ -58,9 +58,9 @@ class GameCompleted implements ShouldBroadcast
         ];
 
         // Add detailed outcome information if available
-        if (!empty($this->outcomeDetails)) {
+        if (! empty($this->outcomeDetails)) {
             $data['outcome'] = $this->outcomeDetails;
-            
+
             // Add human-readable summary
             $data['summary'] = $this->generateSummary();
         }
@@ -82,6 +82,7 @@ class GameCompleted implements ShouldBroadcast
 
         if ($this->winnerUlid && isset($this->outcomeDetails['winner'])) {
             $winner = $this->outcomeDetails['winner'];
+
             return sprintf(
                 '%s won the game! %s',
                 $winner['username'] ?? 'Player',

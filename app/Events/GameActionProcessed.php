@@ -66,7 +66,7 @@ class GameActionProcessed implements ShouldBroadcast
         ];
 
         // Add rich context if available
-        if (!empty($this->actionContext)) {
+        if (! empty($this->actionContext)) {
             $data['context'] = [
                 'action_summary' => $this->actionContext['action_summary'] ?? null,
                 'state_changes' => $this->actionContext['state_changes'] ?? [],
@@ -79,7 +79,7 @@ class GameActionProcessed implements ShouldBroadcast
 
             // Add animation hints for clients
             $data['animation_hints'] = $this->generateAnimationHints();
-            
+
             // Add sound effect suggestions
             $data['sound_effects'] = $this->generateSoundEffects();
         }
@@ -135,7 +135,7 @@ class GameActionProcessed implements ShouldBroadcast
 
                 // Add capture animations for jumps
                 if (str_contains($this->actionType, 'jump')) {
-                    $captureCount = match($this->actionType) {
+                    $captureCount = match ($this->actionType) {
                         'jump_piece' => 1,
                         'double_jump_piece' => 2,
                         'triple_jump_piece' => 3,
@@ -176,7 +176,7 @@ class GameActionProcessed implements ShouldBroadcast
         $effects = [];
 
         // Add state change sounds
-        if (!empty($this->actionContext['state_changes'])) {
+        if (! empty($this->actionContext['state_changes'])) {
             foreach ($this->actionContext['state_changes'] as $change) {
                 if (str_contains($change, 'King')) {
                     $effects[] = 'king_promotion';

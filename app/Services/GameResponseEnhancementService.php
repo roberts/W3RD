@@ -23,7 +23,7 @@ class GameResponseEnhancementService
     {
         $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
         /** @var \App\Models\Game\Player|null $currentPlayer */
-        $currentPlayer = $currentPlayerUlid 
+        $currentPlayer = $currentPlayerUlid
             ? $game->players()->where('ulid', $currentPlayerUlid)->first()
             : null;
 
@@ -46,7 +46,7 @@ class GameResponseEnhancementService
         $availableActions = [];
         foreach ($game->players as $player) {
             $actions = $mode->getAvailableActions($gameState, $player->ulid);
-            if (!empty($actions)) {
+            if (! empty($actions)) {
                 $availableActions[$player->ulid] = [
                     'username' => $player->user->username,
                     'position' => $player->position_id,
@@ -100,8 +100,8 @@ class GameResponseEnhancementService
     protected function formatActionSummary(Action $action): string
     {
         $username = $action->player->user->username;
-        
-        return match($action->action_type->value) {
+
+        return match ($action->action_type->value) {
             'drop_piece' => sprintf(
                 '%s dropped a piece in column %d',
                 $username,
@@ -198,7 +198,7 @@ class GameResponseEnhancementService
      */
     protected function getGameSpecificContext(Game $game, object $gameState, Action $action): array
     {
-        return match($game->title_slug->value) {
+        return match ($game->title_slug->value) {
             'validate-four' => [
                 'pieces_played' => $this->countValidateFourPieces($gameState),
                 'columns_available' => $this->countAvailableColumns($gameState),
@@ -267,7 +267,7 @@ class GameResponseEnhancementService
                 break;
 
             case 'hearts':
-                if (!empty($outcome->scores)) {
+                if (! empty($outcome->scores)) {
                     $analysis['score_spread'] = max($outcome->scores) - min($outcome->scores);
                     $analysis['shooting_moon_occurred'] = $this->didSomeoneShootMoon($gameState);
                 }
@@ -283,7 +283,7 @@ class GameResponseEnhancementService
     protected function calculateGameStats(Game $game): array
     {
         $actions = $game->actions()->with('player')->get();
-        
+
         $stats = [
             'total_actions' => $actions->count(),
             'average_action_time' => $this->calculateAverageActionTime($actions),
@@ -305,7 +305,7 @@ class GameResponseEnhancementService
     }
 
     // Helper methods
-    
+
     protected function formatCard(string $card): string
     {
         if (strlen($card) < 2) {
@@ -314,11 +314,11 @@ class GameResponseEnhancementService
 
         $suits = ['C' => '♣', 'D' => '♦', 'H' => '♥', 'S' => '♠'];
         $ranks = ['T' => '10', 'J' => 'Jack', 'Q' => 'Queen', 'K' => 'King', 'A' => 'Ace'];
-        
+
         $suit = $suits[$card[0]] ?? $card[0];
         $rank = $ranks[substr($card, 1)] ?? substr($card, 1);
-        
-        return $rank . $suit;
+
+        return $rank.$suit;
     }
 
     protected function wasKingPromoted(Action $action): bool
@@ -335,7 +335,7 @@ class GameResponseEnhancementService
 
     protected function countCapturedPieces(Action $action): int
     {
-        return match($action->action_type->value) {
+        return match ($action->action_type->value) {
             'jump_piece' => 1,
             'double_jump_piece' => 2,
             'triple_jump_piece' => 3,
@@ -358,6 +358,7 @@ class GameResponseEnhancementService
                 }
             }
         }
+
         return $count;
     }
 
@@ -369,6 +370,7 @@ class GameResponseEnhancementService
                 $available++;
             }
         }
+
         return $available;
     }
 
@@ -378,6 +380,7 @@ class GameResponseEnhancementService
         foreach ($gameState->players ?? [] as $ulid => $player) {
             $counts[$ulid] = $player->piecesRemaining ?? 0;
         }
+
         return $counts;
     }
 
@@ -394,6 +397,7 @@ class GameResponseEnhancementService
                 }
             }
         }
+
         return $counts;
     }
 
@@ -403,12 +407,13 @@ class GameResponseEnhancementService
         foreach ($gameState->players ?? [] as $ulid => $player) {
             $scores[$ulid] = $player->score ?? 0;
         }
+
         return $scores;
     }
 
     protected function getReasonText(string $reason): string
     {
-        return match($reason) {
+        return match ($reason) {
             'four_in_a_row' => 'Four pieces connected in a row',
             'board_full' => 'Board filled with no winner',
             'no_pieces_remaining' => 'All opponent pieces captured',
@@ -432,8 +437,9 @@ class GameResponseEnhancementService
         if (count($counts) < 2) {
             return false;
         }
-        
+
         $values = array_values($counts);
+
         return max($values) > min($values) * 2;
     }
 
@@ -452,7 +458,7 @@ class GameResponseEnhancementService
 
         $times = [];
         $previousTime = null;
-        
+
         foreach ($actions as $action) {
             if ($previousTime) {
                 $times[] = $action->created_at->diffInSeconds($previousTime);

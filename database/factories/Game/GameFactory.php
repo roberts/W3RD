@@ -3,10 +3,14 @@
 namespace Database\Factories\Game;
 
 use App\Enums\GameTitle;
+use App\Models\Access\Client;
+use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Mode;
+use App\Models\Game\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Game>
@@ -174,6 +178,102 @@ class GameFactory extends Factory
             return [
                 'mode_id' => $mode->id ?? $attributes['mode_id'],
             ];
+        });
+    }
+
+    /**
+     * Create game with players automatically.
+     * 
+     * @param array<User>|int $usersOrCount Array of User models or count to auto-create
+     * @param int|null $clientId Optional client ID for all players
+     * 
+     * Example:
+     * ```php
+     * // With existing users
+     * Game::factory()->completed()->withPlayers([$user1, $user2])->create()
+     * 
+     * // Auto-create 2 users
+     * Game::factory()->withPlayers(2)->create()
+     * 
+     * // With specific client
+     * Game::factory()->withPlayers([$user1, $user2], clientId: $client->id)->create()
+     * ```
+     */
+    public function withPlayers(array|int $usersOrCount, ?int $clientId = null): static
+    {
+        return $this->afterCreating(function (Game $game) use ($usersOrCount, $clientId) {
+            $users = is_int($usersOrCount)
+                ? User::factory()->count($usersOrCount)->create()
+                : collect($usersOrCount);
+
+            $users->each(function (User $user, int $index) use ($game, $clientId) {
+                $colors = ['red', 'yellow', 'blue', 'green'];
+                
+                Player::factory()->create([
+                    'game_id' => $game->getKey(),
+                    'user_id' => $user->getKey(),
+                    'position_id' => $index + 1,
+                    'color' => $colors[$index % count($colors)],
+                    'client_id' => $clientId ?? Client::factory(),
+                ]);
+            });
+        });
+    }
+
+    /**
+     * Create game with an agent as opponent.
+     * 
+     * @param User $humanUser The human player
+     * @param string|null $gameTitle Game title for agent compatibility (defaults to 'validate-four')
+     * @param int|null $clientId Optional client ID
+     * 
+     * Returns the created game with agent_user and agent properties attached.
+     * 
+     * Example:
+     * ```php
+     * $game = Game::factory()->completed()->withAgentOpponent($humanUser)->create()
+     * $agentUser = $game->agent_user; // Access the created agent user
+     * $agent = $game->agent; // Access the created agent
+     * ```
+     */
+    public function withAgentOpponent(User $humanUser, ?string $gameTitle = null, ?int $clientId = null): static
+    {
+        return $this->afterCreating(function (Game $game) use ($humanUser, $gameTitle, $clientId) {
+            $gameTitle = $gameTitle ?? 'validate-four';
+            
+            // Create agent
+            $agent = Agent::factory()
+                ->forGame($gameTitle)
+                ->alwaysAvailable()
+                ->create();
+            
+            // Create agent user
+            $agentUser = User::factory()->create(['agent_id' => $agent->getKey()]);
+            
+            // Create players
+            $colors = ['red', 'yellow'];
+            
+            Player::factory()->create([
+                'game_id' => $game->getKey(),
+                'user_id' => $humanUser->getKey(),
+                'position_id' => 1,
+                'color' => $colors[0],
+                'client_id' => $clientId ?? Client::factory(),
+            ]);
+            
+            Player::factory()->create([
+                'game_id' => $game->getKey(),
+                'user_id' => $agentUser->getKey(),
+                'position_id' => 2,
+                'color' => $colors[1],
+                'client_id' => $clientId ?? Client::factory(),
+            ]);
+            
+            // Attach agent properties to game for easy access
+            /** @var Agent $agent */
+            /** @var User $agentUser */
+            $game->agent_user = $agentUser; // @phpstan-ignore-line
+            $game->agent = $agent; // @phpstan-ignore-line
         });
     }
 }

@@ -1,13 +1,10 @@
 <?php
 
-use App\Actions\Quickplay\JoinQuickplayQueueAction;
-use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\RematchCancelled;
 use App\Jobs\CheckAndCancelPendingRematches;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Lobby;
 use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
 use App\Services\PlayerActivityService;
@@ -20,13 +17,13 @@ uses(RefreshDatabase::class);
 describe('Automatic Rematch Cancellation', function () {
     beforeEach(function () {
         Event::fake();
-        
+
         // Mock Redis operations
         Redis::shouldReceive('setex')->andReturn(true);
         Redis::shouldReceive('get')->andReturn(null);
         Redis::shouldReceive('hmset')->andReturn(true);
         Redis::shouldReceive('del')->andReturn(1);
-        
+
         $this->activityService = app(PlayerActivityService::class);
     });
 
@@ -175,7 +172,7 @@ describe('Automatic Rematch Cancellation', function () {
 
             // Setting to IN_QUEUE dispatches job (we need to manually execute for test)
             $this->activityService->setState($user->id, PlayerActivityState::IN_QUEUE);
-            
+
             // Manually execute the job that would be dispatched
             $job = new CheckAndCancelPendingRematches($user->id);
             $job->handle();
@@ -199,7 +196,7 @@ describe('Automatic Rematch Cancellation', function () {
             ]);
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
-            
+
             $job = new CheckAndCancelPendingRematches($user->id);
             $job->handle();
 
@@ -222,7 +219,7 @@ describe('Automatic Rematch Cancellation', function () {
             ]);
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_GAME);
-            
+
             $job = new CheckAndCancelPendingRematches($user->id);
             $job->handle();
 
@@ -267,7 +264,7 @@ describe('Automatic Rematch Cancellation', function () {
 
             // Logout sets OFFLINE (doesn't auto-trigger, handled by AuthController)
             $this->activityService->setState($user->id, PlayerActivityState::OFFLINE);
-            
+
             // AuthController explicitly dispatches job on logout
             $job = new CheckAndCancelPendingRematches($user->id);
             $job->handle();

@@ -86,19 +86,19 @@ class AgentAutoAcceptRematch implements ShouldQueue
 
         // All checks passed - auto-accept!
         $agentUser = User::find($this->agentUserId);
-        
+
         if (! $agentUser) {
             Log::warning('Agent user not found for auto-accept', [
                 'rematch_request_id' => $this->rematchRequestId,
                 'agent_id' => $this->agentUserId,
             ]);
-            
+
             $rematchRequest->update(['status' => 'cancelled']);
             event(new RematchCancelled($rematchRequest, 'opponent_unavailable'));
-            
+
             return;
         }
-        
+
         $rematchService = app(RematchService::class);
 
         try {

@@ -19,50 +19,53 @@ uses(RefreshDatabase::class);
 describe('AgentAutoAcceptRematch Job', function () {
     beforeEach(function () {
         Event::fake();
-        
+
         $this->states = [];
         $this->hashKeys = [];
-        
+
         // Mock Redis to track state changes in memory
         Redis::shouldReceive('setex')
             ->with(\Mockery::pattern('/player:\d+:activity/'), 1800, \Mockery::any())
             ->andReturnUsing(function ($key, $ttl, $value) {
                 $this->states[$key] = $value;
+
                 return true;
             })
             ->byDefault();
-            
+
         Redis::shouldReceive('get')
             ->with(\Mockery::pattern('/player:\d+:activity/'))
             ->andReturnUsing(function ($key) {
                 return $this->states[$key] ?? 'idle'; // Default to idle for these tests
             })
             ->byDefault();
-        
+
         Redis::shouldReceive('hmset')
             ->andReturnUsing(function ($key, $data) {
                 $this->hashKeys[$key] = $data;
+
                 return true;
             })
             ->byDefault();
-            
+
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
-        
+
         Redis::shouldReceive('del')
             ->andReturnUsing(function ($key) {
                 unset($this->hashKeys[$key]);
+
                 return 1;
             })
             ->byDefault();
-            
+
         Redis::shouldReceive('exists')
             ->andReturnUsing(function ($key) {
                 return isset($this->hashKeys[$key]);
             })
             ->byDefault();
-            
+
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
-        
+
         $this->activityService = app(PlayerActivityService::class);
     });
 
@@ -261,22 +264,22 @@ describe('AgentAutoAcceptRematch Job', function () {
             $fakeAgentUser = User::factory()->create(); // Create but will be deleted
 
             $game = Game::factory()->completed()->create();
-            
+
             $rematchRequest = RematchRequest::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $fakeAgentUser->id,
                 'status' => 'pending',
             ]);
-            
+
             $fakeAgentId = $fakeAgentUser->id;
             $fakeAgentUser->delete(); // Delete to simulate missing user
 
             $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $fakeAgentId);
-            
+
             // Should not throw exception
             $job->handle();
-            
+
             // Should cancel since agent user not found
             expect($rematchRequest->fresh()->status)->toBe('cancelled');
             Event::assertDispatched(RematchCancelled::class);

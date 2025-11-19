@@ -23,7 +23,7 @@ describe('Rematch Flow with Agents', function () {
     beforeEach(function () {
         Event::fake([GameCompleted::class, RematchAccepted::class]);
         Queue::fake();
-        
+
         // Mock Redis operations - default returns
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
@@ -32,7 +32,7 @@ describe('Rematch Flow with Agents', function () {
         Redis::shouldReceive('setex')->andReturn(true)->byDefault();
         Redis::shouldReceive('get')->andReturn(null)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
-        
+
         $this->activityService = app(PlayerActivityService::class);
         $this->rematchService = app(RematchService::class);
     });
@@ -105,10 +105,10 @@ describe('Rematch Flow with Agents', function () {
         // Verify players swapped positions
         $newPlayers = $newGame->players;
         expect($newPlayers)->toHaveCount(2);
-        
+
         $newHumanPlayer = $newPlayers->firstWhere('user_id', $humanUser->id);
         $newAgentPlayer = $newPlayers->firstWhere('user_id', $agentUser->id);
-        
+
         expect($newHumanPlayer->position_id)->toBe(2) // Was 1, now 2
             ->and($newAgentPlayer->position_id)->toBe(1); // Was 2, now 1
     });

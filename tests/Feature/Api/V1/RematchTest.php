@@ -3,8 +3,8 @@
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use Tests\Feature\Helpers\GameHelper;
 use Illuminate\Support\Facades\Redis;
+use Tests\Feature\Helpers\GameHelper;
 
 describe('Rematch Management', function () {
     beforeEach(function () {

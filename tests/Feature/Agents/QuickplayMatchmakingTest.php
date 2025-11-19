@@ -91,7 +91,7 @@ describe('Recent Opponent Tracking', function () {
                 (string) $agentUsers[1]->id,
                 (string) $agentUsers[0]->id, // 3rd most recent
             ]);
-        
+
         // Ensure exists continues to work for cooldown checks
         Redis::makePartial();
 
@@ -129,7 +129,7 @@ describe('Recent Opponent Tracking', function () {
                 (string) $agentUsers[2]->id,
                 (string) $agentUsers[1]->id,
             ]);
-        
+
         // Ensure exists continues to work for cooldown checks
         Redis::makePartial();
 
@@ -157,7 +157,7 @@ describe('Recent Opponent Tracking', function () {
         Redis::shouldReceive('lrange')
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([(string) $agentUser1->id, (string) $agentUser2->id]);
-        
+
         // Ensure exists continues to work for cooldown checks
         Redis::makePartial();
 

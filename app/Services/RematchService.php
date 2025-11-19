@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\GameStatus;
-use App\Enums\PlayerActivityState;
 use App\Events\RematchAccepted;
 use App\Events\RematchDeclined;
 use App\Events\RematchExpired;
@@ -13,9 +12,9 @@ use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 

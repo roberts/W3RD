@@ -21,13 +21,13 @@ class RematchRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         // Check if opponent is an agent with active cooldown
-        $opponentUserId = $this->requesting_user_id === $request->user()?->id 
-            ? $this->opponent_user_id 
+        $opponentUserId = $this->requesting_user_id === $request->user()?->id
+            ? $this->opponent_user_id
             : $this->requesting_user_id;
-        
+
         $opponentUser = User::find($opponentUserId);
         $autoAcceptExpected = false;
-        
+
         if ($opponentUser && $opponentUser->isAgent()) {
             $cooldownKey = "agent:{$opponentUser->id}:cooldown";
             $autoAcceptExpected = Redis::exists($cooldownKey);

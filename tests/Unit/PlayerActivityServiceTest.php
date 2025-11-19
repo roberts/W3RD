@@ -26,7 +26,7 @@ describe('PlayerActivityService', function () {
                 ->with("player:{$this->userId}:activity")
                 ->once()
                 ->andReturn('in_game');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_GAME);
 
             expect($this->service->getState($this->userId))->toBe(PlayerActivityState::IN_GAME);
@@ -37,7 +37,7 @@ describe('PlayerActivityService', function () {
                 ->with("player:{$this->userId}:activity")
                 ->once()
                 ->andReturn(null);
-            
+
             expect($this->service->getState($this->userId))->toBe(PlayerActivityState::OFFLINE);
         });
 
@@ -54,7 +54,7 @@ describe('PlayerActivityService', function () {
                 ->with("player:{$this->userId}:activity")
                 ->once()
                 ->andReturn('in_lobby');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_QUEUE);
             $this->service->setState($this->userId, PlayerActivityState::IN_LOBBY);
 
@@ -100,18 +100,18 @@ describe('PlayerActivityService', function () {
                 ->with("player:{$this->userId}:activity")
                 ->once()
                 ->andReturn(1795);
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IDLE);
 
             $ttl = Redis::ttl("player:{$this->userId}:activity");
-            
+
             expect($ttl)->toBeGreaterThan(1790)
                 ->and($ttl)->toBeLessThanOrEqual(1800);
         });
 
         it('refreshes TTL without changing state', function () {
             $key = "player:{$this->userId}:activity";
-            
+
             Redis::shouldReceive('setex')
                 ->with($key, 1800, 'in_game')
                 ->once()
@@ -128,7 +128,7 @@ describe('PlayerActivityService', function () {
                 ->with($key)
                 ->once()
                 ->andReturn('in_game');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_GAME);
             $this->service->refreshActivity($this->userId);
 
@@ -140,7 +140,7 @@ describe('PlayerActivityService', function () {
                 ->with("player:{$this->userId}:activity")
                 ->once()
                 ->andReturn(false);
-            
+
             $this->service->refreshActivity($this->userId);
 
             // No other Redis calls should be made
@@ -151,7 +151,7 @@ describe('PlayerActivityService', function () {
         it('returns true for IDLE state', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
             Redis::shouldReceive('get')->twice()->andReturn('idle');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IDLE);
 
             expect($this->service->isAvailableForRematch($this->userId))->toBeTrue()
@@ -161,7 +161,7 @@ describe('PlayerActivityService', function () {
         it('returns false for IN_GAME state', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
             Redis::shouldReceive('get')->twice()->andReturn('in_game');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_GAME);
 
             expect($this->service->isAvailableForRematch($this->userId))->toBeFalse()
@@ -171,7 +171,7 @@ describe('PlayerActivityService', function () {
         it('returns false for IN_QUEUE state', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
             Redis::shouldReceive('get')->twice()->andReturn('in_queue');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_QUEUE);
 
             expect($this->service->isAvailableForRematch($this->userId))->toBeFalse()
@@ -181,7 +181,7 @@ describe('PlayerActivityService', function () {
         it('returns false for IN_LOBBY state', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
             Redis::shouldReceive('get')->twice()->andReturn('in_lobby');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_LOBBY);
 
             expect($this->service->isAvailableForRematch($this->userId))->toBeFalse()
@@ -191,7 +191,7 @@ describe('PlayerActivityService', function () {
         it('returns false for OFFLINE state', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
             Redis::shouldReceive('get')->twice()->andReturn('offline');
-            
+
             $this->service->setState($this->userId, PlayerActivityState::OFFLINE);
 
             expect($this->service->isAvailableForRematch($this->userId))->toBeFalse()
@@ -202,7 +202,7 @@ describe('PlayerActivityService', function () {
     describe('automatic rematch cancellation', function () {
         it('dispatches cancellation job when state becomes busy', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IN_QUEUE);
 
             Queue::assertPushed(CheckAndCancelPendingRematches::class, function ($job) {
@@ -212,7 +212,7 @@ describe('PlayerActivityService', function () {
 
         it('does not dispatch job when setting to IDLE', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
-            
+
             $this->service->setState($this->userId, PlayerActivityState::IDLE);
 
             Queue::assertNotPushed(CheckAndCancelPendingRematches::class);
@@ -220,7 +220,7 @@ describe('PlayerActivityService', function () {
 
         it('does not dispatch job when setting to OFFLINE', function () {
             Redis::shouldReceive('setex')->once()->andReturn(true);
-            
+
             $this->service->setState($this->userId, PlayerActivityState::OFFLINE);
 
             Queue::assertNotPushed(CheckAndCancelPendingRematches::class);

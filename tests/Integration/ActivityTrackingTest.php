@@ -20,23 +20,24 @@ uses(RefreshDatabase::class);
 describe('Activity Tracking in Game Creation', function () {
     beforeEach(function () {
         $this->states = [];
-        
+
         // Mock Redis to track state changes in memory
         Redis::shouldReceive('setex')
             ->with(\Mockery::pattern('/player:\d+:activity/'), 1800, \Mockery::any())
             ->andReturnUsing(function ($key, $ttl, $value) {
                 $this->states[$key] = $value;
+
                 return true;
             })
             ->byDefault();
-            
+
         Redis::shouldReceive('get')
             ->with(\Mockery::pattern('/player:\d+:activity/'))
             ->andReturnUsing(function ($key) {
                 return $this->states[$key] ?? null;
             })
             ->byDefault();
-        
+
         // Mock other Redis operations
         Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
@@ -48,7 +49,7 @@ describe('Activity Tracking in Game Creation', function () {
         Redis::shouldReceive('zscore')->andReturn(1.0)->byDefault();
         Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
-        
+
         $this->activityService = app(PlayerActivityService::class);
         $this->gameCreationService = app(GameCreationService::class);
     });
@@ -65,11 +66,11 @@ describe('Activity Tracking in Game Creation', function () {
 
         it('sets IDLE when leaving quickplay queue', function () {
             $user = User::factory()->create();
-            
+
             // Join queue first
             $joinAction = new JoinQuickplayQueueAction;
             $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
-            
+
             // Then leave
             $leaveAction = new LeaveQuickplayQueueAction;
             $leaveAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard');
@@ -153,7 +154,7 @@ describe('Activity Tracking in Game Creation', function () {
 
         it('sets players to IDLE when kicked from lobby', function () {
             $user = User::factory()->create();
-            
+
             // Simulate lobby kick by setting state (actual logic in controller)
             $this->activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IN_LOBBY);

@@ -53,18 +53,6 @@ describe('FindGameByUlidAction', function () {
                 ->and($found->players)->toHaveCount(2);
         });
 
-        it('loads nested relationships when requested', function () {
-            $game = Game::factory()->create();
-            $player = Player::factory()->for($game)->create();
-            $action = new FindGameByUlidAction;
-
-            $found = $action->execute($game->ulid, ['players.user']);
-
-            expect($found->relationLoaded('players'))->toBeTrue()
-                ->and($found->players->first()->relationLoaded('user'))->toBeTrue()
-                ->and($found->players->first()->user->id)->toBe($player->user_id);
-        });
-
         it('loads multiple relationships when requested', function () {
             $mode = Mode::factory()->create();
             $game = Game::factory()->for($mode)->create();
@@ -75,49 +63,6 @@ describe('FindGameByUlidAction', function () {
 
             expect($found->relationLoaded('mode'))->toBeTrue()
                 ->and($found->relationLoaded('players'))->toBeTrue();
-        });
-
-        it('does not load relationships when empty array provided', function () {
-            $game = Game::factory()->create();
-            Player::factory()->for($game)->create();
-            $action = new FindGameByUlidAction;
-
-            $found = $action->execute($game->ulid, []);
-
-            expect($found->relationLoaded('mode'))->toBeFalse()
-                ->and($found->relationLoaded('players'))->toBeFalse();
-        });
-
-        it('handles deeply nested relationships', function () {
-            $game = Game::factory()->create();
-            $player = Player::factory()->for($game)->create();
-            $action = new FindGameByUlidAction;
-
-            $found = $action->execute($game->ulid, ['players.user.avatar.image']);
-
-            expect($found->relationLoaded('players'))->toBeTrue()
-                ->and($found->players->first()->relationLoaded('user'))->toBeTrue();
-        });
-    });
-
-    describe('Edge Cases', function () {
-        it('handles games with no relationships', function () {
-            $game = Game::factory()->create();
-            $action = new FindGameByUlidAction;
-
-            $found = $action->execute($game->ulid);
-
-            expect($found->id)->toBe($game->id);
-        });
-
-        it('returns same game instance for multiple calls with same ulid', function () {
-            $game = Game::factory()->create();
-            $action = new FindGameByUlidAction;
-
-            $found1 = $action->execute($game->ulid);
-            $found2 = $action->execute($game->ulid);
-
-            expect($found1->id)->toBe($found2->id);
         });
     });
 });

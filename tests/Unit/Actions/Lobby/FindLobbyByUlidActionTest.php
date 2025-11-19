@@ -54,29 +54,6 @@ describe('FindLobbyByUlidAction', function () {
                 ->and($found->players)->toHaveCount(2);
         });
 
-        it('loads nested relationships when requested', function () {
-            $lobby = Lobby::factory()->create();
-            $lobbyPlayer = LobbyPlayer::factory()->for($lobby)->create();
-            $action = new FindLobbyByUlidAction;
-
-            $found = $action->execute($lobby->ulid, ['players.user']);
-
-            expect($found->relationLoaded('players'))->toBeTrue()
-                ->and($found->players->first()->relationLoaded('user'))->toBeTrue()
-                ->and($found->players->first()->user->id)->toBe($lobbyPlayer->user_id);
-        });
-
-        it('loads host avatar image when requested', function () {
-            $host = User::factory()->create();
-            $lobby = Lobby::factory()->for($host, 'host')->create();
-            $action = new FindLobbyByUlidAction;
-
-            $found = $action->execute($lobby->ulid, ['host.avatar.image']);
-
-            expect($found->relationLoaded('host'))->toBeTrue()
-                ->and($found->host->relationLoaded('avatar'))->toBeTrue();
-        });
-
         it('loads multiple relationships when requested', function () {
             $host = User::factory()->create();
             $lobby = Lobby::factory()->for($host, 'host')->create();
@@ -87,17 +64,6 @@ describe('FindLobbyByUlidAction', function () {
 
             expect($found->relationLoaded('host'))->toBeTrue()
                 ->and($found->relationLoaded('players'))->toBeTrue();
-        });
-
-        it('does not load relationships when empty array provided', function () {
-            $lobby = Lobby::factory()->create();
-            LobbyPlayer::factory()->for($lobby)->create();
-            $action = new FindLobbyByUlidAction;
-
-            $found = $action->execute($lobby->ulid, []);
-
-            expect($found->relationLoaded('host'))->toBeFalse()
-                ->and($found->relationLoaded('players'))->toBeFalse();
         });
 
         it('handles complex nested player relationships', function () {

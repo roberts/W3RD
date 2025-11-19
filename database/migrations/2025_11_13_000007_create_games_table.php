@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'active', 'completed'])->default('pending');
             $table->foreignId('creator_id')->nullable()->constrained('users');
             $table->unsignedBigInteger('winner_id')->nullable();
+            $table->string('finish_reason')->nullable(); // Why the game ended (e.g., 'four_in_a_row', 'draw', 'forfeit', 'timeout')
             $table->integer('turn_number')->default(0);
             $table->json('game_state');
 

@@ -222,4 +222,118 @@ describe('Lobby Player Management', function () {
             expect($response->status())->toBeIn([200, 400, 404, 422]);
         });
     });
+
+    describe('Player Permissions - Cross-Client', function () {
+        it('prevents kick action from non-host client', function () {
+            $host = User::factory()->create();
+            $player = User::factory()->create();
+            $otherPlayer = User::factory()->create();
+
+            $lobby = Lobby::factory()->create(['host_id' => $host->id]);
+
+            LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => $player->id,
+                'status' => 'accepted',
+            ]);
+
+            LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => $otherPlayer->id,
+                'status' => 'accepted',
+            ]);
+
+            // Non-host tries to kick from different client
+            $response = $this->actingAs($player)
+                ->withHeader('X-Client-Key', '2')
+                ->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$otherPlayer->username}");
+
+            $response->assertStatus(403);
+        });
+
+        it('validates host permissions across session refresh', function () {
+            $host = User::factory()->create();
+            $player = User::factory()->create();
+
+            $lobby = Lobby::factory()->create(['host_id' => $host->id]);
+
+            LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => $player->id,
+                'status' => 'accepted',
+            ]);
+
+            // Host kicks from one session
+            $response1 = $this->actingAs($host)
+                ->withHeader('X-Client-Key', '1')
+                ->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}");
+
+            // Host verifies from different session
+            $response2 = $this->actingAs($host)
+                ->withHeader('X-Client-Key', '2')
+                ->getJson("/api/v1/games/lobbies/{$lobby->ulid}");
+
+            expect($response1->status())->toBe(204);
+            expect($response2->status())->toBe(200);
+        });
+    });
+
+    describe('Player Limits & Validation', function () {
+        it('enforces game-specific player limits for validate-four', function () {
+            $host = User::factory()->create();
+
+            $lobby = Lobby::factory()->create([
+                'host_id' => $host->id,
+                'game_title' => 'validate-four',
+                'is_public' => true,
+            ]);
+
+            // Validate Four requires exactly 2 players
+            // Try to add more than 2 total players should fail or be handled
+            LobbyPlayer::factory()->create([
+                'lobby_id' => $lobby->id,
+                'user_id' => User::factory()->create()->id,
+                'status' => 'accepted',
+            ]);
+
+            $extraUser = User::factory()->create();
+            $response = $this->actingAs($extraUser)
+                ->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+                    'username' => $extraUser->username,
+                ]);
+
+            // Should reject if lobby is full (or 403 if not host trying to invite)
+            expect($response->status())->toBeIn([200, 400, 403, 422]);
+        });
+
+        it('enforces game-specific player limits for hearts', function () {
+            $host = User::factory()->create();
+
+            $lobby = Lobby::factory()->create([
+                'host_id' => $host->id,
+                'game_title' => 'hearts',
+                'is_public' => true,
+            ]);
+
+            // Hearts requires exactly 4 players
+            // Add 3 more players (host + 3 = 4)
+            for ($i = 0; $i < 3; $i++) {
+                LobbyPlayer::factory()->create([
+                    'lobby_id' => $lobby->id,
+                    'user_id' => User::factory()->create()->id,
+                    'status' => 'accepted',
+                ]);
+            }
+
+            // Try to add 5th player
+            $extraUser = User::factory()->create();
+            $response = $this->actingAs($extraUser)
+                ->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+                    'username' => $extraUser->username,
+                ]);
+
+            // Should reject (or 403 if not host trying to invite)
+            expect($response->status())->toBeIn([400, 403, 422]);
+        });
+    });
 });

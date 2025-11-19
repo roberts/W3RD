@@ -76,7 +76,7 @@ class GameActionController extends Controller
         }
 
         // Verify it's this player's turn
-        if ($error = $this->authorizePlayerTurn($player, $mode->getGameState()->currentPlayerUlid)) {
+        if ($error = $this->authorizePlayerTurn($player, $gameState->currentPlayerUlid)) {
             return $error;
         }
 

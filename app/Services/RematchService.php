@@ -7,6 +7,7 @@ use App\Events\RematchAccepted;
 use App\Events\RematchDeclined;
 use App\Events\RematchExpired;
 use App\Events\RematchRequested;
+use App\Exceptions\RematchNotAvailableException;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -27,13 +28,13 @@ class RematchService
     {
         // Validate game is completed
         if ($game->status !== GameStatus::COMPLETED) {
-            throw new \InvalidArgumentException('Can only request rematch for completed games.');
+            throw new RematchNotAvailableException('Can only request rematch for completed games.');
         }
 
         // Validate requesting user was a player
         $player = $game->players()->where('user_id', $requestingUser->id)->first();
         if (! $player) {
-            throw new \InvalidArgumentException('User was not a player in this game.');
+            throw new RematchNotAvailableException('User was not a player in this game.');
         }
 
         // Get opponent
@@ -43,7 +44,7 @@ class RematchService
             ->first();
 
         if (! $opponent) {
-            throw new \InvalidArgumentException('Could not find opponent for rematch.');
+            throw new RematchNotAvailableException('Could not find opponent for rematch.');
         }
 
         // Check if opponent is available for rematch
@@ -51,7 +52,7 @@ class RematchService
         $opponentState = $activityService->getState($opponent->user_id);
 
         if (! $opponentState->isAvailableForRematch()) {
-            throw new \InvalidArgumentException(
+            throw new RematchNotAvailableException(
                 "Opponent is currently {$opponentState->value}. Cannot request rematch."
             );
         }
@@ -63,7 +64,7 @@ class RematchService
 
             if (! Redis::exists($cooldownKey)) {
                 // Cooldown expired - agent is no longer available for instant rematch
-                throw new \InvalidArgumentException('Opponent is no longer available for rematch.');
+                throw new RematchNotAvailableException('Opponent is no longer available for rematch.');
             }
         }
 
@@ -73,7 +74,7 @@ class RematchService
             ->first();
 
         if ($existing) {
-            throw new \InvalidArgumentException('A rematch request already exists for this game.');
+            throw new RematchNotAvailableException('A rematch request already exists for this game.');
         }
 
         $expirationMinutes = config('protocol.rematch.expiration_minutes', 5);
@@ -120,18 +121,18 @@ class RematchService
     {
         // Validate user is the opponent (skip for auto-accepts)
         if (! $isAutoAccept && $rematchRequest->opponent_user_id !== $acceptingUser->id) {
-            throw new \InvalidArgumentException('Only the opponent can accept this rematch request.');
+            throw new RematchNotAvailableException('Only the opponent can accept this rematch request.');
         }
 
         // Validate request is still pending
         if ($rematchRequest->status !== 'pending') {
-            throw new \InvalidArgumentException('This rematch request is no longer pending.');
+            throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
         // Validate not expired
         if ($rematchRequest->expires_at->isPast()) {
             $rematchRequest->update(['status' => 'expired']);
-            throw new \InvalidArgumentException('This rematch request has expired.');
+            throw new RematchNotAvailableException('This rematch request has expired.');
         }
 
         return DB::transaction(function () use ($rematchRequest) {
@@ -208,7 +209,7 @@ class RematchService
 
         // Validate request is still pending
         if ($rematchRequest->status !== 'pending') {
-            throw new \InvalidArgumentException('This rematch request is no longer pending.');
+            throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
         $rematchRequest->update(['status' => 'declined']);

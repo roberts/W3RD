@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\GameStatus;
+use App\Exceptions\RematchNotAvailableException;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -32,7 +33,7 @@ describe('RematchService', function () {
             $game = Game::factory()->active()->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $user))
-                ->toThrow(\InvalidArgumentException::class, 'completed games');
+                ->toThrow(RematchNotAvailableException::class, 'completed games');
         });
 
         test('throws exception when user was not a player', function () {
@@ -41,7 +42,7 @@ describe('RematchService', function () {
             $game = Game::factory()->completed()->withPlayers([$player])->create(['creator_id' => $player->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $nonPlayer))
-                ->toThrow(\InvalidArgumentException::class, 'not a player');
+                ->toThrow(RematchNotAvailableException::class, 'not a player');
         });
 
         test('throws exception when opponent not found', function () {
@@ -49,7 +50,7 @@ describe('RematchService', function () {
             $game = Game::factory()->completed()->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             expect(fn () => $this->service->createRematchRequest($game, $user))
-                ->toThrow(\InvalidArgumentException::class, 'opponent');
+                ->toThrow(RematchNotAvailableException::class, 'opponent');
         });
 
         test('throws exception when pending request already exists', function () {
@@ -62,7 +63,7 @@ describe('RematchService', function () {
 
             // Try to create duplicate
             expect(fn () => $this->service->createRematchRequest($game, $user1))
-                ->toThrow(\InvalidArgumentException::class, 'already exists');
+                ->toThrow(RematchNotAvailableException::class, 'already exists');
         });
     });
 
@@ -104,7 +105,7 @@ describe('RematchService', function () {
             $request = $this->service->createRematchRequest($game, $user1);
 
             expect(fn () => $this->service->acceptRematchRequest($request, $user3))
-                ->toThrow(\InvalidArgumentException::class, 'opponent');
+                ->toThrow(RematchNotAvailableException::class, 'opponent');
         });
 
         test('throws exception when requester tries to accept own request', function () {
@@ -115,7 +116,7 @@ describe('RematchService', function () {
             $request = $this->service->createRematchRequest($game, $user1);
 
             expect(fn () => $this->service->acceptRematchRequest($request, $user1))
-                ->toThrow(\InvalidArgumentException::class, 'opponent');
+                ->toThrow(RematchNotAvailableException::class, 'opponent');
         });
 
         test('throws exception when request not pending', function () {
@@ -132,7 +133,7 @@ describe('RematchService', function () {
             ]);
 
             expect(fn () => $this->service->acceptRematchRequest($request, $user2))
-                ->toThrow(\InvalidArgumentException::class, 'no longer pending');
+                ->toThrow(RematchNotAvailableException::class, 'no longer pending');
         });
 
         test('throws exception when request expired', function () {
@@ -149,7 +150,7 @@ describe('RematchService', function () {
             ]);
 
             expect(fn () => $this->service->acceptRematchRequest($request, $user2))
-                ->toThrow(\InvalidArgumentException::class, 'expired');
+                ->toThrow(RematchNotAvailableException::class, 'expired');
         });
     });
 

@@ -15,12 +15,20 @@ class GameHelper
      */
     public static function createGame(array $attributes = [], array $players = []): Game
     {
-        $mode = Mode::first() ?? Mode::factory()->create();
+        // Always use ValidateFour Standard mode for consistent test behavior
+        $mode = Mode::where('title_slug', 'validate-four')
+            ->where('slug', 'standard')
+            ->first() ?? Mode::factory()->validateFourStandard()->create();
 
         $baseAttributes = array_merge([
             'mode_id' => $mode->id,
             'status' => GameStatus::ACTIVE,
         ], $attributes);
+
+        // If status is ACTIVE, ensure started_at is set
+        if (($baseAttributes['status'] ?? null) === GameStatus::ACTIVE && ! isset($baseAttributes['started_at'])) {
+            $baseAttributes['started_at'] = now();
+        }
 
         // Create players if not provided
         if (empty($players)) {

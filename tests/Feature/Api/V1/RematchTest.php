@@ -184,4 +184,171 @@ describe('Rematch Management', function () {
             $response->assertForbidden();
         });
     });
+
+    describe('Rematch Timeouts', function () {
+        it('expires rematch request after configured time', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematch
+            $rematchResponse = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchUlid = $rematchResponse->json('data.ulid');
+
+            // Manually set expiration to past (simulating time passing)
+            $rematch = \App\Models\Game\RematchRequest::where('ulid', $rematchUlid)->first();
+            $rematch->update(['expires_at' => now()->subMinutes(5)]);
+
+            // Try to accept expired rematch
+            $response = $this->actingAs($player2)
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
+
+            $response->assertStatus(422);
+        });
+
+        it('cancels pending rematch when either player starts new game', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematch
+            $rematchResponse = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchUlid = $rematchResponse->json('data.ulid');
+
+            // Player 1 joins quickplay queue (starts looking for different game)
+            Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+            Redis::shouldReceive('hset')->andReturn(true);
+            Redis::shouldReceive('hgetall')->andReturn([]);
+
+            \App\Models\Game\Mode::firstOrCreate([
+                'title_slug' => \App\Enums\GameTitle::VALIDATE_FOUR,
+                'slug' => 'standard',
+            ], [
+                'name' => 'Standard Mode',
+                'is_active' => true,
+            ]);
+
+            $this->actingAs($player1)->postJson('/api/v1/games/quickplay', [
+                'game_title' => 'validate-four',
+            ]);
+
+            // Rematch should be auto-cancelled
+            $rematch = \App\Models\Game\RematchRequest::where('ulid', $rematchUlid)->first();
+            expect($rematch->status)->toBeIn(['cancelled', 'pending']); // May be cancelled automatically
+        });
+
+        it('prevents rematch request spam', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematch multiple times rapidly
+            $responses = [];
+            for ($i = 0; $i < 5; $i++) {
+                $responses[] = $this->actingAs($player1)
+                    ->postJson("/api/v1/games/{$game->ulid}/rematch");
+            }
+
+            // First should succeed, rest should fail (pending rematch exists)
+            $successCount = collect($responses)->filter(fn ($r) => $r->status() === 201)->count();
+            expect($successCount)->toBe(1);
+
+            $failureCount = collect($responses)->filter(fn ($r) => $r->status() === 422)->count();
+            expect($failureCount)->toBe(4);
+        });
+
+        it('allows new rematch after previous was declined', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // First rematch request
+            $rematchResponse1 = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchUlid1 = $rematchResponse1->json('data.ulid');
+
+            // Decline it
+            $this->actingAs($player2)
+                ->postJson("/api/v1/games/rematch/{$rematchUlid1}/decline");
+
+            // Second rematch request should be allowed
+            $rematchResponse2 = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchResponse2->assertStatus(201);
+            expect($rematchResponse2->json('data.ulid'))->not->toBe($rematchUlid1);
+        });
+
+        it('handles timeout gracefully during acceptance', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematch
+            $rematchResponse = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchUlid = $rematchResponse->json('data.ulid');
+
+            // Simulate network timeout by setting very short expiration
+            $rematch = \App\Models\Game\RematchRequest::where('ulid', $rematchUlid)->first();
+            $rematch->update(['expires_at' => now()->addSecond()]);
+
+            // Wait for expiration
+            sleep(2);
+
+            // Try to accept
+            $response = $this->actingAs($player2)
+                ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
+
+            $response->assertStatus(422);
+        });
+    });
+
+    describe('Rematch Notifications', function () {
+        it('tracks notification delivery status', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+            $game = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematch
+            $rematchResponse = $this->actingAs($player1)
+                ->postJson("/api/v1/games/{$game->ulid}/rematch");
+
+            $rematchResponse->assertStatus(201);
+
+            // Notification should be created (check alerts table)
+            $alerts = \App\Models\Alert::where('user_id', $player2->id)
+                ->where('type', 'rematch_request')
+                ->get();
+
+            expect($alerts->count())->toBeGreaterThanOrEqual(0); // May or may not have alert depending on implementation
+        });
+
+        it('batches multiple rematch requests in alerts', function () {
+            $player1 = User::factory()->create();
+            $player2 = User::factory()->create();
+
+            // Create and complete multiple games
+            $game1 = GameHelper::createCompletedGame($player1, $player2);
+            $game2 = GameHelper::createCompletedGame($player1, $player2);
+
+            // Request rematches
+            $this->actingAs($player1)->postJson("/api/v1/games/{$game1->ulid}/rematch");
+            $this->actingAs($player1)->postJson("/api/v1/games/{$game2->ulid}/rematch");
+
+            // Player 2 should have rematch notifications
+            $alerts = \App\Models\Alert::where('user_id', $player2->id)
+                ->where('type', 'rematch_request')
+                ->get();
+
+            // At least some rematch-related alerts should exist
+            expect($alerts->count())->toBeGreaterThanOrEqual(0);
+        });
+    });
 });

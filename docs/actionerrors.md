@@ -133,7 +133,7 @@ These error codes apply across all games:
   "severity": "error",
   "context": {
     "game_status": "completed",
-    "finished_at": "2025-01-15T14:30:00Z",
+    "completed_at": "2025-01-15T14:30:00Z",
     "winner": {
       "player_ulid": "01JMQXXX",
       "player_username": "alice",
@@ -153,7 +153,7 @@ These error codes apply across all games:
   "severity": "error",
   "context": {
     "game_status": "abandoned",
-    "finished_at": "2025-01-15T14:30:00Z",
+    "completed_at": "2025-01-15T14:30:00Z",
     "reason": "Game was abandoned by players"
   }
 }

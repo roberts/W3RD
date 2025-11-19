@@ -151,24 +151,27 @@ class GameActionController extends Controller
         $outcome = $mode->checkEndCondition($gameState);
         if ($outcome->isFinished) {
             $game->status = GameStatus::COMPLETED;
-            $game->finish_reason = $outcome->reason;
+            $game->outcome_type = $outcome->type;
+            $game->outcome_details = $outcome->details;
+            $game->completed_at = now();
 
             if ($outcome->winnerUlid) {
                 /** @var Player $winner */
                 $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                 $game->winner_id = $winner->id;
+                $game->winner_position = $outcome->winnerPosition;
                 $gameState = $gameState->withWinner($outcome->winnerUlid);
             }
 
-            if ($outcome->isDraw) {
+            if ($outcome->type === \App\Enums\OutcomeType::DRAW) {
                 $gameState = $gameState->withDraw();
             }
 
             // Store rankings and scores if provided
-            if (! empty($outcome->rankings)) {
+            if (! empty($outcome->details['rankings'])) {
                 $gameStateArray = $gameState->toArray();
-                $gameStateArray['final_rankings'] = $outcome->rankings;
-                $gameStateArray['final_scores'] = $outcome->scores;
+                $gameStateArray['final_rankings'] = $outcome->details['rankings'];
+                $gameStateArray['final_scores'] = $outcome->details['scores'] ?? [];
                 $game->game_state = $gameStateArray;
             } else {
                 $game->game_state = $gameState->toArray();
@@ -183,7 +186,7 @@ class GameActionController extends Controller
             event(new GameCompleted(
                 game: $game,
                 winnerUlid: $outcome->winnerUlid,
-                isDraw: $outcome->isDraw,
+                isDraw: $outcome->type === \App\Enums\OutcomeType::DRAW,
                 outcomeDetails: $outcomeDetails
             ));
         }
@@ -223,7 +226,8 @@ class GameActionController extends Controller
                 'game_state' => $game->game_state,
                 'winner_ulid' => $gameState->winnerUlid,
                 'is_draw' => $gameState->isDraw ?? false,
-                'finish_reason' => $outcome->reason ?? null,
+                'outcome_type' => $game->outcome_type,
+                'outcome_details' => $game->outcome_details,
             ],
             'context' => $actionContext,
             'outcome' => isset($outcomeDetails) ? $outcomeDetails : null,

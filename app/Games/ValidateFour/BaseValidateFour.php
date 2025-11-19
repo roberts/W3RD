@@ -158,7 +158,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
         // Check for a winner
         $winnerUlid = $this->checkForWinner($gameState);
         if ($winnerUlid) {
-            return GameOutcome::win($winnerUlid, 'four_in_a_row');
+            return GameOutcome::win($winnerUlid, null, 'four_in_a_row');
         }
 
         // Check for draw (board full)
@@ -361,5 +361,99 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
     public function getTimeoutPenalty(): string
     {
         return static::DEFAULT_TIMEOUT_PENALTY;
+    }
+
+    // GameReportingInterface implementation
+
+    public function getPublicStatus(object $gameState): array
+    {
+        return [
+            'pieces_played' => $this->countPieces($gameState),
+            'columns_available' => $this->countAvailableColumns($gameState),
+        ];
+    }
+
+    public function describeStateChanges(Game $game, Action $action, object $gameState): array
+    {
+        $changes = parent::describeStateChanges($game, $action, $gameState);
+
+        // Validate Four specific changes could be added here if needed
+
+        return $changes;
+    }
+
+    public function formatActionSummary(Action $action): string
+    {
+        $username = $action->player->user->username;
+
+        return match ($action->action_type->value) {
+            'drop_piece' => sprintf(
+                '%s dropped a piece in column %d',
+                $username,
+                ($action->action_details['column'] ?? 0) + 1
+            ),
+            'pop_out' => sprintf(
+                '%s popped out from column %d',
+                $username,
+                ($action->action_details['column'] ?? 0) + 1
+            ),
+            default => parent::formatActionSummary($action),
+        };
+    }
+
+    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $details = parent::getFinishDetails($game, $outcome, $gameState);
+        $reason = $outcome->details['reason'] ?? null;
+
+        if ($reason === 'four_in_a_row') {
+            $details['winning_sequence'] = $this->findWinningSequence($gameState);
+            $details['reason_text'] = 'Four pieces connected in a row';
+        } elseif ($reason === 'board_full') {
+            $details['reason_text'] = 'Board filled with no winner';
+        }
+
+        return $details;
+    }
+
+    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $analysis = parent::analyzeOutcome($game, $outcome, $gameState);
+
+        $analysis['quick_win'] = ($game->turn_number ?? 0) < 10;
+
+        return $analysis;
+    }
+
+    // Helpers
+
+    protected function countPieces(object $gameState): int
+    {
+        $count = 0;
+        foreach ($gameState->board ?? [] as $row) {
+            foreach ($row as $cell) {
+                if ($cell !== null) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    protected function countAvailableColumns(object $gameState): int
+    {
+        $available = 0;
+        for ($col = 0; $col < ($gameState->columns ?? 7); $col++) {
+            if (method_exists($gameState, 'getLowestEmptyRow') && $gameState->getLowestEmptyRow($col) !== null) {
+                $available++;
+            }
+        }
+        return $available;
+    }
+
+    protected function findWinningSequence(object $gameState): ?array
+    {
+        // Placeholder as per service
+        return null;
     }
 }

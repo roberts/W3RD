@@ -26,7 +26,9 @@ class GameResource extends JsonResource
             'winner_id' => $this->winner_id,
             'players' => PlayerResource::collection($this->players),
             'game_state' => $this->game_state,
-            'finished_at' => $this->when($this->finished_at !== null, $this->finished_at),
+            'completed_at' => $this->when($this->completed_at !== null, $this->completed_at),
+            'outcome_type' => $this->when($this->outcome_type !== null, $this->outcome_type),
+            'outcome_details' => $this->when($this->outcome_details !== null, $this->outcome_details),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

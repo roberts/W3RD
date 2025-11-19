@@ -4,6 +4,7 @@ namespace App\Models\Game;
 
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
+use App\Enums\OutcomeType;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,14 +23,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $mode_id
  * @property int|null $creator_id
  * @property int|null $winner_id
+ * @property int|null $winner_position
  * @property int|null $turn_number
  * @property array|null $game_state
  * @property \Illuminate\Support\Carbon|null $started_at
- * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $finish_reason
+ * @property OutcomeType|null $outcome_type
+ * @property array|null $outcome_details
  */
 class Game extends Model
 {
@@ -42,10 +45,13 @@ class Game extends Model
         'status',
         'creator_id',
         'winner_id',
+        'winner_position',
+        'outcome_type',
+        'outcome_details',
         'turn_number',
         'game_state',
         'started_at',
-        'finished_at',
+        'completed_at',
         'expires_at',
         'player_count',
         'action_count',
@@ -55,11 +61,14 @@ class Game extends Model
     protected $casts = [
         'title_slug' => GameTitle::class,
         'status' => GameStatus::class,
+        'outcome_type' => OutcomeType::class,
+        'outcome_details' => 'array',
         'game_state' => 'array',
         'turn_number' => 'integer',
         'mode_id' => 'integer',
+        'winner_position' => 'integer',
         'started_at' => 'datetime',
-        'finished_at' => 'datetime',
+        'completed_at' => 'datetime',
         'expires_at' => 'datetime',
         'player_count' => 'integer',
         'action_count' => 'integer',

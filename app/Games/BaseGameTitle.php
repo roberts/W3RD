@@ -2,10 +2,12 @@
 
 namespace App\Games;
 
+use App\Games\Interfaces\GameReportingInterface;
 use App\Interfaces\GameTitleContract;
+use App\Models\Game\Action;
 use App\Models\Game\Game;
 
-abstract class BaseGameTitle implements GameTitleContract
+abstract class BaseGameTitle implements GameTitleContract, GameReportingInterface
 {
     protected Game $game;
 
@@ -43,6 +45,53 @@ abstract class BaseGameTitle implements GameTitleContract
             'title' => 'Game Title',
             'description' => 'Base description for a game.',
             'sections' => [],
+        ];
+    }
+
+    // Default implementations for GameReportingInterface
+
+    public function getPublicStatus(object $gameState): array
+    {
+        return [];
+    }
+
+    public function describeStateChanges(Game $game, Action $action, object $gameState): array
+    {
+        $changes = [];
+
+        // Check for phase transitions
+        if (isset($gameState->phase) && isset($game->game_state['phase']) && $gameState->phase->value !== $game->game_state['phase']) {
+            $changes['phase_transition'] = $gameState->phase->value;
+        }
+
+        return $changes;
+    }
+
+    public function formatActionSummary(Action $action): string
+    {
+        return sprintf(
+            '%s performed %s',
+            $action->player->user->username,
+            $action->action_type->value
+        );
+    }
+
+    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $reason = $outcome->details['reason'] ?? null;
+        return [
+            'reason_text' => $reason ? ucwords(str_replace('_', ' ', $reason)) : null,
+        ];
+    }
+
+    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $startTime = $game->started_at ?? $game->created_at;
+        $endTime = $game->completed_at ?? now();
+
+        return [
+            'duration_seconds' => $startTime->diffInSeconds($endTime),
+            'total_turns' => $game->turn_number ?? 0,
         ];
     }
 }

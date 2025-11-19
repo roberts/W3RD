@@ -32,7 +32,7 @@ class ForfeitHandler implements TimeoutHandlerContract
             return GameOutcome::draw('timeout_no_opponent');
         }
 
-        return GameOutcome::win($winnerPlayer->ulid, 'timeout_forfeit');
+        return GameOutcome::win($winnerPlayer->ulid, null, 'timeout_forfeit');
     }
 
     /**

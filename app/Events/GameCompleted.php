@@ -54,7 +54,7 @@ class GameCompleted implements ShouldBroadcast
             'status' => $this->game->status->value,
             'winner_ulid' => $this->winnerUlid,
             'is_draw' => $this->isDraw,
-            'finished_at' => $this->game->finished_at?->toIso8601String(),
+            'completed_at' => $this->game->completed_at?->toIso8601String(),
         ];
 
         // Add detailed outcome information if available

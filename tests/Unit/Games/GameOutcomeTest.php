@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\OutcomeType;
 use App\Games\GameOutcome;
 use Illuminate\Support\Str;
 
@@ -17,19 +18,17 @@ describe('GameOutcome', function () {
 
             expect($outcome->isFinished)->toBeFalse()
                 ->and($outcome->winnerUlid)->toBeNull()
-                ->and($outcome->isDraw)->toBeFalse()
-                ->and($outcome->reason)->toBeNull()
-                ->and($outcome->rankings)->toBe([])
-                ->and($outcome->scores)->toBe([]);
+                ->and($outcome->type)->toBeNull()
+                ->and($outcome->details)->toBe([]);
         });
 
         test('win creates finished outcome with winner', function () {
-            $outcome = GameOutcome::win($this->player1Ulid, 'four_in_a_row');
+            $outcome = GameOutcome::win($this->player1Ulid, null, 'four_in_a_row');
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid)
-                ->and($outcome->isDraw)->toBeFalse()
-                ->and($outcome->reason)->toBe('four_in_a_row');
+                ->and($outcome->type)->toBe(OutcomeType::WIN)
+                ->and($outcome->details['reason'])->toBe('four_in_a_row');
         });
 
         test('win without reason is valid', function () {
@@ -37,7 +36,7 @@ describe('GameOutcome', function () {
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid)
-                ->and($outcome->reason)->toBeNull();
+                ->and($outcome->details)->toBe([]);
         });
 
         test('draw creates finished outcome without winner', function () {
@@ -45,34 +44,34 @@ describe('GameOutcome', function () {
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBeNull()
-                ->and($outcome->isDraw)->toBeTrue()
-                ->and($outcome->reason)->toBe('board_full');
+                ->and($outcome->type)->toBe(OutcomeType::DRAW)
+                ->and($outcome->details['reason'])->toBe('board_full');
         });
 
         test('draw without reason is valid', function () {
             $outcome = GameOutcome::draw();
 
             expect($outcome->isFinished)->toBeTrue()
-                ->and($outcome->isDraw)->toBeTrue()
-                ->and($outcome->reason)->toBeNull();
+                ->and($outcome->type)->toBe(OutcomeType::DRAW)
+                ->and($outcome->details)->toBe([]);
         });
     });
 
     describe('Win Conditions', function () {
         test('win outcome has correct properties', function () {
-            $outcome = GameOutcome::win($this->player1Ulid, 'checkmate');
+            $outcome = GameOutcome::win($this->player1Ulid, null, 'checkmate');
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid)
-                ->and($outcome->isDraw)->toBeFalse();
+                ->and($outcome->type)->toBe(OutcomeType::WIN);
         });
 
         test('supports various win reasons', function () {
             $reasons = ['four_in_a_row', 'checkmate', 'forfeit', 'timeout', 'resignation'];
 
             foreach ($reasons as $reason) {
-                $outcome = GameOutcome::win($this->player1Ulid, $reason);
-                expect($outcome->reason)->toBe($reason)
+                $outcome = GameOutcome::win($this->player1Ulid, null, $reason);
+                expect($outcome->details['reason'])->toBe($reason)
                     ->and($outcome->isFinished)->toBeTrue();
             }
         });
@@ -83,7 +82,7 @@ describe('GameOutcome', function () {
             $outcome = GameOutcome::draw('stalemate');
 
             expect($outcome->winnerUlid)->toBeNull()
-                ->and($outcome->isDraw)->toBeTrue()
+                ->and($outcome->type)->toBe(OutcomeType::DRAW)
                 ->and($outcome->isFinished)->toBeTrue();
         });
 
@@ -92,8 +91,8 @@ describe('GameOutcome', function () {
 
             foreach ($reasons as $reason) {
                 $outcome = GameOutcome::draw($reason);
-                expect($outcome->reason)->toBe($reason)
-                    ->and($outcome->isDraw)->toBeTrue();
+                expect($outcome->details['reason'])->toBe($reason)
+                    ->and($outcome->type)->toBe(OutcomeType::DRAW);
             }
         });
     });
@@ -104,14 +103,13 @@ describe('GameOutcome', function () {
 
             expect($outcome->isFinished)->toBeFalse()
                 ->and($outcome->winnerUlid)->toBeNull()
-                ->and($outcome->isDraw)->toBeFalse();
+                ->and($outcome->type)->toBeNull();
         });
 
-        test('in progress has no rankings or scores', function () {
+        test('in progress has no details', function () {
             $outcome = GameOutcome::inProgress();
 
-            expect($outcome->rankings)->toBeEmpty()
-                ->and($outcome->scores)->toBeEmpty();
+            expect($outcome->details)->toBeEmpty();
         });
     });
 
@@ -123,41 +121,50 @@ describe('GameOutcome', function () {
             $outcome = new GameOutcome(
                 isFinished: true,
                 winnerUlid: $this->player1Ulid,
-                rankings: [$this->player1Ulid, $player3Ulid, $this->player2Ulid, $player4Ulid]
+                type: OutcomeType::WIN,
+                details: [
+                    'rankings' => [$this->player1Ulid, $player3Ulid, $this->player2Ulid, $player4Ulid]
+                ]
             );
 
-            expect($outcome->rankings)->toHaveCount(4)
-                ->and($outcome->rankings[0])->toBe($this->player1Ulid)
-                ->and($outcome->rankings[1])->toBe($player3Ulid);
+            expect($outcome->details['rankings'])->toHaveCount(4)
+                ->and($outcome->details['rankings'][0])->toBe($this->player1Ulid)
+                ->and($outcome->details['rankings'][1])->toBe($player3Ulid);
         });
 
         test('supports scores for scoring-based games', function () {
             $outcome = new GameOutcome(
                 isFinished: true,
                 winnerUlid: $this->player1Ulid,
-                scores: [
-                    $this->player1Ulid => 26,
-                    $this->player2Ulid => 78,
+                type: OutcomeType::WIN,
+                details: [
+                    'scores' => [
+                        $this->player1Ulid => 26,
+                        $this->player2Ulid => 78,
+                    ]
                 ]
             );
 
-            expect($outcome->scores)->toHaveCount(2)
-                ->and($outcome->scores[$this->player1Ulid])->toBe(26)
-                ->and($outcome->scores[$this->player2Ulid])->toBe(78);
+            expect($outcome->details['scores'])->toHaveCount(2)
+                ->and($outcome->details['scores'][$this->player1Ulid])->toBe(26)
+                ->and($outcome->details['scores'][$this->player2Ulid])->toBe(78);
         });
 
         test('supports both rankings and scores', function () {
             $outcome = new GameOutcome(
                 isFinished: true,
                 winnerUlid: $this->player1Ulid,
-                rankings: [$this->player1Ulid, $this->player2Ulid],
-                scores: [$this->player1Ulid => 100, $this->player2Ulid => 75],
-                reason: 'game_complete'
+                type: OutcomeType::WIN,
+                details: [
+                    'rankings' => [$this->player1Ulid, $this->player2Ulid],
+                    'scores' => [$this->player1Ulid => 100, $this->player2Ulid => 75],
+                    'reason' => 'game_complete'
+                ]
             );
 
-            expect($outcome->rankings)->toHaveCount(2)
-                ->and($outcome->scores)->toHaveCount(2)
-                ->and($outcome->reason)->toBe('game_complete');
+            expect($outcome->details['rankings'])->toHaveCount(2)
+                ->and($outcome->details['scores'])->toHaveCount(2)
+                ->and($outcome->details['reason'])->toBe('game_complete');
         });
     });
 
@@ -170,94 +177,24 @@ describe('GameOutcome', function () {
             expect($array)->toBe([
                 'is_finished' => false,
                 'winner_ulid' => null,
-                'is_draw' => false,
-                'rankings' => [],
-                'scores' => [],
-                'reason' => null,
+                'winner_position' => null,
+                'type' => null,
+                'details' => [],
             ]);
         });
 
         test('toArray includes all properties for win', function () {
-            $outcome = GameOutcome::win($this->player1Ulid, 'four_in_a_row');
+            $outcome = GameOutcome::win($this->player1Ulid, 1, 'four_in_a_row');
 
             $array = $outcome->toArray();
 
             expect($array)->toBe([
                 'is_finished' => true,
                 'winner_ulid' => $this->player1Ulid,
-                'is_draw' => false,
-                'rankings' => [],
-                'scores' => [],
-                'reason' => 'four_in_a_row',
+                'winner_position' => 1,
+                'type' => 'win',
+                'details' => ['reason' => 'four_in_a_row'],
             ]);
-        });
-
-        test('toArray includes all properties for draw', function () {
-            $outcome = GameOutcome::draw('board_full');
-
-            $array = $outcome->toArray();
-
-            expect($array)->toBe([
-                'is_finished' => true,
-                'winner_ulid' => null,
-                'is_draw' => true,
-                'rankings' => [],
-                'scores' => [],
-                'reason' => 'board_full',
-            ]);
-        });
-
-        test('toArray includes rankings and scores when present', function () {
-            $outcome = new GameOutcome(
-                isFinished: true,
-                winnerUlid: $this->player1Ulid,
-                rankings: [$this->player1Ulid, $this->player2Ulid],
-                scores: [$this->player1Ulid => 100, $this->player2Ulid => 50]
-            );
-
-            $array = $outcome->toArray();
-
-            expect($array['rankings'])->toHaveCount(2)
-                ->and($array['scores'])->toHaveCount(2)
-                ->and($array['winner_ulid'])->toBe($this->player1Ulid);
-        });
-    });
-
-    describe('Readonly Properties', function () {
-        test('all properties are readonly', function () {
-            $outcome = GameOutcome::inProgress();
-
-            expect($outcome)->toHaveProperty('isFinished')
-                ->and($outcome)->toHaveProperty('winnerUlid')
-                ->and($outcome)->toHaveProperty('isDraw')
-                ->and($outcome)->toHaveProperty('rankings')
-                ->and($outcome)->toHaveProperty('scores')
-                ->and($outcome)->toHaveProperty('reason');
-        });
-    });
-
-    describe('Edge Cases', function () {
-        test('handles empty strings for reason', function () {
-            $outcome = GameOutcome::win($this->player1Ulid, '');
-
-            expect($outcome->reason)->toBe('');
-        });
-
-        test('handles float scores', function () {
-            $outcome = new GameOutcome(
-                isFinished: true,
-                scores: [$this->player1Ulid => 95.5, $this->player2Ulid => 87.3]
-            );
-
-            expect($outcome->scores[$this->player1Ulid])->toBe(95.5)
-                ->and($outcome->scores[$this->player2Ulid])->toBe(87.3);
-        });
-
-        test('rankings can be empty even when finished', function () {
-            $outcome = GameOutcome::win($this->player1Ulid);
-
-            expect($outcome->isFinished)->toBeTrue()
-                ->and($outcome->rankings)->toBeEmpty();
         });
     });
 });

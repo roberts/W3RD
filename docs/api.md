@@ -643,12 +643,12 @@ Response:
         "board": [...],
         "currentPlayerUlid": "01HQ...",
         "winnerUlid": null,
-        "is_draw": false,
-        "finish_reason": null
+        "is_draw": false
       },
       "winner_ulid": null,
       "is_draw": false,
-      "finish_reason": null
+      "outcome_type": null,
+      "outcome_details": null
     },
     "next_action_deadline": "2025-11-17T10:03:00Z",
     "timeout": {
@@ -696,7 +696,7 @@ Response:
     "ulid": "01HQ...",
     "status": "completed",
     "winner_id": 123,
-    "finished_at": "2025-11-17T10:05:00Z"
+    "completed_at": "2025-11-17T10:05:00Z"
   },
   "message": "Game forfeited successfully."
 }

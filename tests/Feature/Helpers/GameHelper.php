@@ -74,7 +74,7 @@ class GameHelper
             'creator_id' => $winner->id,
         ]);
 
-        $game->update(['winner_id' => $game->players->first()->id]);
+        $game->update(['winner_id' => $game->players->first()->user_id]);
 
         return $game->fresh(['players', 'mode']);
     }

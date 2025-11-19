@@ -42,7 +42,7 @@ trait GamePlayerAuthorization
         if ($game->status !== GameStatus::ACTIVE) {
             $context = [
                 'game_status' => $game->status->value,
-                'finished_at' => $game->finished_at?->toIso8601String(),
+                'completed_at' => $game->completed_at?->toIso8601String(),
             ];
 
             // Add winner information if game is completed

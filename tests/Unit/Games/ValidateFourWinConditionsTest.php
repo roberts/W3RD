@@ -27,7 +27,7 @@ describe('ValidateFour Win Conditions', function () {
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid)
-                ->and($outcome->reason)->toBe('four_in_a_row');
+                ->and($outcome->details['reason'])->toBe('four_in_a_row');
         });
 
         test('detects horizontal win in top row', function () {

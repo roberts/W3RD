@@ -136,7 +136,8 @@ class GameController extends Controller
         // Update game status
         $game->status = GameStatus::COMPLETED;
         $game->winner_id = $opponent->user_id;
-        $game->finished_at = now();
+        $game->outcome_type = \App\Enums\OutcomeType::FORFEIT;
+        $game->completed_at = now();
         $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
 
@@ -151,7 +152,7 @@ class GameController extends Controller
             'ulid' => $game->ulid,
             'status' => $game->status->value,
             'winner_id' => $game->winner_id,
-            'finished_at' => $game->finished_at,
+            'completed_at' => $game->completed_at,
         ], 'Game forfeited successfully.');
     }
 }

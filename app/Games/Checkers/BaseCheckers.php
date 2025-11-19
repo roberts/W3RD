@@ -420,7 +420,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
                 $winner = reset($otherPlayers);
 
                 if ($winner !== false) {
-                    return GameOutcome::win($winner->ulid);
+                    return GameOutcome::win($winner->ulid, null, 'no_pieces_remaining');
                 }
             }
         }
@@ -428,7 +428,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
         // Check for draw (no legal moves - stalemate)
         // This will be implemented more thoroughly in the game mode
         if ($gameState->isDraw) {
-            return GameOutcome::draw();
+            return GameOutcome::draw('stalemate');
         }
 
         return GameOutcome::inProgress();
@@ -471,5 +471,137 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
     public function getTimeoutPenalty(): string
     {
         return self::DEFAULT_TIMEOUT_PENALTY;
+    }
+
+    // GameReportingInterface implementation
+
+    public function getPublicStatus(object $gameState): array
+    {
+        return [
+            'pieces_remaining' => $this->getPieceCounts($gameState),
+            'kings_count' => $this->getKingCounts($gameState),
+        ];
+    }
+
+    public function describeStateChanges(Game $game, Action $action, object $gameState): array
+    {
+        $changes = parent::describeStateChanges($game, $action, $gameState);
+
+        if ($this->wasKingPromoted($action)) {
+            $changes[] = 'Piece promoted to King!';
+        }
+        if ($this->werePiecesCaptured($action)) {
+            $captureCount = $this->countCapturedPieces($action);
+            $changes[] = sprintf('%d opponent piece(s) captured', $captureCount);
+        }
+
+        return $changes;
+    }
+
+    public function formatActionSummary(Action $action): string
+    {
+        $username = $action->player->user->username;
+
+        return match ($action->action_type->value) {
+            'move_piece' => sprintf(
+                '%s moved piece from [%d,%d] to [%d,%d]',
+                $username,
+                $action->action_details['from_row'] ?? 0,
+                $action->action_details['from_col'] ?? 0,
+                $action->action_details['to_row'] ?? 0,
+                $action->action_details['to_col'] ?? 0
+            ),
+            'jump_piece' => sprintf(
+                '%s jumped and captured opponent piece',
+                $username
+            ),
+            'double_jump_piece' => sprintf(
+                '%s performed a double jump, capturing 2 pieces',
+                $username
+            ),
+            'triple_jump_piece' => sprintf(
+                '%s performed a triple jump, capturing 3 pieces',
+                $username
+            ),
+            default => parent::formatActionSummary($action),
+        };
+    }
+
+    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $details = parent::getFinishDetails($game, $outcome, $gameState);
+        $details['final_piece_count'] = $this->getPieceCounts($gameState);
+        
+        $reason = $outcome->details['reason'] ?? null;
+        if ($reason === 'no_pieces_remaining') {
+            $details['reason_text'] = 'All opponent pieces captured';
+        }
+
+        return $details;
+    }
+
+    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        $analysis = parent::analyzeOutcome($game, $outcome, $gameState);
+        $analysis['dominant_victory'] = $this->wasVictoryDominant($gameState);
+        return $analysis;
+    }
+
+    // Helpers
+
+    protected function getPieceCounts(object $gameState): array
+    {
+        $counts = [];
+        foreach ($gameState->players ?? [] as $ulid => $player) {
+            $counts[$ulid] = $player->piecesRemaining ?? 0;
+        }
+        return $counts;
+    }
+
+    protected function getKingCounts(object $gameState): array
+    {
+        $counts = [];
+        foreach ($gameState->board ?? [] as $row) {
+            foreach ($row as $cell) {
+                if ($cell !== null && isset($cell['king']) && $cell['king']) {
+                    $playerUlid = $cell['player'] ?? null;
+                    if ($playerUlid) {
+                        $counts[$playerUlid] = ($counts[$playerUlid] ?? 0) + 1;
+                    }
+                }
+            }
+        }
+        return $counts;
+    }
+
+    protected function wasKingPromoted(Action $action): bool
+    {
+        // Placeholder as per service
+        return false;
+    }
+
+    protected function werePiecesCaptured(Action $action): bool
+    {
+        return in_array($action->action_type->value, ['jump_piece', 'double_jump_piece', 'triple_jump_piece']);
+    }
+
+    protected function countCapturedPieces(Action $action): int
+    {
+        return match ($action->action_type->value) {
+            'jump_piece' => 1,
+            'double_jump_piece' => 2,
+            'triple_jump_piece' => 3,
+            default => 0,
+        };
+    }
+
+    protected function wasVictoryDominant(object $gameState): bool
+    {
+        $counts = $this->getPieceCounts($gameState);
+        if (count($counts) < 2) {
+            return false;
+        }
+        $values = array_values($counts);
+        return max($values) > min($values) * 2;
     }
 }

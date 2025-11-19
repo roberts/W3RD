@@ -149,8 +149,10 @@ class GameFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => 'completed',
             'started_at' => now()->subHours(1),
-            'finished_at' => now(),
+            'completed_at' => now(),
             'duration_seconds' => 3600,
+            'outcome_type' => 'win',
+            'outcome_details' => ['reason' => 'factory_completed'],
         ]);
     }
 

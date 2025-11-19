@@ -4,8 +4,20 @@ use App\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
+use Illuminate\Support\Facades\Redis;
 
 describe('Lobby Player Management', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn(null)->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     describe('Player Invitations', function () {
         it('host can invite player to lobby', function () {
             $host = User::factory()->create();

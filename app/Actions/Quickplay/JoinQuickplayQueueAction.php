@@ -4,7 +4,9 @@ namespace App\Actions\Quickplay;
 
 use App\DataTransferObjects\Quickplay\QueueJoinResult;
 use App\Enums\GameTitle;
+use App\Enums\PlayerActivityState;
 use App\Models\Auth\User;
+use App\Services\PlayerActivityService;
 use Illuminate\Support\Facades\Redis;
 
 class JoinQuickplayQueueAction
@@ -33,6 +35,9 @@ class JoinQuickplayQueueAction
 
         // Store client_id for this player
         Redis::hset('quickplay:clients', (string) $user->id, (string) $clientId);
+
+        // Set player activity state to IN_QUEUE
+        app(PlayerActivityService::class)->setState($user->id, PlayerActivityState::IN_QUEUE);
 
         return QueueJoinResult::success($gameTitle->value, $gameMode);
     }

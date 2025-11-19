@@ -7,6 +7,7 @@ use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
+use App\Enums\PlayerActivityState;
 use App\Events\LobbyInvitation;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
@@ -15,6 +16,7 @@ use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use App\Services\GameCreationService;
+use App\Services\PlayerActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -108,6 +110,10 @@ class LobbyPlayerController extends Controller
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
+            // Set player activity to IN_LOBBY
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+
             // Check if we can start the game (exact player count for games that require it)
             if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
@@ -131,6 +137,10 @@ class LobbyPlayerController extends Controller
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
+            // Set player activity to IN_LOBBY
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+
             // Check if we can start the game (exact player count for games that require it)
             if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
@@ -139,6 +149,10 @@ class LobbyPlayerController extends Controller
             return $this->messageResponse('Invitation accepted');
         } else {
             $lobbyPlayer->decline();
+
+            // Player declined, they never entered lobby so set to IDLE
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IDLE);
 
             return $this->messageResponse('Invitation declined');
         }
@@ -168,6 +182,10 @@ class LobbyPlayerController extends Controller
             ->firstOrFail();
 
         $lobbyPlayer->delete();
+
+        // Set kicked player activity to IDLE
+        $activityService = app(PlayerActivityService::class);
+        $activityService->setState($user->id, PlayerActivityState::IDLE);
 
         return $this->noContentResponse();
     }

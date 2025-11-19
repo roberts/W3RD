@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Game\FindGameByUlidAction;
 use App\Enums\GameStatus;
+use App\Events\GameCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ForfeitGameRequest;
 use App\Http\Requests\Game\RequestRematchRequest;
@@ -139,6 +140,13 @@ class GameController extends Controller
         $game->finished_at = now();
         $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
+
+        // Dispatch GameCompleted event for activity tracking and cooldown
+        event(new GameCompleted(
+            game: $game,
+            winnerUlid: $opponent->ulid,
+            isDraw: false
+        ));
 
         return $this->dataResponse([
             'ulid' => $game->ulid,

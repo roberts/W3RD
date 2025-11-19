@@ -62,6 +62,12 @@ class AgentSchedulingService
                 return $agent->user !== null;
             })
             ->filter(function (Agent $agent) {
+                // Filter out agents in cooldown period
+                $cooldownKey = "agent:{$agent->user->id}:cooldown";
+
+                return ! Redis::exists($cooldownKey);
+            })
+            ->filter(function (Agent $agent) {
                 // Filter out agents currently in active games
                 return ! $this->isAgentBusy($agent->user);
             })

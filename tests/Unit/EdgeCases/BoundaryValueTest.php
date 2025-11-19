@@ -7,6 +7,18 @@ use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\Player;
+use Illuminate\Support\Facades\Redis;
+
+beforeEach(function () {
+    // Mock Redis for PlayerActivityService (for API endpoint tests)
+    Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+    Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+    Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+    Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+    Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+});
 
 describe('Boundary Value Testing', function () {
     describe('Lobby Player Management', function () {
@@ -289,9 +301,13 @@ describe('Boundary Value Testing', function () {
             $user = User::factory()->create();
             $tooLongUsername = str_repeat('a', 51); // Over the 50 character limit
 
-            // Database constraint should prevent this
-            expect(fn () => $user->update(['username' => $tooLongUsername]))
-                ->toThrow(\Exception::class);
+            // API validation should prevent this
+            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+                'username' => $tooLongUsername,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['username']);
         });
     });
 });

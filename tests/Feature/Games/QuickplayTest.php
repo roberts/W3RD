@@ -5,6 +5,14 @@ use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 
 describe('Quickplay Matchmaking', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn(null)->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    });
+
     describe('Queue Management', function () {
         test('authenticated user can join quickplay queue', function () {
             $user = User::factory()->create();

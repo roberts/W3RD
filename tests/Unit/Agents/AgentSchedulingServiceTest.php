@@ -12,6 +12,18 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->service = app(AgentSchedulingService::class);
+
+    // Mock Redis for PlayerActivityService
+    Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+    Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+    Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+    Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+    Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    Redis::shouldReceive('zadd')->andReturn(1)->byDefault();
+    Redis::shouldReceive('zscore')->andReturn(null)->byDefault();
+    Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
 });
 
 describe('Agent Discovery', function () {

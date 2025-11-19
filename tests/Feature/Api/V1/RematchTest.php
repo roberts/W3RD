@@ -4,8 +4,20 @@ use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use Tests\Feature\Helpers\GameHelper;
+use Illuminate\Support\Facades\Redis;
 
 describe('Rematch Management', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault(); // Default opponent to idle state
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     describe('Rematch Request', function () {
         it('allows player to request rematch from completed game', function () {
             $player1 = User::factory()->create();

@@ -3,16 +3,20 @@
 namespace App\Services;
 
 use App\Enums\GameStatus;
+use App\Enums\PlayerActivityState;
 use App\Events\RematchAccepted;
 use App\Events\RematchDeclined;
 use App\Events\RematchExpired;
 use App\Events\RematchRequested;
+use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchService
@@ -43,6 +47,27 @@ class RematchService
             throw new \InvalidArgumentException('Could not find opponent for rematch.');
         }
 
+        // Check if opponent is available for rematch
+        $activityService = app(PlayerActivityService::class);
+        $opponentState = $activityService->getState($opponent->user_id);
+
+        if (! $opponentState->isAvailableForRematch()) {
+            throw new \InvalidArgumentException(
+                "Opponent is currently {$opponentState->value}. Cannot request rematch."
+            );
+        }
+
+        // If opponent is an agent, check if cooldown period has expired
+        $opponentUser = User::find($opponent->user_id);
+        if ($opponentUser && $opponentUser->isAgent()) {
+            $cooldownKey = "agent:{$opponentUser->id}:cooldown";
+
+            if (! Redis::exists($cooldownKey)) {
+                // Cooldown expired - agent is no longer available for instant rematch
+                throw new \InvalidArgumentException('Opponent is no longer available for rematch.');
+            }
+        }
+
         // Check for existing pending request
         $existing = RematchRequest::where('original_game_id', $game->id)
             ->where('status', 'pending')
@@ -62,6 +87,28 @@ class RematchService
             'expires_at' => Carbon::now()->addMinutes($expirationMinutes),
         ]);
 
+        // If opponent is agent within cooldown window, schedule auto-accept
+        if ($opponentUser && $opponentUser->isAgent()) {
+            $cooldownKey = "agent:{$opponentUser->id}:cooldown";
+            $cooldownData = Redis::hgetall($cooldownKey);
+
+            if (! empty($cooldownData) &&
+                (int) $cooldownData['human_user_id'] === $requestingUser->id) {
+
+                // Schedule delayed auto-accept (1-7 seconds random)
+                $delay = rand(1, 7);
+
+                dispatch(new AgentAutoAcceptRematch($rematchRequest->ulid, $opponentUser->id))
+                    ->delay(now()->addSeconds($delay));
+
+                Log::info('Scheduled agent auto-accept', [
+                    'rematch_request_id' => $rematchRequest->ulid,
+                    'agent_id' => $opponentUser->id,
+                    'delay_seconds' => $delay,
+                ]);
+            }
+        }
+
         event(new RematchRequested($rematchRequest));
 
         return $rematchRequest;
@@ -70,10 +117,10 @@ class RematchService
     /**
      * Accept a rematch request and create a new game.
      */
-    public function acceptRematchRequest(RematchRequest $rematchRequest, User $acceptingUser): Game
+    public function acceptRematchRequest(RematchRequest $rematchRequest, User $acceptingUser, bool $isAutoAccept = false): Game
     {
-        // Validate user is the opponent by comparing user ID directly
-        if ($rematchRequest->opponent_user_id !== $acceptingUser->id) {
+        // Validate user is the opponent (skip for auto-accepts)
+        if (! $isAutoAccept && $rematchRequest->opponent_user_id !== $acceptingUser->id) {
             throw new \InvalidArgumentException('Only the opponent can accept this rematch request.');
         }
 

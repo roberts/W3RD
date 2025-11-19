@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * API endpoint tests for Checkers game.
@@ -14,6 +15,17 @@ use App\Models\Auth\User;
  * - Detecting game end conditions
  */
 describe('Checkers Game API', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     describe('Game Creation', function () {
         test('can create checkers game through lobby and play moves', function () {
             $users = User::factory()->count(2)->create();

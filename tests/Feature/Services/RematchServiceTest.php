@@ -9,10 +9,21 @@ use App\Models\Game\Player;
 use App\Models\Game\RematchRequest;
 use App\Services\RematchService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Redis;
 
 describe('RematchService', function () {
     beforeEach(function () {
         $this->service = new RematchService;
+
+        // Mock Redis for PlayerActivityService
+        // Default to 'idle' state so opponents are available for rematch
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
     });
 
     describe('Create Rematch Request Validation', function () {

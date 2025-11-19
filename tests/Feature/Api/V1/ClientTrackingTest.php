@@ -4,8 +4,20 @@ use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Illuminate\Support\Facades\Redis;
 
 describe('Client Tracking', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     it('tracks client_id when game is created through rematch', function () {
         $player1 = User::factory()->create();
         $player2 = User::factory()->create();

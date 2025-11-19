@@ -5,11 +5,23 @@ use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\AuthenticationHelper;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
+
+beforeEach(function () {
+    // Mock Redis for PlayerActivityService
+    Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+    Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+    Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+    Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+    Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+});
 
 describe('Auth', function () {
     describe('Registration', function () {

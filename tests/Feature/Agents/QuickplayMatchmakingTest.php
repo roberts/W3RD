@@ -8,6 +8,20 @@ use Illuminate\Support\Facades\Redis;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    // Mock Redis for PlayerActivityService
+    Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+    Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+    Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+    Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+    Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    Redis::shouldReceive('zadd')->andReturn(1)->byDefault();
+    Redis::shouldReceive('zscore')->andReturn(null)->byDefault();
+    Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
+});
+
 describe('Agent Matchmaking', function () {
     it('matches human player with agent after timeout in quickplay', function () {
         // Create an available agent
@@ -71,13 +85,15 @@ describe('Recent Opponent Tracking', function () {
 
         // Mock recent opponents: agents 0, 1, 2 (last 3 games)
         Redis::shouldReceive('lrange')
-            ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([
                 (string) $agentUsers[2]->id, // Most recent
                 (string) $agentUsers[1]->id,
                 (string) $agentUsers[0]->id, // 3rd most recent
             ]);
+        
+        // Ensure exists continues to work for cooldown checks
+        Redis::makePartial();
 
         // Now find an agent for the next game
         $service = app(AgentSchedulingService::class);
@@ -107,13 +123,15 @@ describe('Recent Opponent Tracking', function () {
 
         // Mock recent opponents: agents 3, 2, 1 (last 3 games)
         Redis::shouldReceive('lrange')
-            ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([
                 (string) $agentUsers[3]->id, // Most recent
                 (string) $agentUsers[2]->id,
                 (string) $agentUsers[1]->id,
             ]);
+        
+        // Ensure exists continues to work for cooldown checks
+        Redis::makePartial();
 
         // Now find an agent for the next game
         $service = app(AgentSchedulingService::class);
@@ -137,9 +155,11 @@ describe('Recent Opponent Tracking', function () {
 
         // Mock that both are recent opponents
         Redis::shouldReceive('lrange')
-            ->once()
             ->with("recent_opponents:{$humanUser->id}", 0, 2)
             ->andReturn([(string) $agentUser1->id, (string) $agentUser2->id]);
+        
+        // Ensure exists continues to work for cooldown checks
+        Redis::makePartial();
 
         // Try to find an agent - should use lenient fallback
         $service = app(AgentSchedulingService::class);

@@ -7,6 +7,7 @@ use App\Actions\Game\HandleTimeoutAction;
 use App\Actions\Game\ProcessCoordinatedActionAction;
 use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
+use App\Events\GameCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
@@ -15,6 +16,7 @@ use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
+use App\Services\Agents\AgentService;
 use App\Services\GameActionRecorder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -168,6 +170,13 @@ class GameActionController extends Controller
             }
 
             $game->save();
+
+            // Dispatch GameCompleted event for rematch cooldown and activity tracking
+            event(new GameCompleted(
+                game: $game,
+                winnerUlid: $outcome->winnerUlid,
+                isDraw: $outcome->isDraw
+            ));
         }
 
         // Increment turn number
@@ -294,7 +303,7 @@ class GameActionController extends Controller
             ]);
 
             // Dispatch agent action via AgentService
-            $agentService = app(\App\Services\Agents\AgentService::class);
+            $agentService = app(AgentService::class);
             $agentService->performAction($user, $game);
         }
     }

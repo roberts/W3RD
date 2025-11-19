@@ -3,9 +3,12 @@
 namespace App\Jobs;
 
 use App\Enums\GameTitle;
+use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
 use App\Http\Controllers\Api\V1\QuickplayController;
+use App\Services\Agents\AgentSchedulingService;
 use App\Services\GameCreationService;
+use App\Services\PlayerActivityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -126,7 +129,7 @@ class ProcessQuickplayQueue implements ShouldQueue
     private function matchWithAI(int $userId, GameTitle $gameTitle, string $mode, string $queueKey): void
     {
         // Find available agent FIRST before removing from queue
-        $schedulingService = app(\App\Services\Agents\AgentSchedulingService::class);
+        $schedulingService = app(AgentSchedulingService::class);
         $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode, $userId);
 
         if (! $agentUser) {
@@ -257,6 +260,11 @@ class ProcessQuickplayQueue implements ShouldQueue
 
             Redis::lpush("recent_opponents:{$agentUserId}", $humanUserId);
             Redis::ltrim("recent_opponents:{$agentUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
+
+            // Set both players' activity state to IN_GAME
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($humanUserId, PlayerActivityState::IN_GAME);
+            $activityService->setState($agentUserId, PlayerActivityState::IN_GAME);
 
             \Log::info('Game created with agent opponent', [
                 'game_id' => $game->id,

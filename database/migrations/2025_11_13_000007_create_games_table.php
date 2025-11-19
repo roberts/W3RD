@@ -15,13 +15,13 @@ return new class extends Migration
             $table->foreignId('mode_id')->constrained('modes');
             $table->enum('status', ['pending', 'active', 'completed'])->default('pending');
             $table->foreignId('creator_id')->nullable()->constrained('users');
-            
+
             // Outcome fields
             $table->foreignId('winner_id')->nullable()->constrained('users');
             $table->tinyInteger('winner_position')->nullable();       // Player position (1-4)
             $table->string('outcome_type', 20)->nullable();           // 'win', 'draw', 'forfeit', 'timeout'
             $table->json('outcome_details')->nullable();              // Flexible game-specific data
-            
+
             $table->integer('turn_number')->default(0);
             $table->json('game_state');
 

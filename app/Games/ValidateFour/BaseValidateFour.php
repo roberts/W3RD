@@ -437,6 +437,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
                 }
             }
         }
+
         return $count;
     }
 
@@ -448,6 +449,7 @@ abstract class BaseValidateFour extends BaseBoardGameTitle
                 $available++;
             }
         }
+
         return $available;
     }
 

@@ -585,7 +585,7 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
     public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
     {
         $details = parent::getFinishDetails($game, $outcome, $gameState);
-        
+
         $details['final_scores'] = $this->getScores($gameState);
         $details['rounds_played'] = $gameState->roundNumber ?? 0;
 
@@ -617,6 +617,7 @@ abstract class BaseHearts extends BaseCardGameTitle implements GameTitleContract
         foreach ($gameState->players ?? [] as $ulid => $player) {
             $scores[$ulid] = $player->score ?? 0;
         }
+
         return $scores;
     }
 

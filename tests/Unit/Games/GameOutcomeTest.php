@@ -123,7 +123,7 @@ describe('GameOutcome', function () {
                 winnerUlid: $this->player1Ulid,
                 type: OutcomeType::WIN,
                 details: [
-                    'rankings' => [$this->player1Ulid, $player3Ulid, $this->player2Ulid, $player4Ulid]
+                    'rankings' => [$this->player1Ulid, $player3Ulid, $this->player2Ulid, $player4Ulid],
                 ]
             );
 
@@ -141,7 +141,7 @@ describe('GameOutcome', function () {
                     'scores' => [
                         $this->player1Ulid => 26,
                         $this->player2Ulid => 78,
-                    ]
+                    ],
                 ]
             );
 
@@ -158,7 +158,7 @@ describe('GameOutcome', function () {
                 details: [
                     'rankings' => [$this->player1Ulid, $this->player2Ulid],
                     'scores' => [$this->player1Ulid => 100, $this->player2Ulid => 75],
-                    'reason' => 'game_complete'
+                    'reason' => 'game_complete',
                 ]
             );
 

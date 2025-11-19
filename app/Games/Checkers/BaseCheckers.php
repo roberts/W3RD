@@ -531,7 +531,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
     {
         $details = parent::getFinishDetails($game, $outcome, $gameState);
         $details['final_piece_count'] = $this->getPieceCounts($gameState);
-        
+
         $reason = $outcome->details['reason'] ?? null;
         if ($reason === 'no_pieces_remaining') {
             $details['reason_text'] = 'All opponent pieces captured';
@@ -544,6 +544,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
     {
         $analysis = parent::analyzeOutcome($game, $outcome, $gameState);
         $analysis['dominant_victory'] = $this->wasVictoryDominant($gameState);
+
         return $analysis;
     }
 
@@ -555,6 +556,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
         foreach ($gameState->players ?? [] as $ulid => $player) {
             $counts[$ulid] = $player->piecesRemaining ?? 0;
         }
+
         return $counts;
     }
 
@@ -571,6 +573,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
                 }
             }
         }
+
         return $counts;
     }
 
@@ -602,6 +605,7 @@ abstract class BaseCheckers extends BaseBoardGameTitle implements GameTitleContr
             return false;
         }
         $values = array_values($counts);
+
         return max($values) > min($values) * 2;
     }
 }

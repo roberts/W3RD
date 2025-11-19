@@ -50,7 +50,6 @@ interface GameReportingInterface
      * Example: "Player1 dropped a piece in column 4"
      *
      * @param  Action  $action  The action to summarize
-     * @return string
      */
     public function formatActionSummary(Action $action): string;
 

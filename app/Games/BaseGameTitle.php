@@ -7,7 +7,7 @@ use App\Interfaces\GameTitleContract;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 
-abstract class BaseGameTitle implements GameTitleContract, GameReportingInterface
+abstract class BaseGameTitle implements GameReportingInterface, GameTitleContract
 {
     protected Game $game;
 
@@ -79,6 +79,7 @@ abstract class BaseGameTitle implements GameTitleContract, GameReportingInterfac
     public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
     {
         $reason = $outcome->details['reason'] ?? null;
+
         return [
             'reason_text' => $reason ? ucwords(str_replace('_', ' ', $reason)) : null,
         ];

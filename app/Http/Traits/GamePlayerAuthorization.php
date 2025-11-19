@@ -3,6 +3,7 @@
 namespace App\Http\Traits;
 
 use App\Enums\GameStatus;
+use App\Exceptions\GameAccessDeniedException;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use Illuminate\Http\JsonResponse;
@@ -13,13 +14,17 @@ trait GamePlayerAuthorization
     /**
      * Authorize that the authenticated user is a player in the game.
      */
-    protected function authorizeGamePlayer(Game $game): Player|JsonResponse
+    protected function authorizeGamePlayer(Game $game): Player
     {
         /** @var Player|null $player */
         $player = $game->players()->where('user_id', Auth::id())->first();
 
         if (! $player) {
-            return $this->forbiddenResponse('You are not a player in this game.');
+            throw new GameAccessDeniedException(
+                'You are not a player in this game',
+                $game->ulid,
+                ['user_id' => Auth::id()]
+            );
         }
 
         return $player;

@@ -53,9 +53,6 @@ class GameActionController extends Controller
 
         // Verify the authenticated user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         // Check if game is still active
         if ($error = $this->authorizeActiveGame($game)) {
@@ -240,9 +237,6 @@ class GameActionController extends Controller
 
         // Get the player
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         // Get the current game state
         $gameState = $mode->getGameState();

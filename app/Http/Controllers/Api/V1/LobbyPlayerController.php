@@ -9,6 +9,8 @@ use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
 use App\Events\LobbyInvitation;
+use App\Exceptions\LobbyStateException;
+use App\Exceptions\PlayerBusyException;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
 use App\Http\Traits\ApiResponses;
@@ -49,7 +51,11 @@ class LobbyPlayerController extends Controller
         }
 
         if ($lobby->status !== LobbyStatus::PENDING) {
-            return $this->errorResponse('Cannot invite players to a non-pending lobby');
+            throw new LobbyStateException(
+                'Cannot invite players to a non-pending lobby',
+                $lobby->status->value,
+                ['lobby_ulid' => $lobby->ulid]
+            );
         }
 
         // Resolve username to user
@@ -61,7 +67,11 @@ class LobbyPlayerController extends Controller
             ->first();
 
         if ($existing) {
-            return $this->errorResponse('Player is already in this lobby');
+            throw new PlayerBusyException(
+                "Player {$invitee->username} is already in this lobby",
+                'in_lobby',
+                ['lobby_ulid' => $lobby->ulid, 'username' => $invitee->username]
+            );
         }
 
         // Create invitation
@@ -127,7 +137,11 @@ class LobbyPlayerController extends Controller
         }
 
         if ($lobbyPlayer->status !== LobbyPlayerStatus::PENDING) {
-            return $this->errorResponse('You have already responded to this invitation');
+            throw new PlayerBusyException(
+                'You have already responded to this invitation',
+                'invitation_already_responded',
+                ['lobby_ulid' => $lobby->ulid, 'status' => $lobbyPlayer->status->value]
+            );
         }
 
         // Update status
@@ -174,7 +188,11 @@ class LobbyPlayerController extends Controller
         $user = $this->resolveUsername->execute($username);
 
         if ($user->id === $currentUser->id) {
-            return $this->errorResponse('Host cannot kick themselves');
+            throw new LobbyStateException(
+                'Host cannot kick themselves from the lobby',
+                $lobby->status->value,
+                ['lobby_ulid' => $lobby->ulid]
+            );
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)

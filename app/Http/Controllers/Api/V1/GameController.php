@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Game\FindGameByUlidAction;
 use App\Enums\GameStatus;
 use App\Events\GameCompleted;
+use App\Exceptions\GameAccessDeniedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ForfeitGameRequest;
 use App\Http\Requests\Game\RequestRematchRequest;
@@ -60,9 +61,6 @@ class GameController extends Controller
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         return $this->resourceResponse(GameResource::make($game));
     }
@@ -103,9 +101,6 @@ class GameController extends Controller
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         $actions = Action::where('game_id', $game->id)
             ->with('player.user:id,name,username')
@@ -131,7 +126,11 @@ class GameController extends Controller
             ->first();
 
         if (! $opponent) {
-            return $this->errorResponse('Cannot determine opponent.');
+            throw new GameAccessDeniedException(
+                'Cannot determine opponent for this game',
+                $game->ulid,
+                ['user_id' => $user->id]
+            );
         }
 
         // Update game status

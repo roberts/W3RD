@@ -150,7 +150,7 @@ describe('Lobby Player Management', function () {
                 "/api/v1/games/lobbies/{$lobby->ulid}/players/{$host->username}"
             );
 
-            $response->assertStatus(400);
+            $response->assertStatus(422);
         });
 
         it('non-host cannot kick players', function () {

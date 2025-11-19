@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PaymentValidationException;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Core\JWK;
 use Jose\Component\KeyManagement\JWKFactory;
@@ -91,7 +92,11 @@ class AppleReceiptValidator
         curl_close($ch);
 
         if ($httpCode !== 200) {
-            throw new \RuntimeException("Apple API returned status {$httpCode}: {$response}");
+            throw new PaymentValidationException(
+                "Apple receipt validation failed with status {$httpCode}",
+                'apple',
+                ['transaction_id' => $transactionId, 'http_code' => $httpCode, 'response' => $response]
+            );
         }
 
         return json_decode($response, true);

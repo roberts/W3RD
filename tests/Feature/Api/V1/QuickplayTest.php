@@ -85,8 +85,8 @@ describe('Quickplay Matchmaking', function () {
                 'game_title' => 'invalid-game',
             ]);
 
-            // App returns 400 for invalid game title (not a validation error, handled in controller)
-            $response->assertStatus(400);
+            // InvalidGameConfigurationException returns 422
+            $response->assertStatus(422);
         });
 
         it('prevents joining while already in game', function () {
@@ -236,7 +236,7 @@ describe('Quickplay Matchmaking', function () {
             ]);
 
             $response->assertStatus(404)
-                ->assertJsonPath('message', 'Match confirmation has expired');
+                ->assertJsonPath('message', 'Match confirmation has expired. Please join the queue again');
         });
 
         it('waits for opponent when only one accepts', function () {

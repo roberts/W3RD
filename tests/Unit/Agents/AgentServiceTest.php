@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AgentConfigurationException;
 use App\Jobs\CalculateAgentAction;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
@@ -33,7 +34,7 @@ describe('Agent Action Handling', function () {
         $game = Game::factory()->create();
 
         expect(fn () => $this->service->performAction($user, $game))
-            ->toThrow(\InvalidArgumentException::class);
+            ->toThrow(AgentConfigurationException::class);
     });
 
     it('is dispatched with correct parameters', function () {

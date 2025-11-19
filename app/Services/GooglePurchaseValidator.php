@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PaymentValidationException;
 use Google\Client as GoogleClient;
 use Google\Service\AndroidPublisher;
 
@@ -44,7 +45,11 @@ class GooglePurchaseValidator
                 'acknowledgement_state' => $purchase->getAcknowledgementState(),
             ];
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to validate Google Play purchase: '.$e->getMessage());
+            throw new PaymentValidationException(
+                'Failed to validate Google Play purchase: '.$e->getMessage(),
+                'google',
+                ['product_id' => $productId, 'error' => $e->getMessage()]
+            );
         }
     }
 
@@ -72,7 +77,11 @@ class GooglePurchaseValidator
                 'auto_renewing' => $subscription->getAutoRenewing(),
             ];
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to validate Google Play subscription: '.$e->getMessage());
+            throw new PaymentValidationException(
+                'Failed to validate Google Play subscription: '.$e->getMessage(),
+                'google',
+                ['subscription_id' => $subscriptionId, 'error' => $e->getMessage()]
+            );
         }
     }
 }

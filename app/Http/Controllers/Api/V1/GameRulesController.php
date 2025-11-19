@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +26,11 @@ class GameRulesController extends Controller
         $rulesPath = app_path("Games/{$gameDirName}/rules.php");
 
         if (! File::exists($rulesPath)) {
-            return $this->notFoundResponse("No rules found for game '{$gameTitle}'");
+            throw new ResourceNotFoundException(
+                "No rules found for game '{$gameTitle}'",
+                'game_rules',
+                $gameTitle
+            );
         }
 
         // Load the base rules

@@ -10,6 +10,7 @@ use App\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
+use App\Exceptions\InvalidGameConfigurationException;
 use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
@@ -58,7 +59,11 @@ class LobbyController extends Controller
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
         if (! $gameTitle) {
-            return $this->errorResponse('Invalid game title');
+            throw new InvalidGameConfigurationException(
+                "Game title '{$validated['game_title']}' is not supported",
+                $validated['game_title'],
+                ['available_titles' => array_column(GameTitle::cases(), 'value')]
+            );
         }
 
         DB::beginTransaction();

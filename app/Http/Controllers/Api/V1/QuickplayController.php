@@ -7,6 +7,8 @@ use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Actions\Quickplay\JoinQuickplayQueueAction;
 use App\Actions\Quickplay\LeaveQuickplayQueueAction;
 use App\Enums\GameTitle;
+use App\Exceptions\InvalidGameConfigurationException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Requests\Quickplay\AcceptMatchRequest;
 use App\Http\Requests\Quickplay\JoinQuickplayRequest;
 use App\Http\Traits\ApiResponses;
@@ -41,7 +43,11 @@ class QuickplayController extends Controller
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
         if (! $gameTitle) {
-            return $this->errorResponse('Invalid game title');
+            throw new InvalidGameConfigurationException(
+                "Game title '{$validated['game_title']}' is not supported",
+                $validated['game_title'],
+                ['available_titles' => array_column(GameTitle::cases(), 'value')]
+            );
         }
 
         $gameMode = $validated['game_mode'] ?? 'standard';
@@ -89,7 +95,11 @@ class QuickplayController extends Controller
 
         // Check if match still exists
         if (! Redis::exists($confirmKey)) {
-            return $this->notFoundResponse('Match confirmation has expired');
+            throw new ResourceNotFoundException(
+                'Match confirmation has expired. Please join the queue again',
+                'match_confirmation',
+                $matchId
+            );
         }
 
         // Mark this user as accepted

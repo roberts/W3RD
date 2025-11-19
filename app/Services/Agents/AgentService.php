@@ -2,6 +2,7 @@
 
 namespace App\Services\Agents;
 
+use App\Exceptions\AgentConfigurationException;
 use App\Jobs\CalculateAgentAction;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -26,12 +27,16 @@ class AgentService
      * @param  User  $user  The agent user
      * @param  Game  $game  The game instance
      *
-     * @throws \InvalidArgumentException If user is not an agent
+     * @throws AgentConfigurationException If user is not an agent
      */
     public function performAction(User $user, Game $game): void
     {
         if (! $user->isAgent()) {
-            throw new \InvalidArgumentException('User must be an agent to perform agent actions');
+            throw new AgentConfigurationException(
+                'User must be an agent to perform agent actions',
+                null,
+                ['user_id' => $user->id]
+            );
         }
 
         Log::info('AgentService dispatching action calculation', [
@@ -50,12 +55,16 @@ class AgentService
      *
      * @param  User  $user  The agent user
      *
-     * @throws \Exception If logic class doesn't exist or doesn't implement AgentContract
+     * @throws AgentConfigurationException If logic class doesn't exist or doesn't implement AgentContract
      */
     public function getAgentLogic(User $user): \App\Interfaces\AgentContract
     {
         if (! $user->isAgent()) {
-            throw new \InvalidArgumentException('User must be an agent');
+            throw new AgentConfigurationException(
+                'User must be an agent',
+                null,
+                ['user_id' => $user->id]
+            );
         }
 
         /** @var \App\Models\Auth\Agent $agent */
@@ -67,7 +76,11 @@ class AgentService
                 'agent_id' => $agent->id,
                 'logic_class' => $logicClass,
             ]);
-            throw new \Exception("Agent logic class not found: {$logicClass}");
+            throw new AgentConfigurationException(
+                "Agent logic class not found: {$logicClass}",
+                $logicClass,
+                ['agent_id' => $agent->id]
+            );
         }
 
         $logic = app($logicClass);
@@ -77,7 +90,11 @@ class AgentService
                 'agent_id' => $agent->id,
                 'logic_class' => $logicClass,
             ]);
-            throw new \Exception("Agent logic must implement AgentContract: {$logicClass}");
+            throw new AgentConfigurationException(
+                "Agent logic must implement AgentContract: {$logicClass}",
+                $logicClass,
+                ['agent_id' => $agent->id, 'required_interface' => \App\Interfaces\AgentContract::class]
+            );
         }
 
         return $logic;

@@ -1,7 +1,5 @@
 <?php
 
-use App\Enums\GameStatus;
-use App\Models\Auth\Entry;
 use App\Models\Auth\User;
 use App\Models\Game\Action;
 use App\Models\Game\Game;

@@ -1,7 +1,6 @@
 <?php
 
 use App\Actions\Game\FindGameByUlidAction;
-use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
 
 describe('Quickplay Matchmaking', function () {

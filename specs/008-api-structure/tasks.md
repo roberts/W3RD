@@ -70,17 +70,17 @@ All paths assume Laravel project structure at repository root:
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Create HealthController with service status checks in app/Http/Controllers/Api/V1/System/HealthController.php
-- [ ] T019 [P] [US1] Create TimeController with authoritative server time endpoint in app/Http/Controllers/Api/V1/System/TimeController.php
-- [ ] T020 [P] [US1] Create ConfigController with platform configuration endpoint in app/Http/Controllers/Api/V1/System/ConfigController.php
-- [ ] T021 [P] [US1] Create WebhookController with provider event processing in app/Http/Controllers/Api/V1/Webhooks/WebhookController.php
-- [ ] T022 [US1] Create SystemHealthService with database, cache, queue, game engine checks in app/Services/SystemHealthService.php
-- [ ] T023 [US1] Add System namespace routes to routes/api.php (GET /v1/system/health, GET /v1/system/time, GET /v1/system/config)
-- [ ] T024 [US1] Add Webhooks namespace routes to routes/api.php (POST /v1/webhooks/{provider})
-- [ ] T025 [US1] Create HealthData DTO in app/DataTransferObjects/System/HealthData.php
-- [ ] T026 [US1] Create ConfigData DTO in app/DataTransferObjects/System/ConfigData.php
-- [ ] T027 [US1] Delete old StatusController from app/Http/Controllers/Api/V1/StatusController.php
-- [ ] T028 [US1] Delete old StripeWebhookController from app/Http/Controllers/Api/V1/StripeWebhookController.php
+- [x] T018 [P] [US1] Create HealthController with service status checks in app/Http/Controllers/Api/V1/System/HealthController.php
+- [x] T019 [P] [US1] Create TimeController with authoritative server time endpoint in app/Http/Controllers/Api/V1/System/TimeController.php
+- [x] T020 [P] [US1] Create ConfigController with platform configuration endpoint in app/Http/Controllers/Api/V1/System/ConfigController.php
+- [x] T021 [P] [US1] Create WebhookController with provider event processing in app/Http/Controllers/Api/V1/Webhooks/WebhookController.php
+- [x] T022 [US1] Create SystemHealthService with database, cache, queue, game engine checks in app/Services/SystemHealthService.php
+- [x] T023 [US1] Add System namespace routes to routes/api.php (GET /v1/system/health, GET /v1/system/time, GET /v1/system/config)
+- [x] T024 [US1] Add Webhooks namespace routes to routes/api.php (POST /v1/webhooks/{provider})
+- [x] T025 [US1] Create HealthData DTO in app/DataTransferObjects/System/HealthData.php
+- [x] T026 [US1] Create ConfigData DTO in app/DataTransferObjects/System/ConfigData.php
+- [x] T027 [US1] Delete old StatusController from app/Http/Controllers/Api/V1/StatusController.php
+- [x] T028 [US1] Delete old StripeWebhookController from app/Http/Controllers/Api/V1/StripeWebhookController.php
 
 **Checkpoint**: System endpoints operational - health monitoring, time sync, and webhook processing functional
 

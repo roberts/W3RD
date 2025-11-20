@@ -14,14 +14,36 @@ use App\Http\Controllers\Api\V1\QuickplayController;
 use App\Http\Controllers\Api\V1\RematchController;
 use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\StripeWebhookController;
+use App\Http\Controllers\Api\V1\System\ConfigController;
+use App\Http\Controllers\Api\V1\System\HealthController;
+use App\Http\Controllers\Api\V1\System\TimeController;
 use App\Http\Controllers\Api\V1\TitleController;
 use App\Http\Controllers\Api\V1\UserLevelsController;
 use App\Http\Controllers\Api\V1\UserStatsController;
+use App\Http\Controllers\Api\V1\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 // API Version 1
 Route::prefix('v1')->group(function () {
+    // ========================================
+    // System Namespace - Health & Configuration
+    // ========================================
+    Route::prefix('system')->group(function () {
+        Route::get('/health', HealthController::class);
+        Route::get('/time', TimeController::class);
+        Route::get('/config', ConfigController::class);
+    });
+
+    // ========================================
+    // Webhooks Namespace - External Provider Events
+    // ========================================
+    Route::prefix('webhooks')->group(function () {
+        Route::post('/{provider}', WebhookController::class);
+    });
+
+    // ========================================
     // Authentication Routes
+    // ========================================
     Route::prefix('auth')->controller(AuthController::class)->group(function () {
         // Public routes
         Route::post('register', 'register');

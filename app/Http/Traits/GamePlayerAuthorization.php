@@ -2,7 +2,7 @@
 
 namespace App\Http\Traits;
 
-use App\Enums\BaseGameActionErrorCode;
+use App\Enums\GameErrorCode;
 use App\Enums\GameStatus;
 use App\Exceptions\GameAccessDeniedException;
 use App\Exceptions\GameActionDeniedException;
@@ -65,7 +65,7 @@ trait GamePlayerAuthorization
 
             throw new GameActionDeniedException(
                 'This game is not active.',
-                BaseGameActionErrorCode::GAME_ALREADY_COMPLETED->value,
+                GameErrorCode::GAME_ALREADY_COMPLETED->value,
                 $game->title_slug->value,
                 'error',
                 $context
@@ -88,8 +88,8 @@ trait GamePlayerAuthorization
             $currentPlayer = $player->game->players()->where('ulid', $currentPlayerUlid)->first();
 
             throw new GameActionDeniedException(
-                'It is not your turn.',
-                BaseGameActionErrorCode::NOT_PLAYER_TURN->value,
+                GameErrorCode::NOT_PLAYER_TURN->message(),
+                GameErrorCode::NOT_PLAYER_TURN->value,
                 $player->game->title_slug->value,
                 'error',
                 [

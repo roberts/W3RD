@@ -2,37 +2,33 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidateFour\BaseValidateFour;
-use App\Games\ValidateFour\GameState;
+use App\Exceptions\InvalidGameConfigurationException;
+use App\Games\ValidateFour\ValidateFourProtocol;
+use App\Games\ValidateFour\Configs\StandardConfig;
+use App\Games\ValidateFour\ValidateFourBoard;
+use App\Games\ValidateFour\ValidateFourReporter;
+use App\Games\ValidateFour\ValidateFourArbiter;
+use App\Games\ValidateFour\ValidateFourConfig;
 
-class NineBySixMode extends BaseValidateFour
+class NineBySixMode extends ValidateFourProtocol
 {
-    /**
-     * Create initial game state for 9x6 mode.
-     *
-     * @param  string  ...$playerUlids  Player ULIDs (must be exactly 2)
-     * @return GameState
-     *
-     * @throws \InvalidArgumentException If not exactly 2 players provided
-     */
-    public function createInitialState(string ...$playerUlids): object
+    protected function getGameConfig(): ValidateFourConfig
     {
-        if (count($playerUlids) !== 2) {
-            throw new \InvalidArgumentException('Validate Four (9x6 Mode) requires exactly 2 players');
-        }
-
-        return GameState::createNew(
-            playerOneUlid: $playerUlids[0],
-            playerTwoUlid: $playerUlids[1],
-            columns: 9,
-            rows: 6,
-            connectCount: 4
+        return new ValidateFourConfig(
+            stateConfig: ['columns' => 9, 'rows' => 6, 'connectCount' => 4]
         );
     }
 
-    /**
-     * Returns the complete rules for the 9x6 mode.
-     */
+    protected function getArbiter(): ValidateFourArbiter
+    {
+        return new ValidateFourArbiter;
+    }
+
+    protected function getReporter(): ValidateFourReporter
+    {
+        return new ValidateFourReporter;
+    }
+
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

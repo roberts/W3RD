@@ -14,7 +14,7 @@ use Exception;
  * but semantically invalid for the current game state.
  *
  * Error codes come from:
- * - BaseGameActionErrorCode: Universal codes for all games
+ * - GameErrorCode: Universal codes for all games
  * - Game-specific enums: Codes unique to each game (e.g., ValidateFourActionError)
  */
 class GameActionDeniedException extends Exception

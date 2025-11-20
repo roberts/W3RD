@@ -1,9 +1,11 @@
 <?php
 
+use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Illuminate\Support\Str;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\GameHelper;
 
@@ -414,18 +416,39 @@ describe('Game Lifecycle', function () {
         it('returns empty array when not player turn', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
+            
+            $p1Ulid = (string) Str::ulid();
+            $p2Ulid = (string) Str::ulid();
+
             $game = Game::factory()->active()->create([
                 'creator_id' => $player1->id,
+                'game_state' => [
+                    'current_player_ulid' => $p1Ulid,
+                    'players' => [
+                        $p1Ulid => ['ulid' => $p1Ulid, 'position' => 1, 'color' => 'red'],
+                        $p2Ulid => ['ulid' => $p2Ulid, 'position' => 2, 'color' => 'yellow'],
+                    ],
+                    'board' => [],
+                    'rows' => 6,
+                    'columns' => 7,
+                    'phase' => GamePhase::ACTIVE->value,
+                    'status' => GameStatus::ACTIVE->value,
+                    'roundNumber' => 1,
+                    'winnerUlid' => null,
+                    'isDraw' => false,
+                ]
             ]);
             Player::factory()->create([
                 'game_id' => $game->id,
                 'user_id' => $player1->id,
                 'position_id' => 1,
+                'ulid' => $p1Ulid,
             ]);
             Player::factory()->create([
                 'game_id' => $game->id,
                 'user_id' => $player2->id,
                 'position_id' => 2,
+                'ulid' => $p2Ulid,
             ]);
 
             $response = $this->actingAs($player2)->getJson("/api/v1/games/{$game->ulid}/options");

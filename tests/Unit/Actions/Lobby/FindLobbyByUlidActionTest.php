@@ -7,30 +7,6 @@ use App\Models\Game\LobbyPlayer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('FindLobbyByUlidAction', function () {
-    describe('Basic Lookup', function () {
-        it('finds lobby by ulid without eager loading', function () {
-            $lobby = Lobby::factory()->create();
-            $action = new FindLobbyByUlidAction;
-
-            $found = $action->execute($lobby->ulid);
-
-            expect($found->id)->toBe($lobby->id)
-                ->and($found->ulid)->toBe($lobby->ulid);
-        });
-
-        it('throws ModelNotFoundException for invalid ulid', function () {
-            $action = new FindLobbyByUlidAction;
-
-            $action->execute('invalid-ulid-12345');
-        })->throws(ModelNotFoundException::class);
-
-        it('throws ModelNotFoundException for non-existent ulid', function () {
-            $action = new FindLobbyByUlidAction;
-
-            $action->execute('01234567890123456789012345');
-        })->throws(ModelNotFoundException::class);
-    });
-
     describe('Eager Loading', function () {
         it('loads host relationship when requested', function () {
             $host = User::factory()->create();

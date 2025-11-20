@@ -81,7 +81,7 @@ class GameActionController extends Controller
         }
 
         // Get the action factory for this game and create the action DTO
-        $actionFactoryClass = $mode->getActionFactory();
+        $actionFactoryClass = $mode->getActionMapper();
         $action = $this->handleServiceCall(
             fn () => $actionFactoryClass::create(
                 $validated['action_type'],

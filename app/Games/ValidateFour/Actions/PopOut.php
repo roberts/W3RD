@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour\Actions;
 
-use App\Interfaces\GameActionContract;
+use App\GameEngine\Interfaces\GameActionContract;
 
 class PopOut implements GameActionContract
 {
@@ -18,6 +18,19 @@ class PopOut implements GameActionContract
     ) {
         // Validation happens in PopOutMode::validatePopOutAction()
         // This allows for consistent error responses with proper error codes
+    }
+
+    /**
+     * Create a new PopOut action from an array.
+     *
+     * @param  array<string, mixed>  $data
+     * @return self
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            column: (int) ($data['column'] ?? 0),
+        );
     }
 
     /**

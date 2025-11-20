@@ -16,6 +16,7 @@ enum ActionType: string
     case PASS = 'pass';
     case DRAW_CARD = 'draw_card';
     case BID = 'bid';
+    case DEAL_CARDS = 'deal_cards';
 
     public function label(): string
     {
@@ -32,6 +33,7 @@ enum ActionType: string
             self::PASS => 'Pass',
             self::DRAW_CARD => 'Draw Card',
             self::BID => 'Bid',
+            self::DEAL_CARDS => 'Deal Cards',
         };
     }
 
@@ -48,8 +50,9 @@ enum ActionType: string
             self::PASS_CARDS => 'Pass cards to another player (e.g., Hearts passing phase)',
             self::CLAIM_REMAINING_TRICKS => 'Claim all remaining tricks when holding all winning cards (Hearts)',
             self::PASS => 'Skip turn or pass',
-            self::DRAW_CARD => 'Draw a card from deck',
-            self::BID => 'Place a bid (e.g., Spades bidding)',
+            self::DRAW_CARD => 'Draw a card from the deck',
+            self::BID => 'Place a bid',
+            self::DEAL_CARDS => 'Deal cards to players',
         };
     }
 

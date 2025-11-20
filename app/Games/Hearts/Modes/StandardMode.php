@@ -4,18 +4,33 @@ declare(strict_types=1);
 
 namespace App\Games\Hearts\Modes;
 
-use App\Games\Hearts\BaseHearts;
+use App\Games\Hearts\HeartsProtocol;
+use App\Games\Hearts\HeartsReporter;
+use App\Games\Hearts\HeartsArbiter;
+use App\Games\Hearts\HeartsConfig;
 
 /**
  * Standard Hearts mode implementation.
  *
  * Implements standard 4-player Hearts rules.
  */
-class StandardMode extends BaseHearts
+class StandardMode extends HeartsProtocol
 {
-    /**
-     * Returns the complete rules for the Standard mode.
-     */
+    protected function getGameConfig(): HeartsConfig
+    {
+        return new HeartsConfig;
+    }
+
+    protected function getArbiter(): HeartsArbiter
+    {
+        return new HeartsArbiter;
+    }
+
+    protected function getReporter(): HeartsReporter
+    {
+        return new HeartsReporter;
+    }
+
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

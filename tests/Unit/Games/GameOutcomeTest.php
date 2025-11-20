@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\OutcomeType;
-use App\Games\GameOutcome;
+use App\GameEngine\GameOutcome;
 use Illuminate\Support\Str;
 
 describe('GameOutcome', function () {

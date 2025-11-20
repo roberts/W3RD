@@ -2,16 +2,22 @@
 
 namespace App\Games;
 
-use App\Games\Interfaces\GameReportingInterface;
-use App\Interfaces\GameTitleContract;
+use App\GameEngine\Interfaces\GameReporterContract;
+use App\GameEngine\Interfaces\GameTitleContract;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use App\GameEngine\GameOutcome;
+use App\GameEngine\Kernel\GameKernel;
+use App\GameEngine\Interfaces\GameConfigContract;
+use App\GameEngine\ValidationResult;
 
-abstract class BaseGameTitle implements GameReportingInterface, GameTitleContract
+abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
     protected Game $game;
 
-    protected BaseGameState $gameState;
+    protected object $gameState;
+
+    protected GameKernel $kernel;
 
     public function __construct(Game $game)
     {
@@ -19,12 +25,19 @@ abstract class BaseGameTitle implements GameReportingInterface, GameTitleContrac
 
         $gameStateClass = $this->getGameStateClass();
         $this->gameState = $gameStateClass::fromArray($game->game_state);
+
+        $this->kernel = new GameKernel($this->getGameConfig());
     }
 
     /**
      * Returns the fully qualified class name of the game state object.
      */
     abstract protected function getGameStateClass(): string;
+
+    /**
+     * Returns the game configuration object.
+     */
+    abstract protected function getGameConfig(): GameConfigContract;
 
     public function getGame(): Game
     {
@@ -34,6 +47,16 @@ abstract class BaseGameTitle implements GameReportingInterface, GameTitleContrac
     public function getGameState(): BaseGameState
     {
         return $this->gameState;
+    }
+
+    public function validateAction(object $gameState, object $action): ValidationResult
+    {
+        return $this->kernel->validateAction($gameState, $action);
+    }
+
+    public function applyAction(object $gameState, object $action): object
+    {
+        return $this->kernel->applyAction($gameState, $action);
     }
 
     /**
@@ -48,7 +71,7 @@ abstract class BaseGameTitle implements GameReportingInterface, GameTitleContrac
         ];
     }
 
-    // Default implementations for GameReportingInterface
+    // Default implementations for GameReporterContract
 
     public function getPublicStatus(object $gameState): array
     {

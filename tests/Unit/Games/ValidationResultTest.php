@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Games\ValidationResult;
+use App\GameEngine\ValidationResult;
 
 describe('ValidationResult', function () {
     describe('Factory Methods', function () {

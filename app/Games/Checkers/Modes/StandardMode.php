@@ -4,18 +4,33 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Modes;
 
-use App\Games\Checkers\BaseCheckers;
+use App\Games\Checkers\CheckersProtocol;
+use App\Games\Checkers\CheckersReporter;
+use App\Games\Checkers\CheckersArbiter;
+use App\Games\Checkers\CheckersConfig;
 
 /**
  * Standard Checkers mode implementation.
  *
  * Implements the standard American Checkers (English Draughts) rules.
  */
-class StandardMode extends BaseCheckers
+class StandardMode extends CheckersProtocol
 {
-    /**
-     * Returns the complete rules for the Standard mode.
-     */
+    protected function getGameConfig(): CheckersConfig
+    {
+        return new CheckersConfig;
+    }
+
+    protected function getArbiter(): CheckersArbiter
+    {
+        return new CheckersArbiter;
+    }
+
+    protected function getReporter(): CheckersReporter
+    {
+        return new CheckersReporter;
+    }
+
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

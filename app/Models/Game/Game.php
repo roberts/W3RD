@@ -127,4 +127,12 @@ class Game extends Model
     {
         return $this->status === GameStatus::ACTIVE;
     }
+
+    public function getRecentActionTime(): \Illuminate\Support\Carbon
+    {
+        /** @var Action|null $lastAction */
+        $lastAction = $this->actions()->latest()->first();
+
+        return $lastAction ? $lastAction->created_at : ($this->started_at ?? $this->created_at);
+    }
 }

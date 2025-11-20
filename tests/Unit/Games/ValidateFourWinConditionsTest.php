@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Games\ValidateFour\GameState;
+use App\Games\ValidateFour\ValidateFourBoard;
 use App\Games\ValidateFour\Modes\StandardMode;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
@@ -17,7 +17,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Horizontal Wins', function () {
         test('detects horizontal win in bottom row', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player1Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid)
@@ -31,7 +31,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects horizontal win in top row', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(0, 2, $this->player2Ulid)
                 ->withPieceAt(0, 3, $this->player2Ulid)
                 ->withPieceAt(0, 4, $this->player2Ulid)
@@ -44,7 +44,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects horizontal win in middle row', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 1, $this->player1Ulid)
                 ->withPieceAt(3, 2, $this->player1Ulid)
                 ->withPieceAt(3, 3, $this->player1Ulid)
@@ -57,7 +57,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects horizontal win at right edge', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(4, 3, $this->player2Ulid)
                 ->withPieceAt(4, 4, $this->player2Ulid)
                 ->withPieceAt(4, 5, $this->player2Ulid)
@@ -70,7 +70,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect horizontal win with only 3 pieces', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player1Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid);
@@ -82,7 +82,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect horizontal win with broken sequence', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player1Ulid)
                 ->withPieceAt(5, 2, $this->player2Ulid)
@@ -97,7 +97,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Vertical Wins', function () {
         test('detects vertical win in leftmost column', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(4, 0, $this->player1Ulid)
                 ->withPieceAt(3, 0, $this->player1Ulid)
@@ -110,7 +110,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects vertical win in rightmost column', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 6, $this->player2Ulid)
                 ->withPieceAt(4, 6, $this->player2Ulid)
                 ->withPieceAt(3, 6, $this->player2Ulid)
@@ -123,7 +123,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects vertical win in middle column', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 3, $this->player1Ulid)
                 ->withPieceAt(4, 3, $this->player1Ulid)
                 ->withPieceAt(3, 3, $this->player1Ulid)
@@ -136,7 +136,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects vertical win at top of column', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 2, $this->player2Ulid)
                 ->withPieceAt(2, 2, $this->player2Ulid)
                 ->withPieceAt(1, 2, $this->player2Ulid)
@@ -149,7 +149,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect vertical win with only 3 pieces', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 3, $this->player1Ulid)
                 ->withPieceAt(4, 3, $this->player1Ulid)
                 ->withPieceAt(3, 3, $this->player1Ulid);
@@ -162,7 +162,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Diagonal Wins - Down-Right', function () {
         test('detects diagonal win from bottom-left', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(4, 1, $this->player1Ulid)
                 ->withPieceAt(3, 2, $this->player1Ulid)
@@ -175,7 +175,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects diagonal win in center', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 1, $this->player2Ulid)
                 ->withPieceAt(2, 2, $this->player2Ulid)
                 ->withPieceAt(1, 3, $this->player2Ulid)
@@ -188,7 +188,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects diagonal win ending at top-right corner', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 3, $this->player1Ulid)
                 ->withPieceAt(2, 4, $this->player1Ulid)
                 ->withPieceAt(1, 5, $this->player1Ulid)
@@ -201,7 +201,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect diagonal win with broken sequence', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(4, 1, $this->player1Ulid)
                 ->withPieceAt(3, 2, $this->player2Ulid)
@@ -215,7 +215,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Diagonal Wins - Down-Left', function () {
         test('detects diagonal win from bottom-right', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 6, $this->player2Ulid)
                 ->withPieceAt(4, 5, $this->player2Ulid)
                 ->withPieceAt(3, 4, $this->player2Ulid)
@@ -228,7 +228,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects diagonal win in center going left', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 5, $this->player1Ulid)
                 ->withPieceAt(2, 4, $this->player1Ulid)
                 ->withPieceAt(1, 3, $this->player1Ulid)
@@ -241,7 +241,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects diagonal win ending at top-left', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(3, 3, $this->player2Ulid)
                 ->withPieceAt(2, 2, $this->player2Ulid)
                 ->withPieceAt(1, 1, $this->player2Ulid)
@@ -257,7 +257,7 @@ describe('ValidateFour Win Conditions', function () {
     describe('Edge Cases', function () {
         test('detects win at board corners', function () {
             // Top-left corner horizontal
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(0, 0, $this->player1Ulid)
                 ->withPieceAt(0, 1, $this->player1Ulid)
                 ->withPieceAt(0, 2, $this->player1Ulid)
@@ -270,7 +270,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects win with more than 4 in a row', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player1Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid)
@@ -284,7 +284,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect win with alternating pieces', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player2Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid)
@@ -297,7 +297,7 @@ describe('ValidateFour Win Conditions', function () {
 
         test('detects win in complex board state', function () {
             // Create a more controlled complex state with no win initially
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player2Ulid)
                 ->withPieceAt(4, 1, $this->player1Ulid)
@@ -325,7 +325,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Draw Condition', function () {
         test('prioritizes win detection over draw when board is full', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid);
 
             // Fill most of the board in checkerboard pattern
             for ($row = 0; $row < 6; $row++) {
@@ -343,7 +343,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect draw on empty board', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid);
 
             $outcome = $this->mode->checkEndCondition($state);
 
@@ -352,7 +352,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('does not detect draw on partially filled board', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 1, $this->player2Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid);
@@ -365,7 +365,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('Custom Board Sizes', function () {
         test('detects win on 8x7 board', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid, columns: 8, rows: 7)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid, columns: 8, rows: 7)
                 ->withPieceAt(6, 4, $this->player1Ulid)
                 ->withPieceAt(6, 5, $this->player1Ulid)
                 ->withPieceAt(6, 6, $this->player1Ulid)
@@ -378,7 +378,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('detects vertical win on taller board', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid, columns: 7, rows: 8)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid, columns: 7, rows: 8)
                 ->withPieceAt(7, 3, $this->player2Ulid)
                 ->withPieceAt(6, 3, $this->player2Ulid)
                 ->withPieceAt(5, 3, $this->player2Ulid)
@@ -393,7 +393,7 @@ describe('ValidateFour Win Conditions', function () {
 
     describe('No Winner Scenarios', function () {
         test('returns in progress for empty board', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid);
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid);
 
             $outcome = $this->mode->checkEndCondition($state);
 
@@ -402,7 +402,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('returns in progress for single piece', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 3, $this->player1Ulid);
 
             $outcome = $this->mode->checkEndCondition($state);
@@ -411,7 +411,7 @@ describe('ValidateFour Win Conditions', function () {
         });
 
         test('returns in progress with scattered pieces', function () {
-            $state = GameState::createNew($this->player1Ulid, $this->player2Ulid)
+            $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 0, $this->player1Ulid)
                 ->withPieceAt(5, 3, $this->player2Ulid)
                 ->withPieceAt(4, 1, $this->player1Ulid)

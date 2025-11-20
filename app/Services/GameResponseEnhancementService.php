@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Games\BaseGameTitle;
-use App\Games\GameOutcome;
+use App\GameEngine\GameOutcome;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Providers\GameServiceProvider;

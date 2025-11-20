@@ -2,16 +2,32 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidateFour\BaseValidateFour;
+use App\Games\ValidateFour\ValidateFourProtocol;
+use App\Games\ValidateFour\Configs\StandardConfig;
+use App\Games\ValidateFour\ValidateFourReporter;
+use App\Games\ValidateFour\ValidateFourArbiter;
+use App\Games\ValidateFour\ValidateFourConfig;
 
-class StandardMode extends BaseValidateFour
+class StandardMode extends ValidateFourProtocol
 {
-    // StandardMode uses all the default logic from BaseValidateFourMode
+    // StandardMode uses all the default logic from ValidateFourProtocolMode
     // No additional customization needed for the standard 7x6, connect-4 game
 
-    /**
-     * Returns the complete rules for the Standard mode.
-     */
+    protected function getGameConfig(): ValidateFourConfig
+    {
+        return new ValidateFourConfig;
+    }
+
+    protected function getArbiter(): ValidateFourArbiter
+    {
+        return new ValidateFourArbiter;
+    }
+
+    protected function getReporter(): ValidateFourReporter
+    {
+        return new ValidateFourReporter;
+    }
+
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

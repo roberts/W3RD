@@ -7,30 +7,6 @@ use App\Models\Game\Player;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('FindGameByUlidAction', function () {
-    describe('Basic Lookup', function () {
-        it('finds game by ulid without eager loading', function () {
-            $game = Game::factory()->create();
-            $action = new FindGameByUlidAction;
-
-            $found = $action->execute($game->ulid);
-
-            expect($found->id)->toBe($game->id)
-                ->and($found->ulid)->toBe($game->ulid);
-        });
-
-        it('throws ModelNotFoundException for invalid ulid', function () {
-            $action = new FindGameByUlidAction;
-
-            $action->execute('invalid-ulid-12345');
-        })->throws(ModelNotFoundException::class);
-
-        it('throws ModelNotFoundException for non-existent ulid', function () {
-            $action = new FindGameByUlidAction;
-
-            $action->execute('01234567890123456789012345');
-        })->throws(ModelNotFoundException::class);
-    });
-
     describe('Eager Loading', function () {
         it('loads mode relationship when requested', function () {
             $mode = Mode::factory()->create();

@@ -2,92 +2,37 @@
 
 namespace App\Games\ValidateFour\Modes;
 
+use App\Games\ValidateFour\ValidateFourProtocol;
 use App\Games\ValidateFour\Actions\PopOut;
-use App\Games\ValidateFour\BaseValidateFour;
-use App\Games\ValidateFour\ErrorCodes\PopOutModeError;
-use App\Games\ValidateFour\GameState;
-use App\Games\ValidationResult;
+use App\Games\ValidateFour\Handlers\PopOutHandler;
+use App\Games\ValidateFour\ValidateFourReporter;
+use App\Games\ValidateFour\ValidateFourArbiter;
+use App\Games\ValidateFour\ValidateFourConfig;
 
-class PopOutMode extends BaseValidateFour
+class PopOutMode extends ValidateFourProtocol
 {
-    /**
-     * Override parent validateAction to handle both drop_piece and pop_out actions.
-     */
-    public function validateAction(object $gameState, object $action): ValidationResult
+    protected function getGameConfig(): ValidateFourConfig
     {
-        if (! ($gameState instanceof GameState)) {
-            return ValidationResult::invalid(
-                'INVALID_STATE_TYPE',
-                'Game state must be a GameState instance'
-            );
-        }
-
-        if ($action instanceof PopOut) {
-            return $this->validatePopOutAction($gameState, $action);
-        }
-
-        return parent::validateAction($gameState, $action);
+        return new ValidateFourConfig(
+            additionalActions: [
+                PopOut::class => [
+                    'handler' => PopOutHandler::class,
+                    'label' => 'Pop Out',
+                ],
+            ]
+        );
     }
 
-    /**
-     * Override parent applyAction to handle both drop_piece and pop_out actions.
-     */
-    public function applyAction(object $gameState, object $action): object
+    protected function getArbiter(): ValidateFourArbiter
     {
-        if (! ($gameState instanceof GameState)) {
-            return $gameState;
-        }
-
-        // Handle pop_out action
-        if ($action instanceof PopOut) {
-            return $this->applyPopOut($gameState, $action);
-        }
-
-        // For drop_piece, use parent implementation
-        return parent::applyAction($gameState, $action);
+        return new ValidateFourArbiter;
     }
 
-    /**
-     * Override getAvailableActions to include pop_out option.
-     *
-     * @return array<string, mixed>
-     */
-    public function getAvailableActions(object $gameState, string $playerUlid): array
+    protected function getReporter(): ValidateFourReporter
     {
-        $actions = parent::getAvailableActions($gameState, $playerUlid);
-
-        if (! ($gameState instanceof GameState)) {
-            return $actions;
-        }
-
-        // If not player's turn, no actions available
-        if ($gameState->currentPlayerUlid !== $playerUlid) {
-            return [];
-        }
-
-        // Find columns where player can pop out (has piece at bottom)
-        $bottomRow = $gameState->rows - 1;
-        $popOutColumns = [];
-
-        for ($col = 0; $col < $gameState->columns; $col++) {
-            $bottomPiece = $gameState->getPieceAt($bottomRow, $col);
-            if ($bottomPiece === $playerUlid) {
-                $popOutColumns[] = $col;
-            }
-        }
-
-        $actions['pop_out'] = [
-            'columns' => $popOutColumns,
-        ];
-
-        return $actions;
+        return new ValidateFourReporter;
     }
 
-    /**
-     * Returns the complete rules for the Pop-Out mode.
-     *
-     * Merges its specific rules with the base Validate Four rules.
-     */
     public static function getRules(): array
     {
         $baseRules = parent::getRules();
@@ -115,65 +60,5 @@ class PopOutMode extends BaseValidateFour
         $baseRules['name'] = $popOutRules['name'];
 
         return $baseRules;
-    }
-
-    /**
-     * Validate a pop_out action.
-     */
-    protected function validatePopOutAction(GameState $gameState, PopOut $action): ValidationResult
-    {
-        $column = $action->column;
-
-        // Check column is valid
-        if ($column < 0 || $column >= $gameState->columns) {
-            return ValidationResult::invalid(
-                'INVALID_COLUMN',
-                sprintf('Column must be between 0 and %d', $gameState->columns - 1),
-                ['column' => $column, 'max' => $gameState->columns - 1]
-            );
-        }
-
-        // Check if bottom piece exists (bottom row is rows - 1)
-        $bottomRow = $gameState->rows - 1;
-        $bottomPiece = $gameState->getPieceAt($bottomRow, $column);
-        if ($bottomPiece === null) {
-            return ValidationResult::invalid(
-                PopOutModeError::NO_PIECE_AT_BOTTOM->value,
-                sprintf('No piece at bottom of column %d', $column),
-                ['column' => $column]
-            );
-        }
-
-        // Check if bottom piece belongs to current player
-        if ($bottomPiece !== $gameState->currentPlayerUlid) {
-            return ValidationResult::invalid(
-                PopOutModeError::NOT_YOUR_PIECE->value,
-                'You can only pop out your own pieces',
-                ['column' => $column, 'piece_owner' => $bottomPiece]
-            );
-        }
-
-        return ValidationResult::valid();
-    }
-
-    /**
-     * Apply a pop_out action to the game state.
-     * Returns a new immutable game state with the piece popped and column shifted.
-     */
-    protected function applyPopOut(GameState $gameState, PopOut $action): GameState
-    {
-        $newBoard = $gameState->board;
-        $column = $action->column;
-
-        // Remove the bottom piece and shift all pieces above it down
-        for ($row = $gameState->rows - 1; $row > 0; $row--) {
-            $newBoard[$row][$column] = $newBoard[$row - 1][$column];
-        }
-        $newBoard[0][$column] = null; // Top row becomes empty
-
-        // Return new state with updated board and switched turn
-        return $gameState
-            ->withBoard($newBoard)
-            ->withNextPlayer();
     }
 }

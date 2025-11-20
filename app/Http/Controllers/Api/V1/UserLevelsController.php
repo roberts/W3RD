@@ -20,7 +20,9 @@ class UserLevelsController extends Controller
         $user = $request->user();
 
         /** @var \Illuminate\Database\Eloquent\Collection<int, UserTitleLevel> $levelCollection */
-        $levelCollection = $user->titleLevels()->get();
+        $levelCollection = $user->titleLevels()
+            ->orderByDesc('last_played_at')
+            ->get();
 
         $levels = $levelCollection->map(function (UserTitleLevel $titleLevel) {
             return [

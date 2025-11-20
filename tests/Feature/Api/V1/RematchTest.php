@@ -225,7 +225,7 @@ describe('Rematch Management', function () {
             Redis::shouldReceive('hgetall')->andReturn([]);
 
             \App\Models\Game\Mode::firstOrCreate([
-                'title_slug' => \App\Enums\GameTitle::VALIDATE_FOUR,
+                'title_slug' => \App\Enums\GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ], [
                 'name' => 'Standard Mode',

@@ -36,7 +36,7 @@ describe('Quickplay Matchmaking', function () {
         it('joins quickplay queue with valid game title', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -57,7 +57,7 @@ describe('Quickplay Matchmaking', function () {
         it('returns 429 when user has dodge penalty active', function () {
             $user = User::factory()->create();
             $mode = Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -96,7 +96,7 @@ describe('Quickplay Matchmaking', function () {
             $user2 = User::factory()->create();
 
             $mode = Mode::firstOrCreate([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ], [
                 'name' => 'Standard Mode',
@@ -127,7 +127,7 @@ describe('Quickplay Matchmaking', function () {
         it('prevents joining while already in another queue', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -146,7 +146,7 @@ describe('Quickplay Matchmaking', function () {
         it('tracks client_id for matchmaking analytics', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -163,7 +163,7 @@ describe('Quickplay Matchmaking', function () {
         it('defaults to standard mode when mode not specified', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -183,7 +183,7 @@ describe('Quickplay Matchmaking', function () {
             $matchId = str_pad('1', 26, '0'); // Valid 26-character ULID format
 
             $mode = Mode::firstOrCreate([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ], [
                 'name' => 'Standard Mode',
@@ -304,7 +304,7 @@ describe('Quickplay Matchmaking', function () {
         it('allows re-joining after leaving queue', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 
@@ -324,7 +324,7 @@ describe('Quickplay Matchmaking', function () {
         it('handles Redis connection failure gracefully', function () {
             $user = User::factory()->create();
             Mode::factory()->create([
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'slug' => 'standard',
             ]);
 

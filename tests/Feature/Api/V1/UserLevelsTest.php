@@ -22,7 +22,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR->value,
+                'title_slug' => GameTitle::CONNECT_FOUR->value,
                 'level' => 5,
                 'xp_current' => 250,
                 'last_played_at' => now(),
@@ -35,7 +35,7 @@ describe('User Levels & Experience', function () {
                 ->assertJson([
                     'data' => [
                         [
-                            'game_title' => GameTitle::VALIDATE_FOUR->value,
+                            'game_title' => GameTitle::CONNECT_FOUR->value,
                             'level' => 5,
                             'experience_points' => 250,
                         ],
@@ -50,7 +50,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'level' => 5,
                 'xp_current' => 250,
             ]);
@@ -84,7 +84,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user1->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'level' => 10,
             ]);
 
@@ -115,7 +115,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'level' => 1,
                 'xp_current' => 0,
             ]);
@@ -137,7 +137,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'level' => 5,
                 'xp_current' => 1500,
             ]);
@@ -164,7 +164,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'last_played_at' => $lastPlayed,
             ]);
 
@@ -181,7 +181,7 @@ describe('User Levels & Experience', function () {
 
             UserTitleLevel::factory()->create([
                 'user_id' => $user->id,
-                'title_slug' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'last_played_at' => now()->subDays(5),
             ]);
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Library;
 
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;

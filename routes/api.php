@@ -5,19 +5,17 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\GameActionController;
 use App\Http\Controllers\Api\V1\GameController;
-use App\Http\Controllers\Api\V1\GameRulesController;
 use App\Http\Controllers\Api\V1\LeaderboardController;
+use App\Http\Controllers\Api\V1\Library\GameLibraryController;
+use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\LobbyController;
 use App\Http\Controllers\Api\V1\LobbyPlayerController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuickplayController;
 use App\Http\Controllers\Api\V1\RematchController;
-use App\Http\Controllers\Api\V1\StatusController;
-use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\System\ConfigController;
 use App\Http\Controllers\Api\V1\System\HealthController;
 use App\Http\Controllers\Api\V1\System\TimeController;
-use App\Http\Controllers\Api\V1\TitleController;
 use App\Http\Controllers\Api\V1\UserLevelsController;
 use App\Http\Controllers\Api\V1\UserStatsController;
 use App\Http\Controllers\Api\V1\Webhooks\WebhookController;
@@ -42,6 +40,16 @@ Route::prefix('v1')->group(function () {
     });
 
     // ========================================
+    // Library Namespace - Game Discovery & Rules
+    // ========================================
+    Route::prefix('library')->group(function () {
+        Route::get('/', [GameLibraryController::class, 'index']);
+        Route::get('/{key}', [GameLibraryController::class, 'show']);
+        Route::get('/{key}/rules', [GameRulesController::class, 'show']);
+        Route::get('/{key}/entities', [GameLibraryController::class, 'entities']);
+    });
+
+    // ========================================
     // Authentication Routes
     // ========================================
     Route::prefix('auth')->controller(AuthController::class)->group(function () {
@@ -59,10 +67,9 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::get('/status', [StatusController::class, 'index']);
-    Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
-    Route::get('/titles', [TitleController::class, 'index']);
-    Route::get('/titles/{gameTitle}/rules', [GameRulesController::class, 'show']);
+    // ========================================
+    // Legacy Routes (will be migrated to namespaces)
+    // ========================================
     Route::get('/leaderboard/{gameTitle}', [LeaderboardController::class, 'show']);
 
     // Gamer Protocol (requires authentication)

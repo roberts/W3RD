@@ -1,0 +1,1819 @@
+openapi: 3.1.0
+
+info:
+  title: GamerProtocol.io API - Complete Reference
+  version: 1.0.0
+  description: |
+    Production-ready v1 API for GamerProtocol.io with headless infrastructure architecture.
+    
+    ## Architecture
+    
+    The API is organized into 9 functional namespaces:
+    1. **System & Webhooks** - Platform health and external integrations
+    2. **Game Library** - Static game definitions and assets
+    3. **Authentication** - Identity verification and session management
+    4. **Account Management** - User profiles, progression, and alerts
+    5. **Floor Coordination** - Matchmaking via lobbies, signals, and proposals
+    6. **Active Games** - Live gameplay and action execution
+    7. **Economy** - Financial operations and subscriptions
+    8. **Data Feeds** - Real-time SSE streams
+    9. **Competitions** - Tournaments and brackets
+    
+    ## Authentication
+    
+    Most endpoints require two forms of authorization:
+    - **Bearer Token**: User authentication via Laravel Sanctum (`Authorization: Bearer <token>`)
+    - **Client Key**: Application authorization (`X-Client-Key: <api-key>`)
+    
+    ## Versioning
+    
+    This is v1 of the API. Breaking changes will be released as v2 with minimum 12 months notice.
+    
+  contact:
+    name: GamerProtocol.io API Support
+    url: https://gamerprotocol.io/support
+    email: api@gamerprotocol.io
+  license:
+    name: Proprietary
+    url: https://gamerprotocol.io/terms
+
+servers:
+  - url: https://api.gamerprotocol.io/v1
+    description: Production
+  - url: https://staging-api.gamerprotocol.io/v1
+    description: Staging
+  - url: http://localhost:8000/v1
+    description: Local Development
+
+tags:
+  - name: System
+    description: Platform health and configuration
+  - name: Webhooks
+    description: External provider integrations
+  - name: Library
+    description: Game catalog and rules
+  - name: Auth
+    description: Authentication and session management
+  - name: Account
+    description: User profiles and progression
+  - name: Floor
+    description: Matchmaking coordination
+  - name: Games
+    description: Active gameplay instances
+  - name: Economy
+    description: Financial operations
+  - name: Feeds
+    description: Real-time data streams
+  - name: Competitions
+    description: Tournaments and brackets
+
+paths:
+  # System & Webhooks
+  /system/health:
+    get:
+      summary: Check platform health
+      description: Returns operational status of all critical services
+      operationId: systemHealth
+      tags: [System]
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /system/time:
+    get:
+      summary: Get authoritative server time
+      description: Returns current server timestamp for client synchronization
+      operationId: systemTime
+      tags: [System]
+      responses:
+        '200':
+          description: Server timestamp
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    format: date-time
+                  unix:
+                    type: integer
+                    description: Unix epoch seconds
+
+  /system/config:
+    get:
+      summary: Get platform configuration
+      description: Returns global platform settings including feature flags and supported games
+      operationId: systemConfig
+      tags: [System]
+      responses:
+        '200':
+          description: Platform configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfig'
+
+  /webhooks/{provider}:
+    post:
+      summary: Handle webhook events
+      description: Receives and processes events from external providers (Stripe, Apple, Google, Telegram)
+      operationId: webhookHandle
+      tags: [Webhooks]
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [stripe, apple, google, telegram]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Provider-specific webhook payload
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '400':
+          description: Invalid webhook signature or payload
+
+  # Game Library
+  /library:
+    get:
+      summary: List all game titles
+      description: Returns paginated list of available games with attributes
+      operationId: libraryIndex
+      tags: [Library]
+      parameters:
+        - name: pacing
+          in: query
+          schema:
+            type: string
+            enum: [real_time, turn_based]
+        - name: complexity
+          in: query
+          schema:
+            type: string
+            enum: [simple, moderate, complex, expert]
+        - name: player_count
+          in: query
+          schema:
+            type: integer
+            minimum: 2
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of game titles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameTitle'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /library/{key}:
+    get:
+      summary: Get game title details
+      description: Returns complete metadata for a specific game
+      operationId: libraryShow
+      tags: [Library]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            example: connect-four
+      responses:
+        '200':
+          description: Game title details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameTitle'
+        '404':
+          description: Game title not found
+
+  /library/{key}/rules:
+    get:
+      summary: Get game rules
+      description: Returns rule documentation in text and JSON format
+      operationId: libraryRules
+      tags: [Library]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game rules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: Human-readable rules
+                  json:
+                    type: object
+                    description: Structured rules for UI rendering
+
+  /library/{key}/entities:
+    get:
+      summary: Get game entity definitions
+      description: Returns static asset definitions (cards, units, boards) for client caching
+      operationId: libraryEntities
+      tags: [Library]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entity definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameEntity'
+
+  # Authentication
+  /auth/register:
+    post:
+      summary: Register new user
+      description: Creates pending registration and sends verification email
+      operationId: authRegister
+      tags: [Auth]
+      security:
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, username]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 20
+      responses:
+        '201':
+          description: Registration created, verification email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  email:
+                    type: string
+
+  /auth/login:
+    post:
+      summary: User login
+      description: Authenticates user and returns access token
+      operationId: authLogin
+      tags: [Auth]
+      security:
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Invalid credentials
+
+  /auth/social:
+    post:
+      summary: Social authentication
+      description: Authenticates via OAuth provider token (Google, Apple)
+      operationId: authSocial
+      tags: [Auth]
+      security:
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, token]
+              properties:
+                provider:
+                  type: string
+                  enum: [google, apple]
+                token:
+                  type: string
+                  description: Provider access token
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+
+  /auth/logout:
+    post:
+      summary: User logout
+      description: Revokes current access token
+      operationId: authLogout
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: Logout successful
+
+  # Account Management
+  /account/profile:
+    get:
+      summary: Get user profile
+      description: Returns authenticated user's profile
+      operationId: accountProfileShow
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    
+    patch:
+      summary: Update user profile
+      description: Updates profile fields (username, avatar, bio)
+      operationId: accountProfileUpdate
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 20
+                avatar_url:
+                  type: string
+                  format: uri
+                bio:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /account/progression:
+    get:
+      summary: Get user progression
+      description: Returns XP, level, and battle pass status
+      operationId: accountProgression
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: User progression
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProgression'
+
+  /account/records:
+    get:
+      summary: Get performance records
+      description: Returns win/loss statistics and ELO ratings
+      operationId: accountRecords
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: title_key
+          in: query
+          schema:
+            type: string
+          description: Filter by specific game title
+      responses:
+        '200':
+          description: Performance records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameRecord'
+
+  /account/alerts:
+    get:
+      summary: Get user alerts
+      description: Returns paginated list of notifications
+      operationId: accountAlertsIndex
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Alert'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /account/alerts/read:
+    post:
+      summary: Mark alerts as read
+      description: Marks specified alerts or all alerts as read
+      operationId: accountAlertsRead
+      tags: [Account]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  type: array
+                  items:
+                    type: string
+                    description: Alert ULIDs
+                  description: Omit to mark all as read
+      responses:
+        '200':
+          description: Alerts marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  marked_count:
+                    type: integer
+
+  # Floor Coordination
+  /floor/lobbies:
+    get:
+      summary: Browse public lobbies
+      description: Returns list of available public rooms
+      operationId: floorLobbiesIndex
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: title_key
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [waiting, ready_check]
+      responses:
+        '200':
+          description: List of lobbies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lobby'
+    
+    post:
+      summary: Create new lobby
+      description: Creates a new public or private room
+      operationId: floorLobbiesStore
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title_key, max_players]
+              properties:
+                title_key:
+                  type: string
+                max_players:
+                  type: integer
+                  minimum: 2
+                  maximum: 10
+                visibility:
+                  type: string
+                  enum: [public, private]
+                  default: public
+      responses:
+        '201':
+          description: Lobby created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lobby'
+
+  /floor/lobbies/{id}/seat:
+    post:
+      summary: Join lobby
+      description: Occupies an available player slot in the lobby
+      operationId: floorLobbiesSeat
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Lobby ULID
+      responses:
+        '200':
+          description: Joined lobby successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lobby'
+        '409':
+          description: Lobby is full
+
+  /floor/signals:
+    post:
+      summary: Submit matchmaking signal
+      description: Registers intent to play (quickplay/ranked)
+      operationId: floorSignalsStore
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title_key]
+              properties:
+                title_key:
+                  type: string
+                preferred_pace:
+                  type: string
+                  enum: [fast, normal, slow]
+      responses:
+        '201':
+          description: Signal created, searching for match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchmakingSignal'
+
+  /floor/signals/{id}:
+    delete:
+      summary: Cancel matchmaking
+      description: Removes user from matchmaking queue
+      operationId: floorSignalsDestroy
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Signal ULID
+      responses:
+        '200':
+          description: Signal cancelled
+
+  /floor/proposals:
+    post:
+      summary: Send challenge or rematch
+      description: Creates direct invite or rematch offer
+      operationId: floorProposalsStore
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, recipient_username, title_key]
+              properties:
+                type:
+                  type: string
+                  enum: [challenge, rematch]
+                recipient_username:
+                  type: string
+                title_key:
+                  type: string
+                previous_game_ulid:
+                  type: string
+                  description: Required for rematch type
+      responses:
+        '201':
+          description: Proposal sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposal'
+
+  /floor/proposals/{id}/accept:
+    post:
+      summary: Accept proposal
+      description: Accepts challenge or rematch and creates game
+      operationId: floorProposalsAccept
+      tags: [Floor]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Proposal ULID
+      responses:
+        '200':
+          description: Proposal accepted, game created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game_ulid:
+                    type: string
+                  redirect_url:
+                    type: string
+
+  # Active Games
+  /games:
+    get:
+      summary: List user's games
+      description: Returns all active and recent game sessions
+      operationId: gamesIndex
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, completed, abandoned]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Game'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /games/{ulid}:
+    get:
+      summary: Get game state
+      description: Returns current board state with smart sync support
+      operationId: gamesShow
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9A-Z]{26}$'
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Return only changes since this timestamp (patch/diff)
+      responses:
+        '200':
+          description: Game state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+
+  /games/{ulid}/actions:
+    post:
+      summary: Execute game action
+      description: Submits a player move with idempotency protection
+      operationId: gamesActionsStore
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique key to prevent duplicate actions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action_type, action_data]
+              properties:
+                action_type:
+                  type: string
+                  example: DROP_PIECE
+                action_data:
+                  type: object
+                  description: Game-specific action parameters
+      responses:
+        '200':
+          description: Action executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '422':
+          description: Invalid action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /games/{ulid}/turn:
+    get:
+      summary: Get turn timer info
+      description: Returns current turn timer and active player
+      operationId: gamesTurn
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Turn timer information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active_player:
+                    type: string
+                  time_remaining_seconds:
+                    type: integer
+                  expires_at:
+                    type: string
+                    format: date-time
+
+  /games/{ulid}/timeline:
+    get:
+      summary: Get action history
+      description: Returns ordered event stream for replay
+      operationId: gamesTimeline
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        player:
+                          type: string
+                        data:
+                          type: object
+                        timestamp:
+                          type: string
+                          format: date-time
+
+  /games/{ulid}/concede:
+    post:
+      summary: Concede game
+      description: Resigns gracefully with standard loss
+      operationId: gamesConcede
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game conceded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameOutcome'
+
+  /games/{ulid}/abandon:
+    post:
+      summary: Abandon game
+      description: Rage quit with penalty loss
+      operationId: gamesAbandon
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game abandoned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameOutcome'
+
+  /games/{ulid}/outcome:
+    get:
+      summary: Get game outcome
+      description: Returns detailed results, scores, XP, and rewards
+      operationId: gamesOutcome
+      tags: [Games]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game outcome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameOutcome'
+        '409':
+          description: Game not yet completed
+
+  # Economy
+  /economy/balance:
+    get:
+      summary: Get user balance
+      description: Returns current holdings in all currencies
+      operationId: economyBalance
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: User balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+
+  /economy/transactions:
+    get:
+      summary: Get transaction history
+      description: Returns paginated list of financial transactions
+      operationId: economyTransactions
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [deposit, purchase, buy_in, cash_out, subscription, refund]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Transaction history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /economy/cashier:
+    post:
+      summary: Manage chips
+      description: Buy-in to games or cash-out winnings
+      operationId: economyCashier
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation, amount]
+              properties:
+                operation:
+                  type: string
+                  enum: [buy_in, cash_out]
+                amount:
+                  type: number
+                  format: decimal
+                  minimum: 0.01
+                game_ulid:
+                  type: string
+                  description: Required for buy_in
+      responses:
+        '200':
+          description: Operation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '422':
+          description: Insufficient balance or invalid operation
+
+  /economy/plans:
+    get:
+      summary: List subscription plans
+      description: Returns available tiers with pricing and features
+      operationId: economyPlans
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: Subscription plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscriptionPlan'
+
+  /economy/receipts/{provider}:
+    post:
+      summary: Verify purchase receipt
+      description: Verifies and processes mobile platform receipts
+      operationId: economyReceiptsVerify
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [apple, google, telegram]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receipt_data]
+              properties:
+                receipt_data:
+                  type: string
+                  description: Provider-specific receipt string
+      responses:
+        '200':
+          description: Receipt verified and credits applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '422':
+          description: Invalid receipt
+
+  # Data Feeds
+  /feeds/live-scores:
+    get:
+      summary: Live scores SSE stream
+      description: Real-time global game score updates
+      operationId: feedsLiveScores
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: SSE stream of score updates
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /feeds/casino-floor:
+    get:
+      summary: Casino floor SSE stream
+      description: Real-time drop-in table status updates
+      operationId: feedsCasinoFloor
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      responses:
+        '200':
+          description: SSE stream of floor status
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  # Competitions
+  /competitions:
+    get:
+      summary: List tournaments
+      description: Returns active and upcoming tournaments
+      operationId: competitionsIndex
+      tags: [Competitions]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [registration_open, in_progress, completed]
+        - name: title_key
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of tournaments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tournament'
+
+  /competitions/{id}/enter:
+    post:
+      summary: Enter tournament
+      description: Registers user and deducts buy-in
+      operationId: competitionsEnter
+      tags: [Competitions]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Tournament ULID
+      responses:
+        '200':
+          description: Successfully entered tournament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tournament_ulid:
+                    type: string
+                  seed:
+                    type: integer
+                  bracket_position:
+                    type: string
+
+  /competitions/{id}/structure:
+    get:
+      summary: Get tournament structure
+      description: Returns phase rules and blind levels
+      operationId: competitionsStructure
+      tags: [Competitions]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tournament structure
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  format:
+                    type: string
+                  phase_rules:
+                    type: object
+
+  /competitions/{id}/bracket:
+    get:
+      summary: Get tournament bracket
+      description: Returns bracket tree with match results
+      operationId: competitionsBracket
+      tags: [Competitions]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tournament bracket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rounds:
+                    type: array
+                    items:
+                      type: object
+
+  /competitions/{id}/standings:
+    get:
+      summary: Get tournament standings
+      description: Returns real-time leaderboard
+      operationId: competitionsStandings
+      tags: [Competitions]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tournament standings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  standings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Standing'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Laravel Sanctum user token
+    
+    clientKey:
+      type: apiKey
+      in: header
+      name: X-Client-Key
+      description: Application authorization key from clients table
+
+  schemas:
+    # System schemas
+    HealthStatus:
+      type: object
+      required: [healthy, status, services, timestamp]
+      properties:
+        healthy:
+          type: boolean
+        status:
+          type: string
+          enum: [operational, degraded, down]
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [ok, degraded, down]
+            cache:
+              type: string
+              enum: [ok, degraded, down]
+            queue:
+              type: string
+              enum: [ok, degraded, down]
+            game_engine:
+              type: string
+              enum: [ok, degraded, down]
+        timestamp:
+          type: string
+          format: date-time
+
+    PlatformConfig:
+      type: object
+      properties:
+        version:
+          type: string
+          example: '1.0.0'
+        supported_games:
+          type: array
+          items:
+            type: string
+        features:
+          type: object
+          additionalProperties:
+            type: boolean
+        maintenance_window:
+          type: string
+          format: date-time
+          nullable: true
+
+    # Library schemas
+    GameTitle:
+      type: object
+      required: [key, name, description, player_count, pacing, complexity]
+      properties:
+        key:
+          type: string
+          example: connect-four
+        name:
+          type: string
+          example: Connect Four
+        description:
+          type: string
+        player_count:
+          type: integer
+        pacing:
+          type: string
+          enum: [real_time, turn_based]
+        complexity:
+          type: string
+          enum: [simple, moderate, complex, expert]
+        category_tags:
+          type: array
+          items:
+            type: string
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+        average_session_minutes:
+          type: integer
+          nullable: true
+
+    GameEntity:
+      type: object
+      properties:
+        type:
+          type: string
+          example: card
+        id:
+          type: string
+        name:
+          type: string
+        attributes:
+          type: object
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+
+    # Auth schemas
+    AuthToken:
+      type: object
+      required: [access_token, token_type, expires_in]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Seconds until expiration
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    # Account schemas
+    UserProfile:
+      type: object
+      required: [username, email, created_at]
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    UserProgression:
+      type: object
+      required: [level, current_xp, xp_to_next_level]
+      properties:
+        level:
+          type: integer
+        current_xp:
+          type: integer
+        xp_to_next_level:
+          type: integer
+        battle_pass:
+          type: object
+          nullable: true
+
+    GameRecord:
+      type: object
+      required: [title_key, total_games, wins, losses, win_rate, elo_rating]
+      properties:
+        title_key:
+          type: string
+        total_games:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        win_rate:
+          type: number
+          format: float
+        elo_rating:
+          type: integer
+
+    Alert:
+      type: object
+      required: [ulid, type, title, message, created_at]
+      properties:
+        ulid:
+          type: string
+        type:
+          type: string
+          enum: [game_invite, match_found, game_completed, friend_request, system]
+        title:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    # Floor schemas
+    Lobby:
+      type: object
+      required: [ulid, host_username, title_key, visibility, current_players, max_players, status]
+      properties:
+        ulid:
+          type: string
+        host_username:
+          type: string
+        title_key:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private]
+        current_players:
+          type: integer
+        max_players:
+          type: integer
+        join_code:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [waiting, ready_check, starting]
+
+    MatchmakingSignal:
+      type: object
+      required: [ulid, title_key, elo_rating, expires_at]
+      properties:
+        ulid:
+          type: string
+        title_key:
+          type: string
+        elo_rating:
+          type: integer
+        connection_quality:
+          type: string
+          enum: [excellent, good, fair, poor]
+        preferred_pace:
+          type: string
+          enum: [fast, normal, slow]
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+
+    Proposal:
+      type: object
+      required: [ulid, type, sender_username, recipient_username, title_key, status, expires_at]
+      properties:
+        ulid:
+          type: string
+        type:
+          type: string
+          enum: [challenge, rematch]
+        sender_username:
+          type: string
+        recipient_username:
+          type: string
+        title_key:
+          type: string
+        game_settings:
+          type: object
+        status:
+          type: string
+          enum: [pending, accepted, declined, expired]
+        expires_at:
+          type: string
+          format: date-time
+
+    # Game schemas
+    Game:
+      type: object
+      required: [ulid, title, status, players, created_at]
+      properties:
+        ulid:
+          type: string
+          pattern: '^[0-9A-Z]{26}$'
+        title:
+          type: string
+        status:
+          type: string
+          enum: [waiting, active, completed, abandoned]
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+              seat:
+                type: integer
+        current_turn:
+          type: string
+          nullable: true
+        state:
+          type: object
+          description: Game-specific state
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GameOutcome:
+      type: object
+      required: [game_ulid, winner, final_scores, completion_type]
+      properties:
+        game_ulid:
+          type: string
+        winner:
+          type: string
+          nullable: true
+        final_scores:
+          type: object
+        xp_awarded:
+          type: integer
+        rewards:
+          type: object
+        completion_type:
+          type: string
+          enum: [normal, concede, abandon, timeout]
+
+    # Economy schemas
+    Balance:
+      type: object
+      required: [real_money, bonus_chips, hard_currency, locked_in_games]
+      properties:
+        real_money:
+          type: number
+          format: decimal
+        bonus_chips:
+          type: number
+          format: decimal
+        hard_currency:
+          type: integer
+        locked_in_games:
+          type: number
+          format: decimal
+
+    Transaction:
+      type: object
+      required: [ulid, type, amount, currency, status, created_at]
+      properties:
+        ulid:
+          type: string
+        type:
+          type: string
+          enum: [deposit, purchase, buy_in, cash_out, subscription, refund]
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        provider:
+          type: string
+          enum: [stripe, apple, google, telegram]
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    SubscriptionPlan:
+      type: object
+      required: [key, name, description, price, billing_cycle, features]
+      properties:
+        key:
+          type: string
+          example: member
+        name:
+          type: string
+          example: Member
+        description:
+          type: string
+        price:
+          type: number
+          format: decimal
+        billing_cycle:
+          type: string
+          enum: [monthly, yearly]
+        features:
+          type: array
+          items:
+            type: string
+
+    # Competition schemas
+    Tournament:
+      type: object
+      required: [ulid, name, title_key, format, buy_in_amount, status, starts_at]
+      properties:
+        ulid:
+          type: string
+        name:
+          type: string
+        title_key:
+          type: string
+        format:
+          type: string
+          enum: [single_elimination, double_elimination, round_robin, swiss]
+        buy_in_amount:
+          type: number
+          format: decimal
+        buy_in_currency:
+          type: string
+          enum: [real_money, bonus_chips, hard_currency]
+        prize_pool:
+          type: number
+          format: decimal
+        current_participants:
+          type: integer
+        max_participants:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, registration_open, in_progress, completed]
+        starts_at:
+          type: string
+          format: date-time
+
+    Standing:
+      type: object
+      required: [rank, username, wins, losses, points, status]
+      properties:
+        rank:
+          type: integer
+        username:
+          type: string
+        wins:
+          type: integer
+        losses:
+          type: integer
+        points:
+          type: integer
+        status:
+          type: string
+          enum: [active, eliminated]
+
+    # Common schemas
+    PaginationMeta:
+      type: object
+      required: [current_page, per_page, total, last_page]
+      properties:
+        current_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        last_page:
+          type: integer
+
+    ValidationError:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

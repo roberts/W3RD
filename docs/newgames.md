@@ -104,6 +104,38 @@ App/Games/Checkers/
     *   Inject specific `Config` and `Arbiter` implementations into the Protocol.
     *   Example: `SpeedMode` might use `StandardConfig` but override the time limit.
 
+## Protocol Architecture
+
+The system uses a layered inheritance model to provide helpful tools without forcing a specific game structure.
+
+### 1. The Contract (`GameTitleContract`)
+This interface defines the absolute minimum requirements for the Game Engine to interact with any game. It is agnostic to the game's genre or mechanics.
+*   **Lifecycle**: `createInitialState` (Start), `checkEndCondition` (End).
+*   **Reflection**: `getStateClass`, `getActionMapper` (Tells the engine what classes to use).
+*   **Interaction**: `getAvailableActions` (What can the user do?), `getPublicStatus` (What can the user see?).
+
+### 2. The Base (`BaseGameTitle`)
+This abstract class implements `GameTitleContract` and provides the "plumbing" connecting the Game Model to the Game Engine. It is **not over-abstracted**; it does not assume the game has turns, players, or a board.
+*   **State Hydration**: Automatically converts the raw database array into your typed `GameState` object.
+*   **Kernel Integration**: Sets up the `GameKernel` to handle action validation and application.
+*   **Time Management**: Provides a standard `getActionDeadline` calculation (Last Action Time + Time Limit + Network Grace Period).
+*   **Reporting**: Provides default (empty) implementations for reporting, so you only implement what you need.
+
+### 3. Genre Categories
+We provide intermediate base classes for common game genres. These are optional starting points that provide "Turn-Based" or "Sequential" logic relevant to that category.
+
+*   **BaseBoardGameTitle**:
+    *   **Turn-Based Defaults**: Sets a default 60-second turn timer.
+    *   **Grid Helpers**: Provides `isWithinBounds(row, col)` for grid-based logic.
+*   **BaseCardGameTitle**:
+    *   **Deck Management**: Helpers for `createShuffledDeck`, `getSuit`, `getRank`.
+    *   **Turn-Based Defaults**: Sets a default 30-second turn timer.
+
+### 4. Extensibility & Overrides
+All underlying functions in these base classes are designed to be extended or overwritten.
+*   **Protocol Level**: Your `CheckersProtocol` can override `getTimelimit` to change the time, or `getActionDeadline` to change how time is calculated entirely.
+*   **Mode Level**: Specific modes (e.g., `SpeedCheckers`) can further override these behaviors, allowing for radical changes (e.g., a Real-Time mode for a Turn-Based game) without rewriting the core logic.
+
 ## The Game Engine (`App/GameEngine`)
 
 The core Game Engine provides the infrastructure that supports these game implementations.

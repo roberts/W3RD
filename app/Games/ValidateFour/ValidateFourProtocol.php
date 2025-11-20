@@ -17,10 +17,6 @@ abstract class ValidateFourProtocol extends BaseBoardGameTitle
 {
     protected const DEFAULT_TURN_TIME_SECONDS = 30;
 
-    protected const NETWORK_GRACE_PERIOD_SECONDS = 2;
-
-    protected const DEFAULT_TIMEOUT_PENALTY = 'forfeit';
-
     abstract protected function getGameConfig(): ValidateFourConfig;
 
     abstract protected function getArbiter(): ValidateFourArbiter;
@@ -98,11 +94,6 @@ abstract class ValidateFourProtocol extends BaseBoardGameTitle
         return $this->kernel->applyAction($gameState, $action);
     }
 
-    public function checkEndCondition(object $gameState): GameOutcome
-    {
-        return $this->getArbiter()->checkWinCondition($gameState);
-    }
-
     public function getAvailableActions(object $gameState, string $playerUlid): array
     {
         if (! ($gameState instanceof ValidateFourBoard)) {
@@ -110,49 +101,5 @@ abstract class ValidateFourProtocol extends BaseBoardGameTitle
         }
 
         return $this->kernel->getAvailableActions($gameState, $playerUlid);
-    }
-
-    public function getTimelimit(): int
-    {
-        return static::DEFAULT_TURN_TIME_SECONDS;
-    }
-
-    public function getActionDeadline(object $gameState, Game $game): Carbon
-    {
-        return $game->getRecentActionTime()->addSeconds(
-            $this->getTimelimit() + static::NETWORK_GRACE_PERIOD_SECONDS
-        );
-    }
-
-    public function getTimeoutPenalty(): string
-    {
-        return static::DEFAULT_TIMEOUT_PENALTY;
-    }
-
-    // GameReporterContract implementation
-
-    public function getPublicStatus(object $gameState): array
-    {
-        return $this->getReporter()->getPublicStatus($gameState);
-    }
-
-    public function describeStateChanges(Game $game, Action $action, object $gameState): array
-    {
-        return $this->getReporter()->describeStateChanges($game, $action, $gameState);
-    }
-
-    public function formatActionSummary(Action $action): string
-    {
-        return $this->getReporter()->formatActionSummary($action);
-    }
-
-    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
-    {
-        return $this->getReporter()->getFinishDetails($game, $outcome, $gameState);
-    }
-
-    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
-    {
-        return $this->getReporter()->analyzeOutcome($game, $outcome, $gameState);
     }
 }

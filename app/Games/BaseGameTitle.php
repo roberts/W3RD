@@ -10,9 +10,13 @@ use App\GameEngine\Kernel\GameKernel;
 use App\GameEngine\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use Carbon\Carbon;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
+    protected const NETWORK_GRACE_PERIOD_SECONDS = 2;
+    protected const DEFAULT_TIMEOUT_PENALTY = 'forfeit';
+
     protected Game $game;
 
     protected object $gameState;
@@ -57,6 +61,18 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
     public function applyAction(object $gameState, object $action): object
     {
         return $this->kernel->applyAction($gameState, $action);
+    }
+
+    public function getActionDeadline(object $gameState, Game $game): Carbon
+    {
+        return $game->getRecentActionTime()->addSeconds(
+            $this->getTimelimit() + static::NETWORK_GRACE_PERIOD_SECONDS
+        );
+    }
+
+    public function getTimeoutPenalty(): string
+    {
+        return static::DEFAULT_TIMEOUT_PENALTY;
     }
 
     /**

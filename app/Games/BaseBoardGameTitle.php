@@ -2,8 +2,25 @@
 
 namespace App\Games;
 
+use App\GameEngine\GameOutcome;
+use App\GameEngine\Interfaces\GameArbiterContract;
+use App\GameEngine\Interfaces\GameReporterContract;
+use App\Models\Game\Action;
+use App\Models\Game\Game;
+
 abstract class BaseBoardGameTitle extends BaseGameTitle
 {
+    protected const DEFAULT_TURN_TIME_SECONDS = 60;
+
+    abstract protected function getReporter(): GameReporterContract;
+
+    abstract protected function getArbiter(): GameArbiterContract;
+
+    public function getTimelimit(): int
+    {
+        return static::DEFAULT_TURN_TIME_SECONDS;
+    }
+
     /**
      * Check if a given coordinate is within the board boundaries.
      */
@@ -19,6 +36,40 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
         $colCount = count($board[0]);
 
         return $row >= 0 && $row < $rowCount && $col >= 0 && $col < $colCount;
+    }
+
+    // GameReporterContract delegation
+
+    public function getPublicStatus(object $gameState): array
+    {
+        return $this->getReporter()->getPublicStatus($gameState);
+    }
+
+    public function describeStateChanges(Game $game, Action $action, object $gameState): array
+    {
+        return $this->getReporter()->describeStateChanges($game, $action, $gameState);
+    }
+
+    public function formatActionSummary(Action $action): string
+    {
+        return $this->getReporter()->formatActionSummary($action);
+    }
+
+    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        return $this->getReporter()->getFinishDetails($game, $outcome, $gameState);
+    }
+
+    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        return $this->getReporter()->analyzeOutcome($game, $outcome, $gameState);
+    }
+
+    // GameArbiterContract delegation
+
+    public function checkEndCondition(object $gameState): GameOutcome
+    {
+        return $this->getArbiter()->checkWinCondition($gameState) ?? GameOutcome::inProgress();
     }
 
     /**

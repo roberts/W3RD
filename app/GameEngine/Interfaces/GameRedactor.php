@@ -2,8 +2,8 @@
 
 namespace App\GameEngine\Interfaces;
 
-use App\Models\Game\Game;
 use App\Models\Auth\User;
+use App\Models\Game\Game;
 
 interface GameRedactor
 {

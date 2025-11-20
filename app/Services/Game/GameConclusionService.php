@@ -11,8 +11,6 @@ use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 
-use App\Enums\GameTitle;
-
 class GameConclusionService
 {
     public function determineOutcome(Game $game): void
@@ -96,14 +94,14 @@ class GameConclusionService
     {
         // Load the game mode to get the arbiter
         $mode = GameServiceProvider::getMode($game);
-        
+
         // Get the arbiter from the mode
         $arbiter = $mode->getArbiter();
-        
+
         // Get the current game state
         $stateClass = $mode->getStateClass();
         $gameState = $stateClass::fromArray($game->game_state ?? []);
-        
+
         // Check win condition using the arbiter
         return $arbiter->checkWinCondition($gameState);
     }

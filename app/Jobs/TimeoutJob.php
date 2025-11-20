@@ -4,13 +4,12 @@ namespace App\Jobs;
 
 use App\Actions\Game\HandleTimeoutAction;
 use App\Models\Game\Game;
+use App\Providers\GameServiceProvider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-
-use App\Providers\GameServiceProvider;
 
 class TimeoutJob implements ShouldQueue
 {
@@ -20,8 +19,7 @@ class TimeoutJob implements ShouldQueue
         public int $gameId,
         public int $playerId,
         public int $turnNumber,
-    ) {
-    }
+    ) {}
 
     public function handle(HandleTimeoutAction $handleTimeout): void
     {
@@ -36,7 +34,7 @@ class TimeoutJob implements ShouldQueue
             $mode = GameServiceProvider::getMode($game);
             $stateClass = $mode->getStateClass();
             $gameState = $stateClass::fromArray($game->game_state ?? []);
-            
+
             $handleTimeout->execute($game, $mode, $gameState);
         }
     }

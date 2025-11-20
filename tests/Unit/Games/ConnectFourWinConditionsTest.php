@@ -12,7 +12,7 @@ describe('ConnectFour Win Conditions', function () {
         $this->player1Ulid = (string) Str::ulid();
         $this->player2Ulid = (string) Str::ulid();
         $this->game = new Game(['game_state' => []]);
-        $this->arbiter = new ConnectFourArbiter();
+        $this->arbiter = new ConnectFourArbiter;
     });
 
     describe('Horizontal Wins', function () {

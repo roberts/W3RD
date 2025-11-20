@@ -7,8 +7,8 @@ namespace App\Games\ConnectFour\Handlers;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
 use App\Games\ConnectFour\Actions\PopOut;
-use App\Games\ConnectFour\Enums\PopOutModeError;
 use App\Games\ConnectFour\ConnectFourBoard;
+use App\Games\ConnectFour\Enums\PopOutModeError;
 
 class PopOutHandler implements GameActionHandlerInterface
 {

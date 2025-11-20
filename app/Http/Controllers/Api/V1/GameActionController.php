@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\Game\HandleTimeoutAction;
 use App\Actions\Game\ProcessCoordinatedActionAction;
-use App\Enums\GameStatus;
 use App\Enums\GameAttributes\GamePacing;
 use App\Enums\GameAttributes\GameSequence;
-use App\GameEngine\Interfaces\GameRedactor;
+use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
-use App\Events\GameCompleted;
 use App\Exceptions\GameActionDeniedException;
+use App\GameEngine\Interfaces\GameRedactor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
+use App\Jobs\TimeoutJob;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -26,7 +26,6 @@ use App\Services\GameActionRecorder;
 use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Jobs\TimeoutJob;
 
 class GameActionController extends Controller
 {

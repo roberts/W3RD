@@ -88,7 +88,7 @@ describe('Checkers Game Logic', function () {
 
     test('can detect when a player has no pieces left', function () {
         $game = new Game(['game_state' => []]);
-        $arbiter = new CheckersArbiter();
+        $arbiter = new CheckersArbiter;
         $state = CheckersBoard::createNew('p1', 'p2');
 
         // Manually set pieces remaining to 0 for player 2
@@ -113,7 +113,7 @@ describe('Checkers Game Logic', function () {
 
     test('game is in progress when both players have pieces', function () {
         $game = new Game(['game_state' => []]);
-        $arbiter = new CheckersArbiter();
+        $arbiter = new CheckersArbiter;
         $state = CheckersBoard::createNew('p1', 'p2');
 
         $outcome = $arbiter->checkWinCondition($state);

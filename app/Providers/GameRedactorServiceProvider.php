@@ -21,12 +21,12 @@ class GameRedactorServiceProvider extends ServiceProvider
 
             if (! $game) {
                 // Default to NullGameRedactor if game is not in the route
-                return new NullGameRedactor();
+                return new NullGameRedactor;
             }
 
             return match ($game->title->getVisibility()) {
-                GameVisibility::HIDDEN_INFORMATION => new HeartsRedactor(),
-                default => new NullGameRedactor(),
+                GameVisibility::HIDDEN_INFORMATION => new HeartsRedactor,
+                default => new NullGameRedactor,
             };
         });
     }

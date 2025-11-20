@@ -3,11 +3,11 @@
 namespace App\Games\ConnectFour\Modes;
 
 use App\Games\ConnectFour\Actions\PopOut;
-use App\Games\ConnectFour\Handlers\PopOutHandler;
 use App\Games\ConnectFour\ConnectFourArbiter;
 use App\Games\ConnectFour\ConnectFourConfig;
 use App\Games\ConnectFour\ConnectFourProtocol;
 use App\Games\ConnectFour\ConnectFourReporter;
+use App\Games\ConnectFour\Handlers\PopOutHandler;
 
 class PopOutMode extends ConnectFourProtocol
 {

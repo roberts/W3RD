@@ -3,8 +3,8 @@
 namespace App\Games\Hearts;
 
 use App\GameEngine\Interfaces\GameRedactor;
-use App\Models\Game\Game;
 use App\Models\Auth\User;
+use App\Models\Game\Game;
 
 class HeartsRedactor implements GameRedactor
 {

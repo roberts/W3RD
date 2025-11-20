@@ -4,19 +4,13 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers;
 
+use App\Enums\GameAttributes\GameComplexity;
+use App\Enums\GameAttributes\GameDynamic;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\Games\BaseBoardGameTitle;
 use App\Games\Checkers\Actions\CheckersActionMapper;
 use App\Models\Game\Game;
-use App\Enums\GameAttributes\GameComplexity;
-use App\Enums\GameAttributes\GameContinuity;
-use App\Enums\GameAttributes\GameDynamic;
-use App\Enums\GameAttributes\GameEntryPolicy;
-use App\Enums\GameAttributes\GameLifecycle;
-use App\Enums\GameAttributes\GamePacing;
-use App\Enums\GameAttributes\GameSequence;
-use App\Enums\GameAttributes\GameVisibility;
 
 /**
  * Base Checkers game implementation.

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Games;
 
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameArbiterContract;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
-use App\Enums\GameAttributes\GamePacing;
-use App\Enums\GameAttributes\GameSequence;
-use App\Enums\GameAttributes\GameVisibility;
 
 /**
  * Base class for card game titles.

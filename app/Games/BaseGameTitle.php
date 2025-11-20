@@ -2,6 +2,9 @@
 
 namespace App\Games;
 
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\GameReporterContract;
@@ -11,14 +14,6 @@ use App\GameEngine\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use Carbon\Carbon;
-use App\Enums\GameAttributes\GameComplexity;
-use App\Enums\GameAttributes\GameContinuity;
-use App\Enums\GameAttributes\GameDynamic;
-use App\Enums\GameAttributes\GameEntryPolicy;
-use App\Enums\GameAttributes\GameLifecycle;
-use App\Enums\GameAttributes\GamePacing;
-use App\Enums\GameAttributes\GameSequence;
-use App\Enums\GameAttributes\GameVisibility;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {

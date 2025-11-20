@@ -421,12 +421,13 @@ X-Client-Key: your-client-key
 
 ### 7. Data Feeds
 
-Subscribe to real-time event streams via Server-Sent Events (SSE).
+Subscribe to real-time event streams via Server-Sent Events (SSE). All feeds support optional query parameters for filtering.
 
-**Live Scores Stream**:
+**Live Games Feed**:
 ```javascript
-const eventSource = new EventSource(
-  'https://api.gamerprotocol.io/v1/feeds/live-scores',
+// Stream public game activity (starts, moves, completions)
+const gamesSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/games?title_key=chess',
   {
     headers: {
       'Authorization': 'Bearer <token>',
@@ -435,16 +436,18 @@ const eventSource = new EventSource(
   }
 );
 
-eventSource.addEventListener('score-update', (event) => {
+gamesSource.addEventListener('game-update', (event) => {
   const data = JSON.parse(event.data);
-  console.log('Score update:', data);
+  // { game_ulid, event_type, title_key, players, stakes, timestamp }
+  console.log('Game event:', data);
 });
 ```
 
-**Casino Floor Stream**:
+**Win Announcements Feed**:
 ```javascript
-const floorSource = new EventSource(
-  'https://api.gamerprotocol.io/v1/feeds/casino-floor',
+// Stream player wins with outcomes and stakes
+const winsSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/wins?min_stakes=10',
   {
     headers: {
       'Authorization': 'Bearer <token>',
@@ -453,10 +456,118 @@ const floorSource = new EventSource(
   }
 );
 
-floorSource.addEventListener('table-status', (event) => {
+winsSource.addEventListener('win-announcement', (event) => {
   const data = JSON.parse(event.data);
-  console.log('Table update:', data);
+  // { game_ulid, winner_username, winner_avatar, title_key, stakes, outcome, xp_earned, timestamp }
+  console.log('Player won:', data);
 });
+```
+
+**Leaderboard Updates Feed**:
+```javascript
+// Stream rank changes and high scores
+const leaderboardSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/leaderboards?period=daily&title_key=chess',
+  {
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'X-Client-Key': 'your-client-key'
+    }
+  }
+);
+
+leaderboardSource.addEventListener('leaderboard-update', (event) => {
+  const data = JSON.parse(event.data);
+  // { event_type, username, avatar, old_rank, new_rank, title_key, period, score, timestamp }
+  console.log('Leaderboard change:', data);
+});
+```
+
+**Tournament Progress Feed**:
+```javascript
+// Stream tournament events (rounds, brackets, eliminations)
+const tournamentsSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/tournaments?tournament_ulid=01J3...',
+  {
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'X-Client-Key': 'your-client-key'
+    }
+  }
+);
+
+tournamentsSource.addEventListener('tournament-event', (event) => {
+  const data = JSON.parse(event.data);
+  // { tournament_ulid, tournament_name, event_type, player_username, round_number, match_result, timestamp }
+  console.log('Tournament update:', data);
+});
+```
+
+**Challenge Activity Feed**:
+```javascript
+// Stream challenge lifecycle events
+const challengesSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/challenges?title_key=connect-four',
+  {
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'X-Client-Key': 'your-client-key'
+    }
+  }
+);
+
+challengesSource.addEventListener('challenge-update', (event) => {
+  const data = JSON.parse(event.data);
+  // { proposal_ulid, event_type, challenger_username, opponent_username, title_key, stakes, timestamp }
+  console.log('Challenge activity:', data);
+});
+```
+
+**Achievement Unlocks Feed**:
+```javascript
+// Stream platform-wide achievement unlocks
+const achievementsSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/achievements?rarity=legendary',
+  {
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'X-Client-Key': 'your-client-key'
+    }
+  }
+);
+
+achievementsSource.addEventListener('achievement-unlock', (event) => {
+  const data = JSON.parse(event.data);
+  // { achievement_key, achievement_name, description, rarity, username, avatar, title_key, timestamp }
+  console.log('Achievement unlocked:', data);
+});
+```
+
+**SSE Reconnection Pattern**:
+```javascript
+function connectWithReconnect(url, options) {
+  let eventSource;
+  let reconnectTimer;
+  
+  function connect() {
+    eventSource = new EventSource(url, options);
+    
+    eventSource.addEventListener('open', () => {
+      console.log('Feed connected');
+      clearTimeout(reconnectTimer);
+    });
+    
+    eventSource.addEventListener('error', () => {
+      console.log('Feed disconnected, reconnecting...');
+      eventSource.close();
+      reconnectTimer = setTimeout(connect, 3000);
+    });
+    
+    return eventSource;
+  }
+  
+  return connect();
+}
 ```
 
 ### 8. Competitions

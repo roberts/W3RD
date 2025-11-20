@@ -679,6 +679,91 @@ class StandingData extends Data
 }
 ```
 
+### Feeds Namespace
+
+```php
+class GameFeedEventData extends Data
+{
+    public function __construct(
+        public string $gameUlid,
+        public string $eventType, // 'started', 'completed', 'move'
+        public string $titleKey,
+        public array $players, // array of ['username', 'avatar']
+        public ?array $stakes, // ['amount', 'currency']
+        public string $timestamp,
+    ) {}
+}
+
+class WinFeedEventData extends Data
+{
+    public function __construct(
+        public string $gameUlid,
+        public string $winnerUsername,
+        public string $winnerAvatar,
+        public string $titleKey,
+        public ?array $stakes, // ['amount', 'currency']
+        public string $outcome, // 'checkmate', 'resignation', etc.
+        public int $xpEarned,
+        public string $timestamp,
+    ) {}
+}
+
+class LeaderboardFeedEventData extends Data
+{
+    public function __construct(
+        public string $eventType, // 'rank_change', 'new_high_score', 'period_leader'
+        public string $username,
+        public string $avatar,
+        public ?int $oldRank,
+        public int $newRank,
+        public ?string $titleKey, // null for global leaderboard
+        public string $period, // 'daily', 'weekly', 'all_time'
+        public int $score,
+        public string $timestamp,
+    ) {}
+}
+
+class TournamentFeedEventData extends Data
+{
+    public function __construct(
+        public string $tournamentUlid,
+        public string $tournamentName,
+        public string $eventType, // 'round_complete', 'bracket_update', 'elimination', 'winner'
+        public ?string $playerUsername,
+        public ?int $roundNumber,
+        public ?string $matchResult,
+        public string $timestamp,
+    ) {}
+}
+
+class ChallengeFeedEventData extends Data
+{
+    public function __construct(
+        public string $proposalUlid,
+        public string $eventType, // 'issued', 'accepted', 'completed'
+        public string $challengerUsername,
+        public ?string $opponentUsername,
+        public string $titleKey,
+        public ?array $stakes, // ['amount', 'currency']
+        public string $timestamp,
+    ) {}
+}
+
+class AchievementFeedEventData extends Data
+{
+    public function __construct(
+        public string $achievementKey,
+        public string $achievementName,
+        public string $description,
+        public string $rarity, // 'common', 'rare', 'epic', 'legendary'
+        public string $username,
+        public string $avatar,
+        public ?string $titleKey, // null for platform-wide achievements
+        public string $timestamp,
+    ) {}
+}
+```
+
 ## State Transitions
 
 ### MatchmakingSignal States

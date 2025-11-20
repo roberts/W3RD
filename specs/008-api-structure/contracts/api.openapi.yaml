@@ -1163,35 +1163,156 @@ paths:
           description: Invalid receipt
 
   # Data Feeds
-  /feeds/live-scores:
+  /feeds/games:
     get:
-      summary: Live scores SSE stream
-      description: Real-time global game score updates
-      operationId: feedsLiveScores
+      summary: Live games feed
+      description: SSE stream of public game activity (starts, moves, completions)
+      operationId: feedsGames
       tags: [Feeds]
       security:
         - bearerAuth: []
         - clientKey: []
+      parameters:
+        - name: title_key
+          in: query
+          description: Filter by game title
+          schema:
+            type: string
       responses:
         '200':
-          description: SSE stream of score updates
+          description: SSE stream of game events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |
+                id: 1234
+                event: game-update
+                data: {"game_ulid":"01J3...", "event_type":"started", "title_key":"chess", "players":[...], "stakes":{"amount":5.00,"currency":"real_money"}, "timestamp":"2025-11-20T12:00:00Z"}
+
+  /feeds/wins:
+    get:
+      summary: Win announcements feed
+      description: SSE stream of player wins with stakes and outcomes
+      operationId: feedsWins
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: min_stakes
+          in: query
+          description: Only show wins above this amount
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: SSE stream of win announcements
           content:
             text/event-stream:
               schema:
                 type: string
 
-  /feeds/casino-floor:
+  /feeds/leaderboards:
     get:
-      summary: Casino floor SSE stream
-      description: Real-time drop-in table status updates
-      operationId: feedsCasinoFloor
+      summary: Leaderboard updates feed
+      description: SSE stream of rank changes, new high scores, period leaders
+      operationId: feedsLeaderboards
       tags: [Feeds]
       security:
         - bearerAuth: []
         - clientKey: []
+      parameters:
+        - name: period
+          in: query
+          description: Filter by time period
+          schema:
+            type: string
+            enum: [daily, weekly, all_time]
+        - name: title_key
+          in: query
+          description: Filter by game title (omit for global)
+          schema:
+            type: string
       responses:
         '200':
-          description: SSE stream of floor status
+          description: SSE stream of leaderboard updates
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /feeds/tournaments:
+    get:
+      summary: Tournament progress feed
+      description: SSE stream of tournament events (rounds, brackets, eliminations)
+      operationId: feedsTournaments
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: tournament_ulid
+          in: query
+          description: Filter by specific tournament
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE stream of tournament events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /feeds/challenges:
+    get:
+      summary: Challenge activity feed
+      description: SSE stream of challenges issued, accepted, and completed
+      operationId: feedsChallenges
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: title_key
+          in: query
+          description: Filter by game title
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE stream of challenge activity
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /feeds/achievements:
+    get:
+      summary: Achievement unlocks feed
+      description: SSE stream of platform-wide achievement unlocks
+      operationId: feedsAchievements
+      tags: [Feeds]
+      security:
+        - bearerAuth: []
+        - clientKey: []
+      parameters:
+        - name: rarity
+          in: query
+          description: Filter by achievement rarity
+          schema:
+            type: string
+            enum: [common, rare, epic, legendary]
+        - name: title_key
+          in: query
+          description: Filter by game title (omit for platform-wide)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE stream of achievement unlocks
           content:
             text/event-stream:
               schema:

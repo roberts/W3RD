@@ -124,16 +124,20 @@ Users manage their financial resources, track transactions, buy into games with 
 
 ### User Story 7 - Real-Time Data Feeds (Priority: P3)
 
-Dashboard applications and spectators access high-frequency streams of live game scores and casino floor activity.
+Dashboard applications, spectators, and players access high-frequency SSE streams of live game activity, win announcements, leaderboard changes, tournament updates, challenge activity, and achievement unlocks.
 
-**Why this priority**: Enhancement feature for observers and analytics, not required for player participation.
+**Why this priority**: Enhancement feature for engagement and social proof, not required for core gameplay.
 
-**Independent Test**: Can be fully tested by connecting to SSE endpoints and verifying real-time updates are pushed correctly when game events occur.
+**Independent Test**: Can be fully tested by connecting to SSE endpoints and verifying real-time updates are pushed correctly when relevant events occur.
 
 **Acceptance Scenarios**:
 
-1. **Given** games are in progress, **When** a dashboard connects to `GET /v1/feeds/live-scores`, **Then** an SSE stream delivers global score updates as games progress
-2. **Given** drop-in tables exist, **When** a client connects to `GET /v1/feeds/casino-floor`, **Then** real-time status updates about table availability, player counts, and pot sizes are streamed
+1. **Given** games are in progress, **When** a spectator connects to `GET /v1/feeds/games`, **Then** an SSE stream delivers live public game starts, moves, and completions with player details
+2. **Given** players are winning games, **When** a client connects to `GET /v1/feeds/wins`, **Then** real-time win announcements stream with winner username, game type, stakes, and outcome
+3. **Given** leaderboard rankings change, **When** a dashboard connects to `GET /v1/feeds/leaderboards`, **Then** rank updates, new high scores, and daily/weekly leaders stream as they occur
+4. **Given** tournaments are active, **When** a spectator connects to `GET /v1/feeds/tournaments`, **Then** tournament progress including round completions, bracket updates, and eliminations stream in real-time
+5. **Given** players issue challenges, **When** a client connects to `GET /v1/feeds/challenges`, **Then** new challenges, acceptances, and completions stream with game type and stake details
+6. **Given** achievements are unlocked, **When** a user connects to `GET /v1/feeds/achievements`, **Then** platform-wide achievement unlocks stream with player details and achievement rarity
 
 ---
 
@@ -254,10 +258,16 @@ Users discover tournaments, register for events, track standings, and view brack
 
 #### Data Feeds (FR-D)
 
-- **FR-D-001**: System MUST provide Server-Sent Events (SSE) stream of live game scores for dashboard applications
-- **FR-D-002**: System MUST provide SSE stream of casino floor status including table availability and player counts
-- **FR-D-003**: System MUST handle high-frequency data streaming efficiently with thousands of concurrent connections
-- **FR-D-004**: System MUST implement connection timeout and reconnection logic for interrupted streams
+- **FR-D-001**: System MUST provide SSE stream of live public games showing game starts, moves, and completions with player details
+- **FR-D-002**: System MUST provide SSE stream of win announcements with winner, game type, stakes, and outcomes
+- **FR-D-003**: System MUST provide SSE stream of leaderboard updates including rank changes, new high scores, and period leaders
+- **FR-D-004**: System MUST provide SSE stream of tournament progress including round completions, bracket updates, and eliminations
+- **FR-D-005**: System MUST provide SSE stream of challenge activity showing new challenges, acceptances, and completions
+- **FR-D-006**: System MUST provide SSE stream of platform-wide achievement unlocks with player details and rarity indicators
+- **FR-D-007**: System MUST handle high-frequency data streaming efficiently with 10,000+ concurrent connections
+- **FR-D-008**: System MUST implement connection timeout and reconnection logic for interrupted streams
+- **FR-D-009**: System MUST filter feed data appropriately (e.g., only public games, only significant wins, only rare achievements)
+- **FR-D-010**: System MUST include timestamp and event sequence identifiers in all feed messages for client-side ordering
 
 #### Competitions (FR-C)
 

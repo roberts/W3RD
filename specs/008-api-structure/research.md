@@ -441,13 +441,23 @@ Route::post('games/{ulid}/actions', [GameActionController::class, 'store'])
 
 ### 8. Server-Sent Events (SSE) for Real-Time Feeds
 
-**Decision**: Use native PHP SSE implementation for data feeds instead of WebSockets
+**Decision**: Use native PHP SSE implementation for six engagement-focused data feeds
+
+**Feed Endpoints**:
+1. **`/feeds/games`**: Live public game activity (starts, moves, completions)
+2. **`/feeds/wins`**: Win announcements with stakes and outcomes
+3. **`/feeds/leaderboards`**: Rank changes and high score updates
+4. **`/feeds/tournaments`**: Tournament progress and bracket updates
+5. **`/feeds/challenges`**: Challenge activity (issued, accepted, completed)
+6. **`/feeds/achievements`**: Platform-wide achievement unlocks
 
 **Rationale**:
-- **Simplicity**: No additional server infrastructure required
+- **Simplicity**: No additional server infrastructure required beyond PHP
 - **Scalability**: One-way communication is more efficient than bidirectional WebSockets
 - **Compatibility**: Works through corporate proxies that block WebSockets
 - **Use Case Fit**: Feeds are read-only streams, don't need client-to-server messages
+- **Engagement**: Creates social proof, FOMO, and community atmosphere
+- **Performance**: Each feed can be independently scaled and filtered
 
 **Alternatives Considered**:
 - **Laravel Reverb (WebSockets)**: Rejected for feeds as overkill for one-way communication
@@ -456,7 +466,7 @@ Route::post('games/{ulid}/actions', [GameActionController::class, 'store'])
 
 **Implementation Pattern**:
 ```php
-class LiveScoresController extends Controller
+class GamesController extends Controller
 {
     public function stream(Request $request): StreamedResponse
     {
@@ -474,19 +484,22 @@ class LiveScoresController extends Controller
                     break;
                 }
                 
-                // Fetch new events since last ID
+                // Fetch new public game events since last ID
                 $events = GameEvent::where('id', '>', $lastEventId)
-                    ->where('event_type', 'score_update')
+                    ->whereIn('event_type', ['game_started', 'game_completed'])
+                    ->whereHas('game', fn($q) => $q->where('visibility', 'public'))
                     ->orderBy('id')
                     ->limit(50)
                     ->get();
                 
                 foreach ($events as $event) {
                     echo "id: {$event->id}\n";
-                    echo "event: score-update\n";
+                    echo "event: game-update\n";
                     echo 'data: ' . json_encode([
                         'game_ulid' => $event->game_ulid,
-                        'score' => $event->data['score'],
+                        'event_type' => $event->event_type,
+                        'players' => $event->data['players'],
+                        'game_type' => $event->data['game_type'],
                         'timestamp' => $event->created_at->toIso8601String(),
                     ]) . "\n\n";
                     

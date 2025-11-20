@@ -283,6 +283,55 @@ Users discover tournaments, register for events, track standings, and view brack
 - **FR-C-006**: System MUST handle tournament advancement logic including elimination and reentry scenarios
 - **FR-C-007**: System MUST distribute tournament prizes according to final standings
 
+#### Idempotency (FR-I)
+
+- **FR-I-001**: System MUST accept idempotency keys for all state-mutating operations (actions, balance changes, tournament entry)
+- **FR-I-002**: System MUST use idempotency key format: client-generated UUID v4 or ULID
+- **FR-I-003**: System MUST cache idempotency keys for 24 hours after initial request
+- **FR-I-004**: System MUST return identical response (including status code) for duplicate requests with same idempotency key
+- **FR-I-005**: System MUST reject requests with malformed idempotency keys with 400 Bad Request
+- **FR-I-006**: System MUST handle concurrent requests with same idempotency key (first wins, others wait for result)
+- **FR-I-007**: System MUST require idempotency keys for: game actions, balance adjustments, tournament entry, proposal acceptance
+- **FR-I-008**: System MUST store idempotency key with: request hash, response status, response body, timestamp
+- **FR-I-009**: System MUST use Redis for idempotency key storage with automatic expiration
+- **FR-I-010**: System MUST return `Idempotency-Key` header in response echoing the provided key
+
+#### Error Handling (FR-E)
+
+- **FR-EH-001**: System MUST return consistent JSON error schema for all failures
+- **FR-EH-002**: System MUST include error code, message, and optional field-level errors in error responses
+- **FR-EH-003**: System MUST use HTTP status codes semantically (400 validation, 401 auth, 403 forbidden, 404 not found, 409 conflict, 422 business rule, 429 rate limit, 500 server error, 503 unavailable)
+- **FR-EH-004**: System MUST provide machine-readable error codes (e.g., LOBBY_FULL, INSUFFICIENT_BALANCE, TURN_NOT_YOURS, DUPLICATE_ACTION)
+- **FR-EH-005**: System MUST include `Retry-After` header in 429 rate limit responses
+- **FR-EH-006**: System MUST log all 5xx errors with request context for debugging
+- **FR-EH-007**: System MUST return field-level validation errors in array format with field name, value, and constraint violated
+- **FR-EH-008**: System MUST sanitize error messages to prevent information leakage (no stack traces, no database errors, no file paths in production)
+- **FR-EH-009**: System MUST provide correlation ID in all error responses for support tracing
+- **FR-EH-010**: System MUST distinguish between client errors (4xx) and server errors (5xx) consistently
+
+#### Real-Time Sync (FR-RT)
+
+- **FR-RT-001**: System MUST use Laravel Reverb for WebSocket server and Laravel Echo on clients via @gamerprotocol/ui npm package
+- **FR-RT-002**: System MUST support private channels requiring authentication (user-specific game updates, alerts)
+- **FR-RT-003**: System MUST support public channels for broadcast events (leaderboards, tournament updates, floor activity)
+- **FR-RT-004**: System MUST authenticate WebSocket connections using Sanctum tokens
+- **FR-RT-005**: System MUST send heartbeat/ping every 30 seconds to detect disconnections
+- **FR-RT-006**: System MUST implement automatic reconnection with exponential backoff (1s, 2s, 4s, 8s, max 30s)
+- **FR-RT-007**: System MUST include sequence IDs in all real-time events for ordering and gap detection
+- **FR-RT-008**: System MUST provide catch-up endpoint for missed events when reconnecting (sync since last sequence ID)
+- **FR-RT-009**: System MUST use Redis pub/sub for broadcasting events across multiple Reverb servers
+- **FR-RT-010**: System MUST limit concurrent WebSocket connections per user (max 5 simultaneous devices)
+- **FR-RT-011**: System MUST deliver game state updates as JSON patches/diffs for efficiency (full state only on initial load)
+- **FR-RT-012**: System MUST namespace channels by resource type (game.{ulid}, lobby.{ulid}, user.{id}, tournament.{ulid})
+- **FR-RT-013**: System MUST broadcast lobby events (player joined, ready state changed, game starting) within 200ms
+- **FR-RT-014**: System MUST broadcast game events (action executed, turn changed, game completed) within 200ms
+- **FR-RT-015**: System MUST use presence channels for lobby participant tracking with join/leave notifications
+- **FR-RT-016**: System MUST cache channel subscriptions in Redis with 1-hour TTL for connection recovery
+- **FR-RT-017**: System MUST throttle broadcast events to prevent message flooding (max 100 events/second per channel)
+- **FR-RT-018**: System MUST gracefully degrade to HTTP polling if WebSocket connection fails after 3 retry attempts
+- **FR-RT-019**: System MUST encrypt WebSocket traffic using WSS protocol
+- **FR-RT-020**: System MUST provide connection status API endpoint for debugging (active connections, channels, memory usage)
+
 ### Key Entities
 
 - **User**: Platform account with authentication credentials, profile details, progression data, performance records, and financial balances
@@ -564,6 +613,550 @@ New Controllers:
 **No backward compatibility**: Old routes will be deleted entirely.
 
 See `plan.md` Phase 2 section for complete route definitions.
+
+---
+
+### Phase 3: Idempotency Implementation
+
+**Objective**: Implement idempotency protection for all state-mutating operations to prevent duplicate processing.
+
+**Redis-Based Idempotency Storage**:
+
+```php
+// config/cache.php - Idempotency store configuration
+'idempotency' => [
+    'driver' => 'redis',
+    'connection' => 'idempotency',
+    'lock_connection' => 'default',
+],
+
+// config/database.php - Redis idempotency connection
+'idempotency' => [
+    'url' => env('REDIS_IDEMPOTENCY_URL'),
+    'host' => env('REDIS_HOST', '127.0.0.1'),
+    'port' => env('REDIS_PORT', '6379'),
+    'database' => env('REDIS_IDEMPOTENCY_DB', '2'),
+],
+```
+
+**Idempotency Middleware**:
+
+```php
+// app/Http/Middleware/EnsureIdempotency.php
+class EnsureIdempotency
+{
+    public function handle(Request $request, Closure $next)
+    {
+        // Only for POST, PUT, PATCH, DELETE
+        if (!in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+            return $next($request);
+        }
+        
+        $idempotencyKey = $request->header('Idempotency-Key');
+        
+        // Require idempotency key for critical operations
+        if ($this->requiresIdempotency($request) && !$idempotencyKey) {
+            return response()->json([
+                'error' => 'IDEMPOTENCY_KEY_REQUIRED',
+                'message' => 'Idempotency-Key header is required for this operation',
+            ], 400);
+        }
+        
+        if (!$idempotencyKey) {
+            return $next($request);
+        }
+        
+        // Validate key format (UUID v4 or ULID)
+        if (!$this->isValidKey($idempotencyKey)) {
+            return response()->json([
+                'error' => 'INVALID_IDEMPOTENCY_KEY',
+                'message' => 'Idempotency-Key must be a valid UUID v4 or ULID',
+            ], 400);
+        }
+        
+        $cacheKey = "idempotency:{$idempotencyKey}";
+        
+        // Check if request was already processed
+        if (Cache::store('idempotency')->has($cacheKey)) {
+            $cached = Cache::store('idempotency')->get($cacheKey);
+            return response()->json($cached['body'], $cached['status'])
+                ->header('Idempotency-Key', $idempotencyKey)
+                ->header('X-Idempotent-Replay', 'true');
+        }
+        
+        // Use lock to handle concurrent requests with same key
+        $lock = Cache::lock("idempotency:lock:{$idempotencyKey}", 10);
+        
+        try {
+            $lock->block(10); // Wait up to 10 seconds for lock
+            
+            // Double-check after acquiring lock
+            if (Cache::store('idempotency')->has($cacheKey)) {
+                $cached = Cache::store('idempotency')->get($cacheKey);
+                return response()->json($cached['body'], $cached['status'])
+                    ->header('Idempotency-Key', $idempotencyKey)
+                    ->header('X-Idempotent-Replay', 'true');
+            }
+            
+            // Process request
+            $response = $next($request);
+            
+            // Cache successful responses (2xx) for 24 hours
+            if ($response->status() >= 200 && $response->status() < 300) {
+                Cache::store('idempotency')->put($cacheKey, [
+                    'status' => $response->status(),
+                    'body' => json_decode($response->content(), true),
+                    'timestamp' => now()->toIso8601String(),
+                ], 86400); // 24 hours
+            }
+            
+            return $response->header('Idempotency-Key', $idempotencyKey);
+            
+        } catch (LockTimeoutException $e) {
+            return response()->json([
+                'error' => 'CONCURRENT_REQUEST',
+                'message' => 'Another request with this idempotency key is being processed',
+            ], 409);
+        } finally {
+            $lock->release();
+        }
+    }
+    
+    protected function requiresIdempotency(Request $request): bool
+    {
+        // Game actions, balance operations, tournament entry, proposals
+        return $request->is('api/v1/games/*/actions') ||
+               $request->is('api/v1/economy/cashier') ||
+               $request->is('api/v1/competitions/*/enter') ||
+               $request->is('api/v1/floor/proposals/*/accept');
+    }
+}
+```
+
+**Idempotency-Protected Endpoints**:
+- `POST /v1/games/{ulid}/actions` - Game action execution
+- `POST /v1/games/{ulid}/concede` - Concede game
+- `POST /v1/games/{ulid}/abandon` - Abandon game
+- `POST /v1/economy/cashier` - Balance adjustments
+- `POST /v1/competitions/{ulid}/enter` - Tournament entry
+- `POST /v1/floor/proposals/{ulid}/accept` - Accept proposal
+- `POST /v1/floor/proposals/{ulid}/decline` - Decline proposal
+
+---
+
+### Phase 4: Error Response Standardization
+
+**Objective**: Implement consistent error response format across all controllers.
+
+**Standard Error Schema**:
+
+```json
+{
+  "error": "ERROR_CODE",
+  "message": "Human-readable error description",
+  "correlation_id": "uuid-for-support-tracing",
+  "errors": [
+    {
+      "field": "email",
+      "value": "invalid-email",
+      "constraint": "Must be a valid email address"
+    }
+  ]
+}
+```
+
+**HTTP Status Code Usage**:
+
+| Code | Usage | Example Error Codes |
+|------|-------|-------------------|
+| 400 | Bad Request - Malformed input | INVALID_JSON, MISSING_PARAMETER, INVALID_IDEMPOTENCY_KEY |
+| 401 | Unauthorized - Missing/invalid token | UNAUTHENTICATED, TOKEN_EXPIRED, TOKEN_INVALID |
+| 403 | Forbidden - Valid token, insufficient permissions | UNAUTHORIZED_CLIENT, CASHIER_NOT_APPROVED, NOT_GAME_PARTICIPANT |
+| 404 | Not Found - Resource doesn't exist | GAME_NOT_FOUND, LOBBY_NOT_FOUND, USER_NOT_FOUND |
+| 409 | Conflict - Resource state conflict | LOBBY_FULL, GAME_ALREADY_STARTED, DUPLICATE_ACTION, CONCURRENT_REQUEST |
+| 422 | Unprocessable Entity - Business rule violation | INSUFFICIENT_BALANCE, TURN_NOT_YOURS, TOURNAMENT_NOT_OPEN, MAX_PROPOSALS_EXCEEDED |
+| 429 | Too Many Requests - Rate limit exceeded | RATE_LIMIT_EXCEEDED |
+| 500 | Internal Server Error - Unexpected failure | INTERNAL_ERROR |
+| 503 | Service Unavailable - Maintenance/overload | SERVICE_UNAVAILABLE, DATABASE_UNAVAILABLE |
+
+**Exception Handler**:
+
+```php
+// app/Exceptions/Handler.php
+public function render($request, Throwable $exception)
+{
+    // API requests get JSON responses
+    if ($request->is('api/*')) {
+        $correlationId = (string) Str::uuid();
+        Log::error('API Error', [
+            'correlation_id' => $correlationId,
+            'exception' => get_class($exception),
+            'message' => $exception->getMessage(),
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'user_id' => $request->user()?->id,
+        ]);
+        
+        return match (true) {
+            $exception instanceof ValidationException => $this->validationError($exception, $correlationId),
+            $exception instanceof AuthenticationException => $this->authError($exception, $correlationId),
+            $exception instanceof AuthorizationException => $this->forbiddenError($exception, $correlationId),
+            $exception instanceof ModelNotFoundException => $this->notFoundError($exception, $correlationId),
+            $exception instanceof BusinessRuleException => $this->businessRuleError($exception, $correlationId),
+            $exception instanceof ThrottleRequestsException => $this->rateLimitError($exception, $correlationId),
+            default => $this->serverError($exception, $correlationId),
+        };
+    }
+    
+    return parent::render($request, $exception);
+}
+
+protected function validationError(ValidationException $exception, string $correlationId)
+{
+    return response()->json([
+        'error' => 'VALIDATION_ERROR',
+        'message' => 'The given data was invalid',
+        'correlation_id' => $correlationId,
+        'errors' => collect($exception->errors())->map(fn($messages, $field) => [
+            'field' => $field,
+            'value' => request($field),
+            'constraint' => is_array($messages) ? $messages[0] : $messages,
+        ])->values(),
+    ], 422);
+}
+
+protected function businessRuleError(BusinessRuleException $exception, string $correlationId)
+{
+    return response()->json([
+        'error' => $exception->getCode() ?: 'BUSINESS_RULE_VIOLATION',
+        'message' => $exception->getMessage(),
+        'correlation_id' => $correlationId,
+    ], 422);
+}
+```
+
+**Custom Business Rule Exceptions**:
+
+```php
+// app/Exceptions/BusinessRuleException.php
+class BusinessRuleException extends Exception
+{
+    public static function insufficientBalance(): self
+    {
+        return new self('INSUFFICIENT_BALANCE', 'Your balance is too low for this operation', 422);
+    }
+    
+    public static function notYourTurn(): self
+    {
+        return new self('TURN_NOT_YOURS', 'It is not your turn to play', 422);
+    }
+    
+    public static function lobbyFull(): self
+    {
+        return new self('LOBBY_FULL', 'This lobby has no available seats', 409);
+    }
+    
+    public static function maxProposalsExceeded(): self
+    {
+        return new self('MAX_PROPOSALS_EXCEEDED', 'You can only have 5 pending proposals at a time', 422);
+    }
+}
+```
+
+---
+
+### Phase 5: Real-Time Sync with Laravel Reverb
+
+**Objective**: Implement WebSocket broadcasting using Laravel Reverb, Redis pub/sub, and Laravel Echo clients.
+
+**Reverb Configuration**:
+
+```php
+// config/broadcasting.php
+'connections' => [
+    'reverb' => [
+        'driver' => 'reverb',
+        'key' => env('REVERB_APP_KEY'),
+        'secret' => env('REVERB_APP_SECRET'),
+        'app_id' => env('REVERB_APP_ID'),
+        'options' => [
+            'host' => env('REVERB_HOST', '0.0.0.0'),
+            'port' => env('REVERB_PORT', 8080),
+            'scheme' => env('REVERB_SCHEME', 'http'),
+            'useTLS' => env('REVERB_SCHEME', 'http') === 'https',
+        ],
+        'client_options' => [
+            // Optional client config
+        ],
+    ],
+],
+
+// Redis pub/sub for horizontal scaling
+'redis' => [
+    'driver' => 'redis',
+    'connection' => 'default',
+],
+```
+
+**Channel Authorization**:
+
+```php
+// routes/channels.php
+use App\Models\Game;
+use App\Models\Lobby;
+use App\Models\User;
+
+// Private game channel - only players can listen
+Broadcast::channel('game.{ulid}', function (User $user, string $ulid) {
+    $game = Game::where('ulid', $ulid)->firstOrFail();
+    return $game->players()->where('user_id', $user->id)->exists();
+});
+
+// Private lobby channel - only participants can listen
+Broadcast::channel('lobby.{ulid}', function (User $user, string $ulid) {
+    $lobby = Lobby::where('ulid', $ulid)->firstOrFail();
+    return $lobby->players()->where('user_id', $user->id)->exists();
+});
+
+// Private user channel - only user can listen
+Broadcast::channel('user.{id}', function (User $user, int $id) {
+    return $user->id === (int) $id;
+});
+
+// Presence channel for lobby participants
+Broadcast::channel('lobby-presence.{ulid}', function (User $user, string $ulid) {
+    $lobby = Lobby::where('ulid', $ulid)->firstOrFail();
+    if ($lobby->players()->where('user_id', $user->id)->exists()) {
+        return ['id' => $user->id, 'username' => $user->username, 'avatar' => $user->avatar];
+    }
+});
+
+// Public tournament channel - anyone can listen
+Broadcast::channel('tournament.{ulid}', function () {
+    return true;
+});
+
+// Public leaderboard channel - anyone can listen
+Broadcast::channel('leaderboard.{gameTitle}', function () {
+    return true;
+});
+```
+
+**Event Broadcasting**:
+
+```php
+// app/Events/GameActionExecuted.php
+class GameActionExecuted implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+    
+    public function __construct(
+        public Game $game,
+        public Action $action,
+        public int $sequenceId,
+    ) {}
+    
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel("game.{$this->game->ulid}"),
+        ];
+    }
+    
+    public function broadcastAs(): string
+    {
+        return 'action.executed';
+    }
+    
+    public function broadcastWith(): array
+    {
+        return [
+            'sequence_id' => $this->sequenceId,
+            'action' => [
+                'id' => $this->action->id,
+                'ulid' => $this->action->ulid,
+                'user_id' => $this->action->user_id,
+                'type' => $this->action->type,
+                'data' => $this->action->data,
+                'created_at' => $this->action->created_at->toIso8601String(),
+            ],
+            'game_state_patch' => $this->game->generateStatePatch(), // JSON patch
+            'next_player_id' => $this->game->current_player_id,
+            'turn_number' => $this->game->turn_number,
+        ];
+    }
+}
+
+// app/Events/LobbyPlayerJoined.php
+class LobbyPlayerJoined implements ShouldBroadcast
+{
+    public function __construct(
+        public Lobby $lobby,
+        public User $user,
+        public int $position,
+    ) {}
+    
+    public function broadcastOn(): array
+    {
+        return [
+            new PresenceChannel("lobby-presence.{$this->lobby->ulid}"),
+        ];
+    }
+    
+    public function broadcastAs(): string
+    {
+        return 'player.joined';
+    }
+    
+    public function broadcastWith(): array
+    {
+        return [
+            'user' => [
+                'id' => $this->user->id,
+                'username' => $this->user->username,
+                'avatar' => $this->user->avatar,
+            ],
+            'position' => $this->position,
+            'player_count' => $this->lobby->players()->count(),
+            'max_players' => $this->lobby->max_players,
+        ];
+    }
+}
+```
+
+**Laravel Echo Client Setup** (in @gamerprotocol/ui package):
+
+```javascript
+// gamerprotocol-ui/src/echo.ts
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+window.Pusher = Pusher;
+
+export const echo = new Echo({
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
+    authEndpoint: '/api/broadcasting/auth',
+    auth: {
+        headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+        },
+    },
+});
+
+// Game channel subscription
+export function subscribeToGame(gameUlid: string, callbacks: {
+    onAction?: (data: any) => void;
+    onTurnChanged?: (data: any) => void;
+    onGameCompleted?: (data: any) => void;
+}) {
+    return echo.private(`game.${gameUlid}`)
+        .listen('.action.executed', callbacks.onAction)
+        .listen('.turn.changed', callbacks.onTurnChanged)
+        .listen('.game.completed', callbacks.onGameCompleted)
+        .error((error) => {
+            console.error('WebSocket error:', error);
+        });
+}
+
+// Lobby presence channel
+export function subscribeToLobby(lobbyUlid: string, callbacks: {
+    onPlayerJoined?: (user: any) => void;
+    onPlayerLeft?: (user: any) => void;
+    onReadyStateChanged?: (data: any) => void;
+}) {
+    return echo.join(`lobby-presence.${lobbyUlid}`)
+        .here((users) => {
+            console.log('Currently in lobby:', users);
+        })
+        .joining((user) => {
+            console.log('User joined:', user);
+            callbacks.onPlayerJoined?.(user);
+        })
+        .leaving((user) => {
+            console.log('User left:', user);
+            callbacks.onPlayerLeft?.(user);
+        })
+        .listen('.ready.changed', callbacks.onReadyStateChanged);
+}
+
+// Auto-reconnect with exponential backoff
+echo.connector.pusher.connection.bind('disconnected', () => {
+    console.log('WebSocket disconnected, will auto-reconnect');
+});
+
+echo.connector.pusher.connection.bind('connected', () => {
+    console.log('WebSocket connected');
+});
+```
+
+**Catch-Up Sync Endpoint** (for missed events):
+
+```php
+// app/Http/Controllers/Api/V1/Games/GameSyncController.php
+public function sync(Request $request, string $ulid)
+{
+    $request->validate([
+        'since_sequence_id' => 'required|integer|min:0',
+    ]);
+    
+    $game = Game::where('ulid', $ulid)->firstOrFail();
+    $this->authorize('view', $game);
+    
+    $sinceSequenceId = $request->input('since_sequence_id');
+    
+    // Get all actions since the provided sequence ID
+    $missedActions = $game->actions()
+        ->where('sequence_id', '>', $sinceSequenceId)
+        ->orderBy('sequence_id')
+        ->get();
+    
+    return response()->json([
+        'current_sequence_id' => $game->current_sequence_id,
+        'missed_actions' => $missedActions->map(fn($action) => [
+            'sequence_id' => $action->sequence_id,
+            'action' => $action->only(['id', 'ulid', 'user_id', 'type', 'data', 'created_at']),
+            'state_patch' => $action->state_patch,
+        ]),
+        'full_state' => $missedActions->count() > 10 ? $game->game_state : null, // Full state if too many missed
+    ]);
+}
+```
+
+**Redis Pub/Sub Configuration** (for multi-server scaling):
+
+```php
+// config/database.php
+'redis' => [
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+    
+    'default' => [
+        'url' => env('REDIS_URL'),
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'port' => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_DB', '0'),
+    ],
+    
+    'cache' => [
+        'url' => env('REDIS_URL'),
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'port' => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_CACHE_DB', '1'),
+    ],
+    
+    'idempotency' => [
+        'url' => env('REDIS_IDEMPOTENCY_URL'),
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'port' => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_IDEMPOTENCY_DB', '2'),
+    ],
+],
+```
 
 ---
 

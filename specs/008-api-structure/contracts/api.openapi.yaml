@@ -15,7 +15,7 @@ info:
     4. **Account Management** - User profiles, progression, and alerts
     5. **Floor Coordination** - Matchmaking via lobbies, signals, and proposals
     6. **Active Games** - Live gameplay and action execution
-    7. **Economy** - Financial operations and subscriptions
+    7. **Economy** - Virtual balance tracking (entertainment only - no real money/cryptocurrency)
     8. **Data Feeds** - Real-time SSE streams
     9. **Competitions** - Tournaments and brackets
     
@@ -61,7 +61,7 @@ tags:
   - name: Games
     description: Active gameplay instances
   - name: Economy
-    description: Financial operations
+    description: Virtual balance tracking (entertainment only - no real money/cryptocurrency)
   - name: Feeds
     description: Real-time data streams
   - name: Competitions
@@ -1068,8 +1068,13 @@ paths:
 
   /economy/cashier:
     post:
-      summary: Manage chips
-      description: Buy-in to games or cash-out winnings
+      summary: Manage user virtual balance (approved clients only)
+      description: |
+        Add or remove virtual tokens/chips from user balance. This endpoint is restricted to approved client applications only.
+        
+        **Important**: This system tracks virtual currency for entertainment purposes only. No real money or cryptocurrency transactions occur.
+        
+        Clients must provide a reference ID for internal reconciliation. Returns 403 Forbidden if client is not approved for cashier access.
       operationId: economyCashier
       tags: [Economy]
       security:
@@ -1081,27 +1086,59 @@ paths:
           application/json:
             schema:
               type: object
-              required: [operation, amount]
+              required: [action, amount, currency, reference]
               properties:
-                operation:
+                action:
                   type: string
-                  enum: [buy_in, cash_out]
+                  enum: [add, remove]
+                  description: Whether to add or remove from balance
                 amount:
                   type: number
                   format: decimal
                   minimum: 0.01
-                game_ulid:
+                  description: Amount to add or remove
+                currency:
                   type: string
-                  description: Required for buy_in
+                  enum: [tokens, chips]
+                  description: Which virtual currency to modify
+                reference:
+                  type: string
+                  maxLength: 255
+                  description: Client-side reference ID for reconciliation
+              example:
+                action: add
+                amount: 100.00
+                currency: tokens
+                reference: client-txn-550e8400-e29b-41d4-a716-446655440000
       responses:
         '200':
-          description: Operation completed
+          description: Balance transaction completed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Balance'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+        '403':
+          description: Client not approved for cashier access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: cashier_unauthorized
+                  message:
+                    type: string
+                    example: Only approved client applications can access the cashier service
         '422':
-          description: Insufficient balance or invalid operation
+          description: Insufficient balance or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
 
   /economy/plans:
     get:
@@ -1798,44 +1835,54 @@ components:
     # Economy schemas
     Balance:
       type: object
-      required: [real_money, bonus_chips, hard_currency, locked_in_games]
+      description: User's virtual currency holdings (entertainment only)
+      required: [tokens, chips, locked_in_games]
       properties:
-        real_money:
+        tokens:
           type: number
           format: decimal
-        bonus_chips:
+          description: Virtual tokens for gameplay
+        chips:
           type: number
           format: decimal
-        hard_currency:
-          type: integer
+          description: Virtual chips for gameplay
         locked_in_games:
           type: number
           format: decimal
+          description: Virtual currency currently in active games
 
     Transaction:
       type: object
-      required: [ulid, type, amount, currency, status, created_at]
+      description: Virtual balance transaction record (entertainment only)
+      required: [ulid, action, amount, currency, reference, created_at]
       properties:
         ulid:
           type: string
-        type:
+          description: Unique transaction identifier
+        action:
           type: string
-          enum: [deposit, purchase, buy_in, cash_out, subscription, refund]
+          enum: [add, remove, game_buy_in, game_cash_out]
+          description: Type of balance operation
         amount:
           type: number
           format: decimal
+          description: Transaction amount
         currency:
           type: string
-        status:
+          enum: [tokens, chips]
+          description: Virtual currency type
+        reference:
           type: string
-          enum: [pending, completed, failed, refunded]
-        provider:
-          type: string
-          enum: [stripe, apple, google, telegram]
+          description: Client reference ID for reconciliation
           nullable: true
+        source:
+          type: string
+          enum: [cashier, game]
+          description: Origin of the transaction
         created_at:
           type: string
           format: date-time
+          description: Transaction timestamp
 
     SubscriptionPlan:
       type: object

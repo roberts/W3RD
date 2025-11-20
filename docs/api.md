@@ -368,14 +368,72 @@ Balance tracking and subscription management for entertainment purposes.
 
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
-| `GET` | `/economy/balance` | Get all token/chip balances | Bearer + Client Key |
-| `GET` | `/economy/transactions` | Get balance transaction history | Bearer + Client Key |
+| `GET` | `/economy/balance` | Get user's balance for authenticated client | Bearer + Client Key |
+| `GET` | `/economy/balances` | Get all user balances across all clients | Bearer + Client Key |
+| `GET` | `/economy/transactions` | Get transaction history (balances + payments) | Bearer + Client Key |
 | `POST` | `/economy/cashier` | Add or remove tokens/chips (approved clients only) | Bearer + Client Key |
 | `GET` | `/economy/plans` | List subscription plans | Bearer + Client Key |
 | `POST` | `/economy/subscribe` | Start subscription | Bearer + Client Key |
 | `GET` | `/economy/subscription` | Get current subscription status | Bearer + Client Key |
 | `POST` | `/economy/subscription/cancel` | Cancel subscription | Bearer + Client Key |
 | `POST` | `/economy/receipts/{provider}` | Verify mobile purchase | Bearer + Client Key |
+
+**Multi-Client Balance Architecture**:
+
+Each user maintains separate balances for each client application they use. This enables:
+- **Client-specific virtual economies**: Each client can manage their own token/chip system
+- **Isolated balance tracking**: Balances from one client don't affect another
+- **Client-specific chip usage**: Chips can only be used in games where all players are using the same client
+- **Token flexibility**: Tokens may be usable across clients (implementation specific)
+
+**Get Balance for Current Client**:
+```http
+GET /v1/economy/balance
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response (shows balance for the authenticated client):
+```json
+{
+  "data": {
+    "client_id": 5,
+    "client_name": "MyGameApp",
+    "tokens": 500.00,
+    "chips": 250.00,
+    "locked_in_games": 50.00
+  }
+}
+```
+
+**Get All Balances Across Clients**:
+```http
+GET /v1/economy/balances
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "client_id": 5,
+      "client_name": "MyGameApp",
+      "tokens": 500.00,
+      "chips": 250.00,
+      "locked_in_games": 50.00
+    },
+    {
+      "client_id": 12,
+      "client_name": "AnotherClient",
+      "tokens": 1000.00,
+      "chips": 0.00,
+      "locked_in_games": 0.00
+    }
+  ]
+}
+```
 
 **Cashier Endpoint** - For approved clients managing user balances:
 
@@ -389,8 +447,7 @@ Content-Type: application/json
   "action": "add",
   "amount": 100.00,
   "currency": "tokens",
-  "reference": "purchase_receipt_xyz",
-  "note": "Token purchase via client platform"
+  "reference": "purchase_receipt_xyz"
 }
 ```
 
@@ -398,28 +455,106 @@ Response:
 ```json
 {
   "data": {
-    "transaction_ulid": "01J3EFG...",
+    "ulid": "01J3EFG...",
+    "client_id": 5,
     "action": "add",
     "amount": 100.00,
     "currency": "tokens",
-    "new_balance": 250.00,
     "reference": "purchase_receipt_xyz",
-    "timestamp": "2025-11-20T12:00:00Z"
-  },
-  "message": "Balance updated successfully"
+    "source": "cashier",
+    "created_at": "2025-11-20T12:00:00Z"
+  }
 }
 ```
 
 **Supported Actions**:
-- `add` - Add tokens/chips to user balance
-- `remove` - Remove tokens/chips from user balance
+- `add` - Add tokens/chips to user balance for the authenticated client
+- `remove` - Remove tokens/chips from user balance for the authenticated client
 
 **Supported Currencies**:
 - `tokens` - Virtual tokens for game entry
-- `chips` - Virtual chips for game stakes
+- `chips` - Virtual chips for game stakes (client-specific, only usable when all game players use same client)
 
 **Access Control**:
 Only approved client applications with proper authorization can use the cashier endpoint. Unauthorized access returns `403 Forbidden`.
+
+**Game Buy-in Rules**:
+- **Chip buy-ins**: Only allowed when all players in a game are using the same client application. System validates client matching before allowing chip stakes.
+- **Token buy-ins**: May be allowed across clients (implementation specific).
+
+**Transaction History**:
+
+The `/economy/transactions` endpoint returns both virtual balance transactions and real payment transactions:
+
+```http
+GET /v1/economy/transactions?limit=50
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response includes both types:
+```json
+{
+  "data": [
+    {
+      "ulid": "01J3ABC...",
+      "type": "balance_add",
+      "amount": 100.00,
+      "currency": "tokens",
+      "client_id": 5,
+      "client_name": "MyGameApp",
+      "reference": "purchase_receipt_xyz",
+      "subscription_id": null,
+      "created_at": "2025-11-20T12:00:00Z"
+    },
+    {
+      "ulid": "01J3DEF...",
+      "type": "subscription_payment",
+      "amount": 9.99,
+      "currency": "usd",
+      "subscription_id": 42,
+      "payment_provider": "stripe",
+      "provider_transaction_id": "pi_1234567890",
+      "payment_status": "completed",
+      "created_at": "2025-11-20T11:30:00Z"
+    },
+    {
+      "ulid": "01J3GHI...",
+      "type": "iap_purchase",
+      "amount": 4.99,
+      "currency": "usd",
+      "subscription_id": 42,
+      "payment_provider": "google_play",
+      "provider_transaction_id": "GPA.1234-5678-9012",
+      "payment_status": "completed",
+      "created_at": "2025-11-19T10:15:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 50,
+    "total": 3
+  }
+}
+```
+
+**Transaction Types**:
+- **Virtual Balance** (entertainment only):
+  - `balance_add` - Tokens/chips added to user balance
+  - `balance_remove` - Tokens/chips removed from user balance
+  - `game_buy_in` - Virtual currency locked in game
+  - `game_cash_out` - Virtual currency released from game
+- **Real Payments** (subscription/purchases):
+  - `subscription_payment` - Monthly/yearly subscription payment
+  - `subscription_refund` - Subscription payment refunded
+  - `iap_purchase` - In-app purchase (Google Play, Apple Store, Telegram)
+  - `iap_refund` - In-app purchase refunded
+
+**Payment Providers**:
+- `stripe` - Credit card payments via Stripe/Laravel Cashier
+- `google_play` - Google Play Store in-app purchases
+- `apple_store` - Apple App Store in-app purchases
+- `telegram` - Telegram Mini App payments
 
 ---
 

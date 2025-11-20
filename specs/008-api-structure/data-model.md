@@ -27,10 +27,11 @@ This document defines the data models and database schema for the new API namesp
 **Relationships**:
 - Has many Games (as player)
 - Has many Alerts
-- Has one Balance
+- Has many Balances (one per client)
 - Has many Transactions
 - Has many MatchmakingSignals
 - Has many Proposals (sent and received)
+- Belongs to Client (via registration_client_id)
 
 ### Game
 *Already exists* - Active game instance
@@ -112,24 +113,130 @@ This document defines the data models and database schema for the new API namesp
 - Belongs to User
 
 ### Transaction
-*Already exists* - Financial record
+*Already exists* - Unified transaction record for both virtual balances and real payments
+
+**Important Note**: This table handles two distinct transaction types:
+1. **Virtual Balance Transactions** (entertainment only): Tokens/chips tracking for gameplay - no real money
+2. **Real Payment Transactions**: Actual subscription payments via Stripe, Google Play, Apple Store, or Telegram
 
 **Fields**:
 - `id`: bigint, primary key
 - `ulid`: string(26), unique, indexed
 - `user_id`: foreign key to users
-- `type`: enum(deposit, purchase, buy_in, cash_out, subscription, refund)
+- `client_id`: foreign key to clients, nullable (required for balance transactions, optional for payments)
+- `type`: enum - transaction category:
+  - Virtual: `balance_add`, `balance_remove`, `game_buy_in`, `game_cash_out`
+  - Subscription: `subscription_payment`, `subscription_refund`
+  - IAP: `iap_purchase`, `iap_refund`
 - `amount`: decimal(10,2)
-- `currency`: string(3), default 'USD'
-- `status`: enum(pending, completed, failed, refunded)
-- `provider`: enum(stripe, apple, google, telegram), nullable
-- `provider_transaction_id`: string, nullable, indexed
+- `currency`: enum(tokens, chips, usd), nullable
+- `subscription_id`: foreign key to subscriptions, nullable (for subscription payments)
+- `payment_provider`: enum(stripe, google_play, apple_store, telegram), nullable
+- `provider_transaction_id`: string, nullable, indexed (Stripe payment ID, Google order ID, etc.)
+- `payment_status`: enum(pending, completed, failed, refunded), nullable
+- `reference`: string, nullable (client reference ID for balance operations)
 - `metadata`: json
 - `created_at`: timestamp
 - `updated_at`: timestamp
 
+**Indexes**:
+- Index on (user_id, created_at) for transaction history
+- Index on (client_id, created_at) for client reporting
+- Index on (subscription_id, created_at) for subscription payment history
+- Index on (type, created_at) for filtering by transaction type
+- Index on reference for client reconciliation
+- Index on provider_transaction_id for payment lookups
+
 **Relationships**:
 - Belongs to User
+- Belongs to Client (optional - required for balance transactions)
+- Belongs to Subscription (optional - for subscription-related payments)
+
+**Relationship Benefits**:
+- **subscription_id link**: Enables direct querying of all payments for a specific subscription
+- **Audit trail**: Complete payment history attached to subscription records
+- **Refund tracking**: Easy to find and match refunds to original payments
+- **Reporting**: Subscription revenue and churn analysis simplified
+- **Laravel Cashier integration**: Webhook handlers can create transaction records with subscription context
+
+**Validation Rules**:
+- All amounts must be > 0
+- Virtual balance transactions (`balance_add`, `balance_remove`):
+  - Must have client_id
+  - Must have currency (tokens or chips)
+  - Reference required for cashier operations
+  - subscription_id should be null
+- Subscription payment transactions:
+  - Must have subscription_id
+  - Must have payment_provider
+  - Must have payment_status
+  - Should have provider_transaction_id for tracking
+  - Currency should be 'usd' (or other real currency)
+- IAP transactions:
+  - May have subscription_id (for subscription purchases)
+  - Must have payment_provider
+  - Must have payment_status
+  - Should have provider_transaction_id
+
+**Usage Patterns**:
+```php
+// Virtual balance transaction (no subscription)
+Transaction::create([
+    'ulid' => Str::ulid(),
+    'user_id' => $user->id,
+    'client_id' => $client->id,
+    'type' => 'balance_add',
+    'amount' => 100.00,
+    'currency' => 'tokens',
+    'reference' => 'client-ref-123',
+]);
+
+// Subscription payment via Stripe (linked to subscription)
+Transaction::create([
+    'ulid' => Str::ulid(),
+    'user_id' => $user->id,
+    'subscription_id' => $subscription->id,
+    'type' => 'subscription_payment',
+    'amount' => 9.99,
+    'currency' => 'usd',
+    'payment_provider' => 'stripe',
+    'provider_transaction_id' => 'pi_1234567890',
+    'payment_status' => 'completed',
+]);
+
+// Subscription refund (linked to subscription)
+Transaction::create([
+    'ulid' => Str::ulid(),
+    'user_id' => $user->id,
+    'subscription_id' => $subscription->id,
+    'type' => 'subscription_refund',
+    'amount' => 9.99,
+    'currency' => 'usd',
+    'payment_provider' => 'stripe',
+    'provider_transaction_id' => 'pi_1234567890_refund',
+    'payment_status' => 'completed',
+]);
+
+// Query all payments for a subscription
+$payments = Transaction::where('subscription_id', $subscription->id)
+    ->whereIn('type', ['subscription_payment', 'subscription_refund'])
+    ->orderBy('created_at', 'desc')
+    ->get();
+
+// In-app purchase via Google Play (linked to subscription if recurring)
+Transaction::create([
+    'ulid' => Str::ulid(),
+    'user_id' => $user->id,
+    'subscription_id' => $subscription->id, // Link if it's a subscription purchase
+    'type' => 'iap_purchase',
+    'amount' => 4.99,
+    'currency' => 'usd',
+    'payment_provider' => 'google_play',
+    'provider_transaction_id' => 'GPA.1234-5678-9012',
+    'payment_status' => 'completed',
+    'metadata' => ['product_id' => 'member_monthly'],
+]);
+```
 
 ### SubscriptionPlan
 *Already exists* - Subscription tier definition
@@ -250,43 +357,64 @@ Schema::create('proposals', function (Blueprint $table) {
 ```
 
 ### Balance
-*New* - User's currency holdings
+*New* - User's virtual currency holdings per client (entertainment only)
+
+**Important Note**: This entity tracks virtual tokens and chips for entertainment purposes only. No real money or cryptocurrency transactions occur. Approved client applications manage user balances through the cashier service.
+
+**Multi-Client Architecture**: Each user can have separate balances for different client applications. This enables:
+- Client-specific virtual economies
+- Isolated balance tracking per client
+- Client-specific chips only used in games where all players use that client
+- Cross-client token transfers (if implemented)
 
 **Fields**:
 - `id`: bigint, primary key
-- `user_id`: foreign key to users, unique
-- `real_money`: decimal(10,2), default 0.00 (withdrawable)
-- `bonus_chips`: decimal(10,2), default 0.00 (non-withdrawable)
-- `hard_currency`: integer, default 0 (premium currency)
+- `user_id`: foreign key to users, indexed
+- `client_id`: foreign key to clients, indexed
+- `tokens`: decimal(10,2), default 0.00 (virtual currency for gameplay)
+- `chips`: decimal(10,2), default 0.00 (virtual currency for gameplay)
 - `locked_in_games`: decimal(10,2), default 0.00 (currently in active games)
 - `updated_at`: timestamp
 
 **Indexes**:
-- Unique index on user_id (one balance per user)
+- Unique composite index on (user_id, client_id) - one balance per user per client
+- Index on client_id for client-wide queries
 
 **Relationships**:
 - Belongs to User
+- Belongs to Client
 
 **Validation Rules**:
 - All balance fields must be >= 0
-- Cannot withdraw real_money while locked_in_games > 0
-- Bonus chips cannot be withdrawn, only used for game buy-ins
+- Virtual tokens and chips are for entertainment only
+- Locked amounts represent virtual currency in active gameplay
+- Unique constraint ensures one balance record per user-client combination
+
+**Game Buy-in Logic**:
+- Chips can only be used in games where all players are using the same client
+- System checks client_id match across all players before allowing chip buy-ins
+- Tokens may have different rules (potentially cross-client)
 
 **Migration**:
 ```php
 Schema::create('balances', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('user_id')->unique()->constrained()->onDelete('cascade');
-    $table->decimal('real_money', 10, 2)->default(0.00);
-    $table->decimal('bonus_chips', 10, 2)->default(0.00);
-    $table->integer('hard_currency')->default(0);
-    $table->decimal('locked_in_games', 10, 2)->default(0.00);
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->foreignId('client_id')->constrained()->onDelete('cascade');
+    $table->decimal('tokens', 10, 2)->default(0.00)->comment('Virtual tokens for gameplay');
+    $table->decimal('chips', 10, 2)->default(0.00)->comment('Virtual chips for gameplay');
+    $table->decimal('locked_in_games', 10, 2)->default(0.00)->comment('Virtual currency in active games');
     $table->timestamp('updated_at');
+
+    // Unique constraint: one balance per user per client
+    $table->unique(['user_id', 'client_id']);
     
+    // Index for client balance queries
+    $table->index('client_id');
+
     // Ensure balances cannot go negative
-    $table->check('real_money >= 0');
-    $table->check('bonus_chips >= 0');
-    $table->check('hard_currency >= 0');
+    $table->check('tokens >= 0');
+    $table->check('chips >= 0');
     $table->check('locked_in_games >= 0');
 });
 ```
@@ -604,9 +732,10 @@ class ProposalData extends Data
 class BalanceData extends Data
 {
     public function __construct(
-        public float $realMoney,
-        public float $bonusChips,
-        public int $hardCurrency,
+        public int $clientId,
+        public string $clientName,
+        public float $tokens,
+        public float $chips,
         public float $lockedInGames,
     ) {}
 }
@@ -615,11 +744,16 @@ class TransactionData extends Data
 {
     public function __construct(
         public string $ulid,
-        public string $type,
+        public string $type,        // Transaction type enum
         public float $amount,
-        public string $currency,
-        public string $status,
-        public ?string $provider,
+        public ?string $currency,   // tokens, chips, or usd
+        public ?int $clientId,      // Required for balance transactions
+        public ?string $clientName, // For display
+        public ?int $subscriptionId,        // For subscription-related payments
+        public ?string $paymentProvider,    // stripe, google_play, apple_store, telegram
+        public ?string $providerTransactionId,
+        public ?string $paymentStatus,      // pending, completed, failed, refunded
+        public ?string $reference,  // Client reference for balance ops
         public string $createdAt,
     ) {}
 }
@@ -779,13 +913,15 @@ pending → (expires after 5 min) → expired
 pending → cancelled → closed
 ```
 
-### Balance Operations
+### Balance Operations (Entertainment Only)
 ```
-Buy-in: real_money -= amount, locked_in_games += amount
-Cash-out: locked_in_games -= amount, real_money += amount
-Deposit: real_money += amount
-Purchase: real_money -= amount
+Game Buy-in: tokens/chips -= amount, locked_in_games += amount
+Game Cash-out: locked_in_games -= amount, tokens/chips += amount
+Cashier Add: tokens/chips += amount (approved clients only)
+Cashier Remove: tokens/chips -= amount (approved clients only)
 ```
+
+Note: All operations use virtual currency for entertainment purposes only. No real money or cryptocurrency transactions occur.
 
 ### Tournament States
 ```

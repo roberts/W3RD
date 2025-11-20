@@ -359,7 +359,7 @@ X-Client-Key: your-client-key
 
 ### 6. Economy
 
-Manage balances, transactions, and subscriptions.
+**Important Note**: The economy namespace tracks virtual tokens and chips for entertainment purposes only. No real money or cryptocurrency transactions occur. The cashier endpoint is restricted to approved client applications only.
 
 **Get Balance**:
 ```http
@@ -368,36 +368,72 @@ Authorization: Bearer <token>
 X-Client-Key: your-client-key
 ```
 
-**Get Transaction History**:
-```http
-GET /v1/economy/transactions?type=buy_in&limit=50
-Authorization: Bearer <token>
-X-Client-Key: your-client-key
-```
-
-**Buy-in to Game**:
-```http
-POST /v1/economy/cashier
-Authorization: Bearer <token>
-X-Client-Key: your-client-key
-
+Response:
+```json
 {
-  "operation": "buy_in",
-  "amount": 10.00,
-  "game_ulid": "01HQZ..."
+  "data": {
+    "tokens": 500.00,
+    "chips": 250.00,
+    "locked_in_games": 50.00
+  }
 }
 ```
 
-**Cash-out from Game**:
+**Get Transaction History**:
+```http
+GET /v1/economy/transactions?currency=tokens&limit=50
+Authorization: Bearer <token>
+X-Client-Key: your-client-key
+```
+
+**Cashier - Add Virtual Balance** (Approved Clients Only):
 ```http
 POST /v1/economy/cashier
 Authorization: Bearer <token>
 X-Client-Key: your-client-key
 
 {
-  "operation": "cash_out",
-  "amount": 15.00,
-  "game_ulid": "01HQZ..."
+  "action": "add",
+  "amount": 100.00,
+  "currency": "tokens",
+  "reference": "client-txn-550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01HQZDJ3K8M9N1P0Q2R4S6T8V0",
+    "action": "add",
+    "amount": 100.00,
+    "currency": "tokens",
+    "reference": "client-txn-550e8400-e29b-41d4-a716-446655440000",
+    "source": "cashier",
+    "created_at": "2025-11-20T15:30:00Z"
+  }
+}
+```
+
+**Cashier - Remove Virtual Balance** (Approved Clients Only):
+```http
+POST /v1/economy/cashier
+Authorization: Bearer <token>
+X-Client-Key: your-client-key
+
+{
+  "action": "remove",
+  "amount": 50.00,
+  "currency": "chips",
+  "reference": "client-redemption-12345"
+}
+```
+
+Error if client not approved:
+```json
+{
+  "error": "cashier_unauthorized",
+  "message": "Only approved client applications can access the cashier service"
 }
 ```
 
@@ -726,42 +762,52 @@ const result = await fetch(`/v1/floor/proposals/${proposal.ulid}/accept`, {
 const { game_ulid } = result;
 ```
 
-### 4. Buy-in / Cash-out Flow
+### 4. Cashier Flow (Approved Clients Only)
+
+**Note**: This example demonstrates how approved client applications manage user virtual balances for entertainment purposes.
 
 ```javascript
-// Check balance before buy-in
+// Check user's virtual balance
 const balance = await fetch('/v1/economy/balance', {
   headers: authHeaders
-});
+}).then(r => r.json());
+// Response: { data: { tokens: 500.00, chips: 250.00, locked_in_games: 0 } }
 
-// Buy-in to game
-await fetch('/v1/economy/cashier', {
+// Add tokens to user balance (approved clients only)
+const addResult = await fetch('/v1/economy/cashier', {
   method: 'POST',
   headers: authHeaders,
   body: JSON.stringify({
-    operation: 'buy_in',
-    amount: 10.00,
-    game_ulid: game_ulid
+    action: 'add',
+    amount: 100.00,
+    currency: 'tokens',
+    reference: `client-txn-${crypto.randomUUID()}`
   })
-});
+}).then(r => r.json());
+// Response: { data: { ulid: "01HQZ...", action: "add", amount: 100.00, currency: "tokens", ... } }
 
-// Play game...
-
-// Cash-out after game
-await fetch('/v1/economy/cashier', {
+// Remove chips from user balance (e.g., for redemption)
+const removeResult = await fetch('/v1/economy/cashier', {
   method: 'POST',
   headers: authHeaders,
   body: JSON.stringify({
-    operation: 'cash_out',
-    amount: 15.00,
-    game_ulid: game_ulid
+    action: 'remove',
+    amount: 50.00,
+    currency: 'chips',
+    reference: 'client-redemption-12345'
   })
-});
+}).then(r => r.json());
 
 // Check updated balance
 const newBalance = await fetch('/v1/economy/balance', {
   headers: authHeaders
-});
+}).then(r => r.json());
+// Response: { data: { tokens: 600.00, chips: 200.00, locked_in_games: 0 } }
+
+// Get transaction history
+const transactions = await fetch('/v1/economy/transactions?currency=tokens&limit=10', {
+  headers: authHeaders
+}).then(r => r.json());
 ```
 
 ## Error Handling
@@ -928,10 +974,13 @@ X-API-Replacement: /v1/system/health
 | `GET /games` | `GET /v1/games` | Unchanged |
 | `GET /games/.../history` | `GET /v1/games/.../timeline` | Renamed |
 | `POST /games/.../forfeit` | `POST /v1/games/.../concede` | Renamed (or `/abandon`) |
-| `GET /billing/status` | `GET /v1/economy/balance` | New namespace |
+| `GET /billing/status` | `GET /v1/economy/balance` | New namespace; now tracks virtual tokens/chips |
 | `GET /billing/plans` | `GET /v1/economy/plans` | Namespace change |
 | `POST /billing/.../verify` | `POST /v1/economy/receipts/{provider}` | New structure |
 | `POST /stripe/webhook` | `POST /v1/webhooks/stripe` | Generalized webhooks |
+| N/A | `POST /v1/economy/cashier` | New endpoint for approved clients to manage virtual balances |
+
+**Note**: The Economy namespace now focuses on entertainment-only virtual balance tracking. No real money or cryptocurrency transactions occur.
 
 ### Migration Strategy
 

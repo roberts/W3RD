@@ -672,6 +672,227 @@ components:
           format: date-time
 ```
 
+### 10. Economy Namespace & Cashier Service
+
+**Decision**: Implement entertainment-only virtual balance tracking with cashier service for approved clients
+
+**Critical Context**: The economy namespace tracks virtual tokens and chips **for entertainment purposes only**. No real money or cryptocurrency transactions occur. This is not a financial system, wagering platform, or gambling service.
+
+**Rationale**:
+- **Legal Compliance**: Clear separation from financial/gambling regulations
+- **Approved Client Model**: Only authorized applications can modify user balances
+- **Unified Endpoint**: Single `/economy/cashier` endpoint replaces separate buy-in/cash-out operations
+- **Reference Tracking**: Clients provide reference IDs for internal reconciliation
+- **Entertainment Focus**: Emphasizes gameplay experience over monetary transactions
+
+**Alternatives Considered**:
+- **Financial transaction endpoints** (deposit/withdraw/buy-in/cash-out): Rejected due to regulatory implications and confusion about platform purpose
+- **Direct balance API**: Rejected due to security concerns and lack of client accountability
+- **Payment gateway integration**: Rejected as this is entertainment-only, not a payment system
+
+**Implementation Pattern**:
+```php
+class CashierController extends Controller
+{
+    public function store(CashierRequest $request)
+    {
+        // Verify approved client authorization
+        if (!$request->user()->client?->use_cashier) {
+            throw new CashierUnauthorizedException(
+                'Only approved client applications can access the cashier service'
+            );
+        }
+        
+        $validated = $request->validated();
+        
+        $transaction = DB::transaction(function () use ($request, $validated) {
+            $user = $request->user();
+            $client = $request->user()->client;
+            
+            // Get or create balance for this user-client combination
+            $balance = Balance::firstOrCreate(
+                ['user_id' => $user->id, 'client_id' => $client->id],
+                ['tokens' => 0, 'chips' => 0, 'locked_in_games' => 0]
+            );
+            
+            $amount = $validated['amount'];
+            $currency = $validated['currency']; // 'tokens' or 'chips'
+            $action = $validated['action'];     // 'add' or 'remove'
+            
+            // Update balance based on action
+            if ($action === 'add') {
+                $balance->$currency += $amount;
+            } else {
+                if ($balance->$currency < $amount) {
+                    throw new InsufficientBalanceException(
+                        "Insufficient {$currency} balance for client {$client->name}"
+                    );
+                }
+                $balance->$currency -= $amount;
+            }
+            
+            $balance->save();
+            
+            // Record transaction with client context
+            return Transaction::create([
+                'ulid' => Str::ulid(),
+                'user_id' => $user->id,
+                'client_id' => $client->id,
+                'action' => $action,
+                'amount' => $amount,
+                'currency' => $currency,
+                'reference' => $validated['reference'],
+                'source' => 'cashier',
+                'metadata' => [
+                    'client_name' => $client->name,
+                ],
+            ]);
+        });
+        
+        return new TransactionResource($transaction);
+    }
+}
+
+// Request validation
+class CashierRequest extends FormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'action' => ['required', 'in:add,remove'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'currency' => ['required', 'in:tokens,chips'],
+            'reference' => ['required', 'string', 'max:255'],
+        ];
+    }
+}
+
+// Exception handling
+class CashierUnauthorizedException extends Exception
+{
+    public function render()
+    {
+        return response()->json([
+            'error' => 'cashier_unauthorized',
+            'message' => 'Only approved client applications can access the cashier service',
+        ], 403);
+    }
+}
+```
+
+**Authorization Model**:
+```php
+// Migration for client approvals
+Schema::table('clients', function (Blueprint $table) {
+    $table->boolean('use_cashier')->default(false);
+    $table->timestamp('cashier_approved_at')->nullable();
+    $table->foreignId('cashier_approved_by')->nullable()->constrained('users');
+});
+
+// Middleware to verify cashier access
+class EnsureCashierAccess
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $client = $request->user()->client;
+        
+        if (!$client || !$client->use_cashier) {
+            throw new CashierUnauthorizedException();
+        }
+        
+        return $next($request);
+    }
+}
+
+// Apply to cashier endpoint
+Route::post('economy/cashier', [CashierController::class, 'store'])
+    ->middleware(['auth:sanctum', EnsureCashierAccess::class]);
+```
+
+**Client Integration Pattern**:
+```php
+// Example: Client application adding tokens to user balance
+$response = Http::withToken($userToken)
+    ->withHeaders(['X-Client-Key' => config('services.protocol.client_key')])
+    ->post('https://api.gamerprotocol.io/v1/economy/cashier', [
+        'action' => 'add',
+        'amount' => 100.00,
+        'currency' => 'tokens',
+        'reference' => 'client-txn-' . Str::uuid(),
+    ]);
+
+// Example: Client application removing chips from user balance
+$response = Http::withToken($userToken)
+    ->withHeaders(['X-Client-Key' => config('services.protocol.client_key')])
+    ->post('https://api.gamerprotocol.io/v1/economy/cashier', [
+        'action' => 'remove',
+        'amount' => 50.00,
+        'currency' => 'chips',
+        'reference' => 'client-redemption-' . Str::uuid(),
+    ]);
+```
+
+**Important Notes**:
+- **Multi-Client Balances**: Each user has separate balances per client application
+- **Client-Specific Chips**: Chips can only be used in games where all players are using the same client
+- **Client Matching Logic**: Before allowing chip buy-ins, system verifies all game participants are authenticated via the same client
+- **Token Flexibility**: Tokens may be transferable across clients (implementation specific)
+- Virtual balances persist across sessions for entertainment continuity
+- No withdrawal or payout mechanisms exist
+- Balances cannot be converted to real money or cryptocurrency
+- Client reference IDs enable reconciliation with client-side systems
+- All transactions are logged with client_id for auditing and client reporting
+- Game buy-ins/cash-outs track client_id to ensure proper balance isolation
+
+**Game Buy-in Client Validation**:
+```php
+class GameBuyInService
+{
+    public function validateChipBuyIn(Game $game, User $user, float $amount): void
+    {
+        // Get all players' client IDs for this game
+        $playerClients = $game->players->pluck('user.registration_client_id')->unique();
+        
+        // Chips can only be used if all players are from the same client
+        if ($playerClients->count() > 1) {
+            throw new MixedClientException(
+                'Chip buy-ins require all players to be using the same client application'
+            );
+        }
+        
+        $clientId = $playerClients->first();
+        $balance = Balance::where('user_id', $user->id)
+            ->where('client_id', $clientId)
+            ->first();
+        
+        if (!$balance || $balance->chips < $amount) {
+            throw new InsufficientBalanceException(
+                "Insufficient chips for {$user->client->name}"
+            );
+        }
+        
+        // Lock chips in game
+        DB::transaction(function () use ($balance, $amount, $user, $clientId, $game) {
+            $balance->chips -= $amount;
+            $balance->locked_in_games += $amount;
+            $balance->save();
+            
+            Transaction::create([
+                'ulid' => Str::ulid(),
+                'user_id' => $user->id,
+                'client_id' => $clientId,
+                'action' => 'game_buy_in',
+                'amount' => $amount,
+                'currency' => 'chips',
+                'reference' => null,
+                'source' => 'game',
+                'metadata' => ['game_ulid' => $game->ulid],
+            ]);
+        });
+    }
+}
+```
+
 ## Summary of Decisions
 
 | Decision Area | Chosen Approach | Key Benefit |
@@ -685,6 +906,8 @@ components:
 | Idempotency | Required header for mutations | Prevents duplicate actions |
 | Real-Time Feeds | Server-Sent Events (SSE) | Simple and scalable |
 | Documentation | OpenAPI 3.1 per namespace | Contract-first development |
+| Virtual Economy | Entertainment-only cashier service | Legal compliance and clear purpose |
+| Multi-Client Balances | Separate balances per user-client pair | Client-specific economies and isolation |
 
 ## Next Steps (Phase 1)
 

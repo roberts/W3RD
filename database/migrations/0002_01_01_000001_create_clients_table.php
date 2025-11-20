@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('platform')->default(Platform::WEB->value);
             $table->boolean('is_active')->default(true);
             $table->boolean('use_trademarks')->default(false);
+            $table->boolean('use_cashier')->default(false);
+            $table->timestamp('cashier_approved_at')->nullable();
+            $table->foreignId('cashier_approved_by')->nullable()->constrained('users');
             $table->foreignId('creator_id')->nullable()->index();
             $table->timestamps();
         });

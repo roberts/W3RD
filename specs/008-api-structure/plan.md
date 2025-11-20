@@ -21,6 +21,301 @@ Finalize the v1 API structure for production by reorganizing endpoints into a he
 **Constraints**: 99.9% uptime SLA, zero data loss during network interruptions, idempotent action processing, backward compatibility for one major version  
 **Scale/Scope**: 1,000+ game titles, 10,000+ concurrent users, 50+ API endpoints across 9 namespaces, support for 4 authentication providers (email, Google, Apple, social)
 
+## Implementation Phases
+
+### Phase 1: Controller Namespace Reorganization
+
+**Objective**: Restructure all controllers into 9 logical namespaces, replacing scattered endpoint design with organized API architecture.
+
+**Strategy**: Direct migration without backward compatibility. Delete old controllers after moving logic to new namespace structure.
+
+**Controller Reorganization Map**:
+
+#### 1. System Namespace (`Api/V1/System/`)
+- **Create `HealthController.php`** - Replaces/expands `StatusController`
+  - Service health indicators (database, cache, queue, game engine)
+  - DELETE: `StatusController.php`
+- **Create `TimeController.php`** - New
+  - Authoritative server time for client sync
+- **Create `ConfigController.php`** - New
+  - Global platform configuration (feature flags, supported games, API version)
+
+#### 2. Webhooks Namespace (`Api/V1/Webhooks/`)
+- **Create `WebhookController.php`** - Consolidates all webhook handling
+  - Stripe, Apple, Google Play, Telegram event processing
+  - DELETE: `StripeWebhookController.php`
+
+#### 3. Library Namespace (`Api/V1/Library/`)
+- **Create `GameLibraryController.php`** - Rename from `TitleController`
+  - Browse games, game metadata, entity definitions
+  - DELETE: `TitleController.php`
+- **Move `GameRulesController.php`** - No changes, relocate to namespace folder
+
+#### 4. Auth Namespace (`Api/V1/Auth/`)
+- **Keep single `AuthController.php`** - Move to namespace folder
+  - Authentication flows are cohesive (register, login, social, logout)
+  - No split into multiple controllers
+
+#### 5. Account Namespace (`Api/V1/Account/`)
+- **Move `ProfileController.php`** - Relocate to namespace folder
+- **Create `ProgressionController.php`** - Rename from `UserLevelsController`
+  - XP, levels, battle pass progression
+  - DELETE: `UserLevelsController.php`
+- **Create `RecordsController.php`** - Rename from `UserStatsController`
+  - Win/loss statistics, ELO ratings, performance metrics
+  - DELETE: `UserStatsController.php`
+- **Create `AlertsController.php`** - Rename from `AlertController`
+  - Notifications, invites, announcements (plural naming)
+  - DELETE: `AlertController.php`
+
+#### 6. Floor Namespace (`Api/V1/Floor/`)
+- **Merge into `LobbyController.php`** - Consolidate lobby + lobby player logic
+  - Lobby management + player seat management in single controller
+  - DELETE: `LobbyPlayerController.php`
+- **Create `SignalController.php`** - Rename from `QuickplayController`
+  - Matchmaking signals (quickplay/ranked intent)
+  - DELETE: `QuickplayController.php`
+- **Create `ProposalController.php`** - Rename from `RematchController`
+  - Direct challenges + rematch offers (unified proposals)
+  - DELETE: `RematchController.php`
+
+#### 7. Games Namespace (`Api/V1/Games/`)
+- **Refactor `GameController.php`** - Simplify to listing + state retrieval only
+  - Remove forfeit, history methods (extract to dedicated controllers)
+- **Keep `GameActionController.php`** - Already focused on action execution
+- **Create `GameTurnController.php`** - New
+  - Turn timer queries, time remaining
+- **Create `GameTimelineController.php`** - Extract from `GameController`
+  - Event history, replay data (moved from `history` method)
+- **Create `GameConcedeController.php`** - Extract from `GameController`
+  - Graceful resignation (moved from `forfeit` method)
+- **Create `GameAbandonController.php`** - New
+  - Rage quit with penalty
+- **Create `GameOutcomeController.php`** - New
+  - Final results, winner, scores, XP, rewards
+
+#### 8. Economy Namespace (`Api/V1/Economy/`)
+- **Create `BalanceController.php`** - New
+  - Virtual token/chip balance queries
+- **Create `TransactionController.php`** - New
+  - Balance history, transaction listing
+- **Create `CashierController.php`** - New
+  - Balance adjustments for approved clients
+- **Create `PlanController.php`** - Extract from `BillingController`
+  - Membership tier listing (moved from `/billing/plans`)
+  - DELETE: `BillingController.php`
+- **Create `ReceiptController.php`** - Extract from `BillingController`
+  - Apple/Google/Telegram IAP verification (moved from billing methods)
+
+#### 9. Feeds Namespace (`Api/V1/Feeds/`)
+- **Move `LeaderboardController.php`** - Relocate to namespace folder
+  - Real-time leaderboard feeds
+- **Create `LiveScoresController.php`** - New
+  - SSE stream for live game activity
+- **Create `CasinoFloorController.php`** - New
+  - SSE stream for floor activity (lobbies, challenges, wins)
+
+#### 10. Competitions Namespace (`Api/V1/Competitions/`)
+- **Create `CompetitionController.php`** - New
+  - Tournament listing, details
+- **Create `EntryController.php`** - New
+  - Tournament registration
+- **Create `StructureController.php`** - New
+  - Phase rules, tournament configuration
+- **Create `BracketController.php`** - New
+  - Tournament bracket/tree visualization
+- **Create `StandingsController.php`** - New
+  - Tournament leaderboards, rankings
+
+**Controllers to DELETE** (after migration):
+1. ❌ `StatusController.php` → Replaced by System/HealthController
+2. ❌ `StripeWebhookController.php` → Replaced by Webhooks/WebhookController
+3. ❌ `TitleController.php` → Replaced by Library/GameLibraryController
+4. ❌ `UserLevelsController.php` → Replaced by Account/ProgressionController
+5. ❌ `UserStatsController.php` → Replaced by Account/RecordsController
+6. ❌ `AlertController.php` → Replaced by Account/AlertsController
+7. ❌ `LobbyPlayerController.php` → Merged into Floor/LobbyController
+8. ❌ `QuickplayController.php` → Replaced by Floor/SignalController
+9. ❌ `RematchController.php` → Replaced by Floor/ProposalController
+10. ❌ `BillingController.php` → Split into Economy/PlanController + Economy/ReceiptController
+
+**Files Remaining** (relocated to namespaces):
+- ✅ `AuthController.php` → Auth/AuthController.php
+- ✅ `ProfileController.php` → Account/ProfileController.php
+- ✅ `GameController.php` → Games/GameController.php (refactored)
+- ✅ `GameActionController.php` → Games/GameActionController.php
+- ✅ `GameRulesController.php` → Library/GameRulesController.php
+- ✅ `LobbyController.php` → Floor/LobbyController.php (expanded)
+- ✅ `LeaderboardController.php` → Feeds/LeaderboardController.php
+
+---
+
+### Phase 2: Route Restructuring
+
+**Objective**: Update all routes in `routes/api.php` to match new namespace organization and RESTful endpoint patterns.
+
+**Strategy**: Complete route rewrite organized by namespace groups. Remove all old route definitions.
+
+**Route Organization**:
+
+```php
+// routes/api.php structure
+
+Route::prefix('v1')->group(function () {
+    
+    // ============================================================
+    // SYSTEM NAMESPACE - Public health & config endpoints
+    // ============================================================
+    Route::prefix('system')->group(function () {
+        Route::get('/health', [System\HealthController::class, 'index']);
+        Route::get('/time', [System\TimeController::class, 'index']);
+        Route::get('/config', [System\ConfigController::class, 'index']);
+    });
+    
+    // ============================================================
+    // WEBHOOKS NAMESPACE - External provider callbacks
+    // ============================================================
+    Route::prefix('webhooks')->controller(Webhooks\WebhookController::class)->group(function () {
+        Route::post('/stripe', 'stripe');
+        Route::post('/apple', 'apple');
+        Route::post('/google', 'google');
+        Route::post('/telegram', 'telegram');
+    });
+    
+    // ============================================================
+    // LIBRARY NAMESPACE - Public game discovery
+    // ============================================================
+    Route::prefix('library')->group(function () {
+        Route::get('/', [Library\GameLibraryController::class, 'index']);
+        Route::get('/{key}', [Library\GameLibraryController::class, 'show']);
+        Route::get('/{key}/rules', [Library\GameRulesController::class, 'show']);
+        Route::get('/{key}/entities', [Library\GameLibraryController::class, 'entities']);
+    });
+    
+    // ============================================================
+    // AUTH NAMESPACE - Authentication flows
+    // ============================================================
+    Route::prefix('auth')->controller(Auth\AuthController::class)->group(function () {
+        // Public routes
+        Route::post('/register', 'register');
+        Route::post('/verify', 'verify');
+        Route::post('/login', 'login');
+        Route::post('/social', 'socialLogin');
+        
+        // Protected routes
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/logout', 'logout');
+            Route::get('/user', 'getUser');
+            Route::patch('/user', 'updateUser');
+        });
+    });
+    
+    // ============================================================
+    // AUTHENTICATED ROUTES - Require Sanctum token
+    // ============================================================
+    Route::middleware('auth:sanctum')->group(function () {
+        
+        // ACCOUNT NAMESPACE - User profile & progression
+        Route::prefix('account')->group(function () {
+            Route::get('/profile', [Account\ProfileController::class, 'show']);
+            Route::patch('/profile', [Account\ProfileController::class, 'update']);
+            Route::get('/progression', [Account\ProgressionController::class, 'show']);
+            Route::get('/records', [Account\RecordsController::class, 'show']);
+            Route::get('/alerts', [Account\AlertsController::class, 'index']);
+            Route::post('/alerts/read', [Account\AlertsController::class, 'markAsRead']);
+        });
+        
+        // FLOOR NAMESPACE - Matchmaking coordination
+        Route::prefix('floor')->group(function () {
+            // Lobbies
+            Route::prefix('lobbies')->controller(Floor\LobbyController::class)->group(function () {
+                Route::get('/', 'index');
+                Route::post('/', 'store');
+                Route::get('/{ulid}', 'show');
+                Route::delete('/{ulid}', 'destroy');
+                Route::post('/{ulid}/ready-check', 'readyCheck');
+                Route::post('/{ulid}/seat', 'joinSeat');         // Merged from LobbyPlayerController
+                Route::put('/{ulid}/seat/{position}', 'updateSeat');  // Merged
+                Route::delete('/{ulid}/seat', 'leaveSeat');      // Merged
+            });
+            
+            // Matchmaking Signals
+            Route::prefix('signals')->controller(Floor\SignalController::class)->group(function () {
+                Route::post('/', 'store');
+                Route::delete('/{ulid}', 'destroy');
+            });
+            
+            // Proposals (Challenges + Rematches)
+            Route::prefix('proposals')->controller(Floor\ProposalController::class)->group(function () {
+                Route::post('/', 'store');
+                Route::post('/{ulid}/accept', 'accept');
+                Route::post('/{ulid}/decline', 'decline');
+            });
+        });
+        
+        // GAMES NAMESPACE - Active gameplay
+        Route::prefix('games')->group(function () {
+            Route::get('/', [Games\GameController::class, 'index']);
+            Route::get('/{ulid}', [Games\GameController::class, 'show']);
+            
+            // Game-specific actions
+            Route::post('/{ulid}/actions', [Games\GameActionController::class, 'store']);
+            Route::get('/{ulid}/actions/options', [Games\GameActionController::class, 'options']);
+            Route::get('/{ulid}/turn', [Games\GameTurnController::class, 'show']);
+            Route::get('/{ulid}/timeline', [Games\GameTimelineController::class, 'index']);
+            Route::post('/{ulid}/concede', [Games\GameConcedeController::class, 'store']);
+            Route::post('/{ulid}/abandon', [Games\GameAbandonController::class, 'store']);
+            Route::get('/{ulid}/outcome', [Games\GameOutcomeController::class, 'show']);
+        });
+        
+        // ECONOMY NAMESPACE - Virtual balance & subscriptions
+        Route::prefix('economy')->group(function () {
+            Route::get('/balance', [Economy\BalanceController::class, 'show']);
+            Route::get('/transactions', [Economy\TransactionController::class, 'index']);
+            Route::post('/cashier', [Economy\CashierController::class, 'store']);  // Approved clients only
+            Route::get('/plans', [Economy\PlanController::class, 'index']);
+            Route::post('/receipts/{provider}', [Economy\ReceiptController::class, 'verify']);
+        });
+        
+        // FEEDS NAMESPACE - Real-time SSE streams
+        Route::prefix('feeds')->group(function () {
+            Route::get('/games', [Feeds\LiveScoresController::class, 'games']);
+            Route::get('/wins', [Feeds\LiveScoresController::class, 'wins']);
+            Route::get('/leaderboards', [Feeds\LeaderboardController::class, 'stream']);
+            Route::get('/tournaments', [Feeds\LiveScoresController::class, 'tournaments']);
+            Route::get('/challenges', [Feeds\CasinoFloorController::class, 'challenges']);
+            Route::get('/achievements', [Feeds\CasinoFloorController::class, 'achievements']);
+        });
+        
+        // COMPETITIONS NAMESPACE - Tournament management
+        Route::prefix('competitions')->group(function () {
+            Route::get('/', [Competitions\CompetitionController::class, 'index']);
+            Route::get('/{ulid}', [Competitions\CompetitionController::class, 'show']);
+            Route::post('/{ulid}/enter', [Competitions\EntryController::class, 'store']);
+            Route::get('/{ulid}/structure', [Competitions\StructureController::class, 'show']);
+            Route::get('/{ulid}/bracket', [Competitions\BracketController::class, 'show']);
+            Route::get('/{ulid}/standings', [Competitions\StandingsController::class, 'index']);
+        });
+    });
+});
+```
+
+**Old Routes to DELETE**:
+- ❌ `GET /v1/status` → `GET /v1/system/health`
+- ❌ `POST /v1/stripe/webhook` → `POST /v1/webhooks/stripe`
+- ❌ `GET /v1/titles` → `GET /v1/library`
+- ❌ `GET /v1/titles/{gameTitle}/rules` → `GET /v1/library/{key}/rules`
+- ❌ `GET /v1/leaderboard/{gameTitle}` → `GET /v1/feeds/leaderboards` (SSE)
+- ❌ All `/v1/billing/*` routes → Replaced by `/v1/economy/*`
+- ❌ All `/v1/me/*` routes → Replaced by `/v1/account/*`
+- ❌ All `/v1/games/quickplay/*` → Replaced by `/v1/floor/signals/*`
+- ❌ All `/v1/games/lobbies/*` → Replaced by `/v1/floor/lobbies/*`
+- ❌ `/v1/games/rematch/*` → Replaced by `/v1/floor/proposals/*`
+
+**Endpoint Count**: 50+ endpoints organized across 9 namespaces
+
+---
+
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
@@ -116,11 +411,17 @@ app/
 │   ├── Transaction.php (existing)
 │   ├── Balance.php (existing)
 │   ├── Tournament.php (new)
+│   ├── PlanAudit.php (new)
 │   └── Alert.php (existing)
 ├── Enums/
 │   ├── GameTitle.php (existing - version controlled)
 │   └── MembershipPlan.php (new - version controlled)
 ├── Services/
+│   ├── SystemHealthService.php (new)
+│   ├── GameLibraryService.php (new)
+│   ├── FloorCoordinationService.php (new)
+│   ├── EconomyService.php (new)
+│   └── CompetitionService.php (new)
 │   ├── SystemHealthService.php (new)
 │   ├── GameLibraryService.php (new)
 │   ├── FloorCoordinationService.php (new)

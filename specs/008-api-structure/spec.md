@@ -323,3 +323,279 @@ Users discover tournaments, register for events, track standings, and view brack
 - **SC-018**: Webhook processing acknowledges receipt within 3 seconds and processes events asynchronously
 - **SC-019**: Users experience zero data loss when network interruptions occur during gameplay
 - **SC-020**: API rate limiting prevents abuse while allowing legitimate high-frequency usage patterns
+
+## Technical Design *(mandatory)*
+
+### Architecture Overview
+
+**Namespace Organization**: The API is restructured into 9 logical namespaces that separate platform infrastructure from gameplay mechanics:
+
+1. **System** (`/v1/system/*`) - Health monitoring, time sync, configuration
+2. **Webhooks** (`/v1/webhooks/*`) - External provider event processing
+3. **Library** (`/v1/library/*`) - Game discovery and rules
+4. **Auth** (`/v1/auth/*`) - Authentication flows
+5. **Account** (`/v1/account/*`) - User profile and progression
+6. **Floor** (`/v1/floor/*`) - Matchmaking coordination (lobbies, signals, proposals)
+7. **Games** (`/v1/games/*`) - Active gameplay sessions
+8. **Economy** (`/v1/economy/*`) - Virtual balance and subscriptions
+9. **Feeds** (`/v1/feeds/*`) - Real-time SSE data streams
+10. **Competitions** (`/v1/competitions/*`) - Tournament management
+
+**Design Principles**:
+- **Headless API**: No frontend rendering, pure JSON responses
+- **RESTful Resources**: Nouns for entities, HTTP verbs for actions
+- **Namespace Isolation**: Related endpoints grouped for discoverability
+- **Separate Controllers**: Each endpoint has dedicated controller (no monoliths)
+- **No Backward Compatibility**: Clean break from legacy structure
+
+---
+
+### Phase 1: Controller Reorganization
+
+**Objective**: Restructure all controllers from flat `Api/V1/` directory into namespace subdirectories.
+
+**Migration Strategy**: Direct reorganization without backward compatibility. Delete old controllers after extracting logic.
+
+#### Namespace Mapping
+
+**1. System Namespace** (`Api/V1/System/`)
+
+New Controllers:
+- `HealthController` - Service health checks (database, cache, queue, game engine)
+- `TimeController` - Authoritative server time
+- `ConfigController` - Global platform configuration
+
+Delete:
+- ❌ `StatusController` → Logic moved to HealthController
+
+---
+
+**2. Webhooks Namespace** (`Api/V1/Webhooks/`)
+
+New Controllers:
+- `WebhookController` - Unified webhook handler with provider-specific methods
+  - `stripe()` - Stripe payment events
+  - `apple()` - Apple IAP notifications
+  - `google()` - Google Play notifications  
+  - `telegram()` - Telegram payment webhooks
+
+Delete:
+- ❌ `StripeWebhookController` → Logic moved to WebhookController
+
+---
+
+**3. Library Namespace** (`Api/V1/Library/`)
+
+New Controllers:
+- `GameLibraryController` - Game browsing, metadata, entity definitions
+  - `index()` - Browse all games (paginated, filterable)
+  - `show()` - Game details
+  - `entities()` - Static game data (cards, units, boards)
+- `GameRulesController` - Rules documentation (relocated, no changes)
+
+Delete:
+- ❌ `TitleController` → Logic moved to GameLibraryController
+
+---
+
+**4. Auth Namespace** (`Api/V1/Auth/`)
+
+Relocated:
+- `AuthController` - Single controller for all auth flows (cohesive domain)
+  - `register()` - Account creation
+  - `verify()` - Email verification
+  - `login()` - Email/password authentication
+  - `socialLogin()` - OAuth (Google, Apple)
+  - `logout()` - Token revocation
+  - `getUser()` - Current user data
+  - `updateUser()` - Account updates
+
+No deletions (existing controller moves to namespace folder)
+
+---
+
+**5. Account Namespace** (`Api/V1/Account/`)
+
+New Controllers:
+- `ProfileController` - User profile management (relocated)
+  - `show()` - Get profile
+  - `update()` - Update avatar/bio
+- `ProgressionController` - XP, levels, battle pass
+  - `show()` - Get progression data
+- `RecordsController` - Win/loss stats, ELO ratings
+  - `show()` - Get performance metrics
+- `AlertsController` - Notifications
+  - `index()` - List alerts
+  - `markAsRead()` - Mark alerts read
+
+Delete:
+- ❌ `UserLevelsController` → Logic moved to ProgressionController
+- ❌ `UserStatsController` → Logic moved to RecordsController
+- ❌ `AlertController` → Renamed to AlertsController (plural)
+
+---
+
+**6. Floor Namespace** (`Api/V1/Floor/`)
+
+New Controllers:
+- `LobbyController` - Private room management + player seats (merged)
+  - `index()` - Browse lobbies
+  - `store()` - Create lobby
+  - `show()` - Lobby details
+  - `destroy()` - Close lobby
+  - `readyCheck()` - Ready check
+  - `joinSeat()` - Join lobby (merged from LobbyPlayerController)
+  - `updateSeat()` - Change seat settings (merged)
+  - `leaveSeat()` - Leave lobby (merged)
+- `SignalController` - Matchmaking intent
+  - `store()` - Submit matchmaking signal
+  - `destroy()` - Cancel matchmaking
+- `ProposalController` - Challenges and rematches (unified)
+  - `store()` - Send challenge/rematch
+  - `accept()` - Accept proposal
+  - `decline()` - Decline proposal
+
+Delete:
+- ❌ `LobbyPlayerController` → Logic merged into LobbyController
+- ❌ `QuickplayController` → Logic moved to SignalController
+- ❌ `RematchController` → Logic moved to ProposalController
+
+---
+
+**7. Games Namespace** (`Api/V1/Games/`)
+
+Refactored Controllers:
+- `GameController` - Game listing and state retrieval (simplified)
+  - `index()` - List user's games
+  - `show()` - Get game state
+  - Removed: `history()` → Moved to GameTimelineController
+  - Removed: `forfeit()` → Moved to GameConcedeController
+  - Removed: `requestRematch()` → Moved to Floor/ProposalController
+- `GameActionController` - Action execution (kept)
+  - `store()` - Execute action
+  - `options()` - Available moves
+
+New Controllers (extracted):
+- `GameTurnController` - Turn timer management
+  - `show()` - Time remaining, active player
+- `GameTimelineController` - Event history
+  - `index()` - Replay data, action log
+- `GameConcedeController` - Graceful resignation
+  - `store()` - Concede game
+- `GameAbandonController` - Rage quit with penalty
+  - `store()` - Abandon game
+- `GameOutcomeController` - Final results
+  - `show()` - Winner, scores, XP, rewards
+
+No deletions (existing controllers refactored and expanded)
+
+---
+
+**8. Economy Namespace** (`Api/V1/Economy/`)
+
+New Controllers:
+- `BalanceController` - Virtual currency queries
+  - `show()` - Get token/chip balance
+- `TransactionController` - Balance history
+  - `index()` - List transactions
+- `CashierController` - Balance adjustments (approved clients only)
+  - `store()` - Add/remove tokens or chips
+- `PlanController` - Membership tiers
+  - `index()` - List subscription plans
+- `ReceiptController` - IAP verification
+  - `verify()` - Apple/Google/Telegram receipt validation
+
+Delete:
+- ❌ `BillingController` → Logic split into PlanController + ReceiptController
+
+---
+
+**9. Feeds Namespace** (`Api/V1/Feeds/`)
+
+New Controllers:
+- `LeaderboardController` - Leaderboard SSE stream (relocated)
+  - `stream()` - Real-time rank changes
+- `LiveScoresController` - Game activity SSE streams
+  - `games()` - Live game updates
+  - `wins()` - Win announcements
+  - `tournaments()` - Tournament progress
+- `CasinoFloorController` - Floor activity SSE streams
+  - `challenges()` - Challenge activity
+  - `achievements()` - Achievement unlocks
+
+Relocated:
+- `LeaderboardController` - Moved from root V1 folder to Feeds namespace
+
+---
+
+**10. Competitions Namespace** (`Api/V1/Competitions/`)
+
+New Controllers:
+- `CompetitionController` - Tournament browsing
+  - `index()` - List tournaments
+  - `show()` - Tournament details
+- `EntryController` - Registration
+  - `store()` - Enter tournament
+- `StructureController` - Tournament configuration
+  - `show()` - Phase rules, blind levels
+- `BracketController` - Tournament tree
+  - `show()` - Bracket visualization
+- `StandingsController` - Rankings
+  - `index()` - Tournament leaderboard
+
+---
+
+### Phase 2: Route Restructuring
+
+**Objective**: Rewrite all routes in `routes/api.php` to match new namespace organization.
+
+**Changes**:
+- Replace `/v1/status` with `/v1/system/health`
+- Replace `/v1/stripe/webhook` with `/v1/webhooks/stripe`
+- Replace `/v1/titles` with `/v1/library`
+- Replace `/v1/billing/*` with `/v1/economy/*`
+- Replace `/v1/me/*` with `/v1/account/*`
+- Replace `/v1/games/quickplay/*` with `/v1/floor/signals/*`
+- Replace `/v1/games/lobbies/*` with `/v1/floor/lobbies/*`
+- Replace `/v1/games/rematch/*` with `/v1/floor/proposals/*`
+- Add `/v1/feeds/*` for SSE streams
+- Add `/v1/competitions/*` for tournaments
+
+**No backward compatibility**: Old routes will be deleted entirely.
+
+See `plan.md` Phase 2 section for complete route definitions.
+
+---
+
+### Database Design
+
+**No schema changes required for Phase 1 & 2**. Controller reorganization is purely API structure refactoring.
+
+**Future migrations** (already documented in data-model.md):
+- MatchmakingSignals table (Floor namespace)
+- Proposals table (Floor namespace, rename from rematch_requests)
+- Tournaments + tournament_user tables (Competitions namespace)
+- PlanAudits table (Economy namespace)
+
+---
+
+### Technology Stack
+
+**Backend**:
+- Laravel 12.10 (RESTful API framework)
+- Laravel Sanctum 4.2 (Token authentication)
+- Laravel Cashier 16.0 (Subscription management)
+- Laravel Reverb 1.6 (SSE/WebSocket support)
+- Spatie Laravel Data 4.5 (DTOs)
+
+**Storage**:
+- MySQL 8.0+ (Primary database)
+- Redis (Cache + SSE pub/sub)
+
+**Testing**:
+- Pest 4.1 + Pest Plugin Laravel 4.0
+- Test structure mirrors controller namespaces
+
+---
+
+## Success Criteria *(mandatory)*

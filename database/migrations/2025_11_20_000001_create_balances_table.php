@@ -22,11 +22,6 @@ return new class extends Migration
             
             // Index for client balance queries
             $table->index('client_id');
-
-            // Ensure balances cannot go negative
-            $table->check('tokens >= 0');
-            $table->check('chips >= 0');
-            $table->check('locked_in_games >= 0');
         });
     }
 };

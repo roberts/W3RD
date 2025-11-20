@@ -257,13 +257,16 @@ Transaction::create([
 ## New Models (To Be Created)
 
 ### MatchmakingSignal
-*New* - User intent to play (quickplay/ranked)
+*Modify Existing* - User intent to play (quickplay/ranked)
+
+**Implementation Note**: Rename/modify existing `quickplay` migration (not yet created - to be implemented).
 
 **Fields**:
 - `id`: bigint, primary key
 - `ulid`: string(26), unique, indexed
 - `user_id`: foreign key to users, indexed
-- `title_id`: foreign key to titles, indexed
+- `title_slug`: string(50), indexed (references GameTitle enum)
+- `mode_id`: foreign key to modes, indexed
 - `elo_rating`: integer (for matchmaking)
 - `connection_quality`: enum(excellent, good, fair, poor)
 - `preferred_pace`: enum(fast, normal, slow), nullable
@@ -271,32 +274,35 @@ Transaction::create([
 - `created_at`: timestamp
 
 **Indexes**:
-- Composite index on (title_id, elo_rating, created_at) for matchmaking queries
+- Composite index on (title_slug, mode_id, elo_rating, created_at) for matchmaking queries
 - Index on (user_id, created_at) for user's active signals
 
 **Relationships**:
 - Belongs to User
-- Belongs to Title
+- References GameTitle enum via title_slug
+- Belongs to Mode
 
 **Validation Rules**:
-- User can only have one active signal at a time per title
+- User can only have one active signal at a time per title+mode combination
 - Signal automatically expires after 5 minutes
 - ELO rating must be between 0 and 3000
+- title_slug must match a valid GameTitle enum case
 
 **Migration**:
 ```php
 Schema::create('matchmaking_signals', function (Blueprint $table) {
     $table->id();
-    $table->string('ulid', 26)->unique()->index();
+    $table->char('ulid', 26)->unique()->index();
     $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->foreignId('title_id')->constrained()->onDelete('cascade');
+    $table->string('title_slug', 50)->index();
+    $table->foreignId('mode_id')->constrained()->onDelete('cascade');
     $table->integer('elo_rating')->default(1200);
     $table->enum('connection_quality', ['excellent', 'good', 'fair', 'poor'])->default('good');
     $table->enum('preferred_pace', ['fast', 'normal', 'slow'])->nullable();
     $table->timestamp('expires_at');
     $table->timestamp('created_at');
     
-    $table->index(['title_id', 'elo_rating', 'created_at']);
+    $table->index(['title_slug', 'mode_id', 'elo_rating', 'created_at']);
     $table->index(['user_id', 'created_at']);
 });
 ```

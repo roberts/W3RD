@@ -48,9 +48,6 @@ return new class extends Migration
             $table->index(['subscription_id', 'created_at']);
             $table->index(['type', 'created_at']);
             $table->index('reference');
-            
-            // Ensure amounts are positive
-            $table->check('amount > 0');
         });
     }
 };

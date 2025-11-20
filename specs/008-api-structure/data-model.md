@@ -308,50 +308,64 @@ Schema::create('matchmaking_signals', function (Blueprint $table) {
 ```
 
 ### Proposal
-*New* - Direct challenge or rematch offer
+*Modify Existing* - Direct challenge or rematch offer
+
+**Implementation Note**: Rename/modify existing `rematch_requests` migration to expand functionality for both challenges and rematches.
+
+**Current Migration**: `2025_11_17_035314_create_rematch_requests_table.php` with fields:
+- ulid, original_game_id, requesting_user_id, opponent_user_id, new_game_id, status, expires_at
 
 **Fields**:
 - `id`: bigint, primary key
-- `ulid`: string(26), unique, indexed
-- `type`: enum(challenge, rematch)
-- `sender_id`: foreign key to users, indexed
-- `recipient_id`: foreign key to users, indexed
-- `title_id`: foreign key to titles
-- `game_settings`: json (stake amount, time control, etc.)
-- `previous_game_id`: foreign key to games, nullable (for rematches)
-- `status`: enum(pending, accepted, declined, expired, cancelled)
-- `expires_at`: timestamp (auto-decline after 5 minutes)
-- `responded_at`: timestamp, nullable
+- `ulid`: char(26), unique, indexed
+- `type`: enum(challenge, rematch) - **NEW**
+- `sender_id`: foreign key to users, indexed (rename from requesting_user_id)
+- `recipient_id`: foreign key to users, indexed (rename from opponent_user_id)
+- `title_slug`: string(50) - **NEW** (references GameTitle enum)
+- `mode_id`: foreign key to modes - **NEW**
+- `game_settings`: json (stake amount, time control, etc.) - **NEW**
+- `previous_game_id`: foreign key to games, nullable (rename from original_game_id)
+- `new_game_id`: foreign key to games, nullable (existing)
+- `status`: enum(pending, accepted, declined, expired, cancelled) - expanded from string
+- `expires_at`: timestamp (existing)
+- `responded_at`: timestamp, nullable - **NEW**
 - `created_at`: timestamp
 - `updated_at`: timestamp
 
 **Indexes**:
 - Index on (recipient_id, status, created_at) for pending proposals
 - Index on (sender_id, created_at) for sent proposals
+- Update existing index from (status, expires_at)
 
 **Relationships**:
 - Belongs to User (sender)
 - Belongs to User (recipient)
-- Belongs to Title
+- References GameTitle enum via title_slug
+- Belongs to Mode
 - Belongs to Game (previous_game), nullable
+- Belongs to Game (new_game), nullable
 
 **Validation Rules**:
 - Cannot send proposal to self
 - User can only have 5 pending outgoing proposals at a time
 - Proposal automatically expires after 5 minutes if not responded to
 - Rematch proposals must reference a completed game
+- Challenge proposals have null previous_game_id
+- title_slug must match a valid GameTitle enum case
 
 **Migration**:
 ```php
 Schema::create('proposals', function (Blueprint $table) {
     $table->id();
-    $table->string('ulid', 26)->unique()->index();
+    $table->char('ulid', 26)->unique()->index();
     $table->enum('type', ['challenge', 'rematch']);
     $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
     $table->foreignId('recipient_id')->constrained('users')->onDelete('cascade');
-    $table->foreignId('title_id')->constrained()->onDelete('cascade');
+    $table->string('title_slug', 50);
+    $table->foreignId('mode_id')->constrained()->onDelete('cascade');
     $table->json('game_settings')->nullable();
     $table->foreignId('previous_game_id')->nullable()->constrained('games')->onDelete('set null');
+    $table->foreignId('new_game_id')->nullable()->constrained('games')->onDelete('set null');
     $table->enum('status', ['pending', 'accepted', 'declined', 'expired', 'cancelled'])->default('pending');
     $table->timestamp('expires_at');
     $table->timestamp('responded_at')->nullable();
@@ -430,13 +444,14 @@ Schema::create('balances', function (Blueprint $table) {
 
 **Fields**:
 - `id`: bigint, primary key
-- `ulid`: string(26), unique, indexed
-- `title_id`: foreign key to titles
+- `ulid`: char(26), unique, indexed
+- `title_slug`: string(50), indexed (references GameTitle enum)
+- `mode_id`: foreign key to modes
 - `name`: string
 - `description`: text, nullable
 - `format`: enum(single_elimination, double_elimination, round_robin, swiss)
 - `buy_in_amount`: decimal(10,2)
-- `buy_in_currency`: enum(real_money, bonus_chips, hard_currency)
+- `buy_in_currency`: enum(tokens, chips) - **Updated from real_money/bonus_chips/hard_currency**
 - `prize_pool`: decimal(10,2)
 - `prize_distribution`: json (1st: 50%, 2nd: 30%, etc.)
 - `max_participants`: integer
@@ -450,10 +465,11 @@ Schema::create('balances', function (Blueprint $table) {
 
 **Indexes**:
 - Index on (status, starts_at) for active tournaments
-- Index on (title_id, status) for game-specific tournaments
+- Index on (title_slug, status) for game-specific tournaments
 
 **Relationships**:
-- Belongs to Title
+- References GameTitle enum via title_slug
+- Belongs to Mode
 - Belongs to many Users (participants) through tournament_user pivot
 - Has many Games (tournament matches)
 
@@ -462,18 +478,21 @@ Schema::create('balances', function (Blueprint $table) {
 - max_participants must be >= min_participants
 - buy_in_amount must be > 0
 - prize_pool must be >= total buy-ins
+- title_slug must match a valid GameTitle enum case
+- buy_in_currency typically uses 'chips' for tournaments
 
 **Migration**:
 ```php
 Schema::create('tournaments', function (Blueprint $table) {
     $table->id();
-    $table->string('ulid', 26)->unique()->index();
-    $table->foreignId('title_id')->constrained()->onDelete('cascade');
+    $table->char('ulid', 26)->unique()->index();
+    $table->string('title_slug', 50)->index();
+    $table->foreignId('mode_id')->constrained()->onDelete('cascade');
     $table->string('name');
     $table->text('description')->nullable();
     $table->enum('format', ['single_elimination', 'double_elimination', 'round_robin', 'swiss']);
     $table->decimal('buy_in_amount', 10, 2);
-    $table->enum('buy_in_currency', ['real_money', 'bonus_chips', 'hard_currency']);
+    $table->enum('buy_in_currency', ['tokens', 'chips'])->default('chips');
     $table->decimal('prize_pool', 10, 2);
     $table->json('prize_distribution');
     $table->integer('max_participants');
@@ -485,7 +504,7 @@ Schema::create('tournaments', function (Blueprint $table) {
     $table->timestamps();
     
     $table->index(['status', 'starts_at']);
-    $table->index(['title_id', 'status']);
+    $table->index(['title_slug', 'status']);
 });
 
 Schema::create('tournament_user', function (Blueprint $table) {
@@ -503,61 +522,163 @@ Schema::create('tournament_user', function (Blueprint $table) {
 });
 ```
 
+### PlanAudit
+*New* - Daily strikes and monthly quota tracking per membership plan
+
+**Important Note**: This table replaces storing strikes/quotas directly on users table. Each user gets a new record per day, allowing historical tracking and natural reset behavior.
+
+**Fields**:
+- `id`: bigint, primary key
+- `user_id`: foreign key to users, indexed (required)
+- `membership_plan`: string (required, references MembershipPlan enum)
+- `day`: date (required) - EST timezone used for cutoff logic
+- `strikes_used`: integer, default 0 - Daily free games used
+- `strikes_limit`: integer (required) - Daily free games allowed
+- `quota_used`: integer, default 0 - Monthly games used
+- `quota_limit`: integer (required) - Monthly games allowed
+- `created_at`: timestamp
+- `updated_at`: timestamp
+
+**Indexes**:
+- Unique composite index on (user_id, membership_plan, day) - one record per user per plan per day
+- Index on (user_id, day) for daily lookups
+- Index on (membership_plan, day) for plan-wide queries
+
+**Relationships**:
+- Belongs to User
+- References MembershipPlan enum via membership_plan field
+
+**Validation Rules**:
+- All fields required (no nullables)
+- Unique constraint ensures one audit record per user per plan per day
+- Strikes reset: Daily at midnight EST (new day = new record)
+- Quota reset: Monthly on 1st at midnight EST (handled in app logic)
+- strikes_used must be <= strikes_limit
+- quota_used must be <= quota_limit
+
+**Usage Pattern**:
+- Application creates new record each day in EST timezone
+- Strikes track daily free games (e.g., 3 free games per day)
+- Quotas track monthly limits (e.g., 100 games per month for Free tier)
+- Historical records preserved for analytics
+
+**Migration**:
+```php
+Schema::create('plan_audits', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->string('membership_plan');
+    $table->date('day');
+    
+    // Daily strikes tracking (resets daily at midnight EST)
+    $table->integer('strikes_used')->default(0);
+    $table->integer('strikes_limit');
+    
+    // Monthly quota tracking (resets on 1st of month at midnight EST)
+    $table->integer('quota_used')->default(0);
+    $table->integer('quota_limit');
+    
+    $table->timestamps();
+    
+    // Unique constraint: one audit record per user per membership plan per day
+    $table->unique(['user_id', 'membership_plan', 'day']);
+    
+    // Indexes for lookups
+    $table->index(['user_id', 'day']);
+    $table->index(['membership_plan', 'day']);
+});
+```
+
 ## Schema Changes to Existing Tables
 
 ### Add Economy Fields to Users Table
 
+**Implementation Note**: Stripe integration for subscription payments (not virtual currency).
+
 **Migration**:
 ```php
 Schema::table('users', function (Blueprint $table) {
-    // Add stripe customer ID for Cashier integration
+    // Add stripe customer ID for Cashier integration (subscription payments)
     $table->string('stripe_customer_id')->nullable()->after('email_verified_at');
-    
-    // Add daily free strikes tracking
-    $table->integer('daily_strikes_remaining')->default(3)->after('level');
-    $table->date('strikes_reset_date')->nullable()->after('daily_strikes_remaining');
-    
-    // Add monthly quota tracking
-    $table->integer('monthly_quota_used')->default(0)->after('strikes_reset_date');
-    $table->date('quota_reset_date')->nullable()->after('monthly_quota_used');
 });
 ```
 
+**Removed Fields** (originally planned but now tracked in plan_audits table):
+- ~~`daily_strikes_remaining`~~ / ~~`strikes_reset_date`~~ - Now in plan_audits table
+- ~~`monthly_quota_used`~~ / ~~`quota_reset_date`~~ - Now in plan_audits table
+
 ### Add Outcome Fields to Games Table
+
+**Implementation Note**: Games table already has `outcome_type` and `outcome_details` fields. Only add missing fields.
+
+**Current Fields**:
+- ✅ `winner_id` (existing)
+- ✅ `winner_position` (existing)
+- ✅ `outcome_type` (existing - string, may need enum conversion)
+- ✅ `outcome_details` (existing - json)
 
 **Migration**:
 ```php
 Schema::table('games', function (Blueprint $table) {
-    // Add detailed outcome tracking
-    $table->json('final_scores')->nullable()->after('winner_id');
+    // Add detailed outcome tracking (only missing fields)
+    $table->json('final_scores')->nullable()->after('outcome_details');
     $table->integer('xp_awarded')->nullable()->after('final_scores');
     $table->json('rewards')->nullable()->after('xp_awarded'); // achievements, items, etc.
-    $table->enum('completion_type', ['normal', 'concede', 'abandon', 'timeout'])->nullable()->after('rewards');
+    
+    // Optional: Convert outcome_type from string to enum if needed
+    // $table->enum('outcome_type', ['win', 'draw', 'forfeit', 'timeout'])->nullable()->change();
+});
+```
+
+### Add Membership Plan to Subscription Items Table
+
+**Implementation Note**: After creating `MembershipPlan` enum, add field to track which plan the subscription item represents.
+
+**Migration** (to be created after enum):
+```php
+Schema::table('subscription_items', function (Blueprint $table) {
+    $table->string('membership_plan')->nullable()->after('stripe_product');
+    // Store enum value as string to reference MembershipPlan::Free, ::Pro, ::Elite, etc.
 });
 ```
 
 ## Entity Relationships Diagram
 
+**Architecture Note**: This system uses **version-controlled enums** instead of database tables for titles and membership plans:
+- **GameTitle enum** (not a table) - Version controlled game titles (connect-four, checkers, hearts, spades)
+- **MembershipPlan enum** (not a table) - Version controlled subscription tiers (Free, Pro, Elite, etc.)
+- **Database references**: Use `title_slug` (string) + `mode_id` (foreign key) to reference games
+
 ```
 User
 ├── has many Games (player)
 ├── has many Alerts
-├── has one Balance
+├── has many Balances (per client)
 ├── has many Transactions
 ├── has many MatchmakingSignals
 ├── has many Proposals (sent)
 ├── has many Proposals (received)
+├── has many PlanAudits
 └── belongs to many Tournaments
 
-Title
+GameTitle Enum (version controlled, not a table)
+├── referenced by Games (via title_slug)
+├── referenced by Lobbies (via title_slug)
+├── referenced by MatchmakingSignals (via title_slug)
+├── referenced by Proposals (via title_slug)
+└── referenced by Tournaments (via title_slug)
+
+Mode (database table)
 ├── has many Games
 ├── has many Lobbies
 ├── has many MatchmakingSignals
 ├── has many Proposals
-└── has many Tournaments
+├── has many Tournaments
+└── belongs to GameTitle (via title_slug)
 
 Game
-├── belongs to Title
+├── references GameTitle (via title_slug)
+├── belongs to Mode
 ├── belongs to many Users (players)
 ├── has many GameActions
 ├── has many GameEvents
@@ -565,35 +686,51 @@ Game
 
 Lobby
 ├── belongs to User (host)
-├── belongs to Title
+├── references GameTitle (via title_slug)
+├── belongs to Mode
 └── belongs to many Users (players)
 
 MatchmakingSignal
 ├── belongs to User
-└── belongs to Title
+├── references GameTitle (via title_slug)
+└── belongs to Mode
 
 Proposal
 ├── belongs to User (sender)
 ├── belongs to User (recipient)
-├── belongs to Title
-└── may belong to Game (previous_game)
+├── references GameTitle (via title_slug)
+├── belongs to Mode
+├── may belong to Game (previous_game)
+└── may belong to Game (new_game)
 
 Balance
-└── belongs to User
+├── belongs to User
+└── belongs to Client
 
 Transaction
-└── belongs to User
+├── belongs to User
+├── may belong to Client (nullable)
+└── may belong to Subscription (nullable)
 
 Tournament
-├── belongs to Title
+├── references GameTitle (via title_slug)
+├── belongs to Mode
 ├── belongs to many Users (participants)
 └── has many Games (matches)
+
+PlanAudit
+├── belongs to User
+└── references MembershipPlan (via membership_plan field)
 
 Alert
 └── belongs to User
 
-SubscriptionPlan
-└── has many Users (subscribers)
+MembershipPlan Enum (version controlled, not a table)
+├── referenced by SubscriptionItems (via membership_plan field)
+└── referenced by PlanAudits (via membership_plan field)
+
+Client
+└── has many Balances
 ```
 
 ## Data Transfer Objects (DTOs)

@@ -110,13 +110,16 @@ app/
 │   ├── User.php (existing)
 │   ├── Game.php (existing)
 │   ├── Lobby.php (existing)
+│   ├── Mode.php (existing)
 │   ├── MatchmakingSignal.php (new)
-│   ├── Proposal.php (new)
+│   ├── Proposal.php (new - rename from RematchRequest)
 │   ├── Transaction.php (existing)
-│   ├── Balance.php (new)
-│   ├── SubscriptionPlan.php (existing)
+│   ├── Balance.php (existing)
 │   ├── Tournament.php (new)
 │   └── Alert.php (existing)
+├── Enums/
+│   ├── GameTitle.php (existing - version controlled)
+│   └── MembershipPlan.php (new - version controlled)
 ├── Services/
 │   ├── SystemHealthService.php (new)
 │   ├── GameLibraryService.php (new)
@@ -178,11 +181,31 @@ tests/
 
 database/
 └── migrations/
-    ├── create_matchmaking_signals_table.php (new)
-    ├── create_proposals_table.php (new)
-    ├── create_balances_table.php (new)
+    ├── create_matchmaking_signals_table.php (new - rename/modify existing quickplay migration)
+    ├── create_proposals_table.php (new - rename/modify existing rematch_requests migration)
+    ├── create_balances_table.php (existing - 2025_11_20_000001)
+    ├── create_transactions_table.php (existing - 2025_11_20_000002)
     ├── create_tournaments_table.php (new)
-    └── add_economy_fields_to_users_table.php (new)
+    ├── create_tournament_user_table.php (new - pivot table)
+    ├── add_stripe_customer_to_users_table.php (new)
+    ├── add_outcome_fields_to_games_table.php (new)
+    └── add_membership_plan_to_subscription_items_table.php (new - after MembershipPlan enum created)
+```
+
+**Migration Strategy Notes**:
+- **MatchmakingSignals**: Rename/modify existing quickplay migration (if it exists) to match Floor namespace spec
+- **Proposals**: Rename/modify existing `rematch_requests` table (2025_11_17_035314) to support both challenges and rematches
+- **Balances/Transactions**: Already implemented with multi-client architecture
+- **Tournaments**: New tables for competitive play with tokens/chips buy-ins
+- **Users**: Add `stripe_customer_id` for Cashier integration (strikes/quotas tracked in separate tables)
+- **Games**: Add `final_scores`, `xp_awarded`, `rewards` fields (outcome_type already exists)
+- **SubscriptionItems**: Add `membership_plan` enum field after creating MembershipPlan enum
+
+**Architecture Notes**:
+- **No Titles Table**: Using version-controlled `GameTitle` enum instead (connect-four, checkers, hearts, spades)
+- **No Subscription Plans Table**: Using version-controlled `MembershipPlan` enum instead (Free, Pro, Elite, etc.)
+- **Database References**: Combine `title_slug` (string) + `mode_id` (foreign key) to reference games
+- **Existing Tables**: `modes` table stores game modes with composite key (`title_slug`, `slug`)
 ```
 
 **Structure Decision**: Web API (Option 2 variant - single Laravel backend)
@@ -198,3 +221,88 @@ This feature involves refactoring existing endpoints into a more organized struc
 - Separating platform services (System, Library, Auth, Account) from gameplay (Floor, Games)
 - Isolating financial operations into dedicated Economy namespace
 - Making API structure more discoverable and maintainable
+
+## Implementation Clarifications (Updated November 20, 2025)
+
+### Database Architecture Decisions
+
+**Version-Controlled Enums (No Database Tables)**:
+- **GameTitle Enum**: Replaces titles table, values stored as `title_slug` string in migrations
+  - Current values: `connect-four`, `checkers`, `hearts`, `spades`
+  - Located: `app/Enums/GameTitle.php`
+  - Usage: Games, Lobbies, MatchmakingSignals, Proposals, Tournaments reference via `title_slug` field
+
+- **MembershipPlan Enum**: Replaces subscription_plans table (to be created)
+  - Proposed values: `Free`, `Pro`, `Elite` (exact values TBD)
+  - Usage: SubscriptionItems table will have `membership_plan` field after enum creation
+
+**Game References Pattern**:
+All game-related tables use composite reference pattern:
+- `title_slug` (string) - References GameTitle enum case value
+- `mode_id` (foreign key) - References modes table (which also stores title_slug)
+- Example: Games table has both `title_slug` and `mode_id`
+
+**Existing Migration Renames/Modifications**:
+1. **MatchmakingSignals**: Currently planned as "quickplay" migration (not yet created)
+   - Will be named `create_matchmaking_signals_table.php`
+   - Supports quickplay and ranked matchmaking with ELO
+
+2. **Proposals**: Existing `rematch_requests` table needs expansion
+   - Current: `2025_11_17_035314_create_rematch_requests_table.php`
+   - Rename to: `create_proposals_table.php`
+   - Add: `type` enum(challenge, rematch), `title_slug`, `mode_id`, `game_settings`, `responded_at`
+   - Rename fields: `requesting_user_id` → `sender_id`, `opponent_user_id` → `recipient_id`, `original_game_id` → `previous_game_id`
+
+### Economy Namespace Changes
+
+**Tournament Currency Simplification**:
+- **Old spec**: `buy_in_currency enum(real_money, bonus_chips, hard_currency)`
+- **New spec**: `buy_in_currency enum(tokens, chips)` with default 'chips'
+- **Rationale**: Align with existing Balance table (tokens/chips only), entertainment-only economy principle
+- **Typical usage**: Tournaments will primarily use chips
+
+### User Table Changes
+
+**Simplified from original spec**:
+- ✅ **Keep**: `stripe_customer_id` (nullable) - For Cashier subscription integration
+- ❌ **Remove**: `daily_strikes_remaining`, `strikes_reset_date` - Already tracked in strikes table
+- ❌ **Remove**: `monthly_quota_used`, `quota_reset_date` - Already tracked in quotas table
+
+**Separate tables already exist**:
+- `strikes` table (2025_11_13_000010) - Tracks daily free games
+- `quotas` table (2025_11_13_000011) - Tracks monthly limits
+
+### Games Table Changes
+
+**Partially implemented**:
+- ✅ **Existing**: `winner_id`, `winner_position`, `outcome_type` (string), `outcome_details` (json)
+- ➕ **Add**: `final_scores` (json), `xp_awarded` (integer), `rewards` (json)
+- 🔄 **Consider**: Converting `outcome_type` from string to enum(win, draw, forfeit, timeout)
+
+### Floor Namespace
+
+**New coordination layer for matchmaking**:
+- **MatchmakingSignals**: Quickplay/ranked intent with ELO-based matching
+- **Proposals**: Direct challenges + rematch requests (unified table)
+- **Lobbies**: Private room coordination (already exists)
+
+### Competitions Namespace
+
+**Tournament Structure**:
+- **Primary table**: `tournaments` with format enum(single_elimination, double_elimination, round_robin, swiss)
+- **Pivot table**: `tournament_user` for participants with seed, rank, winnings, status
+- **Integration**: Tournament matches create Game records with tournament_id reference
+- **Virtual economy**: Buy-ins and prizes use tokens/chips (entertainment only)
+
+### Outstanding Questions
+
+**To Be Determined**:
+1. **User quota fields**: Should `daily_strikes_remaining`/`monthly_quota_used` stay in separate strikes/quotas tables or consolidate into users table?
+   - Current decision: Keep in separate tables (strikes/quotas already exist)
+
+2. **MembershipPlan enum values**: Need to define Free/Pro/Elite tier details
+   - Action: Create enum before adding field to subscription_items migration
+
+3. **Games table outcome_type**: Keep as string or convert to enum?
+   - Current: String with values like 'win', 'draw', 'forfeit', 'timeout'
+   - Consideration: Enum conversion for type safety (optional migration)

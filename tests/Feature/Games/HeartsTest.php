@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Exceptions\InvalidGameConfigurationException;
+use App\Games\Hearts\HeartsPlayer;
 use App\Games\Hearts\HeartsTable;
 use App\Games\Hearts\Modes\StandardMode;
-use App\Games\Hearts\HeartsPlayer;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Games\Hearts\Modes;
 
-use App\Games\Hearts\HeartsProtocol;
-use App\Games\Hearts\HeartsReporter;
 use App\Games\Hearts\HeartsArbiter;
 use App\Games\Hearts\HeartsConfig;
+use App\Games\Hearts\HeartsProtocol;
+use App\Games\Hearts\HeartsReporter;
 
 /**
  * Standard Hearts mode implementation.

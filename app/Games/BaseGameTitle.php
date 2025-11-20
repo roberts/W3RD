@@ -2,14 +2,14 @@
 
 namespace App\Games;
 
+use App\GameEngine\GameOutcome;
+use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameEngine\Interfaces\GameTitleContract;
+use App\GameEngine\Kernel\GameKernel;
+use App\GameEngine\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
-use App\GameEngine\GameOutcome;
-use App\GameEngine\Kernel\GameKernel;
-use App\GameEngine\Interfaces\GameConfigContract;
-use App\GameEngine\ValidationResult;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {

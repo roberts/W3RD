@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Games\ValidateFour;
 
-use App\GameEngine\Interfaces\GameArbiterContract;
 use App\GameEngine\GameOutcome;
+use App\GameEngine\Interfaces\GameArbiterContract;
 
 class ValidateFourArbiter implements GameArbiterContract
 {

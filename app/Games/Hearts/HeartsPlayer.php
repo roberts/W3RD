@@ -25,8 +25,7 @@ class HeartsPlayer
         public readonly int $position,
         public readonly int $score,
         public readonly int $roundScore = 0,
-    ) {
-    }
+    ) {}
 
     /**
      * Create player state from array.

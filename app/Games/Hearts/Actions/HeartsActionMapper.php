@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Games\Hearts\Actions;
 
 use App\Exceptions\InvalidActionDataException;
-use App\GameEngine\Actions\PlayCard;
-use App\GameEngine\Actions\PassCards;
 use App\GameEngine\Actions\ClaimRemainingTricks;
+use App\GameEngine\Actions\PassCards;
+use App\GameEngine\Actions\PlayCard;
 use App\GameEngine\Interfaces\ActionMapperContract;
 use App\GameEngine\Interfaces\GameActionContract;
 
@@ -105,11 +105,11 @@ class HeartsActionMapper implements ActionMapperContract
         }
 
         if ($actionType === 'claim_remaining_tricks') {
-            return new ClaimRemainingTricks();
+            return new ClaimRemainingTricks;
         }
 
         // deal_cards requires no data
-        return new DealCards();
+        return new DealCards;
     }
 
     /**

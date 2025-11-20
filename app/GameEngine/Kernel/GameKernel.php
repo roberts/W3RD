@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Kernel;
 
+use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\ValidationResult;
-use App\Enums\GameErrorCode;
 use InvalidArgumentException;
 
 class GameKernel

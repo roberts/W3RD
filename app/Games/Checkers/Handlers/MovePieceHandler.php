@@ -4,50 +4,49 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\GameEngine\Actions\MovePiece;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\GameEngine\Actions\MovePiece;
 use App\Games\Checkers\CheckersBoard;
-use App\Games\Checkers\CheckersPlayer;
 use App\Games\Checkers\Enums\CheckersActionError;
-use App\Enums\GameErrorCode;
 
 class MovePieceHandler implements GameActionHandlerInterface
 {
     public function validate(object $state, object $action): ValidationResult
     {
         if (! ($state instanceof CheckersBoard)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
+            return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
         }
         if (! ($action instanceof MovePiece)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be MovePiece');
+            return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be MovePiece');
         }
 
         // 1. Check bounds
-        if (!$this->isWithinBounds($action->toRow, $action->toCol)) {
-             return ValidationResult::invalid(CheckersActionError::POSITION_OUT_OF_BOUNDS->value, 'Destination is out of bounds');
+        if (! $this->isWithinBounds($action->toRow, $action->toCol)) {
+            return ValidationResult::invalid(CheckersActionError::POSITION_OUT_OF_BOUNDS->value, 'Destination is out of bounds');
         }
 
         // 2. Check if destination is empty
         if ($state->getPieceAt($action->toRow, $action->toCol) !== null) {
-             return ValidationResult::invalid(CheckersActionError::DESTINATION_OCCUPIED->value, 'Destination is occupied');
+            return ValidationResult::invalid(CheckersActionError::DESTINATION_OCCUPIED->value, 'Destination is occupied');
         }
 
         // 3. Check if piece exists at source
         $piece = $state->getPieceAt($action->fromRow, $action->fromCol);
         if ($piece === null) {
-             return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'No piece at source');
+            return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'No piece at source');
         }
 
         // 4. Check if piece belongs to current player
         if ($piece['player'] !== $state->currentPlayerUlid) {
-             return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'Piece does not belong to you');
+            return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'Piece does not belong to you');
         }
 
         // 5. Check direction and distance
         $playerState = $state->players[$state->currentPlayerUlid];
         $isKing = $piece['king'];
-        
+
         $rowDiff = $action->toRow - $action->fromRow;
         $colDiff = abs($action->toCol - $action->fromCol);
 
@@ -72,7 +71,7 @@ class MovePieceHandler implements GameActionHandlerInterface
                 }
             }
         }
-        
+
         return ValidationResult::valid();
     }
 
@@ -98,7 +97,7 @@ class MovePieceHandler implements GameActionHandlerInterface
         // TODO: Implement move generation for AI/UI
         return [];
     }
-    
+
     private function isWithinBounds(int $row, int $col): bool
     {
         return $row >= 0 && $row < 8 && $col >= 0 && $col < 8;

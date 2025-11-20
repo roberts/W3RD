@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Games\Checkers\Actions;
 
 use App\Exceptions\InvalidActionDataException;
-use App\GameEngine\Actions\MovePiece;
-use App\GameEngine\Actions\JumpPiece;
 use App\GameEngine\Actions\DoubleJumpPiece;
+use App\GameEngine\Actions\JumpPiece;
+use App\GameEngine\Actions\MovePiece;
 use App\GameEngine\Actions\TripleJumpPiece;
 use App\GameEngine\Interfaces\ActionMapperContract;
 use App\GameEngine\Interfaces\GameActionContract;

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Games\ValidateFour\Handlers;
 
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
-use App\Games\ValidateFour\Actions\PopOut;
-use App\Games\ValidateFour\ValidateFourBoard;
 use App\GameEngine\ValidationResult;
+use App\Games\ValidateFour\Actions\PopOut;
 use App\Games\ValidateFour\Enums\PopOutModeError;
+use App\Games\ValidateFour\ValidateFourBoard;
 
 class PopOutHandler implements GameActionHandlerInterface
 {
@@ -26,7 +26,7 @@ class PopOutHandler implements GameActionHandlerInterface
         if ($action->column < 0 || $action->column >= $gameState->columns) {
             return ValidationResult::invalid(
                 'INVALID_COLUMN',
-                "Column must be between 0 and ".($gameState->columns - 1),
+                'Column must be between 0 and '.($gameState->columns - 1),
                 ['column' => $action->column]
             );
         }
@@ -62,7 +62,7 @@ class PopOutHandler implements GameActionHandlerInterface
         // Logic to shift column down
         $newBoard = $gameState->board;
         $col = $action->column;
-        
+
         // Shift pieces down
         for ($row = $gameState->rows - 1; $row > 0; $row--) {
             $newBoard[$row][$col] = $newBoard[$row - 1][$col];

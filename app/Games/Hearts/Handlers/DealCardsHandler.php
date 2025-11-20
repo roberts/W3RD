@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Games\Hearts\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\Enums\GamePhase;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
 use App\Games\Hearts\Actions\DealCards;
-use App\Games\Hearts\HeartsTable;
-use App\Enums\GamePhase;
-use App\Enums\GameErrorCode;
-
 use App\Games\Hearts\Enums\HeartsActionError;
+use App\Games\Hearts\HeartsTable;
 
 class DealCardsHandler implements GameActionHandlerInterface
 {
@@ -33,7 +32,7 @@ class DealCardsHandler implements GameActionHandlerInterface
         $hands = $state->hands;
         $firstHand = reset($hands);
         if (! empty($firstHand)) {
-             return ValidationResult::invalid('ALREADY_DEALT', 'Cards have already been dealt');
+            return ValidationResult::invalid('ALREADY_DEALT', 'Cards have already been dealt');
         }
 
         return ValidationResult::valid();

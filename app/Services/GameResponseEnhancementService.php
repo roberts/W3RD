@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Games\BaseGameTitle;
 use App\GameEngine\GameOutcome;
+use App\Games\BaseGameTitle;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Providers\GameServiceProvider;

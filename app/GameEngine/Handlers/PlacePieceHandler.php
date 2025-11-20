@@ -45,7 +45,7 @@ class PlacePieceHandler implements GameActionHandlerInterface
             // Non-gravity logic (e.g. TicTacToe or Go) would check if specific cell is empty
             // For now, we focus on Connect 4 style
             if ($action->row === null) {
-                 return ValidationResult::invalid('MISSING_ROW', 'Row is required for non-gravity placement');
+                return ValidationResult::invalid('MISSING_ROW', 'Row is required for non-gravity placement');
             }
             // Check row bounds and if cell is empty...
         }
@@ -81,7 +81,7 @@ class PlacePieceHandler implements GameActionHandlerInterface
 
     public function getAvailableOptions(object $state, string $playerUlid): array
     {
-        // If not player's turn, no options? 
+        // If not player's turn, no options?
         // The Kernel or State Machine might handle turn order, but Handler can also check.
         if (isset($state->currentPlayerUlid) && $state->currentPlayerUlid !== $playerUlid) {
             return [];

@@ -25,7 +25,7 @@ abstract class BaseGameReporter implements GameReporterContract
     {
         $username = $action->player->user->username ?? 'Player';
         $type = str_replace('_', ' ', $action->action_type->value);
-        
+
         return sprintf('%s performed %s', $username, $type);
     }
 
@@ -40,8 +40,8 @@ abstract class BaseGameReporter implements GameReporterContract
     public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
     {
         return [
-            'duration_seconds' => $game->started_at && $game->completed_at 
-                ? $game->completed_at->diffInSeconds($game->started_at) 
+            'duration_seconds' => $game->started_at && $game->completed_at
+                ? $game->completed_at->diffInSeconds($game->started_at)
                 : 0,
             'total_turns' => $game->actions()->count(),
         ];

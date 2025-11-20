@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Modes;
 
-use App\Games\Checkers\CheckersProtocol;
-use App\Games\Checkers\CheckersReporter;
 use App\Games\Checkers\CheckersArbiter;
 use App\Games\Checkers\CheckersConfig;
+use App\Games\Checkers\CheckersProtocol;
+use App\Games\Checkers\CheckersReporter;
 
 /**
  * Standard Checkers mode implementation.

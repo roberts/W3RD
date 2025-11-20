@@ -2,13 +2,10 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\ValidateFour\ValidateFourProtocol;
-use App\Games\ValidateFour\Configs\StandardConfig;
-use App\Games\ValidateFour\ValidateFourBoard;
-use App\Games\ValidateFour\ValidateFourReporter;
 use App\Games\ValidateFour\ValidateFourArbiter;
 use App\Games\ValidateFour\ValidateFourConfig;
+use App\Games\ValidateFour\ValidateFourProtocol;
+use App\Games\ValidateFour\ValidateFourReporter;
 
 class NineBySixMode extends ValidateFourProtocol
 {

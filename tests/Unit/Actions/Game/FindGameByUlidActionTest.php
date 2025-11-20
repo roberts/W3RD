@@ -4,7 +4,6 @@ use App\Actions\Game\FindGameByUlidAction;
 use App\Models\Game\Game;
 use App\Models\Game\Mode;
 use App\Models\Game\Player;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('FindGameByUlidAction', function () {
     describe('Eager Loading', function () {

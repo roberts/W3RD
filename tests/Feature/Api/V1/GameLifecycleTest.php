@@ -416,7 +416,7 @@ describe('Game Lifecycle', function () {
         it('returns empty array when not player turn', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
-            
+
             $p1Ulid = (string) Str::ulid();
             $p2Ulid = (string) Str::ulid();
 
@@ -436,7 +436,7 @@ describe('Game Lifecycle', function () {
                     'roundNumber' => 1,
                     'winnerUlid' => null,
                     'isDraw' => false,
-                ]
+                ],
             ]);
             Player::factory()->create([
                 'game_id' => $game->id,

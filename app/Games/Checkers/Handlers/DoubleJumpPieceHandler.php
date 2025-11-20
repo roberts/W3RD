@@ -4,27 +4,26 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\GameEngine\Actions\DoubleJumpPiece;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\GameEngine\Actions\DoubleJumpPiece;
 use App\Games\Checkers\CheckersBoard;
-use App\Games\Checkers\Enums\CheckersActionError;
-use App\Enums\GameErrorCode;
 
 class DoubleJumpPieceHandler implements GameActionHandlerInterface
 {
     public function validate(object $state, object $action): ValidationResult
     {
         if (! ($state instanceof CheckersBoard)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
+            return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
         }
         if (! ($action instanceof DoubleJumpPiece)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be DoubleJumpPiece');
+            return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be DoubleJumpPiece');
         }
 
         // Simplified validation for now - assuming client sends valid moves or we trust the sequence
         // In a real implementation, we would validate each jump step.
-        
+
         return ValidationResult::valid();
     }
 
@@ -70,6 +69,7 @@ class DoubleJumpPieceHandler implements GameActionHandlerInterface
         $playerUlids = array_keys($gameState->players);
         $currentIndex = array_search($gameState->currentPlayerUlid, $playerUlids);
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
+
         return $playerUlids[$nextIndex];
     }
 }

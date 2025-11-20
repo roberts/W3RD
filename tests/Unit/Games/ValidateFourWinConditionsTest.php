@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Games\ValidateFour\ValidateFourBoard;
 use App\Games\ValidateFour\Modes\StandardMode;
+use App\Games\ValidateFour\ValidateFourBoard;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
 

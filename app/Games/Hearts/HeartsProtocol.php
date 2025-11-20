@@ -6,16 +6,13 @@ namespace App\Games\Hearts;
 
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\BaseCardGameTitle;
 use App\GameEngine\GameOutcome;
-use App\GameEngine\ValidationResult;
 use App\GameEngine\Interfaces\GameTitleContract;
+use App\Games\BaseCardGameTitle;
+use App\Games\Hearts\Actions\HeartsActionMapper;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use Carbon\Carbon;
-use App\GameEngine\Kernel\GameKernel;
-use App\GameEngine\Interfaces\GameConfigContract;
-use App\Games\Hearts\Actions\HeartsActionMapper;
 
 /**
  * Base Hearts game implementation.
@@ -190,8 +187,6 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
             default => 'left',  // Fallback, shouldn't happen with modulo 4
         };
     }
-
-
 
     protected function determineTrickWinner(array $trick, string $leadPlayerUlid): string
     {

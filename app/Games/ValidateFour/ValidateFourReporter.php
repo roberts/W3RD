@@ -22,7 +22,7 @@ class ValidateFourReporter implements GameReporterContract
     public function describeStateChanges(Game $game, Action $action, object $gameState): array
     {
         $changes = [];
-        
+
         // Check for phase transitions
         if (isset($gameState->phase) && isset($game->game_state['phase']) && $gameState->phase->value !== $game->game_state['phase']) {
             $changes['phase_transition'] = $gameState->phase->value;
@@ -91,6 +91,7 @@ class ValidateFourReporter implements GameReporterContract
                 }
             }
         }
+
         return $count;
     }
 
@@ -102,6 +103,7 @@ class ValidateFourReporter implements GameReporterContract
                 $available++;
             }
         }
+
         return $available;
     }
 

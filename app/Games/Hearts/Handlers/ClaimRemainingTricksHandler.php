@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Games\Hearts\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\GameEngine\Actions\ClaimRemainingTricks;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\GameEngine\Actions\ClaimRemainingTricks;
 use App\Games\Hearts\HeartsTable;
-use App\Enums\GameErrorCode;
 
 class ClaimRemainingTricksHandler implements GameActionHandlerInterface
 {
     public function validate(object $state, object $action): ValidationResult
     {
         if (! ($state instanceof HeartsTable)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Hearts HeartsTable');
+            return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Hearts HeartsTable');
         }
         if (! ($action instanceof ClaimRemainingTricks)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be ClaimRemainingTricks');
+            return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be ClaimRemainingTricks');
         }
 
         return ValidationResult::valid();

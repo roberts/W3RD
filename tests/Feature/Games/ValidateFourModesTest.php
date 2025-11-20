@@ -12,7 +12,7 @@ describe('ValidateFour Modes', function () {
     test('PopOutMode has PopOut action', function () {
         $game = new Game(['game_state' => []]);
         $mode = new PopOutMode($game);
-        
+
         $reflection = new ReflectionClass($mode);
         $method = $reflection->getMethod('getGameConfig');
         $method->setAccessible(true);

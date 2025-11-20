@@ -7,7 +7,6 @@ namespace App\Games\Hearts;
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\BaseHeartsTable;
 
 /**
  * Immutable game state for Hearts.
@@ -26,7 +25,7 @@ use App\Games\BaseHeartsTable;
  * - `createNew(...$playerUlids)` - New game
  * - `fromArray($data)` - Restore from database JSON
  */
-final class HeartsTable 
+final class HeartsTable
 {
     /**
      * Map of player ULID to HeartsPlayer.
@@ -173,8 +172,6 @@ final class HeartsTable
 
     /**
      * Deal cards to players.
-     *
-     * @return self
      */
     public function dealCards(): self
     {
@@ -224,9 +221,10 @@ final class HeartsTable
         $deck = [];
         foreach ($suits as $suit) {
             foreach ($ranks as $rank) {
-                $deck[] = $suit . $rank;
+                $deck[] = $suit.$rank;
             }
         }
+
         return $deck;
     }
 

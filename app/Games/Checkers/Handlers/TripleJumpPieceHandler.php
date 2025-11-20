@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\GameEngine\Actions\TripleJumpPiece;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\GameEngine\Actions\TripleJumpPiece;
 use App\Games\Checkers\CheckersBoard;
-use App\Games\Checkers\Enums\CheckersActionError;
-use App\Enums\GameErrorCode;
 
 class TripleJumpPieceHandler implements GameActionHandlerInterface
 {
     public function validate(object $state, object $action): ValidationResult
     {
         if (! ($state instanceof CheckersBoard)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
+            return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
         }
         if (! ($action instanceof TripleJumpPiece)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be TripleJumpPiece');
+            return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be TripleJumpPiece');
         }
 
         return ValidationResult::valid();
@@ -67,6 +66,7 @@ class TripleJumpPieceHandler implements GameActionHandlerInterface
         $playerUlids = array_keys($gameState->players);
         $currentIndex = array_search($gameState->currentPlayerUlid, $playerUlids);
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
+
         return $playerUlids[$nextIndex];
     }
 }

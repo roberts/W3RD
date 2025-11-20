@@ -2,12 +2,12 @@
 
 namespace App\Games\ValidateFour\Modes;
 
-use App\Games\ValidateFour\ValidateFourProtocol;
 use App\Games\ValidateFour\Actions\PopOut;
 use App\Games\ValidateFour\Handlers\PopOutHandler;
-use App\Games\ValidateFour\ValidateFourReporter;
 use App\Games\ValidateFour\ValidateFourArbiter;
 use App\Games\ValidateFour\ValidateFourConfig;
+use App\Games\ValidateFour\ValidateFourProtocol;
+use App\Games\ValidateFour\ValidateFourReporter;
 
 class PopOutMode extends ValidateFourProtocol
 {

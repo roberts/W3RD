@@ -3,7 +3,6 @@
 use App\Models\Auth\Entry;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Lobby;
 use Illuminate\Support\Carbon;
 
 describe('Time-Based Edge Cases', function () {

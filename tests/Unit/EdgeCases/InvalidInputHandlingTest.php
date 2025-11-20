@@ -1,9 +1,7 @@
 <?php
 
-use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Models\Auth\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('Invalid and Malformed Input Handling', function () {
     describe('Special Characters and Encoding', function () {

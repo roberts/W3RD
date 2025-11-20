@@ -4,7 +4,6 @@ use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('FindLobbyByUlidAction', function () {
     describe('Eager Loading', function () {

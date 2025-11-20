@@ -40,8 +40,8 @@ class CheckersReporter implements GameReporterContract
         return match ($type) {
             'move_piece' => "Moved piece from ({$data['from_row']}, {$data['from_col']}) to ({$data['to_row']}, {$data['to_col']})",
             'jump_piece' => "Jumped piece from ({$data['from_row']}, {$data['from_col']}) to ({$data['to_row']}, {$data['to_col']})",
-            'double_jump_piece' => "Double jumped",
-            'triple_jump_piece' => "Triple jumped",
+            'double_jump_piece' => 'Double jumped',
+            'triple_jump_piece' => 'Triple jumped',
             default => "Performed action: {$type}",
         };
     }

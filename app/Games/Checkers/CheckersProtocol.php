@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Games\Checkers;
 
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\BaseBoardGameTitle;
 use App\GameEngine\GameOutcome;
-use App\GameEngine\ValidationResult;
 use App\GameEngine\Interfaces\GameTitleContract;
+use App\Games\BaseBoardGameTitle;
+use App\Games\Checkers\Actions\CheckersActionMapper;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use Carbon\Carbon;
-use App\GameEngine\Kernel\GameKernel;
-use App\GameEngine\Interfaces\GameConfigContract;
-use App\Games\Checkers\Actions\CheckersActionMapper;
 
 /**
  * Base Checkers game implementation.
@@ -118,5 +115,4 @@ abstract class CheckersProtocol extends BaseBoardGameTitle implements GameTitleC
     {
         return self::DEFAULT_TIMEOUT_PENALTY;
     }
-
 }

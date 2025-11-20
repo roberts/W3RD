@@ -4,43 +4,43 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Handlers;
 
+use App\Enums\GameErrorCode;
+use App\GameEngine\Actions\JumpPiece;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\GameEngine\Actions\JumpPiece;
 use App\Games\Checkers\CheckersBoard;
 use App\Games\Checkers\Enums\CheckersActionError;
-use App\Enums\GameErrorCode;
 
 class JumpPieceHandler implements GameActionHandlerInterface
 {
     public function validate(object $state, object $action): ValidationResult
     {
         if (! ($state instanceof CheckersBoard)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
+            return ValidationResult::invalid(GameErrorCode::INVALID_STATE->value, 'State must be Checkers CheckersBoard');
         }
         if (! ($action instanceof JumpPiece)) {
-             return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be JumpPiece');
+            return ValidationResult::invalid(GameErrorCode::INVALID_ACTION_TYPE->value, 'Action must be JumpPiece');
         }
 
         // 1. Check bounds
-        if (!$this->isWithinBounds($action->toRow, $action->toCol)) {
-             return ValidationResult::invalid(CheckersActionError::POSITION_OUT_OF_BOUNDS->value, 'Destination is out of bounds');
+        if (! $this->isWithinBounds($action->toRow, $action->toCol)) {
+            return ValidationResult::invalid(CheckersActionError::POSITION_OUT_OF_BOUNDS->value, 'Destination is out of bounds');
         }
 
         // 2. Check if destination is empty
         if ($state->getPieceAt($action->toRow, $action->toCol) !== null) {
-             return ValidationResult::invalid(CheckersActionError::DESTINATION_OCCUPIED->value, 'Destination is occupied');
+            return ValidationResult::invalid(CheckersActionError::DESTINATION_OCCUPIED->value, 'Destination is occupied');
         }
 
         // 3. Check if piece exists at source
         $piece = $state->getPieceAt($action->fromRow, $action->fromCol);
         if ($piece === null) {
-             return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'No piece at source');
+            return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'No piece at source');
         }
 
         // 4. Check if piece belongs to current player
         if ($piece['player'] !== $state->currentPlayerUlid) {
-             return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'Piece does not belong to you');
+            return ValidationResult::invalid(CheckersActionError::INVALID_PIECE_SELECTION->value, 'Piece does not belong to you');
         }
 
         // 5. Check captured piece
@@ -55,7 +55,7 @@ class JumpPieceHandler implements GameActionHandlerInterface
         // 6. Check direction and distance
         $playerState = $state->players[$state->currentPlayerUlid];
         $isKing = $piece['king'];
-        
+
         $rowDiff = $action->toRow - $action->fromRow;
         $colDiff = abs($action->toCol - $action->fromCol);
 
@@ -69,12 +69,12 @@ class JumpPieceHandler implements GameActionHandlerInterface
         // Check if captured piece is in between
         $midRow = ($action->fromRow + $action->toRow) / 2;
         $midCol = ($action->fromCol + $action->toCol) / 2;
-        
+
         if ($midRow !== $action->capturedRow || $midCol !== $action->capturedCol) {
-             return ValidationResult::invalid(CheckersActionError::INVALID_CAPTURE->value, 'Captured piece must be jumped over');
+            return ValidationResult::invalid(CheckersActionError::INVALID_CAPTURE->value, 'Captured piece must be jumped over');
         }
 
-        if (!$isKing) {
+        if (! $isKing) {
             if ($playerState->color === 'red') {
                 // Red moves UP (decreasing row index)
                 if ($rowDiff !== -2) {
@@ -87,7 +87,7 @@ class JumpPieceHandler implements GameActionHandlerInterface
                 }
             }
         }
-        
+
         return ValidationResult::valid();
     }
 
@@ -124,7 +124,7 @@ class JumpPieceHandler implements GameActionHandlerInterface
     {
         return [];
     }
-    
+
     private function isWithinBounds(int $row, int $col): bool
     {
         return $row >= 0 && $row < 8 && $col >= 0 && $col < 8;
@@ -135,6 +135,7 @@ class JumpPieceHandler implements GameActionHandlerInterface
         $playerUlids = array_keys($gameState->players);
         $currentIndex = array_search($gameState->currentPlayerUlid, $playerUlids);
         $nextIndex = ($currentIndex + 1) % count($playerUlids);
+
         return $playerUlids[$nextIndex];
     }
 }

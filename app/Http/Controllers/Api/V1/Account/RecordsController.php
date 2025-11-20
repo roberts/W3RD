@@ -1,20 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class UserStatsController extends Controller
+class RecordsController extends Controller
 {
     use ApiResponses;
 
     /**
-     * Get global stats for the authenticated user.
+     * Get performance records and statistics.
+     *
+     * GET /v1/account/records
      */
-    public function show(Request $request): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -38,6 +40,9 @@ class UserStatsController extends Controller
         // Sum total points from the points ledger (using 'change' column)
         $totalPoints = $user->points()->sum('change');
 
+        // TODO: Implement ELO ratings per game
+        $eloRatings = [];
+
         // TODO: Implement global rank calculation
         $globalRank = null;
 
@@ -45,8 +50,10 @@ class UserStatsController extends Controller
             'total_games' => $totalGames,
             'wins' => $wins,
             'losses' => $losses,
+            'draws' => $totalGames - $wins - $losses,
             'win_rate' => $totalGames > 0 ? round(($wins / $totalGames) * 100, 2) : 0,
             'total_points' => $totalPoints,
+            'elo_ratings' => $eloRatings,
             'global_rank' => $globalRank,
         ]);
     }

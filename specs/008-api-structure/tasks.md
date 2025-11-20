@@ -94,14 +94,14 @@ All paths assume Laravel project structure at repository root:
 
 ### Implementation for User Story 2
 
-- [ ] T029 [P] [US2] Create GameLibraryController with index, show, entities methods in app/Http/Controllers/Api/V1/Library/GameLibraryController.php
-- [ ] T030 [P] [US2] Move GameRulesController to namespace in app/Http/Controllers/Api/V1/Library/GameRulesController.php
-- [ ] T031 [US2] Create GameLibraryService with filtering and caching logic in app/Services/GameLibraryService.php
-- [ ] T032 [US2] Add Library namespace routes to routes/api.php (GET /v1/library, GET /v1/library/{key}, GET /v1/library/{key}/rules, GET /v1/library/{key}/entities)
-- [ ] T033 [US2] Create GameLibraryData DTO in app/DataTransferObjects/Library/GameLibraryData.php
-- [ ] T034 [US2] Create GameRulesData DTO in app/DataTransferObjects/Library/GameRulesData.php
-- [ ] T035 [US2] Create GameEntityData DTO in app/DataTransferObjects/Library/GameEntityData.php
-- [ ] T036 [US2] Delete old TitleController from app/Http/Controllers/Api/V1/TitleController.php
+- [x] T029 [P] [US2] Create GameLibraryController with index, show, entities methods in app/Http/Controllers/Api/V1/Library/GameLibraryController.php
+- [x] T030 [P] [US2] Move GameRulesController to namespace in app/Http/Controllers/Api/V1/Library/GameRulesController.php
+- [x] T031 [US2] Create GameLibraryService with filtering and caching logic in app/Services/GameLibraryService.php
+- [x] T032 [US2] Add Library namespace routes to routes/api.php (GET /v1/library, GET /v1/library/{key}, GET /v1/library/{key}/rules, GET /v1/library/{key}/entities)
+- [x] T033 [US2] Create GameLibraryData DTO in app/DataTransferObjects/Library/GameLibraryData.php
+- [x] T034 [US2] Create GameRulesData DTO in app/DataTransferObjects/Library/GameRulesData.php
+- [x] T035 [US2] Create GameEntityData DTO in app/DataTransferObjects/Library/GameEntityData.php
+- [x] T036 [US2] Delete old TitleController from app/Http/Controllers/Api/V1/TitleController.php
 
 **Checkpoint**: Library endpoints operational - game discovery, rules, and asset retrieval functional
 

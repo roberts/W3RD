@@ -1,21 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
+use App\Services\ProgressionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class UserLevelsController extends Controller
+class ProgressionController extends Controller
 {
     use ApiResponses;
 
+    public function __construct(
+        private ProgressionService $progressionService
+    ) {}
+
     /**
-     * Get game-specific levels for the authenticated user.
+     * Get game-specific progression (XP, levels, battle pass).
+     *
+     * GET /v1/account/progression
      */
-    public function show(Request $request): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -29,10 +36,17 @@ class UserLevelsController extends Controller
                 'game_title' => $titleLevel->title_slug,
                 'level' => $titleLevel->level,
                 'experience_points' => $titleLevel->xp_current,
+                'xp_to_next_level' => $this->progressionService->calculateXpToNextLevel($titleLevel->level),
                 'last_played_at' => $titleLevel->last_played_at?->toIso8601String(),
             ];
         });
 
-        return $this->dataResponse($levels);
+        return $this->dataResponse([
+            'games' => $levels,
+            'total_xp' => $levelCollection->sum('xp_current'),
+            'average_level' => $levelCollection->avg('level'),
+            // TODO: Add battle pass data
+            'battle_pass' => null,
+        ]);
     }
 }

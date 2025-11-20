@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
 use App\Http\Resources\AlertResource;
 use App\Http\Traits\ApiResponses;
-use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class AlertController extends Controller
+class AlertsController extends Controller
 {
     use ApiResponses;
 
     /**
      * Get list of alerts for the authenticated user.
+     *
+     * GET /v1/account/alerts
      */
     public function index(Request $request): JsonResponse
     {
@@ -33,6 +34,8 @@ class AlertController extends Controller
 
     /**
      * Mark alerts as read.
+     *
+     * POST /v1/account/alerts/read
      */
     public function markAsRead(MarkAlertsAsReadRequest $request): JsonResponse
     {

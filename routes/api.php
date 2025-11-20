@@ -1,6 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Account\AlertsController;
+use App\Http\Controllers\Api\V1\Account\ProfileController;
+use App\Http\Controllers\Api\V1\Account\ProgressionController;
+use App\Http\Controllers\Api\V1\Account\RecordsController;
 use App\Http\Controllers\Api\V1\AlertController;
+use App\Http\Controllers\Api\V1\Auth\LoginController;
+use App\Http\Controllers\Api\V1\Auth\LogoutController;
+use App\Http\Controllers\Api\V1\Auth\RegisterController;
+use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\GameActionController;
@@ -10,7 +18,6 @@ use App\Http\Controllers\Api\V1\Library\GameLibraryController;
 use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\LobbyController;
 use App\Http\Controllers\Api\V1\LobbyPlayerController;
-use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\QuickplayController;
 use App\Http\Controllers\Api\V1\RematchController;
 use App\Http\Controllers\Api\V1\System\ConfigController;
@@ -52,19 +59,28 @@ Route::prefix('v1')->group(function () {
     // ========================================
     // Authentication Routes
     // ========================================
-    Route::prefix('auth')->controller(AuthController::class)->group(function () {
+    Route::prefix('auth')->group(function () {
         // Public routes
-        Route::post('register', 'register');
-        Route::post('verify', 'verify');
-        Route::post('login', 'login');
-        Route::post('social', 'socialLogin');
+        Route::post('/register', RegisterController::class);
+        Route::post('/login', LoginController::class);
+        Route::post('/social', SocialAuthController::class);
 
         // Protected routes
         Route::middleware('auth:sanctum')->group(function () {
-            Route::post('logout', 'logout');
-            Route::get('user', 'getUser');
-            Route::patch('user', 'updateUser');
+            Route::post('/logout', LogoutController::class);
         });
+    });
+
+    // ========================================
+    // Account Namespace - Profile & User Data
+    // ========================================
+    Route::middleware('auth:sanctum')->prefix('account')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::patch('/profile', [ProfileController::class, 'update']);
+        Route::get('/progression', ProgressionController::class);
+        Route::get('/records', RecordsController::class);
+        Route::get('/alerts', [AlertsController::class, 'index']);
+        Route::post('/alerts/read', [AlertsController::class, 'markAsRead']);
     });
 
     // ========================================

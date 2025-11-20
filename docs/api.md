@@ -362,21 +362,64 @@ Game state, action submission, and game lifecycle management.
 
 ### 7. Economy
 
-Financial operations including balance, transactions, buy-ins, and subscriptions.
+Balance tracking and subscription management for entertainment purposes.
+
+> **Important**: This API tracks virtual token/chip balances for entertainment only. No real money or cryptocurrency transactions occur within this system. Balances are managed exclusively by approved client applications for their authenticated users. This platform is for entertainment purposes only and does not involve wagering or gambling.
 
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
-| `GET` | `/economy/balance` | Get all currency balances | Bearer + Client Key |
-| `GET` | `/economy/transactions` | Get transaction history | Bearer + Client Key |
-| `POST` | `/economy/deposit` | Initiate deposit (returns payment link) | Bearer + Client Key |
-| `POST` | `/economy/withdraw` | Request withdrawal | Bearer + Client Key |
-| `POST` | `/economy/buy-in` | Buy into game with chips | Bearer + Client Key |
-| `POST` | `/economy/cash-out` | Cash out from completed game | Bearer + Client Key |
+| `GET` | `/economy/balance` | Get all token/chip balances | Bearer + Client Key |
+| `GET` | `/economy/transactions` | Get balance transaction history | Bearer + Client Key |
+| `POST` | `/economy/cashier` | Add or remove tokens/chips (approved clients only) | Bearer + Client Key |
 | `GET` | `/economy/plans` | List subscription plans | Bearer + Client Key |
 | `POST` | `/economy/subscribe` | Start subscription | Bearer + Client Key |
 | `GET` | `/economy/subscription` | Get current subscription status | Bearer + Client Key |
 | `POST` | `/economy/subscription/cancel` | Cancel subscription | Bearer + Client Key |
 | `POST` | `/economy/receipts/{provider}` | Verify mobile purchase | Bearer + Client Key |
+
+**Cashier Endpoint** - For approved clients managing user balances:
+
+```http
+POST /v1/economy/cashier
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-approved-client-key
+Content-Type: application/json
+
+{
+  "action": "add",
+  "amount": 100.00,
+  "currency": "tokens",
+  "reference": "purchase_receipt_xyz",
+  "note": "Token purchase via client platform"
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "transaction_ulid": "01J3EFG...",
+    "action": "add",
+    "amount": 100.00,
+    "currency": "tokens",
+    "new_balance": 250.00,
+    "reference": "purchase_receipt_xyz",
+    "timestamp": "2025-11-20T12:00:00Z"
+  },
+  "message": "Balance updated successfully"
+}
+```
+
+**Supported Actions**:
+- `add` - Add tokens/chips to user balance
+- `remove` - Remove tokens/chips from user balance
+
+**Supported Currencies**:
+- `tokens` - Virtual tokens for game entry
+- `chips` - Virtual chips for game stakes
+
+**Access Control**:
+Only approved client applications with proper authorization can use the cashier endpoint. Unauthorized access returns `403 Forbidden`.
 
 ---
 

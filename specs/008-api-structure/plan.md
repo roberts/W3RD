@@ -5,7 +5,9 @@
 
 ## Summary
 
-Finalize the v1 API structure for production by reorganizing endpoints into a headless infrastructure architecture with 9 logical namespaces: System & Webhooks, Game Library, Authentication, Account Management, Floor Coordination, Active Games, Economy, Data Feeds, and Competitions. This restructure migrates from the legacy scattered endpoint design to a cohesive RESTful API that separates platform services from gameplay, introduces the `/economy` pivot for financial operations, and establishes the `/floor` coordination namespace for unified matchmaking.
+Finalize the v1 API structure for production by reorganizing endpoints into a headless infrastructure architecture with 9 logical namespaces: System & Webhooks, Game Library, Authentication, Account Management, Floor Coordination, Active Games, Economy, Data Feeds, and Competitions. This restructure migrates from the legacy scattered endpoint design to a cohesive RESTful API that separates platform services from gameplay, introduces the `/economy` namespace for virtual balance tracking (entertainment only - no real money/crypto transactions), and establishes the `/floor` coordination namespace for unified matchmaking.
+
+**Important Note on Economy**: The `/economy` namespace tracks virtual tokens and chips for entertainment purposes only. This system does not transact real money or cryptocurrency. Approved client applications manage user balances through the cashier service.
 
 ## Technical Context
 

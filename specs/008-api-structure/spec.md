@@ -105,20 +105,21 @@ Users play games through live board state synchronization, action execution, tur
 
 ### User Story 6 - Economy Management (Priority: P2)
 
-Users manage their financial resources, track transactions, buy into games with chips, cash out winnings, and maintain subscriptions.
+Users view their virtual token/chip balances, track balance transactions, and maintain subscriptions through client applications. Approved clients can adjust user balances for entertainment purposes only.
 
-**Why this priority**: Required for monetization but not essential for core gameplay in free modes.
+**Important**: This system tracks virtual tokens and chips for entertainment only. No real money or cryptocurrency transactions occur. Balances are managed by approved client applications for their authenticated users. This is not a wagering or gambling system.
 
-**Independent Test**: Can be fully tested by checking balances, creating mock transactions, simulating chip management, and verifying subscription plans without real payment processing.
+**Why this priority**: Required for platform monetization and game coordination but not essential for core gameplay mechanics.
+
+**Independent Test**: Can be fully tested by checking balances, creating balance adjustments, simulating chip allocation, and verifying subscription plans without real payment processing.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has an account, **When** they request `GET /v1/economy/balance`, **Then** their real money balance, bonus chips, and hard currency amounts are returned
-2. **Given** a user has made purchases, **When** they request `GET /v1/economy/transactions`, **Then** deposit history, chip purchases, game buy-ins, and cash-outs are listed with timestamps and amounts
-3. **Given** a user wants to join a cash game, **When** they submit `POST /v1/economy/cashier` with buy-in amount, **Then** chips are deducted from their balance and allocated to the game session
-4. **Given** a user finishes a cash game, **When** they submit `POST /v1/economy/cashier` with cash-out amount, **Then** chips are converted back to balance and available for withdrawal
-5. **Given** subscription tiers exist, **When** a user requests `GET /v1/economy/plans`, **Then** available tiers with pricing, benefits, and feature access are returned
-6. **Given** a user purchases via mobile platform, **When** they submit `POST /v1/economy/receipts/{provider}` with receipt data, **Then** the purchase is verified with Apple, Google, or Telegram and credits are applied
+1. **Given** a user has an account, **When** they request `GET /v1/economy/balance`, **Then** their virtual token balance and chip balance are returned
+2. **Given** a user has balance history, **When** they request `GET /v1/economy/transactions`, **Then** balance adjustments (adds/removes) with timestamps, amounts, and references are listed
+3. **Given** an approved client needs to adjust balance, **When** they submit `POST /v1/economy/cashier` with add/remove action and amount, **Then** user's token or chip balance is updated and transaction is recorded
+4. **Given** subscription tiers exist, **When** a user requests `GET /v1/economy/plans`, **Then** available tiers with pricing, benefits, and feature access are returned
+5. **Given** a user purchases via mobile platform, **When** they submit `POST /v1/economy/receipts/{provider}` with receipt data, **Then** the purchase is verified with Apple, Google, or Telegram and subscription is applied
 
 ---
 
@@ -246,15 +247,18 @@ Users discover tournaments, register for events, track standings, and view brack
 
 #### Economy (FR-E)
 
-- **FR-E-001**: System MUST maintain user balances for real money, bonus chips, and hard currency separately
-- **FR-E-002**: System MUST record all financial transactions including deposits, purchases, game buy-ins, and cash-outs
-- **FR-E-003**: System MUST provide transaction history with timestamps, amounts, and transaction types
-- **FR-E-004**: System MUST support chip management through a cashier interface for buying into games and cashing out winnings
-- **FR-E-005**: System MUST prevent users from cashing out chips that are currently in active game sessions
-- **FR-E-006**: System MUST expose subscription plans with pricing, benefits, and feature access details
-- **FR-E-007**: System MUST verify mobile platform receipts (Apple, Google, Telegram) before applying credits
-- **FR-E-008**: System MUST enforce minimum and maximum transaction limits to comply with financial regulations
-- **FR-E-009**: System MUST distinguish between withdrawable real money and non-withdrawable bonus funds
+**Note**: This system tracks virtual tokens and chips for entertainment purposes only. No real money or cryptocurrency is transacted. Balances are managed by approved client applications.
+
+- **FR-E-001**: System MUST maintain user balances for virtual tokens and chips separately
+- **FR-E-002**: System MUST record all balance transactions including adds, removes, and references
+- **FR-E-003**: System MUST provide transaction history with timestamps, amounts, actions, and reference identifiers
+- **FR-E-004**: System MUST support cashier interface allowing approved clients to add or remove tokens/chips from user balances
+- **FR-E-005**: System MUST restrict cashier endpoint access to approved client applications only
+- **FR-E-006**: System MUST validate all cashier operations include proper authentication and authorization
+- **FR-E-007**: System MUST expose subscription plans with pricing, benefits, and feature access details
+- **FR-E-008**: System MUST verify mobile platform receipts (Apple, Google, Telegram) before applying subscription benefits
+- **FR-E-009**: System MUST track balance allocations to active game sessions for coordination purposes
+- **FR-E-010**: System MUST include reference identifiers in all balance transactions for client-side tracking
 
 #### Data Feeds (FR-D)
 

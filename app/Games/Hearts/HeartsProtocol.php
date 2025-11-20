@@ -43,7 +43,7 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
 
     abstract protected function getGameConfig(): HeartsConfig;
 
-    abstract protected function getArbiter(): HeartsArbiter;
+    abstract public function getArbiter(): HeartsArbiter;
 
     abstract protected function getReporter(): HeartsReporter;
 

@@ -6,6 +6,9 @@ use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\Game\HandleTimeoutAction;
 use App\Actions\Game\ProcessCoordinatedActionAction;
 use App\Enums\GameStatus;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\GameEngine\Interfaces\GameRedactor;
 use App\Events\GameActionProcessed;
 use App\Events\GameCompleted;
 use App\Exceptions\GameActionDeniedException;
@@ -18,10 +21,12 @@ use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use App\Services\Agents\AgentService;
+use App\Services\Game\GameConclusionService;
 use App\Services\GameActionRecorder;
 use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Jobs\TimeoutJob;
 
 class GameActionController extends Controller
 {
@@ -32,7 +37,8 @@ class GameActionController extends Controller
         protected HandleTimeoutAction $handleTimeout,
         protected ProcessCoordinatedActionAction $processCoordinatedAction,
         protected FindGameByUlidAction $findGame,
-        protected GameResponseEnhancementService $enhancementService
+        protected GameResponseEnhancementService $enhancementService,
+        protected GameConclusionService $conclusionService
     ) {}
 
     /**
@@ -147,52 +153,17 @@ class GameActionController extends Controller
             $game->save();
         }
 
-        // Check for end condition using new GameOutcome
-        $outcome = $mode->checkEndCondition($gameState);
-        if ($outcome->isFinished) {
-            $game->status = GameStatus::COMPLETED;
-            $game->outcome_type = $outcome->type;
-            $game->outcome_details = $outcome->details;
-            $game->completed_at = now();
+        // Check for end condition using the new GameConclusionService
+        $this->conclusionService->determineOutcome($game);
+        $game->refresh(); // Refresh to get any status changes from the service
 
-            if ($outcome->winnerUlid) {
-                /** @var Player $winner */
-                $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
-                $game->winner_id = $winner->id;
-                $game->winner_position = $outcome->winnerPosition;
-                $gameState = $gameState->withWinner($outcome->winnerUlid);
-            }
+        // Only proceed with turn advancement if the game is still active
+        if ($game->status->isActive()) {
+            $this->advanceTurn($game, $mode);
 
-            if ($outcome->type === \App\Enums\OutcomeType::DRAW) {
-                $gameState = $gameState->withDraw();
-            }
-
-            // Store rankings and scores if provided
-            if (! empty($outcome->details['rankings'])) {
-                $gameStateArray = $gameState->toArray();
-                $gameStateArray['final_rankings'] = $outcome->details['rankings'];
-                $gameStateArray['final_scores'] = $outcome->details['scores'] ?? [];
-                $game->game_state = $gameStateArray;
-            } else {
-                $game->game_state = $gameState->toArray();
-            }
-
-            $game->save();
-
-            // Generate detailed outcome information
-            $outcomeDetails = $this->enhancementService->generateOutcomeDetails($game, $outcome, $gameState);
-
-            // Dispatch GameCompleted event for rematch cooldown and activity tracking
-            event(new GameCompleted(
-                game: $game,
-                winnerUlid: $outcome->winnerUlid,
-                isDraw: $outcome->type === \App\Enums\OutcomeType::DRAW,
-                outcomeDetails: $outcomeDetails
-            ));
+            // Dispatch a timeout job for the next player
+            $this->dispatchTimeoutJob($game, $mode);
         }
-
-        // Increment turn number
-        $game->increment('turn_number');
 
         // Calculate the next action deadline
         $game->refresh();
@@ -212,7 +183,7 @@ class GameActionController extends Controller
             playerUlid: $player->ulid,
             actionUlid: $actionRecord->ulid,
             actionContext: $actionContext,
-            outcomeDetails: isset($outcomeDetails) ? $outcomeDetails : null
+            outcomeDetails: $game->outcome_details
         ));
 
         return $this->dataResponse([
@@ -223,14 +194,14 @@ class GameActionController extends Controller
             'game' => [
                 'ulid' => $game->ulid,
                 'status' => $game->status,
-                'game_state' => $game->game_state,
+                'game_state' => app(GameRedactor::class)->redact($game, auth()->user()),
                 'winner_ulid' => $gameState->winnerUlid,
                 'is_draw' => $gameState->isDraw ?? false,
                 'outcome_type' => $game->outcome_type,
                 'outcome_details' => $game->outcome_details,
             ],
             'context' => $actionContext,
-            'outcome' => isset($outcomeDetails) ? $outcomeDetails : null,
+            'outcome' => $game->outcome_details,
             'next_action_deadline' => $nextDeadline->toIso8601String(),
             'timeout' => [
                 'timelimit_seconds' => $mode->getTimelimit(),
@@ -238,6 +209,45 @@ class GameActionController extends Controller
                 'penalty' => $mode->getTimeoutPenalty(),
             ],
         ], 'Action applied successfully');
+    }
+
+    /**
+     * Advances the turn based on the game's sequence attribute.
+     */
+    protected function advanceTurn(Game $game, object $mode): void
+    {
+        switch ($mode->getSequence()) {
+            case GameSequence::SEQUENTIAL:
+                $game->increment('turn_number');
+                break;
+            case GameSequence::SIMULTANEOUS:
+            case GameSequence::INTERLEAVED:
+                // In real-time/simultaneous games, turns might not auto-increment in the same way.
+                break;
+        }
+    }
+
+    /**
+     * Dispatches a job to handle player timeouts.
+     */
+    protected function dispatchTimeoutJob(Game $game, object $mode): void
+    {
+        $pacing = $mode->getPacing();
+
+        $delay = match ($pacing) {
+            GamePacing::TURN_BASED_ASYNC => now()->addMinutes(5), // Relaxed
+            GamePacing::TURN_BASED_SYNC => now()->addSeconds(60), // Standard
+            GamePacing::REALTIME => now()->addSeconds(15), // Blitz/Realtime
+            default => null,
+        };
+
+        if ($delay && $game->currentPlayer()) {
+            TimeoutJob::dispatch(
+                $game->id,
+                $game->currentPlayer()->id,
+                $game->turn_number
+            )->delay($delay);
+        }
     }
 
     /**

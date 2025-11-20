@@ -152,3 +152,54 @@ This structure allows for easy expansion in several directions:
 2.  **Rule Variations**: Create a new `Config` class (e.g., `FrenchCheckersConfig.php`) and swap it in via a Mode.
 3.  **AI Agents**: The State DTOs provide a clean, standardized data structure that is easy to feed into AI models or heuristic algorithms.
 4.  **Frontend Independence**: Since all logic and text descriptions are encapsulated in the backend, the frontend can be generic, rendering the board based on the State and displaying rules based on `{GameTitle}Config`.
+
+## The Attribute System: Declarative Engine Logic
+
+To achieve maximum code reuse and allow the core game engine to handle common gameplay mechanics, we use a declarative **Attribute System**. Instead of writing `if/else` logic for every game, each `...Protocol.php` file declares its characteristics through a series of static methods. The engine then uses these attributes to dynamically apply the correct logic.
+
+This system is the key to rapidly developing hundreds of titles without rewriting core engine components.
+
+### How It Works
+
+The `GameTitleContract` requires each game to implement a set of `get...()` methods that return a specific `GameAttribute` enum. The `GameActionController` (our "Game Kernel") reads these attributes and alters its behavior accordingly.
+
+### The Four Core Engine Components
+
+The attribute system currently drives four major, scalable components within the game engine:
+
+#### 1. Game Visibility & The `GameRedactor`
+
+*   **Attribute**: `getVisibility(): GameVisibility`
+*   **Values**: `PERFECT_INFORMATION`, `HIDDEN_INFORMATION`
+*   **Engine Logic**: When preparing an API response, the engine checks this attribute.
+    *   If `PERFECT_INFORMATION` (like Checkers), the entire game state is returned as-is via the `NullGameRedactor`.
+    *   If `HIDDEN_INFORMATION` (like Hearts), the request is routed through a game-specific `GameRedactor` (e.g., `HeartsRedactor`) which is responsible for removing sensitive data (like other players' hands) before sending the state to the user.
+*   **Scalability**: To add a new game with hidden info (e.g., Poker), you simply create a `PokerRedactor`, and the `GameRedactorServiceProvider` will automatically use it based on the game's `getVisibility()` attribute.
+
+#### 2. Game Pacing & The `TimeoutJob`
+
+*   **Attribute**: `getPacing(): GamePacing`
+*   **Values**: `NONE`, `RELAXED`, `STANDARD`, `BLITZ`
+*   **Engine Logic**: After a player's turn, the `GameActionController` checks this attribute.
+    *   It dispatches a `TimeoutJob` with a delay corresponding to the pacing value (e.g., 15 seconds for `BLITZ`, 5 minutes for `RELAXED`).
+    *   If the pacing is `NONE`, no job is dispatched.
+*   **Scalability**: Adding new time controls (e.g., a `TOURNAMENT` pace) is as simple as adding a case to the enum and a corresponding delay in the controller's `dispatchTimeoutJob` method.
+
+#### 3. Game Sequence & Turn Management
+
+*   **Attribute**: `getSequence(): GameSequence`
+*   **Values**: `TURN_BASED`, `REAL_TIME`, `PHASE_BASED`
+*   **Engine Logic**: The `GameActionController` calls an `advanceTurn()` method after each action.
+    *   If `TURN_BASED`, it increments the game's `turn_number`.
+    *   If `REAL_TIME`, it does nothing, as turns are not sequential.
+    *   If `PHASE_BASED`, it can delegate to a more complex state machine to determine the next phase or player.
+*   **Scalability**: This allows the same engine to handle a traditional board game, a fast-paced real-time game, and a complex card game with distinct phases (passing, playing, scoring) without changing the core action-handling loop.
+
+#### 4. Game Dynamics & The `GameConclusionService`
+
+*   **Attribute**: `getDynamic(): GameDynamic`
+*   **Values**: `ONE_VS_ONE`, `LAST_MAN_STANDING`, `SCORE_BASED`, `FREE_FOR_ALL`
+*   **Engine Logic**: The `checkEndCondition` method has been **removed** from individual game protocols. Instead, the `GameActionController` calls the `GameConclusionService` after every move.
+    *   This service checks the game's `getDynamic()` attribute.
+    *   It then applies the correct logic to determine a winner (e.g., checking for one active player for `LAST_MAN_STANDING`, or comparing scores for `SCORE_BASED`).
+*   **Scalability**: To add a new win condition (e.g., `CAPTURE_THE_FLAG`), you add a case to the `GameDynamic` enum and implement the corresponding logic within a new private method in the `GameConclusionService`. No changes are needed in the game protocols themselves.

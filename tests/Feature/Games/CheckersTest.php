@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Games\Checkers\CheckersArbiter;
 use App\Games\Checkers\CheckersBoard;
 use App\Games\Checkers\Modes\StandardMode;
 use App\Models\Game\Game;
@@ -87,7 +88,7 @@ describe('Checkers Game Logic', function () {
 
     test('can detect when a player has no pieces left', function () {
         $game = new Game(['game_state' => []]);
-        $mode = new StandardMode($game);
+        $arbiter = new CheckersArbiter();
         $state = CheckersBoard::createNew('p1', 'p2');
 
         // Manually set pieces remaining to 0 for player 2
@@ -104,7 +105,7 @@ describe('Checkers Game Logic', function () {
             isDraw: false,
         );
 
-        $outcome = $mode->checkEndCondition($state);
+        $outcome = $arbiter->checkWinCondition($state);
 
         expect($outcome->isFinished)->toBeTrue()
             ->and($outcome->winnerUlid)->toBe('p1');
@@ -112,10 +113,10 @@ describe('Checkers Game Logic', function () {
 
     test('game is in progress when both players have pieces', function () {
         $game = new Game(['game_state' => []]);
-        $mode = new StandardMode($game);
+        $arbiter = new CheckersArbiter();
         $state = CheckersBoard::createNew('p1', 'p2');
 
-        $outcome = $mode->checkEndCondition($state);
+        $outcome = $arbiter->checkWinCondition($state);
 
         expect($outcome->isFinished)->toBeFalse()
             ->and($outcome->winnerUlid)->toBeNull();

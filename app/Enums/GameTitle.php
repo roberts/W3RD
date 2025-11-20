@@ -2,12 +2,24 @@
 
 namespace App\Enums;
 
+use App\Enums\GameAttributes\GameDynamic;
+
 enum GameTitle: string
 {
     case VALIDATE_FOUR = 'validate-four';
     case CHECKERS = 'checkers';
     case HEARTS = 'hearts';
     case SPADES = 'spades';
+
+    public function getDynamic(): GameDynamic
+    {
+        return match ($this) {
+            self::VALIDATE_FOUR => GameDynamic::ONE_VS_ONE,
+            self::CHECKERS => GameDynamic::ONE_VS_ONE,
+            self::HEARTS => GameDynamic::FREE_FOR_ALL,
+            self::SPADES => GameDynamic::TEAM_BASED,
+        };
+    }
 
     public function label(): string
     {

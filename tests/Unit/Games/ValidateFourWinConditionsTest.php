@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Games\ValidateFour\Modes\StandardMode;
+use App\Games\ValidateFour\ValidateFourArbiter;
 use App\Games\ValidateFour\ValidateFourBoard;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
@@ -12,7 +12,7 @@ describe('ValidateFour Win Conditions', function () {
         $this->player1Ulid = (string) Str::ulid();
         $this->player2Ulid = (string) Str::ulid();
         $this->game = new Game(['game_state' => []]);
-        $this->mode = new StandardMode($this->game);
+        $this->arbiter = new ValidateFourArbiter();
     });
 
     describe('Horizontal Wins', function () {
@@ -23,7 +23,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 2, $this->player1Ulid)
                 ->withPieceAt(5, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid)
@@ -37,7 +37,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(0, 4, $this->player2Ulid)
                 ->withPieceAt(0, 5, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -50,7 +50,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 3, $this->player1Ulid)
                 ->withPieceAt(3, 4, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -63,7 +63,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(4, 5, $this->player2Ulid)
                 ->withPieceAt(4, 6, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -75,7 +75,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 1, $this->player1Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse()
                 ->and($outcome->winnerUlid)->toBeNull();
@@ -89,7 +89,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 3, $this->player1Ulid)
                 ->withPieceAt(5, 4, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -103,7 +103,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 0, $this->player1Ulid)
                 ->withPieceAt(2, 0, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -116,7 +116,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 6, $this->player2Ulid)
                 ->withPieceAt(2, 6, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -129,7 +129,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 3, $this->player1Ulid)
                 ->withPieceAt(2, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -142,7 +142,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(1, 2, $this->player2Ulid)
                 ->withPieceAt(0, 2, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -154,7 +154,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(4, 3, $this->player1Ulid)
                 ->withPieceAt(3, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -168,7 +168,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 2, $this->player1Ulid)
                 ->withPieceAt(2, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -181,7 +181,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(1, 3, $this->player2Ulid)
                 ->withPieceAt(0, 4, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -194,7 +194,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(1, 5, $this->player1Ulid)
                 ->withPieceAt(0, 6, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -207,7 +207,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 2, $this->player2Ulid)
                 ->withPieceAt(2, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -221,7 +221,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 4, $this->player2Ulid)
                 ->withPieceAt(2, 3, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -234,7 +234,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(1, 3, $this->player1Ulid)
                 ->withPieceAt(0, 2, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -247,7 +247,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(1, 1, $this->player2Ulid)
                 ->withPieceAt(0, 0, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -263,7 +263,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(0, 2, $this->player1Ulid)
                 ->withPieceAt(0, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -277,7 +277,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 3, $this->player1Ulid)
                 ->withPieceAt(5, 4, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -290,7 +290,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 2, $this->player1Ulid)
                 ->withPieceAt(5, 3, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -307,7 +307,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 3, $this->player2Ulid);
 
             // No winner yet
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
             expect($outcome->isFinished)->toBeFalse();
 
             // Add winning piece for player2 (vertical in column 3)
@@ -316,7 +316,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(3, 3, $this->player2Ulid)
                 ->withPieceAt(2, 3, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -335,7 +335,7 @@ describe('ValidateFour Win Conditions', function () {
                 }
             }
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             // Checkerboard creates diagonal wins, so winner should be detected
             expect($outcome->isFinished)->toBeTrue()
@@ -345,7 +345,7 @@ describe('ValidateFour Win Conditions', function () {
         test('does not detect draw on empty board', function () {
             $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse()
                 ->and($outcome->winnerUlid)->toBeNull();
@@ -357,7 +357,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 1, $this->player2Ulid)
                 ->withPieceAt(5, 2, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -371,7 +371,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(6, 6, $this->player1Ulid)
                 ->withPieceAt(6, 7, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player1Ulid);
@@ -384,7 +384,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(5, 3, $this->player2Ulid)
                 ->withPieceAt(4, 3, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeTrue()
                 ->and($outcome->winnerUlid)->toBe($this->player2Ulid);
@@ -395,7 +395,7 @@ describe('ValidateFour Win Conditions', function () {
         test('returns in progress for empty board', function () {
             $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse()
                 ->and($outcome->winnerUlid)->toBeNull();
@@ -405,7 +405,7 @@ describe('ValidateFour Win Conditions', function () {
             $state = ValidateFourBoard::createNew($this->player1Ulid, $this->player2Ulid)
                 ->withPieceAt(5, 3, $this->player1Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });
@@ -417,7 +417,7 @@ describe('ValidateFour Win Conditions', function () {
                 ->withPieceAt(4, 1, $this->player1Ulid)
                 ->withPieceAt(3, 5, $this->player2Ulid);
 
-            $outcome = $this->mode->checkEndCondition($state);
+            $outcome = $this->arbiter->checkWinCondition($state);
 
             expect($outcome->isFinished)->toBeFalse();
         });

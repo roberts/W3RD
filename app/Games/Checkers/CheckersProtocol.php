@@ -34,7 +34,7 @@ abstract class CheckersProtocol extends BaseBoardGameTitle implements GameTitleC
 
     abstract protected function getGameConfig(): CheckersConfig;
 
-    abstract protected function getArbiter(): CheckersArbiter;
+    abstract public function getArbiter(): CheckersArbiter;
 
     abstract protected function getReporter(): CheckersReporter;
 

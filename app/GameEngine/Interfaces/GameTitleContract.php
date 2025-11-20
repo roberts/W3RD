@@ -99,7 +99,18 @@ interface GameTitleContract
     public function createInitialState(string ...$playerUlids): object;
 
     /**
+     * Get the arbiter for checking game win conditions.
+     *
+     * Returns the arbiter responsible for determining if the game has ended
+     * and what the outcome is (win, loss, draw, etc.).
+     *
+     * @return GameArbiterContract The arbiter for this game mode
+     */
+    public function getArbiter(): GameArbiterContract;
+
+    /**
      * Get the fully qualified class name of the game state class.
+
      *
      * Returns the FQCN of the state class this mode uses (e.g., ValidateFourGameState::class).
      * Allows the controller to dynamically instantiate the correct state class.
@@ -171,29 +182,6 @@ interface GameTitleContract
      * @return object The updated game state object (new instance if immutable)
      */
     public function applyAction(object $gameState, object $action): object;
-
-    /**
-     * Check if the game has been won, drawn, or is still in progress.
-     *
-     * Returns a rich outcome object supporting wins, draws, rankings, and scores.
-     * Used by the controller to determine if the game should end.
-     *
-     * Example:
-     * ```php
-     * $outcome = $mode->checkEndCondition($gameState);
-     * if ($outcome->isFinished) {
-     *     if ($outcome->isDraw) {
-     *         // Handle draw
-     *     } elseif ($outcome->winnerUlid) {
-     *         // Handle win
-     *     }
-     * }
-     * ```
-     *
-     * @param  object  $gameState  The current game state object
-     * @return GameOutcome The game outcome (finished/in-progress, winner, draw, scores, etc.)
-     */
-    public function checkEndCondition(object $gameState): GameOutcome;
 
     /**
      * Get available actions for a specific player.

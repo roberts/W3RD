@@ -21,7 +21,7 @@ class StandardMode extends HeartsProtocol
         return new HeartsConfig;
     }
 
-    protected function getArbiter(): HeartsArbiter
+    public function getArbiter(): HeartsArbiter
     {
         return new HeartsArbiter;
     }

@@ -49,9 +49,9 @@ enum GameStatus: string
     /**
      * Check if the game is in a playable state.
      */
-    public function isPlayable(): bool
+    public function isActive(): bool
     {
-        return $this === self::ACTIVE || $this === self::PAUSED;
+        return $this === self::ACTIVE;
     }
 
     /**
@@ -59,6 +59,6 @@ enum GameStatus: string
      */
     public function isFinished(): bool
     {
-        return $this === self::COMPLETED || $this === self::ABANDONED;
+        return in_array($this, [self::COMPLETED, self::ABANDONED]);
     }
 }

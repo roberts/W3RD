@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property OutcomeType|null $outcome_type
  * @property array|null $outcome_details
+ * @property GameTitle $title_slug
  */
 class Game extends Model
 {
@@ -134,5 +135,19 @@ class Game extends Model
         $lastAction = $this->actions()->latest()->first();
 
         return $lastAction ? $lastAction->created_at : ($this->started_at ?? $this->created_at);
+    }
+
+    /**
+     * Get the player whose turn it is.
+     */
+    public function currentPlayer(): ?Player
+    {
+        $playerUlid = $this->game_state['current_player_ulid'] ?? null;
+
+        if (! $playerUlid) {
+            return null;
+        }
+
+        return $this->players->where('ulid', $playerUlid)->first();
     }
 }

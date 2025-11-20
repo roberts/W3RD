@@ -9,10 +9,10 @@ use App\GameEngine\Interfaces\GameArbiterContract;
 
 class CheckersArbiter implements GameArbiterContract
 {
-    public function checkWinCondition(object $gameState): ?GameOutcome
+    public function checkWinCondition(object $gameState): GameOutcome
     {
         if (! ($gameState instanceof CheckersBoard)) {
-            return null;
+            return GameOutcome::inProgress();
         }
 
         // Check for winner (no pieces remaining)
@@ -36,6 +36,6 @@ class CheckersArbiter implements GameArbiterContract
             return GameOutcome::draw('stalemate');
         }
 
-        return null;
+        return GameOutcome::inProgress();
     }
 }

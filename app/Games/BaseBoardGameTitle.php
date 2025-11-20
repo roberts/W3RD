@@ -33,7 +33,7 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
 
     abstract protected function getReporter(): GameReporterContract;
 
-    abstract protected function getArbiter(): GameArbiterContract;
+    abstract public function getArbiter(): GameArbiterContract;
 
     public function getTimelimit(): int
     {
@@ -85,11 +85,6 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
     }
 
     // GameArbiterContract delegation
-
-    public function checkEndCondition(object $gameState): GameOutcome
-    {
-        return $this->getArbiter()->checkWinCondition($gameState) ?? GameOutcome::inProgress();
-    }
 
     /**
      * Returns the structured rules for this game title.

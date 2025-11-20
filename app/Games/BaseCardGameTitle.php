@@ -42,7 +42,7 @@ abstract class BaseCardGameTitle extends BaseGameTitle
 
     abstract protected function getReporter(): GameReporterContract;
 
-    abstract protected function getArbiter(): GameArbiterContract;
+    abstract public function getArbiter(): GameArbiterContract;
 
     public function getTimelimit(): int
     {
@@ -77,11 +77,6 @@ abstract class BaseCardGameTitle extends BaseGameTitle
     }
 
     // GameArbiterContract delegation
-
-    public function checkEndCondition(object $gameState): GameOutcome
-    {
-        return $this->getArbiter()->checkWinCondition($gameState) ?? GameOutcome::inProgress();
-    }
 
     /**
      * Standard 52-card deck representation.

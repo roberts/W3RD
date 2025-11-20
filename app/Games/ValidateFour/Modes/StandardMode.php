@@ -17,7 +17,7 @@ class StandardMode extends ValidateFourProtocol
         return new ValidateFourConfig;
     }
 
-    protected function getArbiter(): ValidateFourArbiter
+    public function getArbiter(): ValidateFourArbiter
     {
         return new ValidateFourArbiter;
     }

@@ -29,7 +29,7 @@ abstract class ValidateFourProtocol extends BaseBoardGameTitle
 
     abstract protected function getGameConfig(): ValidateFourConfig;
 
-    abstract protected function getArbiter(): ValidateFourArbiter;
+    abstract public function getArbiter(): ValidateFourArbiter;
 
     abstract protected function getReporter(): ValidateFourReporter;
 

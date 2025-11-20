@@ -16,7 +16,7 @@ class NineBySixMode extends ValidateFourProtocol
         );
     }
 
-    protected function getArbiter(): ValidateFourArbiter
+    public function getArbiter(): ValidateFourArbiter
     {
         return new ValidateFourArbiter;
     }

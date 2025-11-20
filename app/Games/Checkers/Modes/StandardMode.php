@@ -21,7 +21,7 @@ class StandardMode extends CheckersProtocol
         return new CheckersConfig;
     }
 
-    protected function getArbiter(): CheckersArbiter
+    public function getArbiter(): CheckersArbiter
     {
         return new CheckersArbiter;
     }

@@ -43,7 +43,7 @@ App/Games/Checkers/
 ### 2. The Config (`{GameTitle}Config.php`)
 *   **Role**: The static configuration and knowledge base of the game.
 *   **Responsibilities**:
-    *   Implements `GameConfigInterface`.
+    *   Implements `GameConfigContract`.
     *   Defines the **Action Registry** (mapping Action classes to Handlers).
     *   Provides static text descriptions of rules (e.g., for UI tooltips or help screens).
     *   Defines initial state parameters (e.g., board size, piece count).
@@ -51,7 +51,7 @@ App/Games/Checkers/
 ### 3. The Arbiter (`{GameTitle}Arbiter.php`)
 *   **Role**: The judge and rule enforcer.
 *   **Responsibilities**:
-    *   Implements `GameWinEvaluatorInterface`.
+    *   Implements `GameArbiterContract`.
     *   Analyzes a `CheckersBoard` to determine if a Win, Loss, or Draw has occurred.
     *   Returns `GameOutcome` objects.
     *   Contains complex validation logic that spans multiple turns or board states.
@@ -59,7 +59,7 @@ App/Games/Checkers/
 ### 4. The Reporter (`{GameTitle}Reporter.php`)
 *   **Role**: The storyteller and analyst.
 *   **Responsibilities**:
-    *   Implements `GameReportingInterface`.
+    *   Implements `GameReporterContract`.
     *   Formats game events into human-readable logs.
     *   Generates analytics data (e.g., "Average moves per game", "Piece capture rate").
     *   Decouples logging/analytics from the core game logic.
@@ -108,7 +108,7 @@ App/Games/Checkers/
 
 The core Game Engine provides the infrastructure that supports these game implementations.
 
-*   **Interfaces**: Defines the contracts (`GameTitleContract`, `GameConfigInterface`, `GameWinEvaluatorInterface`) that ensure all games behave consistently.
+*   **Interfaces**: Defines the contracts (`GameTitleContract`, `GameConfigContract`, `GameArbiterContract`) that ensure all games behave consistently.
 *   **Kernel**: Manages the game loop, turn transitions, and persistence.
 *   **Shared Actions**: Common actions like `MovePiece`, `PlacePiece`, `DrawCard` are defined globally in `App/GameEngine/Actions` to prevent code duplication. Games should use these whenever possible.
 

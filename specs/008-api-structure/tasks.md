@@ -31,11 +31,11 @@ All paths assume Laravel project structure at repository root:
 
 **Purpose**: Project initialization and configuration for API restructure
 
-- [ ] T001 Create namespace directory structure for 9 API namespaces in app/Http/Controllers/Api/V1/
-- [ ] T002 Configure Redis with 3 separate databases in config/database.php (default: 0, cache: 1, idempotency: 2)
-- [ ] T003 [P] Configure Laravel Reverb broadcasting connection in config/broadcasting.php
-- [ ] T004 [P] Add Reverb environment variables to .env.example (REVERB_APP_ID, REVERB_APP_KEY, REVERB_APP_SECRET, REVERB_HOST, REVERB_PORT, REVERB_SCHEME)
-- [ ] T005 [P] Update API routes file to use namespace grouping in routes/api.php
+- [x] T001 Create namespace directory structure for 9 API namespaces in app/Http/Controllers/Api/V1/
+- [x] T002 Configure Redis with 3 separate databases in config/database.php (default: 0, cache: 1, idempotency: 2)
+- [x] T003 [P] Configure Laravel Reverb broadcasting connection in config/broadcasting.php
+- [x] T004 [P] Add Reverb environment variables to .env.example (REVERB_APP_ID, REVERB_APP_KEY, REVERB_APP_SECRET, REVERB_HOST, REVERB_PORT, REVERB_SCHEME)
+- [x] T005 [P] Update API routes file to use namespace grouping in routes/api.php
 
 ---
 
@@ -45,8 +45,8 @@ All paths assume Laravel project structure at repository root:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create EnsureIdempotency middleware in app/Http/Middleware/EnsureIdempotency.php with Redis lock handling
-- [ ] T007 Update exception handler with correlation ID logging and standardized JSON error responses in app/Exceptions/Handler.php
+- [x] T006 Create EnsureIdempotency middleware in app/Http/Middleware/EnsureIdempotency.php with Redis lock handling
+- [x] T007 Update exception handler with correlation ID logging and standardized JSON error responses in app/Exceptions/Handler.php
 - [ ] T008 [P] Create BusinessRuleException class with factory methods in app/Exceptions/BusinessRuleException.php
 - [ ] T009 [P] Create MembershipPlan enum with Free/Pro/Elite tiers in app/Enums/MembershipPlan.php
 - [ ] T010 [P] Create base Data Transfer Object classes for each namespace in app/DataTransferObjects/

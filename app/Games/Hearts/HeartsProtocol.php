@@ -6,13 +6,10 @@ namespace App\Games\Hearts;
 
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\Games\BaseCardGameTitle;
 use App\Games\Hearts\Actions\HeartsActionMapper;
-use App\Models\Game\Action;
 use App\Models\Game\Game;
-use Carbon\Carbon;
 
 /**
  * Base Hearts game implementation.

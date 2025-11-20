@@ -15,6 +15,7 @@ use Carbon\Carbon;
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
     protected const NETWORK_GRACE_PERIOD_SECONDS = 2;
+
     protected const DEFAULT_TIMEOUT_PENALTY = 'forfeit';
 
     protected Game $game;

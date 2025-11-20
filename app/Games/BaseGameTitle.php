@@ -11,9 +11,38 @@ use App\GameEngine\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use Carbon\Carbon;
+use App\Enums\GameAttributes\GameComplexity;
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
+    // Game Attribute Implementations
+    public static function getContinuity(): GameContinuity
+    {
+        return GameContinuity::MATCH_BASED;
+    }
+
+    public static function getEntryPolicy(): GameEntryPolicy
+    {
+        return GameEntryPolicy::LOCKED_ON_START;
+    }
+
+    public static function getLifecycle(): GameLifecycle
+    {
+        return GameLifecycle::STANDALONE;
+    }
+
+    public static function getAdditionalAttributes(): array
+    {
+        return [];
+    }
+
     protected const NETWORK_GRACE_PERIOD_SECONDS = 2;
 
     protected const DEFAULT_TIMEOUT_PENALTY = 'forfeit';

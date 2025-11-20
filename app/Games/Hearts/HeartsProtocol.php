@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Games\Hearts;
 
+use App\Enums\GameAttributes\GameComplexity;
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
@@ -18,6 +26,24 @@ use App\Models\Game\Game;
  */
 abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleContract
 {
+    // Game Attribute Implementations
+    public static function getSequence(): GameSequence
+    {
+        return GameSequence::PHASE_BASED;
+    }
+
+    public static function getDynamic(): GameDynamic
+    {
+        return GameDynamic::FREE_FOR_ALL;
+    }
+
+    public static function getAdditionalAttributes(): array
+    {
+        return [
+            GameComplexity::class => GameComplexity::MIDCORE,
+        ];
+    }
+
     protected const POINTS_TO_END = 100;
 
     abstract protected function getGameConfig(): HeartsConfig;

@@ -8,6 +8,13 @@ use App\GameEngine\GameOutcome;
 use App\GameEngine\ValidationResult;
 use App\Models\Game\Game;
 use Carbon\Carbon;
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 
 /**
  * Universal contract for all game title implementations.
@@ -49,6 +56,20 @@ use Carbon\Carbon;
  */
 interface GameTitleContract
 {
+    // Engine-Critical Attributes
+    public static function getPacing(): GamePacing;
+    public static function getSequence(): GameSequence;
+    public static function getVisibility(): GameVisibility;
+    public static function getDynamic(): GameDynamic;
+    public static function getContinuity(): GameContinuity;
+    public static function getEntryPolicy(): GameEntryPolicy;
+    public static function getLifecycle(): GameLifecycle;
+
+    /**
+     * @return array<class-string<\BackedEnum>, \BackedEnum>
+     */
+    public static function getAdditionalAttributes(): array;
+
     /**
      * Create initial game state for a new game.
      *

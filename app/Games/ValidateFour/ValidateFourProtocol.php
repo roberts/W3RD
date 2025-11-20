@@ -3,6 +3,14 @@
 namespace App\Games\ValidateFour;
 
 use App\Enums\GameErrorCode;
+use App\Enums\GameAttributes\GameComplexity;
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\ValidationResult;
 use App\Games\BaseBoardGameTitle;
@@ -10,6 +18,19 @@ use App\Games\ValidateFour\Actions\ValidateFourActionMapper;
 
 abstract class ValidateFourProtocol extends BaseBoardGameTitle
 {
+    // Game Attribute Implementations
+    public static function getDynamic(): GameDynamic
+    {
+        return GameDynamic::ONE_VS_ONE;
+    }
+
+    public static function getAdditionalAttributes(): array
+    {
+        return [
+            GameComplexity::class => GameComplexity::CASUAL,
+        ];
+    }
+
     protected const DEFAULT_TURN_TIME_SECONDS = 30;
 
     abstract protected function getGameConfig(): ValidateFourConfig;

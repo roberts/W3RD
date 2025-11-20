@@ -9,6 +9,9 @@ use App\GameEngine\Interfaces\GameArbiterContract;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 
 /**
  * Base class for card game titles.
@@ -19,6 +22,22 @@ use App\Models\Game\Game;
  */
 abstract class BaseCardGameTitle extends BaseGameTitle
 {
+    // Game Attribute Implementations
+    public static function getPacing(): GamePacing
+    {
+        return GamePacing::TURN_BASED_SYNC;
+    }
+
+    public static function getSequence(): GameSequence
+    {
+        return GameSequence::SEQUENTIAL;
+    }
+
+    public static function getVisibility(): GameVisibility
+    {
+        return GameVisibility::HIDDEN_INFORMATION;
+    }
+
     protected const DEFAULT_TURN_TIME_SECONDS = 30;
 
     abstract protected function getReporter(): GameReporterContract;

@@ -9,6 +9,14 @@ use App\GameEngine\Interfaces\GameTitleContract;
 use App\Games\BaseBoardGameTitle;
 use App\Games\Checkers\Actions\CheckersActionMapper;
 use App\Models\Game\Game;
+use App\Enums\GameAttributes\GameComplexity;
+use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameEntryPolicy;
+use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
 
 /**
  * Base Checkers game implementation.
@@ -17,6 +25,19 @@ use App\Models\Game\Game;
  */
 abstract class CheckersProtocol extends BaseBoardGameTitle implements GameTitleContract
 {
+    // Game Attribute Implementations
+    public static function getDynamic(): GameDynamic
+    {
+        return GameDynamic::ONE_VS_ONE;
+    }
+
+    public static function getAdditionalAttributes(): array
+    {
+        return [
+            GameComplexity::class => GameComplexity::MIDCORE,
+        ];
+    }
+
     abstract protected function getGameConfig(): CheckersConfig;
 
     abstract protected function getArbiter(): CheckersArbiter;

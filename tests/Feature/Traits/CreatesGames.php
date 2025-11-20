@@ -11,7 +11,7 @@ trait CreatesGames
     /**
      * Create an active game with the given user as a player
      */
-    protected function createActiveGame(User $user, string $title = 'validate-four'): Game
+    protected function createActiveGame(User $user, string $title = 'connect-four'): Game
     {
         $game = Game::factory()->create([
             'title_slug' => $title,
@@ -27,7 +27,7 @@ trait CreatesGames
     /**
      * Create a waiting game (not yet started)
      */
-    protected function createWaitingGame(User $user, string $title = 'validate-four'): Game
+    protected function createWaitingGame(User $user, string $title = 'connect-four'): Game
     {
         $game = Game::factory()->create([
             'title_slug' => $title,
@@ -42,7 +42,7 @@ trait CreatesGames
     /**
      * Create a completed game
      */
-    protected function createCompletedGame(User $winner, string $title = 'validate-four'): Game
+    protected function createCompletedGame(User $winner, string $title = 'connect-four'): Game
     {
         $game = Game::factory()->create([
             'title_slug' => $title,

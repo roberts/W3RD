@@ -7,7 +7,10 @@ use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Actions\User\ResolveUsernameAction;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
+use App\Enums\PlayerActivityState;
 use App\Events\LobbyInvitation;
+use App\Exceptions\LobbyStateException;
+use App\Exceptions\PlayerBusyException;
 use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
 use App\Http\Traits\ApiResponses;
@@ -15,6 +18,7 @@ use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
 use App\Services\GameCreationService;
+use App\Services\PlayerActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -47,7 +51,11 @@ class LobbyPlayerController extends Controller
         }
 
         if ($lobby->status !== LobbyStatus::PENDING) {
-            return $this->errorResponse('Cannot invite players to a non-pending lobby');
+            throw new LobbyStateException(
+                'Cannot invite players to a non-pending lobby',
+                $lobby->status->value,
+                ['lobby_ulid' => $lobby->ulid]
+            );
         }
 
         // Resolve username to user
@@ -59,7 +67,11 @@ class LobbyPlayerController extends Controller
             ->first();
 
         if ($existing) {
-            return $this->errorResponse('Player is already in this lobby');
+            throw new PlayerBusyException(
+                "Player {$invitee->username} is already in this lobby",
+                'in_lobby',
+                ['lobby_ulid' => $lobby->ulid, 'username' => $invitee->username]
+            );
         }
 
         // Create invitation
@@ -108,6 +120,10 @@ class LobbyPlayerController extends Controller
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
+            // Set player activity to IN_LOBBY
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+
             // Check if we can start the game (exact player count for games that require it)
             if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
@@ -121,7 +137,11 @@ class LobbyPlayerController extends Controller
         }
 
         if ($lobbyPlayer->status !== LobbyPlayerStatus::PENDING) {
-            return $this->errorResponse('You have already responded to this invitation');
+            throw new PlayerBusyException(
+                'You have already responded to this invitation',
+                'invitation_already_responded',
+                ['lobby_ulid' => $lobby->ulid, 'status' => $lobbyPlayer->status->value]
+            );
         }
 
         // Update status
@@ -131,6 +151,10 @@ class LobbyPlayerController extends Controller
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
+            // Set player activity to IN_LOBBY
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+
             // Check if we can start the game (exact player count for games that require it)
             if ($lobby->canStartGame() && ! $lobby->scheduled_at) {
                 $this->startGame($lobby);
@@ -139,6 +163,10 @@ class LobbyPlayerController extends Controller
             return $this->messageResponse('Invitation accepted');
         } else {
             $lobbyPlayer->decline();
+
+            // Player declined, they never entered lobby so set to IDLE
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($user->id, PlayerActivityState::IDLE);
 
             return $this->messageResponse('Invitation declined');
         }
@@ -160,7 +188,11 @@ class LobbyPlayerController extends Controller
         $user = $this->resolveUsername->execute($username);
 
         if ($user->id === $currentUser->id) {
-            return $this->errorResponse('Host cannot kick themselves');
+            throw new LobbyStateException(
+                'Host cannot kick themselves from the lobby',
+                $lobby->status->value,
+                ['lobby_ulid' => $lobby->ulid]
+            );
         }
 
         $lobbyPlayer = LobbyPlayer::where('lobby_id', $lobby->id)
@@ -168,6 +200,10 @@ class LobbyPlayerController extends Controller
             ->firstOrFail();
 
         $lobbyPlayer->delete();
+
+        // Set kicked player activity to IDLE
+        $activityService = app(PlayerActivityService::class);
+        $activityService->setState($user->id, PlayerActivityState::IDLE);
 
         return $this->noContentResponse();
     }

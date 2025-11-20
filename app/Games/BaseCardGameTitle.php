@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace App\Games;
 
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameVisibility;
+use App\GameEngine\GameOutcome;
+use App\GameEngine\Interfaces\GameArbiterContract;
+use App\GameEngine\Interfaces\GameReporterContract;
+use App\Models\Game\Action;
+use App\Models\Game\Game;
+
 /**
  * Base class for card game titles.
  *
@@ -13,6 +22,62 @@ namespace App\Games;
  */
 abstract class BaseCardGameTitle extends BaseGameTitle
 {
+    // Game Attribute Implementations
+    public static function getPacing(): GamePacing
+    {
+        return GamePacing::TURN_BASED_SYNC;
+    }
+
+    public static function getSequence(): GameSequence
+    {
+        return GameSequence::SEQUENTIAL;
+    }
+
+    public static function getVisibility(): GameVisibility
+    {
+        return GameVisibility::HIDDEN_INFORMATION;
+    }
+
+    protected const DEFAULT_TURN_TIME_SECONDS = 30;
+
+    abstract protected function getReporter(): GameReporterContract;
+
+    abstract public function getArbiter(): GameArbiterContract;
+
+    public function getTimelimit(): int
+    {
+        return static::DEFAULT_TURN_TIME_SECONDS;
+    }
+
+    // GameReporterContract delegation
+
+    public function getPublicStatus(object $gameState): array
+    {
+        return $this->getReporter()->getPublicStatus($gameState);
+    }
+
+    public function describeStateChanges(Game $game, Action $action, object $gameState): array
+    {
+        return $this->getReporter()->describeStateChanges($game, $action, $gameState);
+    }
+
+    public function formatActionSummary(Action $action): string
+    {
+        return $this->getReporter()->formatActionSummary($action);
+    }
+
+    public function getFinishDetails(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        return $this->getReporter()->getFinishDetails($game, $outcome, $gameState);
+    }
+
+    public function analyzeOutcome(Game $game, GameOutcome $outcome, object $gameState): array
+    {
+        return $this->getReporter()->analyzeOutcome($game, $outcome, $gameState);
+    }
+
+    // GameArbiterContract delegation
+
     /**
      * Standard 52-card deck representation.
      * Format: [suit][rank] (e.g., 'H2' = 2 of Hearts, 'SQ' = Queen of Spades)

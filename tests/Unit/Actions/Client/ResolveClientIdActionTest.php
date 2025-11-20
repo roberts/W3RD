@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 describe('ResolveClientIdAction', function () {
     describe('Header Parsing', function () {
         it('resolves client id from X-Client-Key header as integer', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $client->id,
             ]);
@@ -175,7 +175,7 @@ describe('ResolveClientIdAction', function () {
 
     describe('Real-world Scenarios', function () {
         it('handles web client', function () {
-            $webClient = Client::factory()->create(['name' => 'Gamer Protocol Web']);
+            $webClient = Client::factory()->withTrademarks()->create(['name' => 'Gamer Protocol Web']);
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $webClient->id,
             ]);
@@ -187,7 +187,7 @@ describe('ResolveClientIdAction', function () {
         });
 
         it('handles mobile client', function () {
-            $mobileClient = Client::factory()->create(['name' => 'Gamer Protocol iOS']);
+            $mobileClient = Client::factory()->withTrademarks()->create(['name' => 'Gamer Protocol iOS']);
             $request = Request::create('/', 'GET', [], [], [], [
                 'HTTP_X_CLIENT_KEY' => (string) $mobileClient->id,
             ]);

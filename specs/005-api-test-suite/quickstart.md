@@ -248,7 +248,7 @@ describe('Complex Feature', function () {
     it('tests game with subscription', function () {
         $user = User::factory()->create();
         $subscription = $this->createStripeSubscription($user);
-        $game = $this->createActiveGame($user, 'validate-four');
+        $game = $this->createActiveGame($user, 'connect-four');
         
         // Test logic...
     });

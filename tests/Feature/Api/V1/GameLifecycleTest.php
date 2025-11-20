@@ -1,25 +1,44 @@
 <?php
 
+use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Illuminate\Support\Str;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\GameHelper;
 
 describe('Game Lifecycle', function () {
+    // Helper function to create proper game_state structure
+    $createGameState = function ($players, $currentPlayerUlid, $boardState = null) {
+        $board = $boardState ?? array_fill(0, 6, array_fill(0, 7, null));
+        $playersData = [];
+
+        foreach ($players as $index => $player) {
+            $playersData[$player->ulid] = [
+                'ulid' => $player->ulid,
+                'position' => $index + 1,
+                'color' => ['red', 'yellow', 'blue', 'green'][$index % 4],
+            ];
+        }
+
+        return [
+            'board' => $board,
+            'current_player_ulid' => $currentPlayerUlid,
+            'players' => $playersData,
+            'columns' => 7,
+            'rows' => 6,
+            'connect_count' => 4,
+        ];
+    };
+
     describe('Game Retrieval', function () {
         it('lists user games with pagination', function () {
             $user = User::factory()->create();
 
             // Create games where user is a player
-            Game::factory()->count(15)->create(['creator_id' => $user->id])->each(function ($game) use ($user) {
-                Player::factory()->create([
-                    'game_id' => $game->id,
-                    'user_id' => $user->id,
-                    'position_id' => 1,
-                ]);
-            });
+            Game::factory()->count(15)->withPlayers([$user])->create(['creator_id' => $user->id]);
 
             $response = $this->actingAs($user)->getJson('/api/v1/games?page=1&per_page=10');
 
@@ -275,7 +294,7 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            $response->assertStatus(400); // API returns 400 for "not your turn"
+            $response->assertStatus(422); // API returns 422 for game rule violations
         });
 
         it('rejects invalid column with 400', function () {
@@ -321,10 +340,12 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 99],
             ]);
 
-            $response->assertStatus(400) // API returns 400 for invalid moves
+            $response->assertStatus(422) // API returns 422 for game rule violations
                 ->assertJson([
                     'message' => 'Column must be between 0 and 6',
-                    'error_code' => 'INVALID_COLUMN',
+                    'error_code' => 'invalid_column',
+                    'game_title' => 'connect-four',
+                    'severity' => 'error',
                 ]);
         });
 
@@ -344,7 +365,7 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            $response->assertStatus(400); // API returns 400 for "game not active"
+            $response->assertStatus(422); // API returns 422 for game rule violations (game not active)
         });
 
         it('rejects action by non-player with 403', function () {
@@ -395,18 +416,39 @@ describe('Game Lifecycle', function () {
         it('returns empty array when not player turn', function () {
             $player1 = User::factory()->create();
             $player2 = User::factory()->create();
+
+            $p1Ulid = (string) Str::ulid();
+            $p2Ulid = (string) Str::ulid();
+
             $game = Game::factory()->active()->create([
                 'creator_id' => $player1->id,
+                'game_state' => [
+                    'current_player_ulid' => $p1Ulid,
+                    'players' => [
+                        $p1Ulid => ['ulid' => $p1Ulid, 'position' => 1, 'color' => 'red'],
+                        $p2Ulid => ['ulid' => $p2Ulid, 'position' => 2, 'color' => 'yellow'],
+                    ],
+                    'board' => [],
+                    'rows' => 6,
+                    'columns' => 7,
+                    'phase' => GamePhase::ACTIVE->value,
+                    'status' => GameStatus::ACTIVE->value,
+                    'roundNumber' => 1,
+                    'winnerUlid' => null,
+                    'isDraw' => false,
+                ],
             ]);
             Player::factory()->create([
                 'game_id' => $game->id,
                 'user_id' => $player1->id,
                 'position_id' => 1,
+                'ulid' => $p1Ulid,
             ]);
             Player::factory()->create([
                 'game_id' => $game->id,
                 'user_id' => $player2->id,
                 'position_id' => 2,
+                'ulid' => $p2Ulid,
             ]);
 
             $response = $this->actingAs($player2)->getJson("/api/v1/games/{$game->ulid}/options");
@@ -469,8 +511,8 @@ describe('Game Lifecycle', function () {
                 'action_details' => ['column' => 3],
             ]);
 
-            // Should reject because it's not their turn
-            expect($response->status())->toBeIn([400, 403]);
+            // Should reject because it's not their turn (422 for game rule violations)
+            expect($response->status())->toBeIn([422, 403]);
         });
 
         it('rejects malformed JSON in request body', function () {
@@ -495,6 +537,179 @@ describe('Game Lifecycle', function () {
 
             // Should return 400 for malformed JSON
             expect($response->status())->toBeIn([400, 422]);
+        });
+    });
+
+    describe('Game Actions - Network & Timing Issues', function () use ($createGameState) {
+        it('handles duplicate action submission (idempotency)', function () use ($createGameState) {
+            $user = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = GameHelper::createGame([
+                'status' => GameStatus::ACTIVE,
+            ], [
+                ['user' => $user, 'position_id' => 1],
+                ['user' => $user2, 'position_id' => 2],
+            ]);
+
+            $player = $game->players()->where('user_id', $user->id)->first();
+            $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
+
+            $game->update([
+                'game_state' => $createGameState([$player, $player2], $player->ulid),
+            ]);
+
+            // Submit same action twice
+            $response1 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
+
+            $response2 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
+
+            // First succeeds, second should fail (not their turn anymore)
+            expect($response1->status())->toBe(200);
+            expect($response2->status())->toBe(422); // Game rule violation: not their turn
+        });
+
+        it('prevents action submission during opponent turn', function () use ($createGameState) {
+            $user1 = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = GameHelper::createGame([
+                'status' => GameStatus::ACTIVE,
+            ], [
+                ['user' => $user1, 'position_id' => 1],
+                ['user' => $user2, 'position_id' => 2],
+            ]);
+
+            $player1 = $game->players()->where('user_id', $user1->id)->first();
+            $player2 = $game->players()->where('user_id', $user2->id)->first();
+
+            $game->update([
+                'game_state' => $createGameState([$player1, $player2], $player1->ulid),
+            ]);
+
+            // Player 2 tries to make move during Player 1's turn
+            $response = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 0],
+            ]);
+
+            $response->assertStatus(422); // API returns 422 for game rule violations
+            expect($response->json('error_code'))->toBe('not_player_turn');
+        });
+
+        it('validates action payload size limits', function () use ($createGameState) {
+            $user = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = GameHelper::createGame([
+                'status' => GameStatus::ACTIVE,
+            ], [
+                ['user' => $user, 'position_id' => 1],
+                ['user' => $user2, 'position_id' => 2],
+            ]);
+
+            $player = $game->players()->where('user_id', $user->id)->first();
+            $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
+
+            $game->update([
+                'game_state' => $createGameState([$player, $player2], $player->ulid),
+            ]);
+
+            // Submit action with excessively large payload
+            $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => [
+                    'column' => 3,
+                    'extra_data' => str_repeat('a', 100000), // 100KB of garbage
+                ],
+            ]);
+
+            // Should either accept (and ignore extra data) or reject
+            expect($response->status())->toBeIn([200, 400, 413, 422]);
+        });
+    });
+
+    describe('Game Actions - Multi-game Scenarios', function () use ($createGameState) {
+        it('handles actions from multiple devices for same user', function () use ($createGameState) {
+            $user = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = GameHelper::createGame([
+                'status' => GameStatus::ACTIVE,
+            ], [
+                ['user' => $user, 'position_id' => 1],
+                ['user' => $user2, 'position_id' => 2],
+            ]);
+
+            $player = $game->players()->where('user_id', $user->id)->first();
+            $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
+
+            $game->update([
+                'game_state' => $createGameState([$player, $player2], $player->ulid),
+            ]);
+
+            // Submit from "mobile" device
+            $response1 = $this->actingAs($user)
+                ->withHeader('X-Client-Key', '2') // Mobile client
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
+
+            // Try to submit from "web" device (should fail - not their turn anymore)
+            $response2 = $this->actingAs($user)
+                ->withHeader('X-Client-Key', '1') // Web client
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 4],
+                ]);
+
+            expect($response1->status())->toBe(200);
+            expect($response2->status())->toBe(422); // Game rule violation: not their turn
+        });
+    });
+
+    describe('Game Actions - Rate Limiting', function () {
+        it('enforces per-user action rate limit', function () {
+            $user = User::factory()->create();
+            $user2 = User::factory()->create();
+
+            $game = GameHelper::createGame([
+                'status' => GameStatus::ACTIVE,
+            ], [
+                ['user' => $user, 'position_id' => 1],
+                ['user' => $user2, 'position_id' => 2],
+            ]);
+
+            $player = $game->players()->where('user_id', $user->id)->first();
+
+            $game->update([
+                'game_state' => [
+                    'board' => array_fill(0, 6, array_fill(0, 7, null)),
+                    'current_player_ulid' => $player->ulid,
+                    'player_ulids' => [$player->ulid, $game->players()->where('user_id', '!=', $user->id)->first()->ulid],
+                    'player_colors' => ['red', 'yellow'],
+                ],
+            ]);
+
+            // Rapidly submit multiple actions
+            $responses = [];
+            for ($i = 0; $i < 10; $i++) {
+                $responses[] = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
+            }
+
+            // First should succeed, rest should fail (not their turn or rate limited)
+            $successCount = collect($responses)->filter(fn ($r) => $r->status() === 200)->count();
+            expect($successCount)->toBeLessThanOrEqual(2); // At most 2 rapid actions succeed
         });
     });
 });

@@ -48,6 +48,9 @@ class Agent extends Model
     }
 
     // Relationships
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<User, $this>
+     */
     public function user()
     {
         return $this->hasOne(User::class);

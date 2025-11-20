@@ -42,12 +42,15 @@ class HandleTimeoutAction
 
         if ($outcome->isFinished) {
             $game->status = GameStatus::COMPLETED;
-            $game->finish_reason = $outcome->reason;
+            $game->outcome_type = $outcome->type;
+            $game->outcome_details = $outcome->details;
+            $game->completed_at = now();
 
             if ($outcome->winnerUlid) {
                 /** @var Player $winner */
                 $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                 $game->winner_id = $winner->id;
+                $game->winner_position = $outcome->winnerPosition;
             }
 
             $game->save();

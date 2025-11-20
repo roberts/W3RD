@@ -13,7 +13,7 @@ describe('Registration', function () {
 
     describe('User Registration', function () {
         it('allows new users to register', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
 
             $response = $this->post(route('register.store'), [
                 'name' => 'John Doe',

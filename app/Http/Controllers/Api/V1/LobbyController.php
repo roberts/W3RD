@@ -7,8 +7,10 @@ use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Enums\GameTitle;
 use App\Enums\LobbyPlayerStatus;
 use App\Enums\LobbyStatus;
+use App\Enums\PlayerActivityState;
 use App\Events\LobbyInvitation;
 use App\Events\LobbyReadyCheck;
+use App\Exceptions\InvalidGameConfigurationException;
 use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
@@ -17,6 +19,7 @@ use App\Http\Traits\ApiResponses;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
+use App\Services\PlayerActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -56,7 +59,11 @@ class LobbyController extends Controller
         $gameTitle = GameTitle::fromSlug($validated['game_title']);
 
         if (! $gameTitle) {
-            return $this->errorResponse('Invalid game title');
+            throw new InvalidGameConfigurationException(
+                "Game title '{$validated['game_title']}' is not supported",
+                $validated['game_title'],
+                ['available_titles' => array_column(GameTitle::cases(), 'value')]
+            );
         }
 
         DB::beginTransaction();
@@ -149,7 +156,16 @@ class LobbyController extends Controller
     {
         $lobby = $this->findLobby->execute($lobbyUlid);
 
+        // Get all players before marking as cancelled
+        $playerIds = $lobby->players()->pluck('user_id')->toArray();
+
         $lobby->markAsCancelled();
+
+        // Set all players back to IDLE
+        $activityService = app(PlayerActivityService::class);
+        foreach ($playerIds as $playerId) {
+            $activityService->setState($playerId, PlayerActivityState::IDLE);
+        }
 
         return $this->noContentResponse();
     }

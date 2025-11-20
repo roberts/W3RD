@@ -24,7 +24,7 @@ class AuthenticationHelper
      */
     public static function loginAs(User $user, string $password = 'password'): string
     {
-        $client = Client::factory()->create();
+        $client = Client::factory()->withTrademarks()->create();
 
         $response = test()->postJson('/api/v1/auth/login', [
             'email' => $user->email,
@@ -49,7 +49,7 @@ class AuthenticationHelper
      */
     public static function registerUser(array $data = []): array
     {
-        $client = Client::factory()->create();
+        $client = Client::factory()->withTrademarks()->create();
 
         $userData = array_merge([
             'client_id' => $client->id,

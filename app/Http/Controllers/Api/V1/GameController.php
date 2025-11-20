@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Game\FindGameByUlidAction;
 use App\Enums\GameStatus;
+use App\Events\GameCompleted;
+use App\Exceptions\GameAccessDeniedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ForfeitGameRequest;
 use App\Http\Requests\Game\RequestRematchRequest;
@@ -59,9 +61,6 @@ class GameController extends Controller
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         return $this->resourceResponse(GameResource::make($game));
     }
@@ -102,9 +101,6 @@ class GameController extends Controller
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         $actions = Action::where('game_id', $game->id)
             ->with('player.user:id,name,username')
@@ -130,21 +126,33 @@ class GameController extends Controller
             ->first();
 
         if (! $opponent) {
-            return $this->errorResponse('Cannot determine opponent.');
+            throw new GameAccessDeniedException(
+                'Cannot determine opponent for this game',
+                $game->ulid,
+                ['user_id' => $user->id]
+            );
         }
 
         // Update game status
         $game->status = GameStatus::COMPLETED;
         $game->winner_id = $opponent->user_id;
-        $game->finished_at = now();
+        $game->outcome_type = \App\Enums\OutcomeType::FORFEIT;
+        $game->completed_at = now();
         $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
         $game->save();
+
+        // Dispatch GameCompleted event for activity tracking and cooldown
+        event(new GameCompleted(
+            game: $game,
+            winnerUlid: $opponent->ulid,
+            isDraw: false
+        ));
 
         return $this->dataResponse([
             'ulid' => $game->ulid,
             'status' => $game->status->value,
             'winner_id' => $game->winner_id,
-            'finished_at' => $game->finished_at,
+            'completed_at' => $game->completed_at,
         ], 'Game forfeited successfully.');
     }
 }

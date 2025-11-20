@@ -15,31 +15,31 @@ class ModeSeeder extends Seeder
         $modes = [
             // Validate Four modes
             [
-                'title_slug' => 'validate-four',
+                'title_slug' => 'connect-four',
                 'slug' => 'standard',
                 'name' => 'Standard (7x6)',
                 'is_active' => true,
             ],
             [
-                'title_slug' => 'validate-four',
+                'title_slug' => 'connect-four',
                 'slug' => 'pop_out',
                 'name' => 'Pop Out',
                 'is_active' => true,
             ],
             [
-                'title_slug' => 'validate-four',
+                'title_slug' => 'connect-four',
                 'slug' => 'eight_by_seven',
                 'name' => '8x7 Board',
                 'is_active' => true,
             ],
             [
-                'title_slug' => 'validate-four',
+                'title_slug' => 'connect-four',
                 'slug' => 'nine_by_six',
                 'name' => '9x6 Board',
                 'is_active' => true,
             ],
             [
-                'title_slug' => 'validate-four',
+                'title_slug' => 'connect-four',
                 'slug' => 'five',
                 'name' => 'Connect Five',
                 'is_active' => true,

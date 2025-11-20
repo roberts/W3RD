@@ -30,7 +30,7 @@ class PlayerFactory extends Factory
         return [
             'game_id' => Game::factory(),
             'user_id' => User::factory(),
-            'client_id' => Client::factory(),
+            'client_id' => Client::factory()->withTrademarks(),
             'position_id' => 1,
             'color' => 'red',
         ];

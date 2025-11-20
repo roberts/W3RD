@@ -4,12 +4,24 @@ use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
+use Illuminate\Support\Facades\Redis;
 
 describe('Client Tracking', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     it('tracks client_id when game is created through rematch', function () {
         $player1 = User::factory()->create();
         $player2 = User::factory()->create();
-        $client = Client::factory()->create(['api_key' => 'test-client-key']);
+        $client = Client::factory()->withTrademarks()->create(['api_key' => 'test-client-key']);
 
         // Create completed game with specific client_ids
         $game = Game::factory()->completed()->create(['creator_id' => $player1->id]);
@@ -39,13 +51,13 @@ describe('Client Tracking', function () {
     it('tracks client_id when game is created through lobby', function () {
         $host = User::factory()->create();
         $player2 = User::factory()->create();
-        $client = Client::factory()->create(['api_key' => 'test-client-key-lobby']);
+        $client = Client::factory()->withTrademarks()->create(['api_key' => 'test-client-key-lobby']);
 
         // Create lobby with min_players = 2
         $lobbyResponse = $this->actingAs($host)
             ->withHeader('X-Client-Key', $client->id)
             ->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'game_mode' => 'standard',
                 'is_public' => false,
                 'min_players' => 2,

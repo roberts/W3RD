@@ -93,12 +93,8 @@ describe('User Statistics', function () {
 
             // 3 wins, 0 losses
             for ($i = 0; $i < 3; $i++) {
-                $game = Game::factory()->completed()->create();
-                $player = Player::factory()->create([
-                    'user_id' => $user->id,
-                    'game_id' => $game->id,
-                ]);
-                $game->update(['winner_id' => $player->id]);
+                $game = Game::factory()->completed()->withPlayers([$user])->create();
+                $game->update(['winner_id' => $game->players->first()->id]);
             }
 
             $response = $this->actingAs($user)->getJson('/api/v1/me/stats');
@@ -119,11 +115,7 @@ describe('User Statistics', function () {
 
             // 0 wins, 3 losses
             for ($i = 0; $i < 3; $i++) {
-                $game = Game::factory()->completed()->create();
-                Player::factory()->create([
-                    'user_id' => $user->id,
-                    'game_id' => $game->id,
-                ]);
+                Game::factory()->completed()->withPlayers([$user])->create();
                 // Don't set winner_id, meaning they lost
             }
 
@@ -145,21 +137,13 @@ describe('User Statistics', function () {
 
             // 2 wins
             for ($i = 0; $i < 2; $i++) {
-                $game = Game::factory()->completed()->create();
-                $player = Player::factory()->create([
-                    'user_id' => $user->id,
-                    'game_id' => $game->id,
-                ]);
-                $game->update(['winner_id' => $player->id]);
+                $game = Game::factory()->completed()->withPlayers([$user])->create();
+                $game->update(['winner_id' => $game->players->first()->id]);
             }
 
             // 2 losses
             for ($i = 0; $i < 2; $i++) {
-                $game = Game::factory()->completed()->create();
-                Player::factory()->create([
-                    'user_id' => $user->id,
-                    'game_id' => $game->id,
-                ]);
+                Game::factory()->completed()->withPlayers([$user])->create();
                 // Don't set winner_id, meaning they lost
             }
 
@@ -182,11 +166,7 @@ describe('User Statistics', function () {
             $user = User::factory()->create();
 
             // Game 1: 100 points
-            $game1 = Game::factory()->completed()->create();
-            Player::factory()->create([
-                'user_id' => $user->id,
-                'game_id' => $game1->id,
-            ]);
+            $game1 = Game::factory()->completed()->withPlayers([$user])->create();
             Point::factory()->create([
                 'user_id' => $user->id,
                 'source_type' => Game::class,
@@ -195,11 +175,7 @@ describe('User Statistics', function () {
             ]);
 
             // Game 2: 250 points
-            $game2 = Game::factory()->completed()->create();
-            Player::factory()->create([
-                'user_id' => $user->id,
-                'game_id' => $game2->id,
-            ]);
+            $game2 = Game::factory()->completed()->withPlayers([$user])->create();
             Point::factory()->create([
                 'user_id' => $user->id,
                 'source_type' => Game::class,
@@ -208,11 +184,7 @@ describe('User Statistics', function () {
             ]);
 
             // Game 3: 50 points
-            $game3 = Game::factory()->completed()->create();
-            Player::factory()->create([
-                'user_id' => $user->id,
-                'game_id' => $game3->id,
-            ]);
+            $game3 = Game::factory()->completed()->withPlayers([$user])->create();
             Point::factory()->create([
                 'user_id' => $user->id,
                 'source_type' => Game::class,

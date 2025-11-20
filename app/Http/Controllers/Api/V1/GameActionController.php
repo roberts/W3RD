@@ -5,17 +5,25 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\Game\HandleTimeoutAction;
 use App\Actions\Game\ProcessCoordinatedActionAction;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
 use App\Enums\GameStatus;
 use App\Events\GameActionProcessed;
+use App\Exceptions\GameActionDeniedException;
+use App\GameEngine\Interfaces\GameRedactor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
+use App\Jobs\TimeoutJob;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
+use App\Services\Agents\AgentService;
+use App\Services\Game\GameConclusionService;
 use App\Services\GameActionRecorder;
+use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,7 +35,9 @@ class GameActionController extends Controller
         protected GameActionRecorder $actionRecorder,
         protected HandleTimeoutAction $handleTimeout,
         protected ProcessCoordinatedActionAction $processCoordinatedAction,
-        protected FindGameByUlidAction $findGame
+        protected FindGameByUlidAction $findGame,
+        protected GameResponseEnhancementService $enhancementService,
+        protected GameConclusionService $conclusionService
     ) {}
 
     /**
@@ -51,9 +61,6 @@ class GameActionController extends Controller
 
         // Verify the authenticated user is a player in this game
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         // Check if game is still active
         if ($error = $this->authorizeActiveGame($game)) {
@@ -74,12 +81,12 @@ class GameActionController extends Controller
         }
 
         // Verify it's this player's turn
-        if ($error = $this->authorizePlayerTurn($player, $mode->getGameState()->currentPlayerUlid)) {
+        if ($error = $this->authorizePlayerTurn($player, $gameState->currentPlayerUlid)) {
             return $error;
         }
 
         // Get the action factory for this game and create the action DTO
-        $actionFactoryClass = $mode->getActionFactory();
+        $actionFactoryClass = $mode->getActionMapper();
         $action = $this->handleServiceCall(
             fn () => $actionFactoryClass::create(
                 $validated['action_type'],
@@ -105,11 +112,16 @@ class GameActionController extends Controller
                 $game->turn_number ?? 1
             );
 
-            return $this->errorResponse(
+            // Throw GameActionDeniedException with game-specific error code
+            // Convert error code to lowercase to match enum values (INVALID_COLUMN -> invalid_column)
+            $errorCode = strtolower($validationResult->errorCode);
+
+            throw new GameActionDeniedException(
                 $validationResult->message,
-                400,
-                $validationResult->errorCode,
-                $validationResult->context
+                $errorCode,
+                $game->title_slug->value,
+                $validationResult->severity ?? 'error',
+                $validationResult->context ?? []
             );
         }
 
@@ -140,42 +152,27 @@ class GameActionController extends Controller
             $game->save();
         }
 
-        // Check for end condition using new GameOutcome
-        $outcome = $mode->checkEndCondition($gameState);
-        if ($outcome->isFinished) {
-            $game->status = GameStatus::COMPLETED;
-            $game->finish_reason = $outcome->reason;
+        // Check for end condition using the new GameConclusionService
+        $this->conclusionService->determineOutcome($game);
+        $game->refresh(); // Refresh to get any status changes from the service
 
-            if ($outcome->winnerUlid) {
-                /** @var Player $winner */
-                $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
-                $game->winner_id = $winner->id;
-                $gameState = $gameState->withWinner($outcome->winnerUlid);
-            }
+        // Only proceed with turn advancement if the game is still active
+        if ($game->status->isActive()) {
+            $this->advanceTurn($game, $mode);
 
-            if ($outcome->isDraw) {
-                $gameState = $gameState->withDraw();
-            }
-
-            // Store rankings and scores if provided
-            if (! empty($outcome->rankings)) {
-                $gameStateArray = $gameState->toArray();
-                $gameStateArray['final_rankings'] = $outcome->rankings;
-                $gameStateArray['final_scores'] = $outcome->scores;
-                $game->game_state = $gameStateArray;
-            } else {
-                $game->game_state = $gameState->toArray();
-            }
-
-            $game->save();
+            // Dispatch a timeout job for the next player
+            $this->dispatchTimeoutJob($game, $mode);
         }
-
-        // Increment turn number
-        $game->increment('turn_number');
 
         // Calculate the next action deadline
         $game->refresh();
         $nextDeadline = $mode->getActionDeadline($gameState, $game);
+
+        // Check if the next player is an agent and trigger their action
+        $this->triggerAgentActionIfNeeded($game, $gameState, $mode);
+
+        // Generate rich context for the response
+        $actionContext = $this->enhancementService->generateActionContext($game, $gameState, $mode, $actionRecord);
 
         // Broadcast the action to all players via websocket
         broadcast(new GameActionProcessed(
@@ -184,20 +181,26 @@ class GameActionController extends Controller
             actionDetails: $validated['action_details'],
             playerUlid: $player->ulid,
             actionUlid: $actionRecord->ulid,
+            actionContext: $actionContext,
+            outcomeDetails: $game->outcome_details
         ));
 
         return $this->dataResponse([
             'action' => [
                 'ulid' => $actionRecord->ulid,
+                'summary' => $actionContext['action_summary'],
             ],
             'game' => [
                 'ulid' => $game->ulid,
                 'status' => $game->status,
-                'game_state' => $game->game_state,
+                'game_state' => app(GameRedactor::class)->redact($game, auth()->user()),
                 'winner_ulid' => $gameState->winnerUlid,
                 'is_draw' => $gameState->isDraw ?? false,
-                'finish_reason' => $outcome->reason ?? null,
+                'outcome_type' => $game->outcome_type,
+                'outcome_details' => $game->outcome_details,
             ],
+            'context' => $actionContext,
+            'outcome' => $game->outcome_details,
             'next_action_deadline' => $nextDeadline->toIso8601String(),
             'timeout' => [
                 'timelimit_seconds' => $mode->getTimelimit(),
@@ -205,6 +208,45 @@ class GameActionController extends Controller
                 'penalty' => $mode->getTimeoutPenalty(),
             ],
         ], 'Action applied successfully');
+    }
+
+    /**
+     * Advances the turn based on the game's sequence attribute.
+     */
+    protected function advanceTurn(Game $game, object $mode): void
+    {
+        switch ($mode->getSequence()) {
+            case GameSequence::SEQUENTIAL:
+                $game->increment('turn_number');
+                break;
+            case GameSequence::SIMULTANEOUS:
+            case GameSequence::INTERLEAVED:
+                // In real-time/simultaneous games, turns might not auto-increment in the same way.
+                break;
+        }
+    }
+
+    /**
+     * Dispatches a job to handle player timeouts.
+     */
+    protected function dispatchTimeoutJob(Game $game, object $mode): void
+    {
+        $pacing = $mode->getPacing();
+
+        $delay = match ($pacing) {
+            GamePacing::TURN_BASED_ASYNC => now()->addMinutes(5), // Relaxed
+            GamePacing::TURN_BASED_SYNC => now()->addSeconds(60), // Standard
+            GamePacing::REALTIME => now()->addSeconds(15), // Blitz/Realtime
+            default => null,
+        };
+
+        if ($delay && $game->currentPlayer()) {
+            TimeoutJob::dispatch(
+                $game->id,
+                $game->currentPlayer()->id,
+                $game->turn_number
+            )->delay($delay);
+        }
     }
 
     /**
@@ -228,9 +270,6 @@ class GameActionController extends Controller
 
         // Get the player
         $player = $this->authorizeGamePlayer($game);
-        if ($player instanceof JsonResponse) {
-            return $player;
-        }
 
         // Get the current game state
         $gameState = $mode->getGameState();
@@ -248,5 +287,51 @@ class GameActionController extends Controller
             'deadline' => $deadline->toIso8601String(),
             'timelimit_seconds' => $mode->getTimelimit(),
         ]);
+    }
+
+    /**
+     * Trigger agent action if the next player is an agent.
+     */
+    protected function triggerAgentActionIfNeeded(Game $game, object $gameState, object $mode): void
+    {
+        // Skip if game is finished
+        if ($game->status === GameStatus::COMPLETED) {
+            return;
+        }
+
+        // Get the current player ULID from game state
+        $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
+
+        if (! $currentPlayerUlid) {
+            return;
+        }
+
+        // Find the player record
+        /** @var \App\Models\Game\Player|null $player */
+        $player = $game->players()->where('ulid', $currentPlayerUlid)->first();
+
+        if (! $player) {
+            return;
+        }
+
+        /** @var \App\Models\Auth\User|null $user */
+        $user = $player->user;
+
+        if (! $user) {
+            return;
+        }
+
+        // Check if the player is an agent
+        if ($user->isAgent()) {
+            \Log::debug('Next player is an agent, triggering action', [
+                'game_id' => $game->id,
+                'player_ulid' => $currentPlayerUlid,
+                'agent_id' => $user->agent_id,
+            ]);
+
+            // Dispatch agent action via AgentService
+            $agentService = app(AgentService::class);
+            $agentService->performAction($user, $game);
+        }
     }
 }

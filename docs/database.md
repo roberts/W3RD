@@ -140,7 +140,7 @@ return new class extends Migration
 
 ## ♟️ Game, Player, and History Structure
 
-This unified core supports all game titles and player types. Game titles (Validate Four, Checkers, Hearts, Spades) are defined as PHP enums rather than database records.
+This unified core supports all game titles and player types. Game titles (Connect Four, Checkers, Hearts, Spades) are defined as PHP enums rather than database records.
 
 ### 6. `create_games_table` (Game Instances)
 ```php

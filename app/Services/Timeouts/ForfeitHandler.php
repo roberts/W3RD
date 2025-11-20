@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Timeouts;
 
-use App\Games\GameOutcome;
+use App\GameEngine\GameOutcome;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 
@@ -32,7 +32,7 @@ class ForfeitHandler implements TimeoutHandlerContract
             return GameOutcome::draw('timeout_no_opponent');
         }
 
-        return GameOutcome::win($winnerPlayer->ulid, 'timeout_forfeit');
+        return GameOutcome::win($winnerPlayer->ulid, null, 'timeout_forfeit');
     }
 
     /**

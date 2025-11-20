@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Auth\TrackAuthenticationEntryAction;
+use App\Enums\PlayerActivityState;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -15,6 +16,7 @@ use App\Models\Auth\Entry;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
 use App\Models\Auth\User;
+use App\Services\PlayerActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -176,6 +178,10 @@ class AuthController extends Controller
                 ->first()
                 ?->update(['logged_out_at' => now()]);
         }
+
+        // Set player activity to OFFLINE and cancel any pending rematches
+        $activityService = app(PlayerActivityService::class);
+        $activityService->setState($user->id, PlayerActivityState::OFFLINE);
 
         // Delete the token if it's a real token (not a transient test token)
         // @phpstan-ignore-next-line if.alwaysTrue - defensive check for test tokens

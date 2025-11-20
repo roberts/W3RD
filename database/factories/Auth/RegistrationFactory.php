@@ -24,7 +24,7 @@ class RegistrationFactory extends Factory
     public function definition(): array
     {
         return [
-            'client_id' => Client::factory(),
+            'client_id' => Client::factory()->withTrademarks(),
             'email' => fake()->unique()->safeEmail(),
             'password' => Hash::make('password'),
             'verification_token' => Str::random(64),

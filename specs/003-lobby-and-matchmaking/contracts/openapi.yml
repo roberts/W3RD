@@ -22,7 +22,7 @@ paths:
               properties:
                 game_title:
                   type: string
-                  example: "validate-four"
+                  example: "connect-four"
                 game_mode:
                   type: string
                   nullable: true
@@ -84,7 +84,7 @@ paths:
               properties:
                 game_title:
                   type: string
-                  example: "validate-four"
+                  example: "connect-four"
                 game_mode:
                   type: string
                   nullable: true

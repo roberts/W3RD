@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
@@ -14,18 +15,22 @@ class GameRulesController extends Controller
     /**
      * Get the rules for a specific game title.
      *
-     * @param  string  $gameTitle  The game title slug (e.g., 'validate-four')
+     * @param  string  $gameTitle  The game title slug (e.g., 'connect-four')
      */
     public function show(string $gameTitle): JsonResponse
     {
-        // Convert slug to StudlyCase for directory name (e.g., 'validate-four' → 'ValidateFour')
+        // Convert slug to StudlyCase for directory name (e.g., 'connect-four' → 'ValidateFour')
         $gameDirName = str_replace(' ', '', ucwords(str_replace('-', ' ', $gameTitle)));
 
         // Build the path to the base rules file
         $rulesPath = app_path("Games/{$gameDirName}/rules.php");
 
         if (! File::exists($rulesPath)) {
-            return $this->notFoundResponse("No rules found for game '{$gameTitle}'");
+            throw new ResourceNotFoundException(
+                "No rules found for game '{$gameTitle}'",
+                'game_rules',
+                $gameTitle
+            );
         }
 
         // Load the base rules

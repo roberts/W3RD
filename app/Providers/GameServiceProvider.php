@@ -17,12 +17,12 @@ class GameServiceProvider extends ServiceProvider
             'hearts' => [
                 'standard' => \App\Games\Hearts\Modes\StandardMode::class,
             ],
-            'validate-four' => [
-                'standard' => \App\Games\ValidateFour\Modes\StandardMode::class,
-                'pop-out' => \App\Games\ValidateFour\Modes\PopOutMode::class,
-                'five' => \App\Games\ValidateFour\Modes\FiveMode::class,
-                'eight-by-seven' => \App\Games\ValidateFour\Modes\EightBySevenMode::class,
-                'nine-by-six' => \App\Games\ValidateFour\Modes\NineBySixMode::class,
+            'connect-four' => [
+                'standard' => \App\Games\ConnectFour\Modes\StandardMode::class,
+                'pop-out' => \App\Games\ConnectFour\Modes\PopOutMode::class,
+                'five' => \App\Games\ConnectFour\Modes\FiveMode::class,
+                'eight-by-seven' => \App\Games\ConnectFour\Modes\EightBySevenMode::class,
+                'nine-by-six' => \App\Games\ConnectFour\Modes\NineBySixMode::class,
             ],
         ];
 

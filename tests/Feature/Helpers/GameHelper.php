@@ -6,7 +6,6 @@ use App\Enums\GameStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Mode;
-use App\Models\Game\Player;
 use Illuminate\Testing\TestResponse;
 
 class GameHelper
@@ -16,47 +15,31 @@ class GameHelper
      */
     public static function createGame(array $attributes = [], array $players = []): Game
     {
-        $mode = Mode::first() ?? Mode::factory()->create();
+        // Always use ConnectFour Standard mode for consistent test behavior
+        $mode = Mode::where('title_slug', 'connect-four')
+            ->where('slug', 'standard')
+            ->first() ?? Mode::factory()->connectFourStandard()->create();
 
-        $game = Game::factory()->create(array_merge([
+        $baseAttributes = array_merge([
             'mode_id' => $mode->id,
             'status' => GameStatus::ACTIVE,
-        ], $attributes));
+        ], $attributes);
+
+        // If status is ACTIVE, ensure started_at is set
+        if (($baseAttributes['status'] ?? null) === GameStatus::ACTIVE && ! isset($baseAttributes['started_at'])) {
+            $baseAttributes['started_at'] = now();
+        }
 
         // Create players if not provided
         if (empty($players)) {
-            $user1 = User::factory()->create();
-            $user2 = User::factory()->create();
-
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $user1->id,
-                'position_id' => 1,
-            ]);
-
-            Player::factory()->create([
-                'game_id' => $game->id,
-                'user_id' => $user2->id,
-                'position_id' => 2,
-            ]);
+            $game = Game::factory()->withPlayers(2)->create($baseAttributes);
         } else {
-            foreach ($players as $index => $playerData) {
-                // Support both User objects and arrays with 'user' and 'position_id' keys
-                if (is_array($playerData)) {
-                    Player::factory()->create([
-                        'game_id' => $game->id,
-                        'user_id' => $playerData['user']->id,
-                        'position_id' => $playerData['position_id'] ?? ($index + 1),
-                    ]);
-                } else {
-                    // Direct User object
-                    Player::factory()->create([
-                        'game_id' => $game->id,
-                        'user_id' => $playerData->id,
-                        'position_id' => $index + 1,
-                    ]);
-                }
+            // Extract users from players array
+            $users = [];
+            foreach ($players as $playerData) {
+                $users[] = is_array($playerData) ? $playerData['user'] : $playerData;
             }
+            $game = Game::factory()->withPlayers($users)->create($baseAttributes);
         }
 
         return $game->fresh(['players', 'mode']);
@@ -87,23 +70,11 @@ class GameHelper
      */
     public static function createCompletedGame(User $winner, User $loser): Game
     {
-        $game = Game::factory()->completed()->create([
+        $game = Game::factory()->completed()->withPlayers([$winner, $loser])->create([
             'creator_id' => $winner->id,
         ]);
 
-        $winnerPlayer = Player::factory()->create([
-            'game_id' => $game->id,
-            'user_id' => $winner->id,
-            'position_id' => 1,
-        ]);
-
-        Player::factory()->create([
-            'game_id' => $game->id,
-            'user_id' => $loser->id,
-            'position_id' => 2,
-        ]);
-
-        $game->update(['winner_id' => $winnerPlayer->id]);
+        $game->update(['winner_id' => $game->players->first()->user_id]);
 
         return $game->fresh(['players', 'mode']);
     }

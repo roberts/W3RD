@@ -3,8 +3,12 @@
 namespace App\Jobs;
 
 use App\Enums\GameTitle;
+use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
 use App\Http\Controllers\Api\V1\QuickplayController;
+use App\Services\Agents\AgentSchedulingService;
+use App\Services\GameCreationService;
+use App\Services\PlayerActivityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,13 +21,13 @@ class ProcessQuickplayQueue implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private const AI_FALLBACK_THRESHOLD = 30; // seconds
+    private const AI_FALLBACK_THRESHOLD = 20; // seconds
 
     private const MATCH_CONFIRMATION_TIMEOUT = 15; // seconds
 
     private const SKILL_RANGE = 5; // Skill level difference tolerance
 
-    private const RECENT_OPPONENT_LIMIT = 5; // Remember last N opponents
+    private const RECENT_OPPONENT_LIMIT = 3; // Remember last N opponents
 
     public function handle(): void
     {
@@ -124,16 +128,36 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private function matchWithAI(int $userId, GameTitle $gameTitle, string $mode, string $queueKey): void
     {
-        // Remove from queue
+        // Find available agent FIRST before removing from queue
+        $schedulingService = app(AgentSchedulingService::class);
+        $agentUser = $schedulingService->findAvailableAgent($gameTitle->value, $mode, $userId);
+
+        if (! $agentUser) {
+            \Log::info('No agent available for matchmaking, keeping user in queue', [
+                'user_id' => $userId,
+                'game_title' => $gameTitle->value,
+                'mode' => $mode,
+            ]);
+
+            // Keep user in queue - they'll continue waiting for human or agent
+            // Agent might become available on next job run, or human might join
+            return;
+        }
+
+        // Only remove from queue once we successfully found an agent
         Redis::zrem($queueKey, (string) $userId);
         Redis::hdel('quickplay:timestamps', (string) $userId);
         Redis::hdel('quickplay:clients', (string) $userId);
 
-        // TODO: Call SchedulingService to find AI agent
-        // For now, just log that we would match with AI
-        \Log::info("Would match user {$userId} with AI for {$gameTitle->value}:{$mode}");
+        \Log::info('Matched user with AI agent', [
+            'user_id' => $userId,
+            'agent_id' => $agentUser->id,
+            'game_title' => $gameTitle->value,
+            'mode' => $mode,
+        ]);
 
-        // TODO: Create game with AI opponent
+        // Create game with AI opponent
+        $this->createGameWithAgent($userId, $agentUser->id, $gameTitle, $mode);
     }
 
     private function createMatchConfirmation(int $userId1, int $userId2, GameTitle $gameTitle, string $mode, string $queueKey): void
@@ -204,5 +228,66 @@ class ProcessQuickplayQueue implements ShouldQueue
             // Clean up
             Redis::del($confirmKey);
         })->delay(now()->addSeconds(self::MATCH_CONFIRMATION_TIMEOUT + 1));
+    }
+
+    /**
+     * Create a game with an AI agent opponent.
+     *
+     * @param  int  $humanUserId  The human player's user ID
+     * @param  int  $agentUserId  The agent user's ID
+     * @param  GameTitle  $gameTitle  The game title
+     * @param  string  $mode  The game mode
+     */
+    private function createGameWithAgent(int $humanUserId, int $agentUserId, GameTitle $gameTitle, string $mode): void
+    {
+        try {
+            // Get client ID for human player
+            $clientId = Redis::hget('quickplay:clients', (string) $humanUserId) ?: 1;
+
+            // Prepare player data
+            $playerData = [
+                ['user_id' => $humanUserId, 'client_id' => (int) $clientId],
+                ['user_id' => $agentUserId, 'client_id' => 1], // Agents use default client
+            ];
+
+            // Create the game
+            $gameCreationService = app(GameCreationService::class);
+            $game = $gameCreationService->createFromQuickplay($playerData, $gameTitle, $mode);
+
+            // Track recent opponents for both human and agent
+            Redis::lpush("recent_opponents:{$humanUserId}", $agentUserId);
+            Redis::ltrim("recent_opponents:{$humanUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
+
+            Redis::lpush("recent_opponents:{$agentUserId}", $humanUserId);
+            Redis::ltrim("recent_opponents:{$agentUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
+
+            // Set both players' activity state to IN_GAME
+            $activityService = app(PlayerActivityService::class);
+            $activityService->setState($humanUserId, PlayerActivityState::IN_GAME);
+            $activityService->setState($agentUserId, PlayerActivityState::IN_GAME);
+
+            \Log::info('Game created with agent opponent', [
+                'game_id' => $game->id,
+                'human_user_id' => $humanUserId,
+                'agent_user_id' => $agentUserId,
+                'game_title' => $gameTitle->value,
+                'mode' => $mode,
+            ]);
+
+            // Broadcast game found to human player
+            broadcast(new GameFound($humanUserId, $game->ulid, [
+                'game_title' => $gameTitle->value,
+                'game_mode' => $mode,
+                'opponent_id' => $agentUserId,
+                'game_id' => $game->ulid,
+            ]));
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to create game with agent', [
+                'human_user_id' => $humanUserId,
+                'agent_user_id' => $agentUserId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

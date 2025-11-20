@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
+use App\Enums\PlayerActivityState;
 use App\Events\GameStarted;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
@@ -140,6 +141,13 @@ class GameCreationService
                 'game_id' => $game->id,
             ]);
 
+            // Set all players to IN_GAME state
+            $activityService = app(PlayerActivityService::class);
+            foreach ($players as $player) {
+                /** @var \App\Models\Game\Player $player */
+                $activityService->setState($player->user_id, PlayerActivityState::IN_GAME);
+            }
+
             // Broadcast game started event
             broadcast(new GameStarted($game));
 
@@ -156,7 +164,7 @@ class GameCreationService
         $matchKey = "quickplay:match:{$matchId}";
         $matchData = Redis::hgetall($matchKey);
 
-        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'validate-four');
+        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'connect-four');
         $gameMode = $matchData['game_mode'] ?? 'standard';
 
         // Prepare player data with each player's specific client_id
@@ -171,6 +179,12 @@ class GameCreationService
 
         // Create the game using the existing quickplay method
         $game = $this->createFromQuickplay($playerData, $gameTitle, $gameMode);
+
+        // Set both players to IN_GAME state
+        $activityService = app(PlayerActivityService::class);
+        foreach ($playerIds as $playerId) {
+            $activityService->setState((int) $playerId, PlayerActivityState::IN_GAME);
+        }
 
         // Clean up Redis
         Redis::del("quickplay:accept:{$matchId}");

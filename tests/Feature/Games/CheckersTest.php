@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Games\Checkers\GameState;
+use App\Games\Checkers\CheckersArbiter;
+use App\Games\Checkers\CheckersBoard;
 use App\Games\Checkers\Modes\StandardMode;
 use App\Models\Game\Game;
 
@@ -15,7 +16,7 @@ describe('Checkers Game Logic', function () {
 
         $state = $checkers->createInitialState($playerOne, $playerTwo);
 
-        expect($state)->toBeInstanceOf(GameState::class)
+        expect($state)->toBeInstanceOf(CheckersBoard::class)
             ->and($state->currentPlayerUlid)->toBe($playerOne)
             ->and($state->players)->toHaveCount(2)
             ->and($state->players[$playerOne]->color)->toBe('red')
@@ -87,11 +88,11 @@ describe('Checkers Game Logic', function () {
 
     test('can detect when a player has no pieces left', function () {
         $game = new Game(['game_state' => []]);
-        $mode = new StandardMode($game);
-        $state = GameState::createNew('p1', 'p2');
+        $arbiter = new CheckersArbiter;
+        $state = CheckersBoard::createNew('p1', 'p2');
 
         // Manually set pieces remaining to 0 for player 2
-        $state = new GameState(
+        $state = new CheckersBoard(
             players: [
                 'p1' => $state->players['p1'],
                 'p2' => $state->players['p2']->withPiecesRemaining(0),
@@ -104,7 +105,7 @@ describe('Checkers Game Logic', function () {
             isDraw: false,
         );
 
-        $outcome = $mode->checkEndCondition($state);
+        $outcome = $arbiter->checkWinCondition($state);
 
         expect($outcome->isFinished)->toBeTrue()
             ->and($outcome->winnerUlid)->toBe('p1');
@@ -112,17 +113,17 @@ describe('Checkers Game Logic', function () {
 
     test('game is in progress when both players have pieces', function () {
         $game = new Game(['game_state' => []]);
-        $mode = new StandardMode($game);
-        $state = GameState::createNew('p1', 'p2');
+        $arbiter = new CheckersArbiter;
+        $state = CheckersBoard::createNew('p1', 'p2');
 
-        $outcome = $mode->checkEndCondition($state);
+        $outcome = $arbiter->checkWinCondition($state);
 
         expect($outcome->isFinished)->toBeFalse()
             ->and($outcome->winnerUlid)->toBeNull();
     });
 
     test('can move a piece', function () {
-        $state = GameState::createNew('p1', 'p2');
+        $state = CheckersBoard::createNew('p1', 'p2');
 
         // Move a red piece forward
         $newState = $state->withMovedPiece(5, 0, 4, 1);
@@ -133,14 +134,14 @@ describe('Checkers Game Logic', function () {
     });
 
     test('piece is promoted to king when reaching opposite end', function () {
-        $state = GameState::createNew('p1', 'p2');
+        $state = CheckersBoard::createNew('p1', 'p2');
 
         // Create a scenario where a red piece is near the top
         $modifiedBoard = $state->board;
         $modifiedBoard[1][0] = ['player' => 'p1', 'king' => false];
         $modifiedBoard[5][0] = null; // Remove from original position
 
-        $state = new GameState(
+        $state = new CheckersBoard(
             players: $state->players,
             currentPlayerUlid: $state->currentPlayerUlid,
             winnerUlid: $state->winnerUlid,
@@ -157,14 +158,14 @@ describe('Checkers Game Logic', function () {
     });
 
     test('can remove a captured piece', function () {
-        $state = GameState::createNew('p1', 'p2');
+        $state = CheckersBoard::createNew('p1', 'p2');
 
         // Place pieces for a capture scenario
         $modifiedBoard = $state->board;
         $modifiedBoard[4][1] = ['player' => 'p1', 'king' => false];
         $modifiedBoard[3][2] = ['player' => 'p2', 'king' => false];
 
-        $state = new GameState(
+        $state = new CheckersBoard(
             players: $state->players,
             currentPlayerUlid: $state->currentPlayerUlid,
             winnerUlid: $state->winnerUlid,

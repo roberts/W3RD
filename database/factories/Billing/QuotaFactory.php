@@ -50,12 +50,12 @@ class QuotaFactory extends Factory
     }
 
     /**
-     * Create a quota for Validate Four.
+     * Create a quota for Connect Four.
      */
-    public function validateFour(): static
+    public function connectFour(): static
     {
         return $this->state(fn (array $attributes) => [
-            'title_slug' => GameTitle::VALIDATE_FOUR->value,
+            'title_slug' => GameTitle::CONNECT_FOUR->value,
         ]);
     }
 }

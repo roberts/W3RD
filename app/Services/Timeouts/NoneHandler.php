@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Timeouts;
 
-use App\Games\GameOutcome;
+use App\GameEngine\GameOutcome;
 use App\Models\Game\Game;
 
 /**

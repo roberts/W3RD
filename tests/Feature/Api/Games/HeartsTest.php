@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
+use App\Models\Game\Player;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * API endpoint tests for Hearts game.
@@ -14,6 +16,17 @@ use App\Models\Auth\User;
  * - Verifying proper game state management
  */
 describe('Hearts Game API', function () {
+    beforeEach(function () {
+        // Mock Redis for PlayerActivityService
+        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+        Redis::shouldReceive('del')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+    });
+
     describe('Game Creation', function () {
         test('can create hearts game through lobby', function () {
             $users = User::factory()->count(4)->create();
@@ -126,8 +139,27 @@ describe('Hearts Game API', function () {
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 
-                // Pass cards
-                $response = $this->actingAs($users[0])
+                // Deal cards
+                $this->actingAs($users[0])
+                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                        'action_type' => 'deal_cards',
+                        'action_details' => ['confirm' => true],
+                    ])->assertStatus(200);
+
+                // Get game state to find current player (who has C2)
+                $gameResponse = $this->actingAs($users[0])
+                    ->getJson("/api/v1/games/{$gameUlid}")
+                    ->assertStatus(200);
+
+                $gameState = $gameResponse->json('data.game_state');
+                $currentPlayerUlid = $gameState['currentPlayerUlid'];
+
+                // Find the user object for current player
+                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $currentUser = $player->user;
+
+                // Pass cards (using current player to pass authorization)
+                $response = $this->actingAs($currentUser)
                     ->postJson("/api/v1/games/{$gameUlid}/action", [
                         'action_type' => 'pass_cards',
                         'action_details' => [
@@ -179,8 +211,27 @@ describe('Hearts Game API', function () {
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 
-                // Play a card
-                $response = $this->actingAs($users[0])
+                // Deal cards
+                $this->actingAs($users[0])
+                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                        'action_type' => 'deal_cards',
+                        'action_details' => ['confirm' => true],
+                    ])->assertStatus(200);
+
+                // Get game state to find current player
+                $gameResponse = $this->actingAs($users[0])
+                    ->getJson("/api/v1/games/{$gameUlid}")
+                    ->assertStatus(200);
+
+                $gameState = $gameResponse->json('data.game_state');
+                $currentPlayerUlid = $gameState['currentPlayerUlid'];
+
+                // Find the user object for current player
+                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $currentUser = $player->user;
+
+                // Play a card (C2 is required to start)
+                $response = $this->actingAs($currentUser)
                     ->postJson("/api/v1/games/{$gameUlid}/action", [
                         'action_type' => 'play_card',
                         'action_details' => [

@@ -66,7 +66,7 @@ function assertValidationError($response, string $field): void {
 
 // tests/Feature/Traits/CreatesGames.php
 trait CreatesGames {
-    protected function createActiveGame(User $user, string $title = 'validate-four'): Game {
+    protected function createActiveGame(User $user, string $title = 'connect-four'): Game {
         $game = Game::factory()->create(['title_slug' => $title]);
         $game->players()->attach($user->id, ['player_number' => 1]);
         return $game;

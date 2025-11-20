@@ -9,7 +9,7 @@ describe('TrackAuthenticationEntryAction', function () {
     describe('Basic Entry Creation', function () {
         it('creates entry with all required fields', function () {
             $user = User::factory()->create();
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $token = $user->createToken('test-token');
             $action = new TrackAuthenticationEntryAction;
 
@@ -33,7 +33,7 @@ describe('TrackAuthenticationEntryAction', function () {
 
         it('persists entry to database', function () {
             $user = User::factory()->create();
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $token = $user->createToken('test-token');
             $action = new TrackAuthenticationEntryAction;
 
@@ -119,7 +119,7 @@ describe('TrackAuthenticationEntryAction', function () {
     describe('Client ID Handling', function () {
         it('accepts client ID as integer', function () {
             $user = User::factory()->create();
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $token = $user->createToken('test');
             $action = new TrackAuthenticationEntryAction;
 
@@ -131,7 +131,7 @@ describe('TrackAuthenticationEntryAction', function () {
 
         it('accepts client ID as string', function () {
             $user = User::factory()->create();
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $token = $user->createToken('test');
             $action = new TrackAuthenticationEntryAction;
 
@@ -205,8 +205,8 @@ describe('TrackAuthenticationEntryAction', function () {
     describe('Multiple Entries', function () {
         it('creates multiple entries for same user from different clients', function () {
             $user = User::factory()->create();
-            $client1 = Client::factory()->create();
-            $client2 = Client::factory()->create();
+            $client1 = Client::factory()->withTrademarks()->create();
+            $client2 = Client::factory()->withTrademarks()->create();
             $token1 = $user->createToken('web');
             $token2 = $user->createToken('mobile');
             $action = new TrackAuthenticationEntryAction;

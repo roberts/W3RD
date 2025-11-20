@@ -15,7 +15,13 @@ return new class extends Migration
             $table->foreignId('mode_id')->constrained('modes');
             $table->enum('status', ['pending', 'active', 'completed'])->default('pending');
             $table->foreignId('creator_id')->nullable()->constrained('users');
-            $table->unsignedBigInteger('winner_id')->nullable();
+
+            // Outcome fields
+            $table->foreignId('winner_id')->nullable()->constrained('users');
+            $table->tinyInteger('winner_position')->nullable();       // Player position (1-4)
+            $table->string('outcome_type', 20)->nullable();           // 'win', 'draw', 'forfeit', 'timeout'
+            $table->json('outcome_details')->nullable();              // Flexible game-specific data
+
             $table->integer('turn_number')->default(0);
             $table->json('game_state');
 
@@ -25,7 +31,7 @@ return new class extends Migration
             $table->integer('duration_seconds')->nullable();
 
             $table->timestamp('started_at')->nullable();
-            $table->timestamp('finished_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -33,6 +39,7 @@ return new class extends Migration
             // Composite indexes for common queries
             $table->index(['status', 'created_at']);
             $table->index(['creator_id', 'status']);
+            $table->index(['winner_id', 'completed_at']);
             $table->index('created_at');
         });
     }

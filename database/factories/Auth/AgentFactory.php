@@ -5,34 +5,22 @@ namespace Database\Factories\Auth;
 use App\Models\Auth\Agent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Auth\Agent>
- */
 class AgentFactory extends Factory
 {
     protected $model = Agent::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
             'name' => 'Agent '.fake()->firstName(),
             'description' => fake()->sentence(),
-            'version' => fake()->semver(),
+            'version' => '1.0.0',
             'difficulty' => fake()->numberBetween(1, 10),
-            'configuration' => [
-                'aggressive' => fake()->boolean(),
-                'defensive' => fake()->boolean(),
-                'think_time_ms' => fake()->numberBetween(100, 5000),
-            ],
-            'ai_logic_path' => 'App\\AI\\'.fake()->word().'Strategy',
-            'strategy_type' => fake()->randomElement(['minimax', 'mcts', 'neural', 'hybrid']),
-            'supported_game_titles' => [fake()->randomElement(['validate-four', 'chess', 'checkers'])],
-            'available_hour_est' => fake()->numberBetween(0, 23),
+            'configuration' => null,
+            'ai_logic_path' => 'App\\Agents\\Logic\\RandomLogic',
+            'strategy_type' => fake()->randomElement(['aggressive', 'defensive', 'balanced', 'random']),
+            'supported_game_titles' => ['checkers', 'hearts', 'validatefour'],
+            'available_hour_est' => null, // Available 24/7 by default for testing
             'error_count' => 0,
             'last_error_at' => null,
             'debug_mode' => false,
@@ -40,34 +28,66 @@ class AgentFactory extends Factory
     }
 
     /**
-     * Indicate that the agent is in debug mode.
+     * Agent that plays all games
      */
-    public function debugging(): static
+    public function allGames(): self
     {
         return $this->state(fn (array $attributes) => [
-            'debug_mode' => true,
+            'supported_game_titles' => ['all'],
         ]);
     }
 
     /**
-     * Create a beginner difficulty agent.
+     * Agent for a specific game
      */
-    public function beginner(): static
+    public function forGame(string $gameSlug): self
     {
         return $this->state(fn (array $attributes) => [
-            'difficulty' => fake()->numberBetween(1, 3),
-            'name' => 'Beginner Bot',
+            'supported_game_titles' => [$gameSlug],
         ]);
     }
 
     /**
-     * Create an expert difficulty agent.
+     * Agent with specific difficulty
      */
-    public function expert(): static
+    public function withDifficulty(int $difficulty): self
     {
         return $this->state(fn (array $attributes) => [
-            'difficulty' => fake()->numberBetween(8, 10),
-            'name' => 'Expert Bot',
+            'difficulty' => max(1, min(10, $difficulty)),
+        ]);
+    }
+
+    /**
+     * Agent available 24/7
+     */
+    public function alwaysAvailable(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'available_hour_est' => null,
+        ]);
+    }
+
+    /**
+     * Agent with specific AI logic
+     */
+    public function withLogic(string $logicClass): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'ai_logic_path' => $logicClass,
+        ]);
+    }
+
+    /**
+     * Agent with mode-specific configuration
+     */
+    public function withModeConfig(string $gameSlug, string $mode, int $difficulty): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'configuration' => [
+                $gameSlug => [
+                    $mode.'_difficulty' => $difficulty,
+                ],
+            ],
         ]);
     }
 }

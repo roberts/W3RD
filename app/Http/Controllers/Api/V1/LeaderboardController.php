@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\GameTitle;
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponses;
@@ -22,7 +23,12 @@ class LeaderboardController extends Controller
         $title = GameTitle::tryFrom($gameTitle);
 
         if (! $title) {
-            return $this->notFoundResponse('Game title not found.');
+            throw new ResourceNotFoundException(
+                'Game title not found',
+                'game_title',
+                $gameTitle,
+                ['available_titles' => array_column(GameTitle::cases(), 'value')]
+            );
         }
 
         // Get top users by level for this game title

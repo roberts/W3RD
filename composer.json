@@ -73,7 +73,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php -d memory_limit=512M ./vendor/bin/pest --testsuite=Unit,Feature,Integration"
+            "@php -d memory_limit=2048M ./vendor/bin/pest --testsuite=Unit,Feature,Integration"
         ],
         "test-browser": [
             "@php artisan config:clear --ansi",
@@ -83,7 +83,7 @@
             "@php artisan config:clear --ansi",
             "@php artisan test --testsuite=Browser"
         ],
-        "analyse": "vendor/bin/phpstan analyse --memory-limit=512M",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=2048M",
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint",
         "lint": "vendor/bin/phpstan analyse && vendor/bin/pest --coverage",

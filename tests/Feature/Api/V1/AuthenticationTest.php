@@ -5,11 +5,23 @@ use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\AuthenticationHelper;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
+
+beforeEach(function () {
+    // Mock Redis for PlayerActivityService
+    Redis::shouldReceive('setex')->andReturn(true)->byDefault();
+    Redis::shouldReceive('get')->andReturn('idle')->byDefault();
+    Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+    Redis::shouldReceive('del')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
+    Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
+    Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+});
 
 describe('Auth', function () {
     describe('Registration', function () {
@@ -26,7 +38,7 @@ describe('Auth', function () {
 
         describe('Invalid Input', function () {
             it('rejects duplicate email with 422', function () {
-                $client = Client::factory()->create();
+                $client = Client::factory()->withTrademarks()->create();
                 User::factory()->create(['email' => 'existing@example.com']);
 
                 $response = postJson('/api/v1/auth/register', [
@@ -40,7 +52,7 @@ describe('Auth', function () {
             });
 
             it('rejects invalid email format with 422', function () {
-                $client = Client::factory()->create();
+                $client = Client::factory()->withTrademarks()->create();
 
                 $response = postJson('/api/v1/auth/register', [
                     'client_id' => $client->id,
@@ -53,7 +65,7 @@ describe('Auth', function () {
             });
 
             it('rejects weak password with 422', function () {
-                $client = Client::factory()->create();
+                $client = Client::factory()->withTrademarks()->create();
 
                 $response = postJson('/api/v1/auth/register', [
                     'client_id' => $client->id,
@@ -69,7 +81,7 @@ describe('Auth', function () {
 
     describe('Email Verification', function () {
         it('verifies email with valid token', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $registration = Registration::factory()->create([
                 'client_id' => $client->id,
                 'email' => 'test@example.com',
@@ -93,7 +105,7 @@ describe('Auth', function () {
 
     describe('Login', function () {
         it('returns token with valid credentials', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $user = User::factory()->create([
                 'email' => 'test@example.com',
                 'password' => Hash::make('Password123!'),
@@ -105,7 +117,7 @@ describe('Auth', function () {
         });
 
         it('rejects invalid password with 401', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             $user = User::factory()->create([
                 'email' => 'test@example.com',
                 'password' => Hash::make('CorrectPassword123!'),
@@ -120,7 +132,7 @@ describe('Auth', function () {
         });
 
         it('rejects unverified email with 403', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
             User::factory()->create([
                 'email' => 'unverified@example.com',
                 'password' => Hash::make('Password123!'),
@@ -142,7 +154,7 @@ describe('Auth', function () {
 
     describe('Social Login', function () {
         it('creates user from OAuth provider and returns 201', function ($provider) {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
 
             // Mock HTTP responses for OAuth provider
             Http::fake([
@@ -164,7 +176,7 @@ describe('Auth', function () {
         })->with(['google', 'facebook', 'github']);
 
         it('rejects invalid OAuth token with 422', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
 
             Http::fake([
                 '*' => Http::response([], 401),
@@ -226,7 +238,7 @@ describe('Auth', function () {
 
     describe('Edge Cases', function () {
         it('handles expired OAuth tokens gracefully', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
 
             Http::fake([
                 '*' => Http::response(['error' => 'Token expired'], 401),
@@ -242,7 +254,7 @@ describe('Auth', function () {
         });
 
         it('handles revoked OAuth tokens gracefully', function () {
-            $client = Client::factory()->create();
+            $client = Client::factory()->withTrademarks()->create();
 
             Http::fake([
                 '*' => Http::response(['error' => 'Token revoked'], 403),

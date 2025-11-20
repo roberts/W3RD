@@ -144,7 +144,7 @@ namespace App\Enums;
 
 enum GameTitle: string
 {
-    case VALIDATE_FOUR = 'validate-four';
+    case VALIDATE_FOUR = 'connect-four';
     case CHECKERS = 'checkers';
     case HEARTS = 'hearts';
     case SPADES = 'spades';
@@ -152,7 +152,7 @@ enum GameTitle: string
     public function label(): string
     {
         return match ($this) {
-            self::VALIDATE_FOUR => 'Validate Four',
+            self::VALIDATE_FOUR => 'Connect Four',
             self::CHECKERS => 'Checkers',
             self::HEARTS => 'Hearts',
             self::SPADES => 'Spades',

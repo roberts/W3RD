@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
-use App\Games\Hearts\GameState;
+use App\Exceptions\InvalidGameConfigurationException;
+use App\Games\Hearts\HeartsPlayer;
+use App\Games\Hearts\HeartsTable;
 use App\Games\Hearts\Modes\StandardMode;
-use App\Games\Hearts\PlayerState;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
 
@@ -21,7 +22,7 @@ describe('Hearts Game Logic', function () {
             $player3Ulid = (string) Str::ulid();
             $player4Ulid = (string) Str::ulid();
 
-            $state = GameState::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
+            $state = HeartsTable::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
 
             expect($state->roundNumber)->toBe(1)
                 ->and($state->currentPlayerUlid)->toBe($player1Ulid)
@@ -37,8 +38,8 @@ describe('Hearts Game Logic', function () {
             $player2Ulid = (string) Str::ulid();
             $player3Ulid = (string) Str::ulid();
 
-            expect(fn () => GameState::createNew($player1Ulid, $player2Ulid, $player3Ulid))
-                ->toThrow(\InvalidArgumentException::class, 'Hearts requires exactly 4 players');
+            expect(fn () => HeartsTable::createNew($player1Ulid, $player2Ulid, $player3Ulid))
+                ->toThrow(InvalidGameConfigurationException::class, 'Hearts requires exactly 4 players');
         });
 
         test('initializes all players with zero score', function () {
@@ -47,7 +48,7 @@ describe('Hearts Game Logic', function () {
             $player3Ulid = (string) Str::ulid();
             $player4Ulid = (string) Str::ulid();
 
-            $state = GameState::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
+            $state = HeartsTable::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
 
             foreach ($state->players as $player) {
                 expect($player->score)->toBe(0);
@@ -60,7 +61,7 @@ describe('Hearts Game Logic', function () {
             $player3Ulid = (string) Str::ulid();
             $player4Ulid = (string) Str::ulid();
 
-            $state = GameState::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
+            $state = HeartsTable::createNew($player1Ulid, $player2Ulid, $player3Ulid, $player4Ulid);
 
             expect($state->players[$player1Ulid]->position)->toBe(1)
                 ->and($state->players[$player2Ulid]->position)->toBe(2)
@@ -163,10 +164,10 @@ describe('Hearts Game Logic', function () {
 
             // Create a state with known scores
             $players = [
-                $player1Ulid => new PlayerState(ulid: $player1Ulid, position: 1, score: 5),
-                $player2Ulid => new PlayerState(ulid: $player2Ulid, position: 2, score: 13),
-                $player3Ulid => new PlayerState(ulid: $player3Ulid, position: 3, score: 26),
-                $player4Ulid => new PlayerState(ulid: $player4Ulid, position: 4, score: 0),
+                $player1Ulid => new HeartsPlayer(ulid: $player1Ulid, position: 1, score: 5),
+                $player2Ulid => new HeartsPlayer(ulid: $player2Ulid, position: 2, score: 13),
+                $player3Ulid => new HeartsPlayer(ulid: $player3Ulid, position: 3, score: 26),
+                $player4Ulid => new HeartsPlayer(ulid: $player4Ulid, position: 4, score: 0),
             ];
 
             expect($players[$player1Ulid]->score)->toBe(5)
@@ -192,10 +193,10 @@ describe('Hearts Game Logic', function () {
 
             // If player 1 shoots the moon, others get 26 points
             $players = [
-                $player1Ulid => new PlayerState(ulid: $player1Ulid, position: 1, score: 0),
-                $player2Ulid => new PlayerState(ulid: $player2Ulid, position: 2, score: 26),
-                $player3Ulid => new PlayerState(ulid: $player3Ulid, position: 3, score: 26),
-                $player4Ulid => new PlayerState(ulid: $player4Ulid, position: 4, score: 26),
+                $player1Ulid => new HeartsPlayer(ulid: $player1Ulid, position: 1, score: 0),
+                $player2Ulid => new HeartsPlayer(ulid: $player2Ulid, position: 2, score: 26),
+                $player3Ulid => new HeartsPlayer(ulid: $player3Ulid, position: 3, score: 26),
+                $player4Ulid => new HeartsPlayer(ulid: $player4Ulid, position: 4, score: 26),
             ];
 
             expect($players[$player1Ulid]->score)->toBe(0)
@@ -214,13 +215,13 @@ describe('Hearts Game Logic', function () {
 
             // Create a state where player 2 has reached 100 points
             $players = [
-                $player1Ulid => new PlayerState(ulid: $player1Ulid, position: 1, score: 45),
-                $player2Ulid => new PlayerState(ulid: $player2Ulid, position: 2, score: 102),
-                $player3Ulid => new PlayerState(ulid: $player3Ulid, position: 3, score: 78),
-                $player4Ulid => new PlayerState(ulid: $player4Ulid, position: 4, score: 56),
+                $player1Ulid => new HeartsPlayer(ulid: $player1Ulid, position: 1, score: 45),
+                $player2Ulid => new HeartsPlayer(ulid: $player2Ulid, position: 2, score: 102),
+                $player3Ulid => new HeartsPlayer(ulid: $player3Ulid, position: 3, score: 78),
+                $player4Ulid => new HeartsPlayer(ulid: $player4Ulid, position: 4, score: 56),
             ];
 
-            $state = new GameState(
+            $state = new HeartsTable(
                 players: $players,
                 currentPlayerUlid: $player1Ulid,
                 winnerUlid: $player1Ulid, // Player with lowest score wins
@@ -247,13 +248,13 @@ describe('Hearts Game Logic', function () {
 
             // Create a state where no player has reached 100 points
             $players = [
-                $player1Ulid => new PlayerState(ulid: $player1Ulid, position: 1, score: 45),
-                $player2Ulid => new PlayerState(ulid: $player2Ulid, position: 2, score: 67),
-                $player3Ulid => new PlayerState(ulid: $player3Ulid, position: 3, score: 78),
-                $player4Ulid => new PlayerState(ulid: $player4Ulid, position: 4, score: 56),
+                $player1Ulid => new HeartsPlayer(ulid: $player1Ulid, position: 1, score: 45),
+                $player2Ulid => new HeartsPlayer(ulid: $player2Ulid, position: 2, score: 67),
+                $player3Ulid => new HeartsPlayer(ulid: $player3Ulid, position: 3, score: 78),
+                $player4Ulid => new HeartsPlayer(ulid: $player4Ulid, position: 4, score: 56),
             ];
 
-            $state = new GameState(
+            $state = new HeartsTable(
                 players: $players,
                 currentPlayerUlid: $player1Ulid,
                 winnerUlid: null,
@@ -279,10 +280,10 @@ describe('Hearts Game Logic', function () {
 
             // Player 4 has the lowest score
             $players = [
-                $player1Ulid => new PlayerState(ulid: $player1Ulid, position: 1, score: 89),
-                $player2Ulid => new PlayerState(ulid: $player2Ulid, position: 2, score: 105),
-                $player3Ulid => new PlayerState(ulid: $player3Ulid, position: 3, score: 98),
-                $player4Ulid => new PlayerState(ulid: $player4Ulid, position: 4, score: 67),
+                $player1Ulid => new HeartsPlayer(ulid: $player1Ulid, position: 1, score: 89),
+                $player2Ulid => new HeartsPlayer(ulid: $player2Ulid, position: 2, score: 105),
+                $player3Ulid => new HeartsPlayer(ulid: $player3Ulid, position: 3, score: 98),
+                $player4Ulid => new HeartsPlayer(ulid: $player4Ulid, position: 4, score: 67),
             ];
 
             // Lowest score should win

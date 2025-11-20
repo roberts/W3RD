@@ -18,6 +18,7 @@ class Client extends Model
         'api_key',
         'platform',
         'is_active',
+        'use_trademarks',
         'website',
         'creator_id',
     ];
@@ -25,6 +26,7 @@ class Client extends Model
     protected $casts = [
         'platform' => Platform::class,
         'is_active' => 'boolean',
+        'use_trademarks' => 'boolean',
     ];
 
     public function getWebsiteLinkAttribute(): ?string

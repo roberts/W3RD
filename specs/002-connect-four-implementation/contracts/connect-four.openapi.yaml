@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: Connect Four Game API
+  version: 1.0.0
+  description: API for playing the Connect Four game.
+
+paths:
+  /api/games/{game_ulid}/action:
+    post:
+      summary: Perform an action in a game
+      description: Allows an authenticated player to perform an action (e.g., drop a disc) in a specific game.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: game_ulid
+          in: path
+          required: true
+          description: The ULID of the game.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action_type:
+                  type: string
+                  description: The type of action to perform.
+                  enum: [drop_disc, pop_out]
+                action_details:
+                  type: object
+                  description: The payload for the action.
+                  properties:
+                    column:
+                      type: integer
+                      description: The zero-based index of the column for the action.
+                      example: 3
+              required:
+                - action_type
+                - action_details
+      responses:
+        '200':
+          description: Action was successful. The updated game state is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Invalid action (e.g., column full, not your turn, invalid move).
+        '401':
+          description: Unauthenticated.
+        '403':
+          description: Forbidden (e.g., not a player in this game).
+        '404':
+          description: Game not found.
+
+  /api/games/connect-four/rules:
+    get:
+      summary: Get rules for Connect Four
+      description: Returns the human-readable rules for the Connect Four game title and all of its available modes.
+      responses:
+        '200':
+          description: Successfully retrieved the rules.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: "Connect Four"
+                  description:
+                    type: string
+                  modes:
+                    type: object
+                    properties:
+                      standard:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "Standard"
+                          points:
+                            type: array
+                            items:
+                              type: string
+                      pop_out:
+                        type: object
+                        # ... other modes
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Game:
+      type: object
+      properties:
+        ulid:
+          type: string
+        title_slug:
+          type: string
+          example: "connect-four"
+        status:
+          type: string
+          example: "active"
+        game_state:
+          type: object
+          # See data-model.md for full structure
+          properties:
+            board:
+              type: array
+            current_player_id:
+              type: integer
+            winner_id:
+              type: integer
+              nullable: true
+      # ... other Game model fields

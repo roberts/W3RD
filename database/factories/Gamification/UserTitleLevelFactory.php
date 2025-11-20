@@ -53,12 +53,12 @@ class UserTitleLevelFactory extends Factory
     }
 
     /**
-     * Create for Validate Four game.
+     * Create for Connect Four game.
      */
-    public function validateFour(): static
+    public function connectFour(): static
     {
         return $this->state(fn (array $attributes) => [
-            'title_slug' => GameTitle::VALIDATE_FOUR->value,
+            'title_slug' => GameTitle::CONNECT_FOUR->value,
         ]);
     }
 }

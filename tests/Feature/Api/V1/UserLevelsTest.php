@@ -68,7 +68,7 @@ describe('User Levels & Experience', function () {
                 ->assertJsonCount(2, 'data');
 
             $titles = collect($response->json('data'))->pluck('game_title')->toArray();
-            expect($titles)->toContain('validate-four');
+            expect($titles)->toContain('connect-four');
             expect($titles)->toContain('hearts');
         });
 
@@ -101,7 +101,7 @@ describe('User Levels & Experience', function () {
                 ->assertJson([
                     'data' => [
                         [
-                            'game_title' => 'validate-four',
+                            'game_title' => 'connect-four',
                             'level' => 10,
                         ],
                     ],

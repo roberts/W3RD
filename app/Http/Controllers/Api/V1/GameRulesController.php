@@ -15,11 +15,11 @@ class GameRulesController extends Controller
     /**
      * Get the rules for a specific game title.
      *
-     * @param  string  $gameTitle  The game title slug (e.g., 'validate-four')
+     * @param  string  $gameTitle  The game title slug (e.g., 'connect-four')
      */
     public function show(string $gameTitle): JsonResponse
     {
-        // Convert slug to StudlyCase for directory name (e.g., 'validate-four' → 'ValidateFour')
+        // Convert slug to StudlyCase for directory name (e.g., 'connect-four' → 'ValidateFour')
         $gameDirName = str_replace(' ', '', ucwords(str_replace('-', ' ', $gameTitle)));
 
         // Build the path to the base rules file

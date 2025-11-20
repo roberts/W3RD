@@ -23,6 +23,17 @@ class ClientFactory extends Factory
             'website' => $this->faker->domainName,
             'platform' => $this->faker->randomElement(Platform::cases()),
             'is_active' => true,
+            'use_trademarks' => false,
         ];
+    }
+
+    /**
+     * Indicate that the client should have access to trademarked game titles.
+     */
+    public function withTrademarks(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'use_trademarks' => true,
+        ]);
     }
 }

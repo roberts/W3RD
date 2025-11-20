@@ -20,7 +20,7 @@ use Carbon\Carbon;
  * Universal contract for all game title implementations.
  *
  * This interface defines the core operations that every game mode must implement,
- * regardless of the game title (Validate Four, Chess, etc.).
+ * regardless of the game title (Connect Four, Chess, etc.).
  *
  * ## Type Safety Design Decision
  *
@@ -52,7 +52,7 @@ use Carbon\Carbon;
  * }
  * ```
  *
- * @see \App\Games\ValidateFour\BaseValidateFourMode For Validate Four implementation
+ * @see \App\Games\ValidateFour\BaseValidateFourMode For Connect Four implementation
  */
 interface GameTitleContract
 {
@@ -80,7 +80,7 @@ interface GameTitleContract
      * Create initial game state for a new game.
      *
      * This method initializes the game state with the provided players. Different games
-     * require different numbers of players (2 for Validate Four, 4 for Hearts, variable for Poker).
+     * require different numbers of players (2 for Connect Four, 4 for Hearts, variable for Poker).
      *
      * Example:
      * ```php
@@ -209,7 +209,7 @@ interface GameTitleContract
      * The base time allowed for a player to make their move. The actual deadline
      * includes a grace period (see getActionDeadline).
      *
-     * @return int Timelimit in seconds (e.g., 30 for Validate Four)
+     * @return int Timelimit in seconds (e.g., 30 for Connect Four)
      */
     public function getTimelimit(): int;
 

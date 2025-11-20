@@ -32,24 +32,24 @@ class ModeFactory extends Factory
     }
 
     /**
-     * Create a Validate Four standard mode.
+     * Create a Connect Four standard mode.
      */
-    public function validateFourStandard(): static
+    public function connectFourStandard(): static
     {
         return $this->state(fn (array $attributes) => [
-            'title_slug' => GameTitle::VALIDATE_FOUR,
+            'title_slug' => GameTitle::CONNECT_FOUR,
             'slug' => 'standard',
             'name' => 'Standard Mode',
         ]);
     }
 
     /**
-     * Create a Validate Four blitz mode.
+     * Create a Connect Four blitz mode.
      */
-    public function validateFourBlitz(): static
+    public function connectFourBlitz(): static
     {
         return $this->state(fn (array $attributes) => [
-            'title_slug' => GameTitle::VALIDATE_FOUR,
+            'title_slug' => GameTitle::CONNECT_FOUR,
             'slug' => 'blitz',
             'name' => 'Blitz Mode',
         ]);

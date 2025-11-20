@@ -149,7 +149,7 @@ class RematchService
 
             // Initialize game state based on game title
             $gameState = [];
-            if ($originalGame->title_slug->value === 'validate-four') {
+            if ($originalGame->title_slug->value === 'connect-four') {
                 $gameState = [
                     'board' => array_fill(0, 6, array_fill(0, 7, null)),
                     'current_player_ulid' => $player2->ulid, // Swapped - was player2, now position 1

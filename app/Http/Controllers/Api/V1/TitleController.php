@@ -35,7 +35,7 @@ class TitleController extends Controller
     private function getDescription(GameTitle $title): string
     {
         return match ($title) {
-            GameTitle::VALIDATE_FOUR => 'Classic connect four game where players compete to align four pieces in a row.',
+            GameTitle::CONNECT_FOUR => 'Classic connect four game where players compete to align four pieces in a row.',
             GameTitle::CHECKERS => 'Classic board game where players move pieces diagonally, capturing opponent pieces by jumping over them.',
             GameTitle::HEARTS => 'Classic 4-player card game where the goal is to avoid taking hearts and the Queen of Spades, or shoot the moon to score big.',
             GameTitle::SPADES => 'Classic 4-player trick-taking card game played in partnerships.',

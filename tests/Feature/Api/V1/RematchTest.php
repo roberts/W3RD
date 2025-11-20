@@ -233,7 +233,7 @@ describe('Rematch Management', function () {
             ]);
 
             $this->actingAs($player1)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             // Rematch should be auto-cancelled

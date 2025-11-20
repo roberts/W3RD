@@ -130,7 +130,7 @@ return new class extends Migration
             $table->string('slug', 50)->unique(); 
             $table->string('name', 100); 
             $table->string('image_url'); 
-            $table->json('condition_json')->comment('Defines requirements, e.g., {"title_slug": "validate-four", "wins": 10}');
+            $table->json('condition_json')->comment('Defines requirements, e.g., {"title_slug": "connect-four", "wins": 10}');
             $table->timestamps();
         });
     }

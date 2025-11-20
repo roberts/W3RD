@@ -111,7 +111,7 @@ class RematchRequestFactory extends Factory
                 'user_id' => $requestingUser->getKey(),
                 'position_id' => 1,
                 'color' => 'red',
-                'client_id' => $clientId ?? Client::factory(),
+                'client_id' => $clientId ?? Client::factory()->withTrademarks(),
             ]);
 
             Player::factory()->create([
@@ -119,7 +119,7 @@ class RematchRequestFactory extends Factory
                 'user_id' => $opponentUser->getKey(),
                 'position_id' => 2,
                 'color' => 'yellow',
-                'client_id' => $clientId ?? Client::factory(),
+                'client_id' => $clientId ?? Client::factory()->withTrademarks(),
             ]);
 
             return [

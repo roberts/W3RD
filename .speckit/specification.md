@@ -29,7 +29,7 @@ The architecture unifies all players, human and AI, under a central `User` model
 
 *   **`users` Table:** The primary identity table. It includes a `username` for unique identification and a nullable, unique `agent_id` foreign key. If `agent_id` is not null, the user is an AI.
 *   **`agents` Table:** A "profile" table that extends `users`. It stores AI-specific data, such as `ai_logic_path` (the class path to its strategy) and `available_hour_est`.
-*   **`titles` Table:** Defines available game titles (like validate-four, checkers, hearts) with their slug, name, and max_players.
+*   **`titles` Table:** Defines available game titles (like connect-four, checkers, hearts) with their slug, name, and max_players.
 *   **`players` Table:** A simple pivot table connecting a `Game` to a `User` via a standard `user_id` foreign key, eliminating polymorphic complexity.
 *   **`games` Table:** The core table for individual game instances, using a `ulid` for public reference and a flexible `game_state` JSON column. It includes `title_slug` (storing GameTitle enum values) to reference which game title is being played and a `last_move_at` timestamp to handle turn timeouts.
 *   **`entries` Table:** Tracks each user entry (login session) when accessing the platform through any client, including login/logout timestamps and device info.
@@ -41,7 +41,7 @@ Agents are designed to be indistinguishable from human players from the frontend
 
 *   **Identity:** An Agent is a standard `User` record linked to an `Agent` profile.
 *   **Scheduling:** A `SchedulingService` finds available agents based on their `available_hour_est` and their current "busy" status.
-*   **AI Logic:** The `getAIMove` method within each game title's service class will use the `ai_logic_path` on the agent's profile to instantiate the correct internal strategy class (e.g., `ValidateFourMinimax`, `CheckersHeuristic`).
+*   **AI Logic:** The `getAIMove` method within each game title's service class will use the `ai_logic_path` on the agent's profile to instantiate the correct internal strategy class (e.g., `ConnectFourMinimax`, `CheckersHeuristic`).
 
 #### 6. Matchmaking & Gameplay
 

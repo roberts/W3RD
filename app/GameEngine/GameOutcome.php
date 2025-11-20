@@ -10,7 +10,7 @@ use App\Enums\OutcomeType;
  * Result of checking game end conditions.
  *
  * Provides flexible outcome representation supporting:
- * - Simple win/loss (Validate Four, Chess)
+ * - Simple win/loss (Connect Four, Chess)
  * - Draws and stalemates
  * - Scoring systems (Hearts: lowest score wins)
  * - Rankings (multiplayer games)

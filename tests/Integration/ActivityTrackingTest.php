@@ -87,7 +87,7 @@ describe('Activity Tracking in Game Creation', function () {
             $matchId = 'test-match-123';
             $matchKey = "quickplay:match:{$matchId}";
             Redis::hmset($matchKey, [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'game_mode' => 'standard',
                 'player_'.$user1->id.'_client' => '1',
                 'player_'.$user2->id.'_client' => '1',

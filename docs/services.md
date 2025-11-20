@@ -2,7 +2,7 @@ That's the final piece of your **GamerProtocol.io** API architecture\! The **Ser
 
 As discussed, we'll use a **Service-Oriented Architecture** with a central factory to route traffic to the correct handler. This ensures your `GameController` remains thin and the game rules are isolated.
 
-Here is the draft structure for the central factory and the four game title services: **`ValidateFour`**, **`Checkers`**, **`Hearts`**, and **`Spades`**.
+Here is the draft structure for the central factory and the four game title services: **`ConnectFour`**, **`Checkers`**, **`Hearts`**, and **`Spades`**.
 
 -----
 
@@ -17,7 +17,7 @@ This class takes the `title_slug` and returns the correct handler instance.
 
 namespace App\Services\Game;
 
-use App\Services\Game\Handlers\ValidateFourService;
+use App\Services\Game\Handlers\ConnectFourService;
 use App\Services\Game\Handlers\CheckersService;
 use App\Services\Game\Handlers\HeartsService;
 use App\Services\Game\Handlers\SpadesService;
@@ -28,7 +28,7 @@ class GameHandlerFactory
 {
     // Maps the title_slug to the responsible service class
     const HANDLERS = [
-        'validate-four' => ValidateFourService::class,
+        'connect-four' => ConnectFourService::class,
         'checkers'      => CheckersService::class,
         'hearts'        => HeartsService::class,
         'spades'        => SpadesService::class,
@@ -103,9 +103,9 @@ interface GameServiceContract
 
 These services adhere to the contract and contain the unique rules for each game title.
 
-### 3\. `app/Services/Game/Handlers/ValidateFourService.php`
+### 3\. `app/Services/Game/Handlers/ConnectFourService.php`
 
-This service handles the **"Validate Four" (Connect Four)** logic, typically using a **Minimax** search for the AI.
+This service handles the **"Connect Four" (Connect Four)** logic, typically using a **Minimax** search for the AI.
 
 ```php
 <?php
@@ -117,7 +117,7 @@ use App\Models\Game\Game;
 use App\Exceptions\InvalidActionException;
 use App\Enums\ActionType;
 
-class ValidateFourService implements GameServiceContract
+class ConnectFourService implements GameServiceContract
 {
     // The core function called by the GameController
     public function processAction(Game $game, string $actionType, array $actionDetails, int $playerId): array
@@ -126,7 +126,7 @@ class ValidateFourService implements GameServiceContract
         $column = $actionDetails['column'] ?? null;
         
         if ($actionType !== ActionType::DROP_PIECE->value) {
-            throw new InvalidActionException("Invalid action type for Validate Four.");
+            throw new InvalidActionException("Invalid action type for Connect Four.");
         }
         
         if (is_null($column) || !is_numeric($column) || $column < 0 || $column >= 7) {

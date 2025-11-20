@@ -32,10 +32,10 @@ class GameFactory extends Factory
      */
     public function definition(): array
     {
-        // Default to ValidateFour Standard mode
+        // Default to ConnectFour Standard mode
         $mode = Mode::firstOrCreate(
             [
-                'title_slug' => GameTitle::VALIDATE_FOUR->value,
+                'title_slug' => GameTitle::CONNECT_FOUR->value,
                 'slug' => 'standard',
             ],
             [
@@ -45,7 +45,7 @@ class GameFactory extends Factory
         );
 
         return [
-            'title_slug' => GameTitle::VALIDATE_FOUR,
+            'title_slug' => GameTitle::CONNECT_FOUR,
             'mode_id' => $mode->id,
             'status' => 'pending',
             'creator_id' => User::factory(),
@@ -91,25 +91,25 @@ class GameFactory extends Factory
     }
 
     /**
-     * Shorthand for ValidateFour with specific mode.
+     * Shorthand for ConnectFour with specific mode.
      *
-     * Example: Game::factory()->validateFour('pop-out')->create()
+     * Example: Game::factory()->connectFour('pop-out')->create()
      */
-    public function validateFour(string $modeSlug = 'standard'): static
+    public function connectFour(string $modeSlug = 'standard'): static
     {
-        return $this->forTitle(GameTitle::VALIDATE_FOUR, $modeSlug);
+        return $this->forTitle(GameTitle::CONNECT_FOUR, $modeSlug);
     }
 
     /**
-     * Create a ValidateFour game with proper initial game state.
+     * Create a ConnectFour game with proper initial game state.
      * Players must be created separately and their ULIDs passed in.
      *
      * Example:
      * ```php
-     * $game = Game::factory()->withValidateFourState($player1->ulid, $player2->ulid)->create();
+     * $game = Game::factory()->withConnectFourState($player1->ulid, $player2->ulid)->create();
      * ```
      */
-    public function withValidateFourState(string $player1Ulid, string $player2Ulid, int $columns = 7, int $rows = 6, int $connectCount = 4): static
+    public function withConnectFourState(string $player1Ulid, string $player2Ulid, int $columns = 7, int $rows = 6, int $connectCount = 4): static
     {
         return $this->state(fn (array $attributes) => [
             'game_state' => [
@@ -215,7 +215,7 @@ class GameFactory extends Factory
                     'user_id' => $user->getKey(),
                     'position_id' => $index + 1,
                     'color' => $colors[$index % count($colors)],
-                    'client_id' => $clientId ?? Client::factory(),
+                    'client_id' => $clientId ?? Client::factory()->withTrademarks(),
                 ]);
             });
         });
@@ -225,7 +225,7 @@ class GameFactory extends Factory
      * Create game with an agent as opponent.
      *
      * @param  User  $humanUser  The human player
-     * @param  string|null  $gameTitle  Game title for agent compatibility (defaults to 'validate-four')
+     * @param  string|null  $gameTitle  Game title for agent compatibility (defaults to 'connect-four')
      * @param  int|null  $clientId  Optional client ID
      *
      * Returns the created game with agent_user and agent properties attached.
@@ -240,7 +240,7 @@ class GameFactory extends Factory
     public function withAgentOpponent(User $humanUser, ?string $gameTitle = null, ?int $clientId = null): static
     {
         return $this->afterCreating(function (Game $game) use ($humanUser, $gameTitle, $clientId) {
-            $gameTitle = $gameTitle ?? 'validate-four';
+            $gameTitle = $gameTitle ?? 'connect-four';
 
             // Create agent
             $agent = Agent::factory()
@@ -259,7 +259,7 @@ class GameFactory extends Factory
                 'user_id' => $humanUser->getKey(),
                 'position_id' => 1,
                 'color' => $colors[0],
-                'client_id' => $clientId ?? Client::factory(),
+                'client_id' => $clientId ?? Client::factory()->withTrademarks(),
             ]);
 
             Player::factory()->create([
@@ -267,7 +267,7 @@ class GameFactory extends Factory
                 'user_id' => $agentUser->getKey(),
                 'position_id' => 2,
                 'color' => $colors[1],
-                'client_id' => $clientId ?? Client::factory(),
+                'client_id' => $clientId ?? Client::factory()->withTrademarks(),
             ]);
 
             // Attach agent properties to game for easy access

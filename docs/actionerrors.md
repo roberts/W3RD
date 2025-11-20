@@ -42,7 +42,7 @@ These errors occur when the request data structure is invalid, before game rules
 {
   "message": "Unknown action type: invalid_move",
   "error_code": "unknown_action_type",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "context": {
     "action_type": "invalid_move",
     "supported_types": ["drop_piece", "pop_out"]
@@ -58,7 +58,7 @@ These errors occur when the request data structure is invalid, before game rules
 {
   "message": "Missing required field: column for drop_piece action",
   "error_code": "missing_required_field",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "context": {
     "action_type": "drop_piece",
     "missing_field": "column",
@@ -129,7 +129,7 @@ These error codes apply across all games:
 {
   "message": "This game is not active.",
   "error_code": "game_already_completed",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "game_status": "completed",
@@ -184,7 +184,7 @@ These error codes apply across all games:
 {
   "message": "Position is already occupied.",
   "error_code": "position_occupied",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "position": {"row": 5, "column": 3},
@@ -302,7 +302,7 @@ These error codes apply across all games:
 
 ---
 
-## Validate Four (Connect 4) Errors
+## Connect Four (Connect 4) Errors
 
 ### Drop Piece Errors
 
@@ -314,7 +314,7 @@ These error codes apply across all games:
 {
   "message": "Column is full, cannot drop piece.",
   "error_code": "column_full",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "column": 3,
@@ -331,7 +331,7 @@ These error codes apply across all games:
 {
   "message": "Invalid board position.",
   "error_code": "invalid_position",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "column": 8,
@@ -350,7 +350,7 @@ These error codes apply across all games:
 {
   "message": "No piece at the bottom of this column.",
   "error_code": "no_piece_at_bottom",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "column": 2,
@@ -367,7 +367,7 @@ These error codes apply across all games:
 {
   "message": "You can only pop out your own pieces.",
   "error_code": "not_your_piece",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "column": 4,
@@ -385,7 +385,7 @@ These error codes apply across all games:
 {
   "message": "Pop out action not allowed in current game state.",
   "error_code": "invalid_pop_state",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "reason": "Must drop at least 4 pieces before using pop"
@@ -944,4 +944,4 @@ function handleGameRuleError(error) {
 
 ## Version History
 
-- **2025-11-19**: Initial documentation with comprehensive error codes for ValidateFour, Checkers, and Hearts
+- **2025-11-19**: Initial documentation with comprehensive error codes for ConnectFour, Checkers, and Hearts

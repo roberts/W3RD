@@ -6,7 +6,7 @@ use App\Enums\GameAttributes\GameDynamic;
 
 enum GameTitle: string
 {
-    case VALIDATE_FOUR = 'validate-four';
+    case CONNECT_FOUR = 'connect-four';
     case CHECKERS = 'checkers';
     case HEARTS = 'hearts';
     case SPADES = 'spades';
@@ -14,7 +14,7 @@ enum GameTitle: string
     public function getDynamic(): GameDynamic
     {
         return match ($this) {
-            self::VALIDATE_FOUR => GameDynamic::ONE_VS_ONE,
+            self::CONNECT_FOUR => GameDynamic::ONE_VS_ONE,
             self::CHECKERS => GameDynamic::ONE_VS_ONE,
             self::HEARTS => GameDynamic::FREE_FOR_ALL,
             self::SPADES => GameDynamic::TEAM_BASED,
@@ -24,7 +24,7 @@ enum GameTitle: string
     public function label(): string
     {
         return match ($this) {
-            self::VALIDATE_FOUR => 'Validate Four',
+            self::CONNECT_FOUR => 'Connect Four',
             self::CHECKERS => 'Checkers',
             self::HEARTS => 'Hearts',
             self::SPADES => 'Spades',
@@ -34,7 +34,7 @@ enum GameTitle: string
     public function maxPlayers(): int
     {
         return match ($this) {
-            self::VALIDATE_FOUR => 2,
+            self::CONNECT_FOUR => 2,
             self::CHECKERS => 2,
             self::HEARTS => 4,
             self::SPADES => 4,
@@ -44,7 +44,7 @@ enum GameTitle: string
     public function minPlayers(): int
     {
         return match ($this) {
-            self::VALIDATE_FOUR => 2,
+            self::CONNECT_FOUR => 2,
             self::CHECKERS => 2,
             self::HEARTS => 4,
             self::SPADES => 4,
@@ -54,7 +54,7 @@ enum GameTitle: string
     public function requiresExactPlayerCount(): bool
     {
         return match ($this) {
-            self::VALIDATE_FOUR => true,
+            self::CONNECT_FOUR => true,
             self::CHECKERS => true,
             self::HEARTS => true,
             self::SPADES => true,
@@ -69,5 +69,35 @@ enum GameTitle: string
     public function slug(): string
     {
         return $this->value;
+    }
+
+    public function isTrademarked(): bool
+    {
+        return match ($this) {
+            self::CONNECT_FOUR => true,
+            self::CHECKERS => false,
+            self::HEARTS => false,
+            self::SPADES => false,
+        };
+    }
+
+    public function trademarkOwner(): ?string
+    {
+        return match ($this) {
+            self::CONNECT_FOUR => 'Hasbro',
+            self::CHECKERS => null,
+            self::HEARTS => null,
+            self::SPADES => null,
+        };
+    }
+
+    public function alternateName(): ?string
+    {
+        return match ($this) {
+            self::CONNECT_FOUR => 'Four in a Row',
+            self::CHECKERS => 'Draughts',
+            self::HEARTS => null,
+            self::SPADES => null,
+        };
     }
 }

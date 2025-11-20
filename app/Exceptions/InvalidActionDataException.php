@@ -23,7 +23,7 @@ class InvalidActionDataException extends Exception
      *
      * @param  string  $message  Human-readable error message
      * @param  string  $errorCode  Machine-readable error code
-     * @param  string  $gameTitle  Game title slug (e.g., 'validate-four', 'checkers')
+     * @param  string  $gameTitle  Game title slug (e.g., 'connect-four', 'checkers')
      * @param  array<string, mixed>  $context  Additional error context
      */
     public function __construct(

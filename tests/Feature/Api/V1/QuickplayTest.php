@@ -25,7 +25,7 @@ describe('Quickplay Matchmaking', function () {
     describe('Authentication', function () {
         it('unauthenticated user cannot access quickplay endpoints', function () {
             $response = $this->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             $response->assertStatus(401);
@@ -41,14 +41,14 @@ describe('Quickplay Matchmaking', function () {
             ]);
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'game_mode' => 'standard',
             ]);
 
             $response->assertStatus(202)
                 ->assertJson([
                     'data' => [
-                        'game_title' => 'validate-four',
+                        'game_title' => 'connect-four',
                         'game_mode' => 'standard',
                     ],
                 ]);
@@ -70,7 +70,7 @@ describe('Quickplay Matchmaking', function () {
                 ->andReturn(300); // 5 minutes remaining
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'game_mode' => 'standard',
             ]);
 
@@ -117,7 +117,7 @@ describe('Quickplay Matchmaking', function () {
                 ->andReturn('IN_GAME');
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             // App currently allows joining queue (feature not yet implemented)
@@ -136,7 +136,7 @@ describe('Quickplay Matchmaking', function () {
                 ->andReturn('IN_QUEUE');
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             // App currently allows joining queue (feature not yet implemented)
@@ -153,7 +153,7 @@ describe('Quickplay Matchmaking', function () {
             $response = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '5')
                 ->postJson('/api/v1/games/quickplay', [
-                    'game_title' => 'validate-four',
+                    'game_title' => 'connect-four',
                 ]);
 
             $response->assertStatus(202);
@@ -168,7 +168,7 @@ describe('Quickplay Matchmaking', function () {
             ]);
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             $response->assertStatus(202)
@@ -313,7 +313,7 @@ describe('Quickplay Matchmaking', function () {
 
             // Re-join
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             $response->assertStatus(202);
@@ -331,7 +331,7 @@ describe('Quickplay Matchmaking', function () {
             Redis::shouldReceive('setex')->andThrow(new \Exception('Redis connection failed'));
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/quickplay', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
             ]);
 
             $response->assertStatus(500);

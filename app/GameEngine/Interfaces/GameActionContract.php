@@ -12,7 +12,7 @@ namespace App\GameEngine\Interfaces;
  * consistently across different game types.
  *
  * Examples:
- * - Validate Four: DropDiscAction, PopOutAction
+ * - Connect Four: DropDiscAction, PopOutAction
  * - Chess: MoveAction, CastleAction, PromoteAction
  * - Poker: BetAction, FoldAction, CallAction
  */

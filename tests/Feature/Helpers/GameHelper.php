@@ -15,10 +15,10 @@ class GameHelper
      */
     public static function createGame(array $attributes = [], array $players = []): Game
     {
-        // Always use ValidateFour Standard mode for consistent test behavior
-        $mode = Mode::where('title_slug', 'validate-four')
+        // Always use ConnectFour Standard mode for consistent test behavior
+        $mode = Mode::where('title_slug', 'connect-four')
             ->where('slug', 'standard')
-            ->first() ?? Mode::factory()->validateFourStandard()->create();
+            ->first() ?? Mode::factory()->connectFourStandard()->create();
 
         $baseAttributes = array_merge([
             'mode_id' => $mode->id,

@@ -320,7 +320,7 @@ Response:
 {
   "data": [
     {
-      "game_title": "validate-four",
+      "game_title": "connect-four",
       "level": 15,
       "experience_points": 3450,
       "last_played_at": "2025-11-17T10:30:00Z"
@@ -410,8 +410,8 @@ Response:
 {
   "data": [
     {
-      "key": "validate-four",
-      "name": "Validate Four",
+      "key": "connect-four",
+      "name": "Connect Four",
       "description": "Classic connect four game where players compete to align four pieces in a row.",
       "min_players": 2,
       "max_players": 2
@@ -440,7 +440,7 @@ Response:
 ```json
 {
   "data": {
-    "title": "Validate Four",
+    "title": "Connect Four",
     "objective": "Connect four pieces in a row",
     "rules": [...],
     "modes": {...},
@@ -459,7 +459,7 @@ Response:
 ```json
 {
   "data": {
-    "game_title": "validate-four",
+    "game_title": "connect-four",
     "entries": [
       {
         "rank": 1,
@@ -485,7 +485,7 @@ Response:
 Request:
 ```json
 {
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "game_mode": "blitz"
 }
 ```
@@ -494,7 +494,7 @@ Response (202 Accepted):
 ```json
 {
   "data": {
-    "game_title": "validate-four",
+    "game_title": "connect-four",
     "game_mode": "blitz"
   },
   "message": "Successfully joined the queue"
@@ -544,7 +544,7 @@ Response:
   "data": [
     {
       "ulid": "01HQ...",
-      "game_title": "validate-four",
+      "game_title": "connect-four",
       "status": "active",
       "players": [...],
       "created_at": "2025-11-17T10:00:00Z"
@@ -575,7 +575,7 @@ Response:
 {
   "data": {
     "ulid": "01HQ...",
-    "game_title": "validate-four",
+    "game_title": "connect-four",
     "status": "active",
     "game_state": {
       "board": [[null, null, ...], ...],
@@ -763,7 +763,7 @@ Response:
   "data": [
     {
       "ulid": "01HQ...",
-      "game_title": "validate-four",
+      "game_title": "connect-four",
       "host": {
         "username": "johndoe",
         "name": "John Doe",
@@ -780,7 +780,7 @@ Response:
 **POST /v1/games/lobbies**
 ```json
 {
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "game_mode": "standard",
   "is_public": true,
   "min_players": 2
@@ -792,7 +792,7 @@ Response (201 Created):
 {
   "data": {
     "ulid": "01HQ...",
-    "game_title": "validate-four",
+    "game_title": "connect-four",
     "is_public": true,
     "min_players": 2,
     "status": "pending",
@@ -822,7 +822,7 @@ Response:
   "data": {
     "lobby": {
       "ulid": "01HQ...",
-      "game_title": "validate-four",
+      "game_title": "connect-four",
       "game_mode": "standard",
       "host": {
         "username": "johndoe",

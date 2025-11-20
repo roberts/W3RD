@@ -344,7 +344,7 @@ describe('Game Lifecycle', function () {
                 ->assertJson([
                     'message' => 'Column must be between 0 and 6',
                     'error_code' => 'invalid_column',
-                    'game_title' => 'validate-four',
+                    'game_title' => 'connect-four',
                     'severity' => 'error',
                 ]);
         });

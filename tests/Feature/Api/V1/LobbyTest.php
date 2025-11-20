@@ -21,7 +21,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
 
             $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => false,
                 'min_players' => 2,
             ]);
@@ -33,7 +33,7 @@ describe('Lobby Management', function () {
                 ]);
 
             $this->assertDatabaseHas('lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'host_id' => $host->id,
                 'is_public' => false,
                 'status' => 'pending',
@@ -44,7 +44,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
 
             $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => true,
                 'min_players' => 4,
             ]);
@@ -63,7 +63,7 @@ describe('Lobby Management', function () {
             $invitee2 = User::factory()->create();
 
             $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => false,
                 'invitees' => [$invitee1->id, $invitee2->id],
             ]);
@@ -93,7 +93,7 @@ describe('Lobby Management', function () {
             $scheduledTime = now()->addHours(2)->toIso8601String();
 
             $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => true,
                 'min_players' => 4,
                 'scheduled_at' => $scheduledTime,
@@ -269,7 +269,7 @@ describe('Lobby Management', function () {
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '2') // Mobile
                 ->postJson('/api/v1/games/lobbies', [
-                    'game_title' => 'validate-four',
+                    'game_title' => 'connect-four',
                     'is_public' => true,
                 ]);
 
@@ -345,7 +345,7 @@ describe('Lobby Management', function () {
             $scheduledTime = now()->addHours(2);
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => false,
                 'scheduled_at' => $scheduledTime->toIso8601String(),
             ]);
@@ -360,7 +360,7 @@ describe('Lobby Management', function () {
             $pastTime = now()->subHours(1);
 
             $response = $this->actingAs($user)->postJson('/api/v1/games/lobbies', [
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => false,
                 'scheduled_at' => $pastTime->toIso8601String(),
             ]);

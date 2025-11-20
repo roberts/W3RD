@@ -32,7 +32,7 @@ describe('Public Endpoints', function () {
 
     describe('Game Rules', function () {
         it('shows rules for specific title without authentication', function () {
-            $response = $this->getJson('/api/v1/titles/validate-four/rules');
+            $response = $this->getJson('/api/v1/titles/connect-four/rules');
 
             // Endpoint may not exist yet
             expect($response->status())->toBeIn([200, 404]);
@@ -69,14 +69,14 @@ describe('Public Endpoints', function () {
                 'position_id' => 1,
             ]);
 
-            $response = $this->getJson('/api/v1/leaderboards/validate-four');
+            $response = $this->getJson('/api/v1/leaderboards/connect-four');
 
             // Endpoint may not exist yet
             expect($response->status())->toBeIn([200, 404]);
         });
 
         it('paginates leaderboard results', function () {
-            $response = $this->getJson('/api/v1/leaderboards/validate-four?page=1&per_page=10');
+            $response = $this->getJson('/api/v1/leaderboards/connect-four?page=1&per_page=10');
 
             // Endpoint may not exist yet
             if ($response->status() === 404) {
@@ -91,7 +91,7 @@ describe('Public Endpoints', function () {
         });
 
         it('filters leaderboard by time period', function () {
-            $response = $this->getJson('/api/v1/leaderboards/validate-four?period=weekly');
+            $response = $this->getJson('/api/v1/leaderboards/connect-four?period=weekly');
 
             // Endpoint may not exist yet
             expect($response->status())->toBeIn([200, 404]);

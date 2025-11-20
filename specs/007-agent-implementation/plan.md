@@ -17,7 +17,7 @@ This plan outlines the technical implementation for a comprehensive AI Agent sys
 **Project Type**: Web Application
 **Performance Goals**: Agent move calculation job should complete in under 500ms (before artificial delay). Matchmaking queries should resolve in under 100ms.
 **Constraints**: The system must handle a population of at least 100 concurrent agents without degrading matchmaking performance. The `sleep` function in the job will increase resource utilization and must be monitored.
-**Scale/Scope**: The initial implementation will support up to 1,000 configured agents and will be integrated with the existing three game titles (Checkers, Hearts, ValidateFour).
+**Scale/Scope**: The initial implementation will support up to 1,000 configured agents and will be integrated with the existing three game titles (Checkers, Hearts, ConnectFour).
 
 ## Constitution Check
 

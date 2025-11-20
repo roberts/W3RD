@@ -279,16 +279,16 @@ describe('Lobby Player Management', function () {
     });
 
     describe('Player Limits & Validation', function () {
-        it('enforces game-specific player limits for validate-four', function () {
+        it('enforces game-specific player limits for connect-four', function () {
             $host = User::factory()->create();
 
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
-                'game_title' => 'validate-four',
+                'game_title' => 'connect-four',
                 'is_public' => true,
             ]);
 
-            // Validate Four requires exactly 2 players
+            // Connect Four requires exactly 2 players
             // Try to add more than 2 total players should fail or be handled
             LobbyPlayer::factory()->create([
                 'lobby_id' => $lobby->id,

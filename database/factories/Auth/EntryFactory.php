@@ -25,7 +25,7 @@ class EntryFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'client_id' => Client::factory(),
+            'client_id' => Client::factory()->withTrademarks(),
             'ip_address' => fake()->ipv4(),
             'device_info' => fake()->userAgent(),
             'token_id' => fake()->optional()->numerify('################'),

@@ -492,7 +492,7 @@ class ValidationResult
 
 #### Game-Specific Implementations
 
-**Validate Four (Connect 4):**
+**Connect Four (Connect 4):**
 ```php
 // When column is full
 if ($lowestEmptyRow === null) {
@@ -640,7 +640,7 @@ if (!$gameState->heartsBroken && $action->isHeart() && $this->hasNonHearts($game
 {
   "message": "Column 3 is full",
   "error_code": "column_full",
-  "game_title": "validate-four",
+  "game_title": "connect-four",
   "severity": "error",
   "context": {
     "column": 3,
@@ -714,7 +714,7 @@ function showActionSuggestions(suggestions, hints) {
 Add to base game classes:
 
 ```php
-// app/Games/ValidateFour/BaseValidateFour.php
+// app/Games/ConnectFour/BaseConnectFour.php
 protected function getAvailableColumnsWithContext(GameState $gameState): array
 {
     $columns = [];
@@ -1117,7 +1117,7 @@ Response format:
     ]
   },
   "by_game": {
-    "validate-four": {
+    "connect-four": {
       "games_played": 45,
       "games_won": 28,
       "win_rate": 62.22,
@@ -1313,14 +1313,14 @@ class GameContextService
     public function getGameContext(Game $game, object $gameState): array
     {
         return match($game->title_slug->value) {
-            'validate-four' => $this->getValidateFourContext($game, $gameState),
+            'connect-four' => $this->getConnectFourContext($game, $gameState),
             'checkers' => $this->getCheckersContext($game, $gameState),
             'hearts' => $this->getHeartsContext($game, $gameState),
             default => [],
         };
     }
     
-    protected function getValidateFourContext(Game $game, $gameState): array
+    protected function getConnectFourContext(Game $game, $gameState): array
     {
         return [
             'turn_number' => $game->turn_number,

@@ -164,7 +164,7 @@ class GameCreationService
         $matchKey = "quickplay:match:{$matchId}";
         $matchData = Redis::hgetall($matchKey);
 
-        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'validate-four');
+        $gameTitle = GameTitle::from($matchData['game_title'] ?? 'connect-four');
         $gameMode = $matchData['game_mode'] ?? 'standard';
 
         // Prepare player data with each player's specific client_id

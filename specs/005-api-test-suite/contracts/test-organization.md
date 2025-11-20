@@ -504,7 +504,7 @@ function assertApiError(TestResponse $response, int $status, string $message): v
 
 ```php
 trait CreatesGames {
-    protected function createActiveGame(User $user, string $title = 'validate-four'): Game;
+    protected function createActiveGame(User $user, string $title = 'connect-four'): Game;
 }
 
 trait CreatesSubscriptions {

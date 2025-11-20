@@ -1,6 +1,8 @@
 # GamerProtocol.io API Documentation
 
-Complete API reference for the GamerProtocol.io platform. All endpoints use the base path `/v1/`.
+Complete API reference for the GamerProtocol.io v1 platform. This headless API serves multiple frontend clients (web, mobile, Telegram) with a clean RESTful architecture organized into 9 functional namespaces.
+
+**Base URL**: `https://api.gamerprotocol.io/v1`
 
 **Required Headers for Authorization:**
 - `Authorization: Bearer [Sanctum User Token]`
@@ -10,1006 +12,589 @@ Complete API reference for the GamerProtocol.io platform. All endpoints use the 
 
 ## 📋 Table of Contents
 
-1. [Implemented Endpoints](#implemented-endpoints)
-   - [Authentication & User Management](#1-authentication--user-management)
-   - [Public Information](#2-public-information)
-   - [User Profile & Stats](#3-user-profile--stats)
-   - [Matchmaking](#4-matchmaking)
-   - [Game Management](#5-game-management)
-   - [Billing & Subscriptions](#6-billing--subscriptions)
-   - [Webhooks](#7-webhooks)
-2. [Future Endpoints (Not Yet Implemented)](#future-endpoints-not-yet-implemented)
+1. [API Architecture](#api-architecture)
+2. [Authentication](#authentication)
+3. [API Namespaces](#api-namespaces)
+   - [System & Webhooks](#1-system--webhooks)
+   - [Game Library](#2-game-library)
+   - [Authentication](#3-authentication)
+   - [Account Management](#4-account-management)
+   - [Floor Coordination](#5-floor-coordination)
+   - [Active Games](#6-active-games)
+   - [Economy](#7-economy)
+   - [Data Feeds](#8-data-feeds)
+   - [Competitions](#9-competitions)
+4. [Common Patterns](#common-patterns)
+5. [Error Handling](#error-handling)
+6. [Real-Time Events](#real-time-events)
 
 ---
 
-## Implemented Endpoints
+## API Architecture
 
-### 1. 🔑 Authentication & User Management
+The GamerProtocol.io API is organized into 9 logical namespaces that separate concerns and provide intuitive endpoint discovery:
 
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/v1/auth/register` | Standard registration - creates pending registration and sends verification email | `X-Client-Key` Only |
-| `POST` | `/v1/auth/verify` | Verify email - validates token, creates user, returns login token | `X-Client-Key` Only |
-| `POST` | `/v1/auth/login` | Standard login with email/password | `X-Client-Key` Only |
-| `POST` | `/v1/auth/social` | Social login with provider access token | `X-Client-Key` Only |
-| `POST` | `/v1/auth/logout` | User logout - revokes current API token | Bearer + Client Key |
-| `GET` | `/v1/auth/user` | Get authenticated user profile | Bearer + Client Key |
-| `PATCH` | `/v1/auth/user` | Update authenticated user profile | Bearer + Client Key |
+| Namespace | Purpose | Authentication |
+|-----------|---------|----------------|
+| **System** | Health checks, webhooks | Public/Vendor |
+| **Library** | Game catalog and rules | Public |
+| **Auth** | Registration, login, tokens | Client Key |
+| **Account** | User profile, stats, transactions | Bearer + Client Key |
+| **Floor** | Matchmaking, lobbies, proposals | Bearer + Client Key |
+| **Games** | Active game state and actions | Bearer + Client Key |
+| **Economy** | Balance, transactions, subscriptions | Bearer + Client Key |
+| **Feeds** | Real-time SSE streams | Bearer + Client Key |
+| **Competitions** | Tournaments and brackets | Bearer + Client Key |
 
----
+### Design Principles
 
-### 2. 🌐 Public Information
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/status` | API health check | Public |
-| `GET` | `/v1/titles` | List all available game titles with metadata | Public |
-| `GET` | `/v1/titles/{gameTitle}/rules` | Get rules for a specific game title | Public |
-| `GET` | `/v1/leaderboard/{gameTitle}` | Get leaderboard for a specific game title | Public |
-
----
-
-### 3. 👤 User Profile & Stats
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/me/profile` | Get authenticated user's detailed profile | Bearer + Client Key |
-| `PATCH` | `/v1/me/profile` | Update authenticated user's profile | Bearer + Client Key |
-| `GET` | `/v1/me/stats` | Get user statistics (wins, losses, points, rank) | Bearer + Client Key |
-| `GET` | `/v1/me/levels` | Get user's title levels and XP progress | Bearer + Client Key |
-| `GET` | `/v1/me/alerts` | Get user's alert history (paginated) | Bearer + Client Key |
-| `POST` | `/v1/me/alerts/mark-as-read` | Mark alerts as read (specific ULIDs or all) | Bearer + Client Key |
+- **RESTful**: Standard HTTP methods (GET, POST, PUT, PATCH, DELETE)
+- **Resource-oriented**: Clear hierarchies (e.g., `/games/{ulid}/actions`)
+- **Stateless**: Each request contains all necessary information
+- **Idempotent actions**: Game actions include idempotency keys
+- **JSON-only**: All requests and responses use `application/json`
+- **Pagination**: Collections use cursor-based pagination
+- **Versioning**: URL-based (`/v1/`, `/v2/`) with deprecation headers
 
 ---
 
-### 4. 🎮 Matchmaking
+## Authentication
 
-#### Quickplay (Public Matchmaking)
+### Dual Authentication Model
 
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/v1/games/quickplay` | Join quickplay matchmaking queue | Bearer + Client Key |
-| `DELETE` | `/v1/games/quickplay` | Leave quickplay matchmaking queue | Bearer + Client Key |
-| `POST` | `/v1/games/quickplay/accept` | Accept a quickplay match | Bearer + Client Key |
+All authenticated endpoints require **both** a Bearer token (user identity) and a Client Key (application identity):
 
-#### Lobbies (Private Matchmaking)
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/games/lobbies` | List available lobbies | Bearer + Client Key |
-| `POST` | `/v1/games/lobbies` | Create a new lobby | Bearer + Client Key |
-| `GET` | `/v1/games/lobbies/{lobby_ulid}` | Get lobby details | Bearer + Client Key |
-| `DELETE` | `/v1/games/lobbies/{lobby_ulid}` | Delete/leave a lobby | Bearer + Client Key |
-| `POST` | `/v1/games/lobbies/{lobby_ulid}/ready-check` | Initiate ready check for lobby | Bearer + Client Key |
-| `POST` | `/v1/games/lobbies/{lobby_ulid}/players` | Add player to lobby | Bearer + Client Key |
-| `PUT` | `/v1/games/lobbies/{lobby_ulid}/players/{username}` | Update player status in lobby | Bearer + Client Key |
-| `DELETE` | `/v1/games/lobbies/{lobby_ulid}/players/{username}` | Remove player from lobby | Bearer + Client Key |
-
----
-
-### 5. 🎯 Game Management
-
-#### Game State & Actions
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/games` | List authenticated user's active and recent games | Bearer + Client Key |
-| `GET` | `/v1/games/{gameUlid}` | Get current game state by ULID | Bearer + Client Key |
-| `GET` | `/v1/games/{gameUlid}/history` | Get full action history for game (replay) | Bearer + Client Key |
-| `POST` | `/v1/games/{gameUlid}/action` | Execute a game action | Bearer + Client Key |
-| `GET` | `/v1/games/{gameUlid}/options` | Get list of valid actions for current state | Bearer + Client Key |
-| `POST` | `/v1/games/{gameUlid}/forfeit` | Forfeit/concede a game | Bearer + Client Key |
-
-#### Rematch System
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/v1/games/{gameUlid}/rematch` | Request rematch with same opponent | Bearer + Client Key |
-| `POST` | `/v1/games/rematch/{requestId}/accept` | Accept a rematch request (by ULID) | Bearer + Client Key |
-| `POST` | `/v1/games/rematch/{requestId}/decline` | Decline a rematch request (by ULID) | Bearer + Client Key |
-
----
-
-### 6. 💳 Billing & Subscriptions
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/billing/plans` | Get available subscription plans | Bearer + Client Key |
-| `GET` | `/v1/billing/status` | Get current plan level and renewal details | Bearer + Client Key |
-| `POST` | `/v1/billing/subscribe` | Initiate subscription (returns Stripe checkout URL) | Bearer + Client Key |
-| `GET` | `/v1/billing/manage` | Get Stripe customer portal URL | Bearer + Client Key |
-| `POST` | `/v1/billing/apple/verify` | Verify Apple receipt | Bearer + Client Key |
-| `POST` | `/v1/billing/google/verify` | Verify Google receipt | Bearer + Client Key |
-| `POST` | `/v1/billing/telegram/verify` | Verify Telegram receipt | Bearer + Client Key |
-
----
-
-### 7. 🔗 Webhooks
-
-| HTTP Method | Endpoint | Purpose | Auth Requirements |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/v1/stripe/webhook` | Stripe webhook for subscription events | None (Vendor Auth) |
-
----
-
-## Future Endpoints (Not Yet Implemented)
-
-The following endpoints are documented for future development but not yet implemented in the codebase.
-
-### 🎖️ Gamification
-
-| HTTP Method | Endpoint | Purpose | Priority |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/user/badges` | Get user's earned badges | Medium |
-| `GET` | `/v1/leaderboard` | Global leaderboard (all games) | Low |
-| `GET` | `/v1/leaderboard/daily/history/{date}` | Historical daily leaderboard | Low |
-
-### ⚙️ Platform Utilities
-
-| HTTP Method | Endpoint | Purpose | Priority |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/config` | Get platform configuration data | Medium |
-| `GET` | `/v1/time` | Get server time for timezone sync | Medium |
-
-### 💰 Advanced Billing
-
-| HTTP Method | Endpoint | Purpose | Priority |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/billing/payment-methods` | List saved payment methods | Low |
-| `POST` | `/v1/billing/payment-methods` | Add new payment method | Low |
-| `DELETE` | `/v1/billing/subscription` | Cancel subscription | Medium |
-
----
-
-## Request & Response Examples
-
-### Response Structure Standards
-
-All API responses follow consistent patterns based on industry best practices:
-
-**Single Resources:**
-```json
-{
-  "data": {...},
-  "message": "Optional success message"
-}
+```http
+GET /v1/account/profile
+Authorization: Bearer 1|abc123xyz...
+X-Client-Key: your-client-key-here
 ```
 
-**Collections (Paginated):**
-```json
-{
-  "data": [...],
-  "links": {
-    "first": "https://gamerprotocol.io/api/v1/games?page=1",
-    "last": "https://gamerprotocol.io/api/v1/games?page=10",
-    "prev": null,
-    "next": "https://gamerprotocol.io/api/v1/games?page=2"
-  },
-  "meta": {
-    "current_page": 1,
-    "from": 1,
-    "last_page": 10,
-    "path": "https://gamerprotocol.io/api/v1/games",
-    "per_page": 20,
-    "to": 20,
-    "total": 200
-  }
-}
-```
+### Bearer Token (User Authentication)
 
-**Authentication (Special Case - Flat Structure):**
-```json
-{
-  "token": "1|abc123...",
-  "user": {...}
-}
-```
+Obtained via login endpoints in the Auth namespace. Represents a specific user session.
 
-**Errors:**
-```json
-{
-  "message": "Human-readable error message",
-  "error_code": "VALIDATION_ERROR",
-  "errors": {
-    "field_name": ["Error message for this field"]
-  }
-}
-```
+**Characteristics**:
+- Laravel Sanctum personal access tokens
+- Scoped to individual users
+- Can be revoked via logout
+- Expires based on session configuration
 
-**Success Messages (No Data):**
-```json
-{
-  "message": "Action completed successfully"
-}
-```
+### Client Key (Application Authentication)
+
+Identifies the client application (web, iOS, Android, Telegram bot). Required for all API calls.
+
+**Characteristics**:
+- Static key per application
+- Stored in `clients` table
+- Used for rate limiting and analytics
+- Required even for public endpoints
 
 ---
 
-### Authentication
+## API Namespaces
 
-**POST /v1/auth/login**
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
+### 1. System & Webhooks
+
+Health monitoring and external service webhooks.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/system/health` | API health check with database connectivity | Public |
+| `POST` | `/webhooks/stripe` | Stripe subscription event handler | Vendor Signature |
+| `POST` | `/webhooks/apple` | Apple App Store notification handler | Vendor Signature |
+| `POST` | `/webhooks/google` | Google Play notification handler | Vendor Signature |
+
+**Example: Health Check**
+
+```http
+GET /v1/system/health
+X-Client-Key: your-client-key
 ```
 
 Response:
 ```json
 {
-  "token": "1|abc123...",
-  "user": {
-    "username": "johndoe",
-    "name": "John Doe",
-    "avatar": "https://res.cloudinary.com/...",
-    "bio": null,
-    "social_links": null
-  }
-}
-```
-
-**GET /v1/auth/user**
-
-Response:
-```json
-{
-  "data": {
-    "username": "johndoe",
-    "name": "John Doe",
-    "avatar": "https://res.cloudinary.com/...",
-    "bio": "Professional gamer",
-    "social_links": {
-      "twitter": "https://twitter.com/johndoe"
-    }
-  }
-}
-```
-
-**POST /v1/auth/logout**
-
-Response:
-```json
-{
-  "message": "Logged out successfully"
+  "status": "healthy",
+  "version": "1.0.0",
+  "database": "connected",
+  "timestamp": "2025-11-20T12:00:00Z"
 }
 ```
 
 ---
 
-### User Profile & Stats
+### 2. Game Library
 
-**GET /v1/me/profile**
+Public catalog of available games, rules, and leaderboards.
 
-Response:
-```json
-{
-  "data": {
-    "username": "johndoe",
-    "name": "John Doe",
-    "avatar": "https://res.cloudinary.com/...",
-    "bio": "Professional gamer",
-    "social_links": {
-      "twitter": "https://twitter.com/johndoe",
-      "twitch": "https://twitch.tv/johndoe"
-    }
-  }
-}
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/library` | List all available game titles | Public |
+| `GET` | `/library/{titleKey}` | Get detailed game information | Public |
+| `GET` | `/library/{titleKey}/rules` | Get complete rule documentation | Public |
+| `GET` | `/library/{titleKey}/leaderboards` | Get game-specific leaderboards | Public |
+
+**Example: List Games**
+
+```http
+GET /v1/library
+X-Client-Key: your-client-key
 ```
-
-**GET /v1/me/stats**
-
-Response:
-```json
-{
-  "data": {
-    "total_games": 150,
-    "wins": 95,
-    "losses": 55,
-    "win_rate": 63.33,
-    "total_points": 2850,
-    "global_rank": null
-  }
-}
-```
-
-**GET /v1/me/levels**
 
 Response:
 ```json
 {
   "data": [
     {
-      "game_title": "connect-four",
-      "level": 15,
-      "experience_points": 3450,
-      "last_played_at": "2025-11-17T10:30:00Z"
+      "key": "chess",
+      "name": "Chess",
+      "description": "Classic strategy game of checkmate",
+      "min_players": 2,
+      "max_players": 2,
+      "pacing": "turn_based",
+      "complexity": 5,
+      "thumbnail": "https://cdn.gamerprotocol.io/games/chess/thumb.jpg"
     },
-    {
-      "game_title": "checkers",
-      "level": 8,
-      "experience_points": 1200,
-      "last_played_at": "2025-11-16T14:20:00Z"
-    }
-  ]
-}
-```
-
----
-
-### Alerts
-
-**GET /v1/me/alerts**
-
-Response:
-```json
-{
-  "data": [
-    {
-      "ulid": "01HQ...",
-      "type": "game_invite",
-      "data": {
-        "lobby_ulid": "01HQ...",
-        "host_username": "player1"
-      },
-      "read_at": null,
-      "created_at": "2025-11-17T10:30:00Z"
-    }
-  ],
-  "links": {
-    "first": "https://gamerprotocol.io/api/v1/me/alerts?page=1",
-    "last": "https://gamerprotocol.io/api/v1/me/alerts?page=1",
-    "prev": null,
-    "next": null
-  },
-  "meta": {
-    "current_page": 1,
-    "from": 1,
-    "last_page": 1,
-    "path": "https://gamerprotocol.io/api/v1/me/alerts",
-    "per_page": 20,
-    "to": 1,
-    "total": 1
-  }
-}
-```
-
-**POST /v1/me/alerts/mark-as-read**
-```json
-{
-  "alert_ulids": ["01HQ...", "01HQ..."]
-}
-```
-
-Response:
-```json
-{
-  "message": "Alerts marked as read."
-}
-```
-
----
-
-### Public Information
-
-**GET /v1/status**
-
-Response:
-```json
-{
-  "data": {
-    "status": "ok"
-  }
-}
-```
-
-**GET /v1/titles**
-
-Response:
-```json
-{
-  "data": [
     {
       "key": "connect-four",
       "name": "Connect Four",
-      "description": "Classic connect four game where players compete to align four pieces in a row.",
+      "description": "Align four pieces in a row to win",
       "min_players": 2,
-      "max_players": 2
-    },
-    {
-      "key": "checkers",
-      "name": "Checkers",
-      "description": "Classic board game where players move pieces diagonally, capturing opponent pieces by jumping over them.",
-      "min_players": 2,
-      "max_players": 2
-    },
-    {
-      "key": "hearts",
-      "name": "Hearts",
-      "description": "Classic 4-player card game where the goal is to avoid taking hearts and the Queen of Spades, or shoot the moon to score big.",
-      "min_players": 4,
-      "max_players": 4
+      "max_players": 2,
+      "pacing": "turn_based",
+      "complexity": 2,
+      "thumbnail": "https://cdn.gamerprotocol.io/games/connect-four/thumb.jpg"
     }
   ]
 }
 ```
 
-**GET /v1/titles/{gameTitle}/rules**
+**Example: Get Rules**
+
+```http
+GET /v1/library/chess/rules
+X-Client-Key: your-client-key
+```
 
 Response:
 ```json
 {
   "data": {
-    "title": "Connect Four",
-    "objective": "Connect four pieces in a row",
-    "rules": [...],
-    "modes": {...},
-    "timeout": {
-      "timelimit_seconds": 30,
-      "grace_period_seconds": 2,
-      "penalty": "lose_turn"
+    "title_key": "chess",
+    "name": "Chess",
+    "objective": "Checkmate the opponent's king",
+    "setup": "Standard 8x8 board with 16 pieces per player",
+    "turn_structure": "Alternating moves, white moves first",
+    "winning_conditions": ["checkmate", "resignation", "timeout"],
+    "special_rules": {
+      "castling": "King and rook special move under specific conditions",
+      "en_passant": "Special pawn capture move",
+      "promotion": "Pawn reaching opposite end promotes to any piece"
+    },
+    "time_controls": {
+      "blitz": { "initial": 300, "increment": 0 },
+      "rapid": { "initial": 600, "increment": 5 },
+      "classic": { "initial": 1800, "increment": 10 }
     }
   }
 }
 ```
 
-**GET /v1/leaderboard/{gameTitle}**
+---
+
+### 3. Authentication
+
+User registration, login, and session management.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `POST` | `/auth/register` | Create new account (email verification required) | Client Key |
+| `POST` | `/auth/verify` | Verify email with token | Client Key |
+| `POST` | `/auth/login` | Email/password login | Client Key |
+| `POST` | `/auth/social` | Social provider login (Google, Apple, Telegram) | Client Key |
+| `POST` | `/auth/logout` | Revoke current session token | Bearer + Client Key |
+| `POST` | `/auth/refresh` | Refresh session token | Bearer + Client Key |
+
+**Example: Registration**
+
+```http
+POST /v1/auth/register
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "email": "player@example.com",
+  "username": "coolplayer",
+  "password": "SecurePass123!",
+  "password_confirmation": "SecurePass123!"
+}
+```
 
 Response:
 ```json
 {
-  "data": {
-    "game_title": "connect-four",
-    "entries": [
-      {
-        "rank": 1,
-        "user": {
-          "username": "progamer123",
-          "name": "Pro Gamer",
-          "avatar": "https://res.cloudinary.com/..."
-        },
-        "level": 25,
-        "experience_points": 12450
-      }
-    ]
+  "message": "Verification email sent. Please check your inbox.",
+  "registration_id": "01J3ABC..."
+}
+```
+
+**Example: Login**
+
+```http
+POST /v1/auth/login
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "email": "player@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+Response:
+```json
+{
+  "token": "1|abc123xyz789...",
+  "token_type": "Bearer",
+  "expires_in": 31536000,
+  "user": {
+    "username": "coolplayer",
+    "email": "player@example.com",
+    "avatar": "https://cdn.gamerprotocol.io/avatars/default.jpg",
+    "level": 1,
+    "xp": 0,
+    "created_at": "2025-11-20T12:00:00Z"
   }
 }
 ```
 
 ---
 
-### Matchmaking
+### 4. Account Management
 
-**POST /v1/games/quickplay**
+User profile, statistics, alerts, and transaction history.
 
-Request:
-```json
-{
-  "game_title": "connect-four",
-  "game_mode": "blitz"
-}
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/account/profile` | Get full user profile | Bearer + Client Key |
+| `PATCH` | `/account/profile` | Update profile (avatar, bio, socials) | Bearer + Client Key |
+| `GET` | `/account/stats` | Get gameplay statistics | Bearer + Client Key |
+| `GET` | `/account/stats/{titleKey}` | Get game-specific statistics | Bearer + Client Key |
+| `GET` | `/account/progression` | Get levels and XP across all games | Bearer + Client Key |
+| `GET` | `/account/alerts` | Get user notifications (paginated) | Bearer + Client Key |
+| `POST` | `/account/alerts/read` | Mark alerts as read | Bearer + Client Key |
+| `GET` | `/account/transactions` | Get financial transaction history | Bearer + Client Key |
+
+**Example: Get Profile**
+
+```http
+GET /v1/account/profile
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
 ```
 
-Response (202 Accepted):
-```json
-{
-  "data": {
-    "game_title": "connect-four",
-    "game_mode": "blitz"
-  },
-  "message": "Successfully joined the queue"
-}
-```
-
-**DELETE /v1/games/quickplay**
-
-Response (204 No Content):
-```
-No response body
-```
-
-**POST /v1/games/quickplay/accept**
-```json
-{
-  "match_id": "abc123"
-}
-```
-
-Response (202 Accepted):
-```json
-{
-  "message": "Acceptance registered. Waiting for opponent..."
-}
-```
-
-Or when both players accept:
+Response:
 ```json
 {
   "data": {
-    "match_id": "abc123"
-  },
-  "message": "Match accepted! Starting game..."
+    "username": "coolplayer",
+    "email": "player@example.com",
+    "name": "Cool Player",
+    "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg",
+    "bio": "Competitive gamer and chess enthusiast",
+    "social_links": {
+      "twitter": "https://twitter.com/coolplayer",
+      "twitch": "https://twitch.tv/coolplayer"
+    },
+    "level": 15,
+    "total_xp": 4500,
+    "member_since": "2025-01-15T10:00:00Z"
+  }
 }
 ```
 
 ---
 
-### Game Management
+### 5. Floor Coordination
 
-**GET /v1/games**
+Matchmaking hub for quickplay, lobbies, challenges, and rematches.
 
-Response:
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `POST` | `/floor/quickplay` | Join quickplay matchmaking | Bearer + Client Key |
+| `DELETE` | `/floor/quickplay` | Leave quickplay queue | Bearer + Client Key |
+| `GET` | `/floor/quickplay/status` | Check queue position and estimated wait | Bearer + Client Key |
+| `GET` | `/floor/lobbies` | List public lobbies | Bearer + Client Key |
+| `POST` | `/floor/lobbies` | Create new lobby | Bearer + Client Key |
+| `GET` | `/floor/lobbies/{ulid}` | Get lobby details | Bearer + Client Key |
+| `POST` | `/floor/lobbies/{ulid}/join` | Join existing lobby | Bearer + Client Key |
+| `POST` | `/floor/lobbies/{ulid}/leave` | Leave lobby | Bearer + Client Key |
+| `POST` | `/floor/lobbies/{ulid}/start` | Start game from lobby (host only) | Bearer + Client Key |
+| `DELETE` | `/floor/lobbies/{ulid}` | Delete lobby (host only) | Bearer + Client Key |
+| `POST` | `/floor/challenges` | Issue challenge to specific user | Bearer + Client Key |
+| `GET` | `/floor/challenges` | List pending challenges | Bearer + Client Key |
+| `POST` | `/floor/challenges/{ulid}/accept` | Accept challenge | Bearer + Client Key |
+| `POST` | `/floor/challenges/{ulid}/decline` | Decline challenge | Bearer + Client Key |
+| `DELETE` | `/floor/challenges/{ulid}` | Cancel challenge | Bearer + Client Key |
+| `POST` | `/floor/rematches` | Request rematch after game | Bearer + Client Key |
+| `POST` | `/floor/rematches/{ulid}/accept` | Accept rematch | Bearer + Client Key |
+| `POST` | `/floor/rematches/{ulid}/decline` | Decline rematch | Bearer + Client Key |
+
+---
+
+### 6. Active Games
+
+Game state, action submission, and game lifecycle management.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/games` | List user's active and recent games | Bearer + Client Key |
+| `GET` | `/games/{ulid}` | Get current game state | Bearer + Client Key |
+| `POST` | `/games/{ulid}/actions` | Submit game action | Bearer + Client Key |
+| `GET` | `/games/{ulid}/actions` | Get complete action history | Bearer + Client Key |
+| `GET` | `/games/{ulid}/options` | Get valid moves for current turn | Bearer + Client Key |
+| `POST` | `/games/{ulid}/concede` | Concede game (standard penalty) | Bearer + Client Key |
+| `POST` | `/games/{ulid}/abandon` | Abandon game (increased penalty) | Bearer + Client Key |
+| `GET` | `/games/{ulid}/replay` | Get replay data | Bearer + Client Key |
+
+---
+
+### 7. Economy
+
+Financial operations including balance, transactions, buy-ins, and subscriptions.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/economy/balance` | Get all currency balances | Bearer + Client Key |
+| `GET` | `/economy/transactions` | Get transaction history | Bearer + Client Key |
+| `POST` | `/economy/deposit` | Initiate deposit (returns payment link) | Bearer + Client Key |
+| `POST` | `/economy/withdraw` | Request withdrawal | Bearer + Client Key |
+| `POST` | `/economy/buy-in` | Buy into game with chips | Bearer + Client Key |
+| `POST` | `/economy/cash-out` | Cash out from completed game | Bearer + Client Key |
+| `GET` | `/economy/plans` | List subscription plans | Bearer + Client Key |
+| `POST` | `/economy/subscribe` | Start subscription | Bearer + Client Key |
+| `GET` | `/economy/subscription` | Get current subscription status | Bearer + Client Key |
+| `POST` | `/economy/subscription/cancel` | Cancel subscription | Bearer + Client Key |
+| `POST` | `/economy/receipts/{provider}` | Verify mobile purchase | Bearer + Client Key |
+
+---
+
+### 8. Data Feeds
+
+Real-time Server-Sent Events (SSE) streams for live platform activity.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/feeds/games` | Stream public game activity | Bearer + Client Key |
+| `GET` | `/feeds/wins` | Stream win announcements | Bearer + Client Key |
+| `GET` | `/feeds/leaderboards` | Stream leaderboard updates | Bearer + Client Key |
+| `GET` | `/feeds/tournaments` | Stream tournament progress | Bearer + Client Key |
+| `GET` | `/feeds/challenges` | Stream challenge activity | Bearer + Client Key |
+| `GET` | `/feeds/achievements` | Stream achievement unlocks | Bearer + Client Key |
+
+All feed endpoints support query parameters for filtering.
+
+**Example: Games Feed**
+
+```javascript
+const gamesSource = new EventSource(
+  'https://api.gamerprotocol.io/v1/feeds/games?title_key=chess',
+  {
+    headers: {
+      'Authorization': 'Bearer 1|abc123...',
+      'X-Client-Key': 'your-client-key'
+    }
+  }
+);
+
+gamesSource.addEventListener('game-update', (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Game event:', data);
+});
+```
+
+---
+
+### 9. Competitions
+
+Tournament management, brackets, and standings.
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/competitions` | List active tournaments | Bearer + Client Key |
+| `GET` | `/competitions/{ulid}` | Get tournament details | Bearer + Client Key |
+| `POST` | `/competitions/{ulid}/enter` | Register for tournament | Bearer + Client Key |
+| `POST` | `/competitions/{ulid}/leave` | Leave tournament (before start) | Bearer + Client Key |
+| `GET` | `/competitions/{ulid}/structure` | Get tournament format rules | Bearer + Client Key |
+| `GET` | `/competitions/{ulid}/bracket` | Get tournament bracket | Bearer + Client Key |
+| `GET` | `/competitions/{ulid}/standings` | Get current standings | Bearer + Client Key |
+
+---
+
+## Common Patterns
+
+### Response Envelope Structure
+
+All successful API responses follow a consistent envelope structure:
+
+**Single Resource** - Wrapped in `data` key:
+```json
+{
+  "data": {
+    "username": "coolplayer",
+    "email": "player@example.com",
+    "level": 15
+  }
+}
+```
+
+**Single Resource with Message**:
+```json
+{
+  "data": {
+    "username": "coolplayer",
+    "email": "player@example.com"
+  },
+  "message": "Profile updated successfully"
+}
+```
+
+**Collections (Resource Arrays)** - Also wrapped in `data`:
+```json
+{
+  "data": [
+    {"key": "chess", "name": "Chess"},
+    {"key": "checkers", "name": "Checkers"}
+  ]
+}
+```
+
+**Paginated Collections** - Includes `data`, `links`, and `meta`:
 ```json
 {
   "data": [
     {
-      "ulid": "01HQ...",
-      "game_title": "connect-four",
-      "status": "active",
-      "players": [...],
-      "created_at": "2025-11-17T10:00:00Z"
+      "ulid": "01J3ABC...",
+      "title_key": "chess",
+      "status": "active"
     }
   ],
   "links": {
-    "first": "https://gamerprotocol.io/api/v1/games?page=1",
-    "last": "https://gamerprotocol.io/api/v1/games?page=5",
+    "first": "https://api.gamerprotocol.io/v1/games?page=1",
+    "last": "https://api.gamerprotocol.io/v1/games?page=8",
     "prev": null,
-    "next": "https://gamerprotocol.io/api/v1/games?page=2"
+    "next": "https://api.gamerprotocol.io/v1/games?page=2"
   },
   "meta": {
     "current_page": 1,
     "from": 1,
-    "last_page": 5,
-    "path": "https://gamerprotocol.io/api/v1/games",
+    "last_page": 8,
+    "path": "https://api.gamerprotocol.io/v1/games",
     "per_page": 20,
     "to": 20,
-    "total": 95
+    "total": 156
   }
 }
 ```
 
-**GET /v1/games/{gameUlid}**
-
-Response:
+**Message-Only Responses** - No data, just confirmation:
 ```json
 {
-  "data": {
-    "ulid": "01HQ...",
-    "game_title": "connect-four",
-    "status": "active",
-    "game_state": {
-      "board": [[null, null, ...], ...],
-      "currentPlayerUlid": "01HQ...",
-      "winnerUlid": null
-    },
-    "players": [
-      {
-        "ulid": "01HQ...",
-        "user": {
-          "username": "player1",
-          "name": "Player One",
-          "avatar": "https://res.cloudinary.com/..."
-        },
-        "position_id": 1
-      }
-    ],
-    "created_at": "2025-11-17T10:00:00Z",
-    "started_at": "2025-11-17T10:01:00Z"
+  "message": "Alerts marked as read"
+}
+```
+
+**Authentication Response** - Special case with flat structure:
+```json
+{
+  "token": "1|abc123xyz789...",
+  "token_type": "Bearer",
+  "expires_in": 31536000,
+  "user": {
+    "username": "coolplayer",
+    "email": "player@example.com"
   }
 }
 ```
 
-**GET /v1/games/{gameUlid}/history**
+### Pagination
 
-Response:
-```json
-{
-  "data": [
-    {
-      "ulid": "01HQ...",
-      "action_type": "drop_piece",
-      "action_details": {"column": 3},
-      "player": {
-        "username": "player1",
-        "name": "Player One"
-      },
-      "created_at": "2025-11-17T10:02:00Z"
-    }
-  ]
-}
+All paginated endpoints return 20 items per page by default and use the same structure shown above.
+
+**Query Parameters**:
+- `page` - Page number (default: 1)
+- `per_page` - Items per page (default: 20, max: 100)
+
+**Example Request**:
+```http
+GET /v1/account/alerts?page=2&per_page=50
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
 ```
 
-**POST /v1/games/{gameUlid}/action**
+**Pagination Metadata**:
+- `current_page` - Current page number
+- `from` - Index of first item on page (1-based)
+- `to` - Index of last item on page
+- `total` - Total number of items across all pages
+- `per_page` - Items per page
+- `last_page` - Total number of pages
+
+**Pagination Links**:
+- `first` - URL to first page
+- `last` - URL to last page  
+- `prev` - URL to previous page (null if on first page)
+- `next` - URL to next page (null if on last page)
+
+### Resource Identifiers
+
+- **ULIDs**: All resources use 26-character ULIDs (e.g., `01J3ABC...`)
+- **Usernames**: Users identified by username in URLs (e.g., `/users/coolplayer`)
+- **Title Keys**: Games identified by slug keys (e.g., `chess`, `connect-four`)
+
+### Idempotency
+
+Game actions support idempotency keys to prevent duplicate submissions:
+
 ```json
 {
-  "action_type": "drop_piece",
-  "action_details": {
-    "column": 3
-  }
-}
-```
-
-Response:
-```json
-{
-  "data": {
-    "action": {
-      "ulid": "01HQ..."
-    },
-    "game": {
-      "ulid": "01HQ...",
-      "status": "active",
-      "game_state": {
-        "board": [...],
-        "currentPlayerUlid": "01HQ...",
-        "winnerUlid": null,
-        "is_draw": false
-      },
-      "winner_ulid": null,
-      "is_draw": false,
-      "outcome_type": null,
-      "outcome_details": null
-    },
-    "next_action_deadline": "2025-11-17T10:03:00Z",
-    "timeout": {
-      "timelimit_seconds": 30,
-      "grace_period_seconds": 2,
-      "penalty": "lose_turn"
-    }
-  },
-  "message": "Action applied successfully"
-}
-```
-
-**GET /v1/games/{gameUlid}/options**
-
-Response:
-```json
-{
-  "data": {
-    "options": [
-      {
-        "action_type": "drop_piece",
-        "action_details": {"column": 0},
-        "description": "Drop piece in column 0"
-      },
-      {
-        "action_type": "drop_piece",
-        "action_details": {"column": 1},
-        "description": "Drop piece in column 1"
-      }
-    ],
-    "is_your_turn": true,
-    "phase": "active",
-    "deadline": "2025-11-17T10:03:00Z",
-    "timelimit_seconds": 30
-  }
-}
-```
-
-**POST /v1/games/{gameUlid}/forfeit**
-
-Response:
-```json
-{
-  "data": {
-    "ulid": "01HQ...",
-    "status": "completed",
-    "winner_id": 123,
-    "completed_at": "2025-11-17T10:05:00Z"
-  },
-  "message": "Game forfeited successfully."
+  "action_type": "move",
+  "action_data": {...},
+  "idempotency_key": "unique-key-here"
 }
 ```
 
 ---
 
-### Rematch System
+## Error Handling
 
-**POST /v1/games/{gameUlid}/rematch**
+### HTTP Status Codes
 
-Response:
-```json
-{
-  "data": {
-    "ulid": "01HQ...",
-    "status": "pending",
-    "requester_ulid": "01HQ...",
-    "opponent_ulid": "01HQ...",
-    "expires_at": "2025-11-17T11:00:00Z"
-  },
-  "message": "Rematch request sent."
-}
-```
+| Code | Meaning | Usage |
+|------|---------|-------|
+| `200` | OK | Successful GET/PATCH |
+| `201` | Created | Successful POST creating resource |
+| `202` | Accepted | Async operation queued |
+| `204` | No Content | Successful DELETE |
+| `400` | Bad Request | Invalid action data (structural issues) |
+| `401` | Unauthorized | Missing or invalid auth token |
+| `402` | Payment Required | Payment validation failed |
+| `403` | Forbidden | Valid auth but insufficient permissions |
+| `404` | Not Found | Resource doesn't exist |
+| `409` | Conflict | Resource state conflict (player busy) |
+| `422` | Unprocessable Entity | Game action denied or validation failed |
+| `429` | Too Many Requests | Rate limit exceeded or cooldown active |
+| `500` | Internal Server Error | Unexpected server error |
 
-**POST /v1/games/rematch/{requestId}/accept**
+### Error Response Formats
 
-Response:
-```json
-{
-  "data": {
-    "ulid": "01HQ...",
-    "status": "accepted",
-    "new_game_ulid": "01HQ...",
-    "accepted_at": "2025-11-17T10:30:00Z"
-  },
-  "message": "Rematch accepted. New game created."
-}
-```
+The API uses different error response formats depending on the type of exception:
 
-**POST /v1/games/rematch/{requestId}/decline**
-
-Response:
-```json
-{
-  "data": {
-    "ulid": "01HQ...",
-    "status": "declined",
-    "declined_at": "2025-11-17T10:30:00Z"
-  },
-  "message": "Rematch request declined"
-}
-```
-
----
-
-### Lobby Management
-
-**GET /v1/games/lobbies**
-
-Response:
-```json
-{
-  "data": [
-    {
-      "ulid": "01HQ...",
-      "game_title": "connect-four",
-      "host": {
-        "username": "johndoe",
-        "name": "John Doe",
-        "avatar": "https://res.cloudinary.com/..."
-      },
-      "min_players": 2,
-      "current_players": 1,
-      "status": "pending"
-    }
-  ]
-}
-```
-
-**POST /v1/games/lobbies**
-```json
-{
-  "game_title": "connect-four",
-  "game_mode": "standard",
-  "is_public": true,
-  "min_players": 2
-}
-```
-
-Response (201 Created):
-```json
-{
-  "data": {
-    "ulid": "01HQ...",
-    "game_title": "connect-four",
-    "is_public": true,
-    "min_players": 2,
-    "status": "pending",
-    "host": {
-      "username": "johndoe",
-      "name": "John Doe",
-      "avatar": "https://res.cloudinary.com/..."
-    },
-    "players": [
-      {
-        "username": "johndoe",
-        "name": "John Doe",
-        "avatar": "https://res.cloudinary.com/...",
-        "status": "accepted"
-      }
-    ]
-  },
-  "message": "Lobby created successfully"
-}
-```
-
-**GET /v1/games/lobbies/{lobby_ulid}**
-
-Response:
-```json
-{
-  "data": {
-    "lobby": {
-      "ulid": "01HQ...",
-      "game_title": "connect-four",
-      "game_mode": "standard",
-      "host": {
-        "username": "johndoe",
-        "name": "John Doe",
-        "avatar": "https://res.cloudinary.com/..."
-      },
-      "is_public": true,
-      "min_players": 2,
-      "status": "pending",
-      "players": [
-        {
-          "username": "johndoe",
-          "name": "John Doe",
-          "avatar": "https://res.cloudinary.com/...",
-          "status": "accepted"
-        }
-      ]
-    },
-    "game": {
-      "ulid": "01HQ..."
-    }
-  }
-}
-```
-
-Note: The `game` object is only present if the lobby has transitioned to `completed` status and a game has been created.
-
-**POST /v1/games/lobbies/{lobby_ulid}/ready-check**
-
-Response (202 Accepted):
-```json
-{
-  "data": {
-    "ready_check_initiated": true
-  },
-  "message": "Ready check initiated"
-}
-```
-
----
-
-### Billing & Subscriptions
-
-**GET /v1/billing/plans**
-
-Response:
-```json
-{
-  "data": [
-    {
-      "id": "basic",
-      "name": "Basic",
-      "price": 4.99,
-      "features": [...]
-    },
-    {
-      "id": "pro",
-      "name": "Pro",
-      "price": 9.99,
-      "features": [...]
-    }
-  ]
-}
-```
-
-**GET /v1/billing/status**
-
-Response (with active subscription):
-```json
-{
-  "data": {
-    "subscription": {
-      "plan": "pro",
-      "status": "active",
-      "current_period_end": "2025-12-17T00:00:00Z"
-    }
-  }
-}
-```
-
-Response (without subscription):
-```json
-{
-  "data": {
-    "subscription": null
-  }
-}
-```
-
-**POST /v1/billing/subscribe**
-```json
-{
-  "plan": "pro",
-  "success_url": "https://yourapp.com/success",
-  "cancel_url": "https://yourapp.com/cancel"
-}
-```
-
-Response:
-```json
-{
-  "data": {
-    "checkout_url": "https://checkout.stripe.com/..."
-  }
-}
-```
-
-**GET /v1/billing/manage**
-
-Response:
-```json
-{
-  "data": {
-    "portal_url": "https://billing.stripe.com/..."
-  }
-}
-```
-
-**POST /v1/billing/apple/verify**
-```json
-{
-  "receipt_data": "base64_encoded_receipt..."
-}
-```
-
-Response:
-```json
-{
-  "data": {
-    "verified": true,
-    "subscription": {
-      "plan": "pro",
-      "expires_at": "2025-12-17T00:00:00Z"
-    }
-  }
-}
-```
-
-**POST /v1/billing/google/verify**
-```json
-{
-  "purchase_token": "token_from_google_play..."
-}
-```
-
-Response:
-```json
-{
-  "data": {
-    "verified": true,
-    "subscription": {
-      "plan": "pro",
-      "expires_at": "2025-12-17T00:00:00Z"
-    }
-  }
-}
-```
-
-**POST /v1/billing/telegram/verify**
-```json
-{
-  "payment_id": "telegram_payment_id..."
-}
-```
-
-Response:
-```json
-{
-  "data": {
-    "verified": true,
-    "subscription": {
-      "plan": "pro",
-      "expires_at": "2025-12-17T00:00:00Z"
-    }
-  }
-}
-```
-
----
-
-## Error Response Examples
-
-### Validation Error (422 Unprocessable Entity)
+**Standard Validation Error (422)**:
 ```json
 {
   "message": "The given data was invalid.",
-  "error_code": "VALIDATION_ERROR",
   "errors": {
     "email": ["The email field is required."],
     "password": ["The password must be at least 8 characters."]
@@ -1017,67 +602,126 @@ Response:
 }
 ```
 
-### Not Found (404)
+**Game Action Denied (422)**:
+```json
+{
+  "message": "Invalid move: It's not your turn",
+  "error_code": "NOT_PLAYER_TURN",
+  "game_title": "chess",
+  "severity": "error",
+  "retryable": true,
+  "errors": {
+    "current_player": "opponent_ulid"
+  }
+}
+```
+
+**Invalid Action Data (400)**:
+```json
+{
+  "message": "Missing required field: column",
+  "error_code": "MISSING_REQUIRED_FIELD",
+  "game_title": "connect-four",
+  "errors": {
+    "field": "column",
+    "required_type": "integer"
+  }
+}
+```
+
+**Resource Not Found (404)**:
 ```json
 {
   "message": "Game not found",
-  "error_code": "RESOURCE_NOT_FOUND"
+  "errors": {
+    "resource_type": "Game",
+    "resource_id": "01J3ABC..."
+  }
 }
 ```
 
-### Unauthorized (401)
+**Player Busy (409)**:
 ```json
 {
-  "message": "Unauthenticated.",
-  "error_code": "UNAUTHENTICATED"
+  "message": "Player is currently busy with another activity",
+  "errors": {
+    "activity_type": "in_game",
+    "game_ulid": "01J3XYZ..."
+  }
 }
 ```
 
-### Forbidden (403)
+**Rate Limit Exceeded (429)**:
 ```json
 {
-  "message": "You are not authorized to perform this action.",
-  "error_code": "FORBIDDEN"
+  "message": "Too many requests. Please try again in 60 seconds.",
+  "errors": {
+    "retry_after": 60,
+    "limit": 60,
+    "window": "1 minute"
+  }
+}
+```
+Response includes `Retry-After` header with seconds until retry allowed.
+
+**Payment Validation Failed (402)**:
+```json
+{
+  "message": "Receipt validation failed",
+  "errors": {
+    "provider": "apple",
+    "validation_error": "Invalid receipt signature"
+  }
 }
 ```
 
-### Game Logic Error (400)
+**Game Access Denied (403)**:
 ```json
 {
-  "message": "Invalid move: Column is full",
-  "error_code": "INVALID_GAME_ACTION"
+  "message": "You are not a player in this game",
+  "errors": {
+    "game_ulid": "01J3ABC...",
+    "reason": "not_participant"
+  }
 }
 ```
 
 ---
 
-## Important Notes
+## Real-Time Events
 
-### ULID Usage
-All resources (Games, Lobbies, Actions, Alerts, RematchRequests) use **ULIDs** as public identifiers instead of internal database IDs. ULIDs are:
-- Lexicographically sortable
-- URL-safe
-- 26-character strings (e.g., `01HQ5X9K3G2YM4N6P7Q8R9S0T1`)
+The platform uses **Laravel Broadcasting** with **Pusher-compatible channels** for real-time updates via WebSockets.
 
-### Username-based User Identification
-User resources are identified by **username** in API endpoints (e.g., `/lobbies/{lobby_ulid}/players/{username}`), not by user ID. This:
-- Prevents user enumeration attacks
-- Provides a consistent, human-readable identifier
-- Maintains security while enabling social features
+### Key Events
 
-### Authentication
-All authenticated endpoints return:
-- `401 Unauthorized` if the Bearer token is missing or invalid
-- `403 Forbidden` if the user is not authorized to access the resource
-- `404 Not Found` if the resource ULID doesn't exist
-
-### WebSocket Events
-The platform uses Laravel Broadcasting for real-time updates. Key events include:
-- `GameActionProcessed` - Broadcasts game actions with `action_ulid`
-- `LobbyInvitation` - Notifies users of lobby invites
-- `LobbyReadyCheck` - Initiates ready check for lobby players
-- `RematchRequested` - Notifies opponent of rematch request
+| Event | Channel | Data |
+|-------|---------|------|
+| `MatchFound` | `private-user.{username}` | Match details, opponent info |
+| `ChallengeReceived` | `private-user.{username}` | Challenge proposal |
+| `YourTurn` | `private-user.{username}` | Game ULID, deadline |
+| `ActionProcessed` | `private-game.{ulid}` | Action details, new state |
+| `GameCompleted` | `private-game.{ulid}` | Winner, outcome, rewards |
 
 ---
 
-**Note:** All authenticated endpoints return `401 Unauthorized` if the Bearer token is missing or invalid. Game-specific endpoints return `404 Not Found` if the game ULID doesn't exist or `403 Forbidden` if the user is not a participant.
+## Rate Limiting
+
+| Endpoint Type | Limit | Window |
+|---------------|-------|--------|
+| Authentication | 10 requests | 1 minute |
+| Game Actions | 60 requests | 1 minute |
+| General API | 120 requests | 1 minute |
+| SSE Feeds | 10 connections | Per user |
+
+---
+
+## Additional Resources
+
+- **OpenAPI Specification**: `https://api.gamerprotocol.io/openapi.yaml`
+- **API Status Page**: `https://status.gamerprotocol.io`
+- **Support**: developers@gamerprotocol.io
+
+---
+
+**Last Updated**: November 20, 2025  
+**API Version**: v1.0.0

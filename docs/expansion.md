@@ -1423,7 +1423,7 @@ protected function authorizePlayerTurn(Player $player, string $currentPlayerUlid
         
         throw new GameActionDeniedException(
             'It is not your turn.',
-            BaseGameActionErrorCode::NOT_PLAYER_TURN->value,
+            GameErrorCode::NOT_PLAYER_TURN->value,
             $player->game->title_slug->value,
             'error',
             [

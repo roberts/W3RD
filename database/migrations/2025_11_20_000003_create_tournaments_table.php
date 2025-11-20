@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status', 'starts_at']);
             $table->index(['title_slug', 'status']);
         });

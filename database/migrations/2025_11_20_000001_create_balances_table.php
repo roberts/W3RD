@@ -19,7 +19,7 @@ return new class extends Migration
 
             // Unique constraint: one balance per user per client
             $table->unique(['user_id', 'client_id']);
-            
+
             // Index for client balance queries
             $table->index('client_id');
         });

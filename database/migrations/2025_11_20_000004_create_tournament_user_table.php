@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('winnings', 10, 2)->default(0.00);
             $table->enum('status', ['registered', 'active', 'eliminated', 'withdrew'])->default('registered');
             $table->timestamp('registered_at');
-            
+
             $table->unique(['tournament_id', 'user_id']);
             $table->index(['tournament_id', 'status']);
         });

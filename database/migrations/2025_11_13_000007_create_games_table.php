@@ -21,6 +21,9 @@ return new class extends Migration
             $table->tinyInteger('winner_position')->nullable();       // Player position (1-4)
             $table->string('outcome_type', 20)->nullable();           // 'win', 'draw', 'forfeit', 'timeout'
             $table->json('outcome_details')->nullable();              // Flexible game-specific data
+            $table->json('final_scores')->nullable();
+            $table->integer('xp_awarded')->nullable();
+            $table->json('rewards')->nullable();
 
             $table->integer('turn_number')->default(0);
             $table->json('game_state');

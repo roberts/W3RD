@@ -47,16 +47,16 @@ All paths assume Laravel project structure at repository root:
 
 - [x] T006 Create EnsureIdempotency middleware in app/Http/Middleware/EnsureIdempotency.php with Redis lock handling
 - [x] T007 Update exception handler with correlation ID logging and standardized JSON error responses in app/Exceptions/Handler.php
-- [ ] T008 [P] Create BusinessRuleException class with factory methods in app/Exceptions/BusinessRuleException.php
-- [ ] T009 [P] Create MembershipPlan enum with Free/Pro/Elite tiers in app/Enums/MembershipPlan.php
-- [ ] T010 [P] Create base Data Transfer Object classes for each namespace in app/DataTransferObjects/
-- [ ] T011 Create migration: add stripe_customer_id to users table in database/migrations/add_stripe_customer_to_users_table.php
-- [ ] T012 Create migration: add outcome fields to games table (final_scores, xp_awarded, rewards) in database/migrations/add_outcome_fields_to_games_table.php
-- [ ] T013 Create migration: add membership_plan to subscription_items table in database/migrations/add_membership_plan_to_subscription_items_table.php
-- [ ] T014 Create migration: rename rematch_requests to proposals table in database/migrations/rename_rematch_requests_to_proposals.php
-- [ ] T015 Create migration: create matchmaking_signals table in database/migrations/create_matchmaking_signals_table.php
-- [ ] T016 [P] Register idempotency middleware alias in app/Http/Kernel.php
-- [ ] T017 [P] Setup channel authorization patterns in routes/channels.php for games, lobbies, tournaments, leaderboards
+- [x] T008 [P] Create BusinessRuleException class with factory methods in app/Exceptions/BusinessRuleException.php
+- [x] T009 [P] Create MembershipPlan enum with Free/Pro/Elite tiers in app/Enums/MembershipPlan.php
+- [x] T010 [P] Create base Data Transfer Object classes for each namespace in app/DataTransferObjects/
+- [x] T011 ~~Create migration: add stripe_customer_id to users table~~ (Not needed - users already have stripe_id from Laravel Cashier)
+- [x] T012 Add outcome fields to games table (final_scores, xp_awarded, rewards) - Added directly to database/migrations/2025_11_13_000007_create_games_table.php
+- [x] T013 Add membership_plan to subscription_items table - Added directly to database/migrations/2025_11_17_035428_create_subscription_items_table.php
+- [x] T014 Rename rematch_requests to proposals table - Renamed directly in database/migrations/2025_11_17_035314_create_proposals_table.php with all new fields (type, title_slug, mode_id, game_settings, responded_at)
+- [x] T015 Create matchmaking_signals table in database/migrations/2025_11_20_174651_create_matchmaking_signals_table.php
+- [x] T016 [P] Register idempotency middleware alias in bootstrap/app.php
+- [x] T017 [P] Setup channel authorization patterns in routes/channels.php for games, lobbies, tournaments, leaderboards
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

@@ -14,6 +14,7 @@ use App\Exceptions\PlayerBusyException;
 use App\Exceptions\RateLimitExceededException;
 use App\Exceptions\RematchNotAvailableException;
 use App\Exceptions\ResourceNotFoundException;
+use App\Http\Middleware\EnsureIdempotency;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,7 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'idempotency' => EnsureIdempotency::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Global API error handler with correlation IDs

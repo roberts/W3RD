@@ -26,7 +26,7 @@ class ReceiptVerificationService
     protected function verifyAppleReceipt(string $receipt, int $userId): array
     {
         $password = config('services.apple.shared_secret');
-        
+
         if (! $password) {
             Log::error('Apple shared secret not configured');
             throw new \Exception('Apple receipt verification not configured');

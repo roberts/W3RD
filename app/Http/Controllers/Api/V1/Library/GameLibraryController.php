@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Library;
 
-use App\DataTransferObjects\Library\GameLibraryData;
-use App\Enums\GameTitle;
 use App\Http\Controllers\Controller;
 use App\Services\GameLibraryService;
 use Illuminate\Http\JsonResponse;

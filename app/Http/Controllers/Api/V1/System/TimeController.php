@@ -9,8 +9,6 @@ class TimeController extends Controller
 {
     /**
      * Get authoritative server time for client synchronization.
-     *
-     * @return JsonResponse
      */
     public function __invoke(): JsonResponse
     {

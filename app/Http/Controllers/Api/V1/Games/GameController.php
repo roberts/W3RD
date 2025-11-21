@@ -49,7 +49,7 @@ class GameController extends Controller
 
         // Verify user is a player in this game
         $isPlayer = $game->players()->where('user_id', $user->id)->exists();
-        
+
         if (! $isPlayer) {
             return $this->forbiddenResponse('You are not a player in this game');
         }

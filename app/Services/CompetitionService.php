@@ -44,7 +44,7 @@ class CompetitionService
 
             // Add user to tournament
             $seed = $tournament->users()->count() + 1;
-            
+
             $tournament->users()->attach($user->id, [
                 'status' => 'registered',
                 'seed' => $seed,
@@ -91,7 +91,7 @@ class CompetitionService
 
         // Pair up participants
         $participantsList = $participants->shuffle();
-        
+
         for ($i = 0; $i < $participantsList->count(); $i += 2) {
             if (isset($participantsList[$i + 1])) {
                 $currentRound[] = [
@@ -126,16 +126,16 @@ class CompetitionService
     public function advanceBracket(Tournament $tournament, int $gameId, int $winnerId): void
     {
         $bracketData = $tournament->bracket_data;
-        
+
         // Update bracket with game result
         // Find the match and update winner
         // Create next round matches if needed
-        
+
         // This is simplified - full implementation would handle
         // all bracket advancement logic
-        
+
         $tournament->update(['bracket_data' => $bracketData]);
-        
+
         event(new TournamentBracketUpdated($tournament));
     }
 }

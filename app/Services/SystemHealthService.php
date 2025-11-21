@@ -10,8 +10,6 @@ class SystemHealthService
 {
     /**
      * Check health status of all critical services.
-     *
-     * @return array
      */
     public function checkHealth(): array
     {
@@ -22,7 +20,7 @@ class SystemHealthService
             'game_engine' => $this->checkGameEngine(),
         ];
 
-        $allHealthy = collect($services)->every(fn($service) => $service['status'] === 'healthy');
+        $allHealthy = collect($services)->every(fn ($service) => $service['status'] === 'healthy');
 
         return [
             'status' => $allHealthy ? 'healthy' : 'degraded',
@@ -38,8 +36,8 @@ class SystemHealthService
     {
         try {
             DB::connection()->getPdo();
-            $latency = $this->measureLatency(fn() => DB::select('SELECT 1'));
-            
+            $latency = $this->measureLatency(fn () => DB::select('SELECT 1'));
+
             return [
                 'status' => 'healthy',
                 'latency_ms' => $latency,
@@ -58,13 +56,13 @@ class SystemHealthService
     private function checkCache(): array
     {
         try {
-            $key = 'health_check_' . time();
+            $key = 'health_check_'.time();
             Cache::put($key, 'test', 10);
             $value = Cache::get($key);
             Cache::forget($key);
-            
-            $latency = $this->measureLatency(fn() => Cache::get('test_key'));
-            
+
+            $latency = $this->measureLatency(fn () => Cache::get('test_key'));
+
             return [
                 'status' => $value === 'test' ? 'healthy' : 'degraded',
                 'latency_ms' => $latency,
@@ -84,7 +82,7 @@ class SystemHealthService
     {
         try {
             $size = Queue::size();
-            
+
             return [
                 'status' => 'healthy',
                 'pending_jobs' => $size,
@@ -105,7 +103,7 @@ class SystemHealthService
         try {
             // Test that game modes are configured
             $availableGames = collect(\App\Enums\GameTitle::cases())->count();
-            
+
             return [
                 'status' => 'healthy',
                 'engines_available' => $availableGames,
@@ -126,7 +124,7 @@ class SystemHealthService
         $start = microtime(true);
         $operation();
         $end = microtime(true);
-        
+
         return round(($end - $start) * 1000, 2);
     }
 }

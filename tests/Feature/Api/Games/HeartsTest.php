@@ -128,8 +128,8 @@ describe('Hearts Game API', function () {
                 $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
-                        $this->actingAs($user)
-                            ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    $this->actingAs($user)
+                        ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }
@@ -200,8 +200,8 @@ describe('Hearts Game API', function () {
                 $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
-                        $this->actingAs($user)
-                            ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    $this->actingAs($user)
+                        ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }

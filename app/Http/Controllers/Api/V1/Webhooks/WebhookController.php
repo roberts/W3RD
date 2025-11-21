@@ -12,10 +12,6 @@ class WebhookController extends Controller
 {
     /**
      * Handle incoming webhook events from external providers.
-     *
-     * @param string $provider
-     * @param Request $request
-     * @return JsonResponse
      */
     public function __invoke(string $provider, Request $request): JsonResponse
     {
@@ -42,11 +38,11 @@ class WebhookController extends Controller
     private function handleStripeWebhook(Request $request): JsonResponse
     {
         // Delegate to Cashier's webhook handler
-        $controller = new CashierWebhookController();
-        
+        $controller = new CashierWebhookController;
+
         try {
             $response = $controller->handleWebhook($request);
-            
+
             return response()->json([
                 'received' => true,
                 'provider' => 'stripe',
@@ -55,7 +51,7 @@ class WebhookController extends Controller
             Log::error('Stripe webhook processing failed', [
                 'error' => $e->getMessage(),
             ]);
-            
+
             return response()->json([
                 'error' => 'WEBHOOK_PROCESSING_FAILED',
                 'message' => 'Failed to process Stripe webhook',
@@ -70,7 +66,7 @@ class WebhookController extends Controller
     {
         // TODO: Implement Apple App Store Server Notifications handling
         // Verify signedPayload JWT, process notification types
-        
+
         return response()->json([
             'received' => true,
             'provider' => 'apple',
@@ -85,7 +81,7 @@ class WebhookController extends Controller
     {
         // TODO: Implement Google Play Developer Notifications handling
         // Verify Cloud Pub/Sub message, process subscription/purchase events
-        
+
         return response()->json([
             'received' => true,
             'provider' => 'google',
@@ -100,7 +96,7 @@ class WebhookController extends Controller
     {
         // TODO: Implement Telegram Bot API webhook handling
         // Verify request authenticity, process payment callbacks
-        
+
         return response()->json([
             'received' => true,
             'provider' => 'telegram',

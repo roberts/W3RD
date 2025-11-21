@@ -307,9 +307,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($player2)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             $response->assertStatus(422); // API returns 422 for game rule violations
         });
@@ -355,9 +355,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 99],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 99],
+                ]);
 
             $response->assertStatus(422) // API returns 422 for game rule violations
                 ->assertJson([
@@ -382,9 +382,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             $response->assertStatus(422); // API returns 422 for game rule violations (game not active)
         });
@@ -404,9 +404,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($nonPlayer)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             $response->assertForbidden();
         });
@@ -532,9 +532,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($user2)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             // Should reject because it's not their turn (422 for game rule violations)
             expect($response->status())->toBeIn([422, 403]);
@@ -588,16 +588,16 @@ describe('Game Lifecycle', function () {
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             $response2 = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 3],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 3],
+                ]);
 
             // First succeeds, second should fail (not their turn anymore)
             expect($response1->status())->toBe(200);
@@ -626,9 +626,9 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($user2)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => 0],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => 0],
+                ]);
 
             $response->assertStatus(422); // API returns 422 for game rule violations
             expect($response->json('error_code'))->toBe('not_player_turn');
@@ -656,12 +656,12 @@ describe('Game Lifecycle', function () {
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
                 ->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => [
-                    'column' => 3,
-                    'extra_data' => str_repeat('a', 100000), // 100KB of garbage
-                ],
-            ]);
+                    'action_type' => 'drop_piece',
+                    'action_details' => [
+                        'column' => 3,
+                        'extra_data' => str_repeat('a', 100000), // 100KB of garbage
+                    ],
+                ]);
 
             // Should either accept (and ignore extra data) or reject
             expect($response->status())->toBeIn([200, 400, 413, 422]);
@@ -735,11 +735,11 @@ describe('Game Lifecycle', function () {
             $responses = [];
             for ($i = 0; $i < 10; $i++) {
                 $responses[] = $this->actingAs($user)
-                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
-                    'action_type' => 'drop_piece',
-                    'action_details' => ['column' => 3],
-                ]);
+                    ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                    ->postJson("/api/v1/games/{$game->ulid}/action", [
+                        'action_type' => 'drop_piece',
+                        'action_details' => ['column' => 3],
+                    ]);
             }
 
             // First should succeed, rest should fail (not their turn or rate limited)

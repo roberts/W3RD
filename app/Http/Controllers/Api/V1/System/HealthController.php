@@ -14,8 +14,6 @@ class HealthController extends Controller
 
     /**
      * Get system health status with service indicators.
-     *
-     * @return JsonResponse
      */
     public function __invoke(): JsonResponse
     {

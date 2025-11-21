@@ -33,7 +33,7 @@ class GameSyncController extends Controller
 
         // Get last N actions for context (configurable)
         $recentActionCount = (int) $request->query('recent_actions', 10);
-        
+
         $recentActions = Action::where('game_id', $game->id)
             ->with('player.user:id,name,username')
             ->orderBy('created_at', 'desc')

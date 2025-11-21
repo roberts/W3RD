@@ -66,7 +66,7 @@ class GameTimerController extends Controller
             $turnStarted = \Carbon\Carbon::parse($gameState->turnStartedAt);
             $timeLimit = $game->mode->turn_time_limit_seconds;
             $timeRemaining = max(0, $timeLimit - $turnStarted->diffInSeconds(now()));
-            
+
             $turnData['timeout'] = [
                 'started_at' => $turnStarted->toIso8601String(),
                 'limit_seconds' => $timeLimit,

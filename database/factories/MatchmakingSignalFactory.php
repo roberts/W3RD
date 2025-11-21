@@ -17,8 +17,8 @@ class MatchmakingSignalFactory extends Factory
 
     public function definition(): array
     {
-    $gameTitle = $this->faker->randomElement(GameTitle::cases());
-    $gameMode = $this->faker->randomElement(['standard', 'blitz', 'rapid']);
+        $gameTitle = $this->faker->randomElement(GameTitle::cases());
+        $gameMode = $this->faker->randomElement(['standard', 'blitz', 'rapid']);
 
         return [
             'ulid' => (string) Str::ulid(),

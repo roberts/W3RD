@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Events\GameFound;
 use App\Services\Agents\AgentSchedulingService;
 use App\Services\GameCreationService;

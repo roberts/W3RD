@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Laravel\Cashier\Cashier;
 
 class PlanController extends Controller
 {

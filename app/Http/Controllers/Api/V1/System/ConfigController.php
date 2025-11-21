@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Api\V1\System;
 
 use App\Http\Controllers\Controller;
-use App\Models\Title;
 use Illuminate\Http\JsonResponse;
 
 class ConfigController extends Controller
 {
     /**
      * Get global platform configuration.
-     *
-     * @return JsonResponse
      */
     public function __invoke(): JsonResponse
     {

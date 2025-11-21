@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Access\Client;
-use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -9,7 +8,6 @@ use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\AuthenticationHelper;
 
-use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 beforeEach(function () {

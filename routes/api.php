@@ -125,20 +125,20 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->prefix('games')->group(function () {
         Route::get('/', [GameController::class, 'index']);
         Route::get('/{gameUlid}', [GameController::class, 'show']);
-        
+
         // Action submission with idempotency
         Route::post('/{gameUlid}/action', [GameActionController::class, 'store'])
             ->middleware('idempotency');
         Route::get('/{gameUlid}/options', [GameActionController::class, 'options']);
-        
+
         // Timer and timeline information
         Route::get('/{gameUlid}/timer', [GameTimerController::class, 'show']);
         Route::get('/{gameUlid}/timeline', [GameTimelineController::class, 'show']);
-        
+
         // Game exit options
         Route::post('/{gameUlid}/concede', [GameConcedeController::class, 'store']);
         Route::post('/{gameUlid}/abandon', [GameAbandonController::class, 'store']);
-        
+
         // Outcome and sync
         Route::get('/{gameUlid}/outcome', [GameOutcomeController::class, 'show']);
         Route::get('/{gameUlid}/sync', [GameSyncController::class, 'show']);
@@ -150,11 +150,11 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->prefix('economy')->group(function () {
         Route::get('/balance', [BalanceController::class, 'index']);
         Route::get('/transactions', [TransactionController::class, 'index']);
-        
+
         // Cashier operations (approved clients only, with idempotency)
         Route::post('/cashier', [CashierController::class, 'store'])
             ->middleware('idempotency');
-        
+
         Route::get('/plans', [PlanController::class, 'index']);
         Route::post('/receipts/{provider}', [ReceiptController::class, 'store']);
     });
@@ -178,12 +178,12 @@ Route::prefix('v1')->group(function () {
     Route::prefix('competitions')->group(function () {
         Route::get('/', [CompetitionController::class, 'index']);
         Route::get('/{tournamentUlid}', [CompetitionController::class, 'show']);
-        
+
         Route::middleware('auth:sanctum')->group(function () {
             // Entry with idempotency
             Route::post('/{tournamentUlid}/enter', [EntryController::class, 'store'])
                 ->middleware('idempotency');
-            
+
             Route::get('/{tournamentUlid}/structure', [StructureController::class, 'show']);
             Route::get('/{tournamentUlid}/bracket', [BracketController::class, 'show']);
             Route::get('/{tournamentUlid}/standings', [StandingsController::class, 'show']);

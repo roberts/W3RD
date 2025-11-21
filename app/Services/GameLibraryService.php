@@ -22,19 +22,17 @@ class GameLibraryService
 
         // Apply filters
         if ($pacing) {
-            $games = array_filter($games, fn($game) => $game['pacing'] === $pacing);
+            $games = array_filter($games, fn ($game) => $game['pacing'] === $pacing);
         }
 
         if ($playerCount) {
             $count = (int) $playerCount;
-            $games = array_filter($games, fn($game) => 
-                $count >= $game['min_players'] && $count <= $game['max_players']
+            $games = array_filter($games, fn ($game) => $count >= $game['min_players'] && $count <= $game['max_players']
             );
         }
 
         if ($category) {
-            $games = array_filter($games, fn($game) => 
-                in_array($category, $game['categories'] ?? [])
+            $games = array_filter($games, fn ($game) => in_array($category, $game['categories'] ?? [])
             );
         }
 
@@ -50,12 +48,12 @@ class GameLibraryService
 
         return Cache::remember("game_library_details_{$key}", 3600, function () use ($title) {
             $details = $this->formatGameSummary($title);
-            
+
             // Add extended details
             $details['modes'] = $this->getGameModes($title);
             $details['average_session_minutes'] = $this->getAverageSessionDuration($title);
             $details['thumbnail_url'] = $this->getThumbnailUrl($title);
-            
+
             return $details;
         });
     }
@@ -70,11 +68,11 @@ class GameLibraryService
 
         return Cache::remember("game_entities_{$key}", 3600, function () use ($gameDirName) {
             $entitiesPath = app_path("Games/{$gameDirName}/entities.php");
-            
-            if (!File::exists($entitiesPath)) {
+
+            if (! File::exists($entitiesPath)) {
                 return [];
             }
-            
+
             return require $entitiesPath;
         });
     }
@@ -102,15 +100,15 @@ class GameLibraryService
     private function findGameTitle(string $key): GameTitle
     {
         $title = GameTitle::tryFrom($key);
-        
-        if (!$title) {
+
+        if (! $title) {
             throw new ResourceNotFoundException(
                 "Game '{$key}' not found in library",
                 'game',
                 $key
             );
         }
-        
+
         return $title;
     }
 
@@ -173,11 +171,11 @@ class GameLibraryService
     {
         $gameDirName = $this->getGameDirectoryName($title->value);
         $modesPath = app_path("Games/{$gameDirName}/Modes");
-        
-        if (!File::isDirectory($modesPath)) {
+
+        if (! File::isDirectory($modesPath)) {
             return [];
         }
-        
+
         $modes = [];
         foreach (File::directories($modesPath) as $modeDir) {
             $modeName = strtolower(basename($modeDir));
@@ -186,7 +184,7 @@ class GameLibraryService
                 'name' => ucwords(str_replace('_', ' ', $modeName)),
             ];
         }
-        
+
         return $modes;
     }
 

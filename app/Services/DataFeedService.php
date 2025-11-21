@@ -65,7 +65,7 @@ class DataFeedService
         $redis->subscribe([$channel], function ($message, $channelName) {
             // Send SSE event
             echo "data: {$message}\n\n";
-            
+
             if (ob_get_level() > 0) {
                 ob_flush();
             }

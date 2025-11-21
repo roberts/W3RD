@@ -2,26 +2,26 @@
 
 namespace App\Listeners;
 
-use App\Events\RematchAccepted;
+use App\Events\ProposalAccepted;
 use App\Models\Alert;
 
-class SendRematchAcceptedAlert
+class SendProposalAcceptedAlert
 {
     /**
      * Handle the event.
      */
-    public function handle(RematchAccepted $event): void
+    public function handle(ProposalAccepted $event): void
     {
-        $rematchRequest = $event->rematchRequest;
+        $proposal = $event->proposal;
         $newGame = $event->newGame;
 
         Alert::create([
-            'user_id' => $rematchRequest->requesting_user_id,
+            'user_id' => $proposal->requesting_user_id,
             'type' => 'rematch_accepted',
             'data' => [
                 'message' => 'Your rematch request was accepted',
                 'new_game_ulid' => $newGame->ulid,
-                'opponent_user_id' => $rematchRequest->opponent_user_id,
+                'opponent_user_id' => $proposal->opponent_user_id,
             ],
         ]);
     }

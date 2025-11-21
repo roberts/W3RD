@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\PlayerActivityState;
-use App\Jobs\CheckAndCancelPendingRematches;
+use App\Jobs\CheckAndCancelPendingProposals;
 use App\Services\PlayerActivityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -205,7 +205,7 @@ describe('PlayerActivityService', function () {
 
             $this->service->setState($this->userId, PlayerActivityState::IN_QUEUE);
 
-            Queue::assertPushed(CheckAndCancelPendingRematches::class, function ($job) {
+            Queue::assertPushed(CheckAndCancelPendingProposals::class, function ($job) {
                 return $job->userId === $this->userId;
             });
         });
@@ -215,7 +215,7 @@ describe('PlayerActivityService', function () {
 
             $this->service->setState($this->userId, PlayerActivityState::IDLE);
 
-            Queue::assertNotPushed(CheckAndCancelPendingRematches::class);
+            Queue::assertNotPushed(CheckAndCancelPendingProposals::class);
         });
 
         it('does not dispatch job when setting to OFFLINE', function () {
@@ -223,7 +223,7 @@ describe('PlayerActivityService', function () {
 
             $this->service->setState($this->userId, PlayerActivityState::OFFLINE);
 
-            Queue::assertNotPushed(CheckAndCancelPendingRematches::class);
+            Queue::assertNotPushed(CheckAndCancelPendingProposals::class);
         });
 
         it('dispatches job for all busy states', function () {
@@ -239,7 +239,7 @@ describe('PlayerActivityService', function () {
                 $this->service->setState($userId, $state);
             }
 
-            Queue::assertPushed(CheckAndCancelPendingRematches::class, 3);
+            Queue::assertPushed(CheckAndCancelPendingProposals::class, 3);
         });
     });
 });

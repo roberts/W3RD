@@ -1,13 +1,13 @@
 <?php
 
 use App\Enums\PlayerActivityState;
-use App\Events\RematchAccepted;
-use App\Events\RematchCancelled;
+use App\Events\ProposalAccepted;
+use App\Events\ProposalCancelled;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use App\Services\PlayerActivityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -74,7 +74,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -98,7 +98,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             expect($rematchRequest->status)->toBe('accepted')
                 ->and($rematchRequest->game_id)->not->toBeNull();
 
-            Event::assertDispatched(RematchAccepted::class);
+            Event::assertDispatched(ProposalAccepted::class);
         });
 
         it('clears agent cooldown after accepting', function () {
@@ -106,7 +106,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -136,8 +136,8 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job = new AgentAutoAcceptRematch('non-existent-ulid', 999);
             $job->handle();
 
-            Event::assertNotDispatched(RematchAccepted::class);
-            Event::assertNotDispatched(RematchCancelled::class);
+            Event::assertNotDispatched(ProposalAccepted::class);
+            Event::assertNotDispatched(ProposalCancelled::class);
         });
 
         it('skips if rematch no longer pending', function () {
@@ -147,7 +147,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             $game = Game::factory()->completed()->create();
 
-            $rematchRequest = RematchRequest::factory()->declined()->create([
+            $rematchRequest = Proposal::factory()->declined()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -157,7 +157,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             expect($rematchRequest->fresh()->status)->toBe('declined');
-            Event::assertNotDispatched(RematchAccepted::class);
+            Event::assertNotDispatched(ProposalAccepted::class);
         });
 
         it('cancels if agent not IDLE', function () {
@@ -165,7 +165,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -181,7 +181,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $rematchRequest->refresh();
             expect($rematchRequest->status)->toBe('cancelled');
 
-            Event::assertDispatched(RematchCancelled::class, function ($event) use ($rematchRequest) {
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
                 return $event->rematchRequest->id === $rematchRequest->id
                     && $event->reason === 'opponent_unavailable';
             });
@@ -192,7 +192,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -208,7 +208,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $rematchRequest->refresh();
             expect($rematchRequest->status)->toBe('cancelled');
 
-            Event::assertDispatched(RematchCancelled::class, function ($event) use ($rematchRequest) {
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
                 return $event->rematchRequest->id === $rematchRequest->id
                     && $event->reason === 'requester_unavailable';
             });
@@ -219,7 +219,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -244,7 +244,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             $game = Game::factory()->completed()->create();
 
-            $rematchRequest = RematchRequest::factory()->create([
+            $rematchRequest = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $fakeAgentUser->id,
@@ -261,7 +261,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             // Should cancel since agent user not found
             expect($rematchRequest->fresh()->status)->toBe('cancelled');
-            Event::assertDispatched(RematchCancelled::class);
+            Event::assertDispatched(ProposalCancelled::class);
         });
 
         it('handles race condition where rematch accepted by another process', function () {
@@ -269,7 +269,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = RematchRequest::factory()->accepted()->create([
+            $rematchRequest = Proposal::factory()->accepted()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,

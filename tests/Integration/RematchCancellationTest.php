@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\PlayerActivityState;
-use App\Events\RematchCancelled;
-use App\Jobs\CheckAndCancelPendingRematches;
+use App\Events\ProposalCancelled;
+use App\Jobs\CheckAndCancelPendingProposals;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use App\Services\PlayerActivityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -26,23 +26,23 @@ describe('Automatic Rematch Cancellation', function () {
         $this->activityService = app(PlayerActivityService::class);
     });
 
-    describe('CheckAndCancelPendingRematches job', function () {
+    describe('CheckAndCancelPendingProposals job', function () {
         it('cancels pending rematch when requester joins queue', function () {
             $requester = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($requester, $opponent)
                 ->create();
 
             // Requester joins queue (triggers cancellation)
-            $job = new CheckAndCancelPendingRematches($requester->id);
+            $job = new CheckAndCancelPendingProposals($requester->id);
             $job->handle();
 
             $rematchRequest->refresh();
             expect($rematchRequest->status)->toBe('cancelled');
 
-            Event::assertDispatched(RematchCancelled::class, function ($event) use ($rematchRequest) {
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
                 return $event->rematchRequest->id === $rematchRequest->id
                     && $event->reason === 'requester_unavailable';
             });
@@ -52,18 +52,18 @@ describe('Automatic Rematch Cancellation', function () {
             $requester = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($requester, $opponent)
                 ->create();
 
             // Opponent joins queue
-            $job = new CheckAndCancelPendingRematches($opponent->id);
+            $job = new CheckAndCancelPendingProposals($opponent->id);
             $job->handle();
 
             $rematchRequest->refresh();
             expect($rematchRequest->status)->toBe('cancelled');
 
-            Event::assertDispatched(RematchCancelled::class, function ($event) use ($rematchRequest) {
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
                 return $event->rematchRequest->id === $rematchRequest->id
                     && $event->reason === 'opponent_unavailable';
             });
@@ -74,15 +74,15 @@ describe('Automatic Rematch Cancellation', function () {
             $opponent1 = User::factory()->create();
             $opponent2 = User::factory()->create();
 
-            $rematch1 = RematchRequest::factory()
+            $rematch1 = Proposal::factory()
                 ->fromCompletedGame($user, $opponent1)
                 ->create();
 
-            $rematch2 = RematchRequest::factory()
+            $rematch2 = Proposal::factory()
                 ->fromCompletedGame($user, $opponent2)
                 ->create();
 
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($rematch1->fresh()->status)->toBe('cancelled')
@@ -96,19 +96,19 @@ describe('Automatic Rematch Cancellation', function () {
             $game1 = Game::factory()->completed()->create();
             $game2 = Game::factory()->completed()->create();
 
-            $acceptedRematch = RematchRequest::factory()->accepted()->create([
+            $acceptedRematch = Proposal::factory()->accepted()->create([
                 'original_game_id' => $game1->id,
                 'requesting_user_id' => $user->id,
                 'opponent_user_id' => $opponent->id,
             ]);
 
-            $declinedRematch = RematchRequest::factory()->declined()->create([
+            $declinedRematch = Proposal::factory()->declined()->create([
                 'original_game_id' => $game2->id,
                 'requesting_user_id' => $user->id,
                 'opponent_user_id' => $opponent->id,
             ]);
 
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($acceptedRematch->fresh()->status)->toBe('accepted')
@@ -118,10 +118,10 @@ describe('Automatic Rematch Cancellation', function () {
         it('does nothing when user has no pending rematches', function () {
             $user = User::factory()->create();
 
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            Event::assertNotDispatched(RematchCancelled::class);
+            Event::assertNotDispatched(ProposalCancelled::class);
         });
     });
 
@@ -130,7 +130,7 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($user, $opponent)
                 ->create();
 
@@ -138,7 +138,7 @@ describe('Automatic Rematch Cancellation', function () {
             $this->activityService->setState($user->id, PlayerActivityState::IN_QUEUE);
 
             // Manually execute the job that would be dispatched
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($rematchRequest->fresh()->status)->toBe('cancelled');
@@ -148,13 +148,13 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($user, $opponent)
                 ->create();
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
 
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($rematchRequest->fresh()->status)->toBe('cancelled');
@@ -164,13 +164,13 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($user, $opponent)
                 ->create();
 
             $this->activityService->setState($user->id, PlayerActivityState::IN_GAME);
 
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($rematchRequest->fresh()->status)->toBe('cancelled');
@@ -180,7 +180,7 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($user, $opponent)
                 ->create();
 
@@ -194,7 +194,7 @@ describe('Automatic Rematch Cancellation', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 
-            $rematchRequest = RematchRequest::factory()
+            $rematchRequest = Proposal::factory()
                 ->fromCompletedGame($user, $opponent)
                 ->create();
 
@@ -202,7 +202,7 @@ describe('Automatic Rematch Cancellation', function () {
             $this->activityService->setState($user->id, PlayerActivityState::OFFLINE);
 
             // AuthController explicitly dispatches job on logout
-            $job = new CheckAndCancelPendingRematches($user->id);
+            $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
             expect($rematchRequest->fresh()->status)->toBe('cancelled');

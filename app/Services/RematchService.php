@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Enums\GameStatus;
-use App\Events\RematchAccepted;
-use App\Events\RematchDeclined;
-use App\Events\RematchExpired;
-use App\Events\RematchRequested;
+use App\Events\ProposalAccepted;
+use App\Events\ProposalCreated;
+use App\Events\ProposalDeclined;
+use App\Events\ProposalExpired;
 use App\Exceptions\RematchNotAvailableException;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\User;
@@ -115,7 +115,7 @@ class RematchService
             }
         }
 
-        event(new RematchRequested($rematchRequest));
+        event(new ProposalCreated($rematchRequest));
 
         return $rematchRequest;
     }
@@ -198,7 +198,7 @@ class RematchService
                 'responded_at' => now(),
             ]);
 
-            event(new RematchAccepted($rematchRequest, $newGame));
+            event(new ProposalAccepted($rematchRequest, $newGame));
 
             return $newGame;
         });
@@ -224,7 +224,7 @@ class RematchService
             'responded_at' => now(),
         ]);
 
-        event(new RematchDeclined($rematchRequest));
+        event(new ProposalDeclined($rematchRequest));
 
         return $rematchRequest;
     }
@@ -243,7 +243,7 @@ class RematchService
                 'status' => 'expired',
                 'responded_at' => now(),
             ]);
-            event(new RematchExpired($request));
+            event(new ProposalExpired($request));
         }
 
         return $expired->count();

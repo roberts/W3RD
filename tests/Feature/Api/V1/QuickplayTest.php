@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\GameTitle;
-use App\Jobs\CheckAndCancelPendingRematches;
+use App\Jobs\CheckAndCancelPendingProposals;
 use App\Models\Auth\User;
 use App\Models\MatchmakingSignal;
 use Illuminate\Support\Facades\Bus;
@@ -46,7 +46,7 @@ describe('Floor Signals API', function () {
             ->assertJsonPath('data.game_mode', 'standard')
             ->assertJsonPath('data.status', 'active');
 
-        Bus::assertDispatched(CheckAndCancelPendingRematches::class);
+        Bus::assertDispatched(CheckAndCancelPendingProposals::class);
     });
 
     it('stores preferences and skill rating when provided', function () {

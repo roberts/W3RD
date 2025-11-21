@@ -7,12 +7,12 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RematchCancelled
+class ProposalCancelled
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public Proposal $rematchRequest,
+        public Proposal $proposal,
         public string $reason // 'opponent_unavailable', 'requester_unavailable', 'expired', 'opponent_left'
     ) {}
 }

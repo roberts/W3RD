@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\ExpireRematchRequests;
+use App\Jobs\ExpireProposals;
 use App\Jobs\ProcessQuickplayQueue;
 use App\Jobs\ProcessScheduledLobbies;
 use Illuminate\Foundation\Inspiring;
@@ -18,4 +18,4 @@ Schedule::job(new ProcessQuickplayQueue)->everyTenSeconds();
 Schedule::job(new ProcessScheduledLobbies)->everyMinute();
 
 // Schedule the rematch request expiration processor
-Schedule::job(new ExpireRematchRequests)->everyMinute();
+Schedule::job(new ExpireProposals)->everyMinute();

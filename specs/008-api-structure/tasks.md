@@ -218,7 +218,7 @@ All paths assume Laravel project structure at repository root:
 - [x] T084 [US5] Add Games namespace routes to routes/api.php (GET /v1/games, GET /v1/games/{ulid}, POST /v1/games/{ulid}/actions, GET /v1/games/{ulid}/turn, GET /v1/games/{ulid}/timeline, POST /v1/games/{ulid}/concede, POST /v1/games/{ulid}/abandon, GET /v1/games/{ulid}/outcome, GET /v1/games/{ulid}/sync)
 - [x] T085 [US5] Create GameData DTO in app/DataTransferObjects/Games/GameData.php
 - [x] T086 [US5] Create GameActionData DTO in app/DataTransferObjects/Games/GameActionData.php
-- [x] T087 [US5] Create GameTurnData DTO in app/DataTransferObjects/Games/GameTurnData.php
+- [x] T087 [US5] Create GameTimerData DTO in app/DataTransferObjects/Games/GameTimerData.php
 - [x] T088 [US5] Create GameOutcomeData DTO in app/DataTransferObjects/Games/GameOutcomeData.php
 
 **Checkpoint**: Games endpoints operational - gameplay state sync, action execution, turn management, and exit options functional

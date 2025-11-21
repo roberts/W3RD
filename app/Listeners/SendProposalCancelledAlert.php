@@ -2,16 +2,16 @@
 
 namespace App\Listeners;
 
-use App\Events\RematchCancelled;
+use App\Events\ProposalCancelled;
 use App\Models\Alert;
 use App\Models\Auth\User;
 
-class SendRematchCancelledAlert
+class SendProposalCancelledAlert
 {
     /**
      * Handle the event.
      */
-    public function handle(RematchCancelled $event): void
+    public function handle(ProposalCancelled $event): void
     {
         $rematch = $event->rematchRequest;
 

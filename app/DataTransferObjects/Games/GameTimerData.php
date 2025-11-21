@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Games;
 
 use Spatie\LaravelData\Data;
 
-class GameTurnData extends Data
+class GameTimerData extends Data
 {
     public function __construct(
         public int $turn_number,

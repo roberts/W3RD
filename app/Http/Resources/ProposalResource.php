@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Redis;
 /**
  * @mixin Proposal
  */
-class RematchRequestResource extends JsonResource
+class ProposalResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

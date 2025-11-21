@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Enums\PlayerActivityState;
-use App\Jobs\CheckAndCancelPendingRematches;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\CheckAndCancelPendingProposals;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -32,7 +31,7 @@ class PlayerActivityService
 
         // Trigger rematch cancellation check if player is now busy
         if ($state->isBusy()) {
-            dispatch(new CheckAndCancelPendingRematches($userId));
+            dispatch(new CheckAndCancelPendingProposals($userId));
         }
     }
 

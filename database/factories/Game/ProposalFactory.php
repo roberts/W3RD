@@ -6,15 +6,15 @@ use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\RematchRequest>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Proposal>
  */
-class RematchRequestFactory extends Factory
+class ProposalFactory extends Factory
 {
-    protected $model = RematchRequest::class;
+    protected $model = Proposal::class;
 
     /**
      * Define the model's default state.

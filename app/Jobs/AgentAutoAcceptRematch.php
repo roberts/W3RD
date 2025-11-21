@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Enums\PlayerActivityState;
-use App\Events\RematchCancelled;
+use App\Events\ProposalCancelled;
 use App\Models\Auth\User;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use App\Services\PlayerActivityService;
 use App\Services\RematchService;
 use Illuminate\Bus\Queueable;
@@ -64,7 +64,7 @@ class AgentAutoAcceptRematch implements ShouldQueue
 
             // Cancel the rematch
             $rematchRequest->update(['status' => 'cancelled']);
-            event(new RematchCancelled($rematchRequest, 'opponent_unavailable'));
+            event(new ProposalCancelled($rematchRequest, 'opponent_unavailable'));
 
             return;
         }
@@ -79,7 +79,7 @@ class AgentAutoAcceptRematch implements ShouldQueue
             ]);
 
             $rematchRequest->update(['status' => 'cancelled']);
-            event(new RematchCancelled($rematchRequest, 'requester_unavailable'));
+            event(new ProposalCancelled($rematchRequest, 'requester_unavailable'));
 
             return;
         }
@@ -94,7 +94,7 @@ class AgentAutoAcceptRematch implements ShouldQueue
             ]);
 
             $rematchRequest->update(['status' => 'cancelled']);
-            event(new RematchCancelled($rematchRequest, 'opponent_unavailable'));
+            event(new ProposalCancelled($rematchRequest, 'opponent_unavailable'));
 
             return;
         }

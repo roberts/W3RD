@@ -272,7 +272,7 @@ This document defines the test data structures and relationships needed for comp
 - Declined request (status = declined)
 - Expired request (status = expired)
 
-**Factory State Methods**: Already exists in `database/factories/Game/RematchRequestFactory.php`
+**Factory State Methods**: Already exists in `database/factories/Game/ProposalFactory.php`
 
 ## Test Data Relationships
 

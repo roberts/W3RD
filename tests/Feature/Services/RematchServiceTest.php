@@ -6,8 +6,7 @@ use App\Enums\GameStatus;
 use App\Exceptions\RematchNotAvailableException;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Player;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use App\Services\RematchService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
@@ -124,7 +123,7 @@ describe('RematchService', function () {
             $user2 = User::factory()->create();
             $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
-            $request = RematchRequest::create([
+            $request = Proposal::create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -141,7 +140,7 @@ describe('RematchService', function () {
             $user2 = User::factory()->create();
             $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
-            $request = RematchRequest::create([
+            $request = Proposal::create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -220,7 +219,7 @@ describe('RematchService', function () {
             Player::factory()->create(['game_id' => $game->id, 'user_id' => $user1->id, 'position_id' => 1]);
             Player::factory()->create(['game_id' => $game->id, 'user_id' => $user2->id, 'position_id' => 2]);
 
-            $request = RematchRequest::create([
+            $request = Proposal::create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -253,7 +252,7 @@ describe('RematchService', function () {
             $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create expired request
-            $expiredRequest = RematchRequest::create([
+            $expiredRequest = Proposal::create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -288,7 +287,7 @@ describe('RematchService', function () {
             $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create expired but non-pending request
-            RematchRequest::create([
+            Proposal::create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -308,7 +307,7 @@ describe('RematchService', function () {
             $game2 = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
             // Create multiple expired requests
-            RematchRequest::create([
+            Proposal::create([
                 'original_game_id' => $game1->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,
@@ -316,7 +315,7 @@ describe('RematchService', function () {
                 'expires_at' => Carbon::now()->subMinutes(10),
             ]);
 
-            RematchRequest::create([
+            Proposal::create([
                 'original_game_id' => $game2->id,
                 'requesting_user_id' => $user1->id,
                 'opponent_user_id' => $user2->id,

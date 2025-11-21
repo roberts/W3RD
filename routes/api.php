@@ -4,12 +4,10 @@ use App\Http\Controllers\Api\V1\Account\AlertsController;
 use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Account\ProgressionController;
 use App\Http\Controllers\Api\V1\Account\RecordsController;
-use App\Http\Controllers\Api\V1\AlertController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
-use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\Competitions\BracketController;
 use App\Http\Controllers\Api\V1\Competitions\CompetitionController;
 use App\Http\Controllers\Api\V1\Competitions\EntryController;
@@ -39,8 +37,6 @@ use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\System\ConfigController;
 use App\Http\Controllers\Api\V1\System\HealthController;
 use App\Http\Controllers\Api\V1\System\TimeController;
-use App\Http\Controllers\Api\V1\UserLevelsController;
-use App\Http\Controllers\Api\V1\UserStatsController;
 use App\Http\Controllers\Api\V1\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -200,25 +196,10 @@ Route::prefix('v1')->group(function () {
 
     // Gamer Protocol (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
-        // Billing
-        Route::prefix('billing')->controller(BillingController::class)->group(function () {
-            Route::get('/plans', 'getPlans');
-            Route::get('/status', 'getStatus');
-            Route::post('/subscribe', 'createStripeSubscription');
-            Route::get('/manage', 'manageSubscription');
-            Route::post('/apple/verify', 'verifyAppleReceipt');
-            Route::post('/google/verify', 'verifyGoogleReceipt');
-            Route::post('/telegram/verify', 'verifyTelegramReceipt');
-        });
-
         // Personal User Endpoints
         Route::prefix('me')->group(function () {
             Route::get('/profile', [ProfileController::class, 'show']);
             Route::patch('/profile', [ProfileController::class, 'update']);
-            Route::get('/stats', [UserStatsController::class, 'show']);
-            Route::get('/levels', [UserLevelsController::class, 'show']);
-            Route::get('/alerts', [AlertController::class, 'index']);
-            Route::post('/alerts/mark-as-read', [AlertController::class, 'markAsRead']);
         });
     });
 });

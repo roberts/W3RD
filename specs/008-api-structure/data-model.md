@@ -313,7 +313,7 @@ Schema::create('matchmaking_signals', function (Blueprint $table) {
 **Implementation Note**: Rename/modify existing `rematch_requests` migration to expand functionality for both challenges and rematches.
 
 **Current Migration**: `2025_11_17_035314_create_rematch_requests_table.php` with fields:
-- ulid, original_game_id, requesting_user_id, opponent_user_id, new_game_id, status, expires_at
+- ulid, original_game_id, requesting_user_id, opponent_user_id, game_id, status, expires_at
 
 **Fields**:
 - `id`: bigint, primary key
@@ -325,7 +325,7 @@ Schema::create('matchmaking_signals', function (Blueprint $table) {
 - `mode_id`: foreign key to modes - **NEW**
 - `game_settings`: json (stake amount, time control, etc.) - **NEW**
 - `previous_game_id`: foreign key to games, nullable (rename from original_game_id)
-- `new_game_id`: foreign key to games, nullable (existing)
+- `game_id`: foreign key to games, nullable (existing)
 - `status`: enum(pending, accepted, declined, expired, cancelled) - expanded from string
 - `expires_at`: timestamp (existing)
 - `responded_at`: timestamp, nullable - **NEW**
@@ -365,7 +365,7 @@ Schema::create('proposals', function (Blueprint $table) {
     $table->foreignId('mode_id')->constrained()->onDelete('cascade');
     $table->json('game_settings')->nullable();
     $table->foreignId('previous_game_id')->nullable()->constrained('games')->onDelete('set null');
-    $table->foreignId('new_game_id')->nullable()->constrained('games')->onDelete('set null');
+    $table->foreignId('game_id')->nullable()->constrained('games')->onDelete('set null');
     $table->enum('status', ['pending', 'accepted', 'declined', 'expired', 'cancelled'])->default('pending');
     $table->timestamp('expires_at');
     $table->timestamp('responded_at')->nullable();

@@ -37,7 +37,7 @@ This table will store rematch requests between players after a game completes.
 | `original_game_id`   | `foreignId` | `constrained('games')->onDelete('cascade')` | The completed game that spawned this request. |
 | `requesting_user_id` | `foreignId` | `constrained('users')->onDelete('cascade')` | The user who requested the rematch.          |
 | `opponent_user_id`   | `foreignId` | `constrained('users')->onDelete('cascade')` | The opponent who must accept/decline.        |
-| `new_game_id`        | `foreignId` | `nullable()->constrained('games')->onDelete('set null')` | The new game created if accepted.    |
+| `game_id`            | `foreignId` | `nullable()->constrained('games')->onDelete('set null')` | The new game created if accepted.    |
 | `status`             | `string`    |                                         | Status: `pending`, `accepted`, `declined`, `expired`. |
 | `expires_at`         | `timestamp` |                                         | Auto-expire time (5 minutes from creation).      |
 | `created_at`         | `timestamp` |                                         |                                                  |

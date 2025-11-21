@@ -107,7 +107,7 @@ class AgentAutoAcceptRematch implements ShouldQueue
             Log::info('Agent auto-accepted rematch', [
                 'rematch_request_id' => $this->rematchRequestId,
                 'agent_id' => $this->agentUserId,
-                'new_game_id' => $newGame->id,
+                'game_id' => $newGame->id,
             ]);
 
             // Clear agent cooldown

@@ -489,7 +489,7 @@ components:
         status:
           type: string
           enum: [pending, accepted, declined, expired]
-        new_game_id:
+        game_id:
           type: string
           format: ulid
           nullable: true

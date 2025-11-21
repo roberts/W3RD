@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $lobby_id
+ * @property int $user_id
+ * @property int $client_id
+ * @property LobbyPlayerStatus $status
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 class LobbyPlayer extends Model
 {
     use HasFactory;

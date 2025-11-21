@@ -32,7 +32,7 @@ describe('Checkers Game API', function () {
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/floor/lobbies', [
                     'game_title' => 'checkers',
                     'game_mode' => 'standard',
                     'max_players' => 2,
@@ -44,14 +44,14 @@ describe('Checkers Game API', function () {
 
             // Second player joins by accepting
             $this->actingAs($users[1])
-                ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
+                ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
                     'status' => 'accepted',
                 ])
                 ->assertStatus(200);
 
             // Check if game was auto-started
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -80,7 +80,7 @@ describe('Checkers Game API', function () {
 
             // Create and start game through lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/floor/lobbies', [
                     'game_title' => 'checkers',
                     'game_mode' => 'standard',
                     'max_players' => 2,
@@ -90,12 +90,12 @@ describe('Checkers Game API', function () {
             $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             $this->actingAs($users[1])
-                ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
+                ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
                     'status' => 'accepted',
                 ]);
 
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 

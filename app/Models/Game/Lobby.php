@@ -13,6 +13,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $ulid
+ * @property GameTitle $game_title
+ * @property string $game_mode
+ * @property int $host_id
+ * @property LobbyStatus $status
+ * @property bool $is_public
+ * @property int $min_players
+ * @property \Illuminate\Support\Carbon|null $scheduled_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, LobbyPlayer> $players
+ * @property-read User $host
+ */
 class Lobby extends Model
 {
     use HasFactory, HasUlids;

@@ -25,7 +25,7 @@ class RegisterController extends Controller
         $registration = $this->authService->createRegistration(
             clientId: $request->client_id,
             email: $request->email,
-            password: Hash::make($request->password)
+            hashedPassword: Hash::make($request->password)
         );
 
         // In production, dispatch email verification job

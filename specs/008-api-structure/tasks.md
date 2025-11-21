@@ -117,35 +117,35 @@ All paths assume Laravel project structure at repository root:
 
 #### Auth Namespace Controllers
 
-- [ ] T037 [P] [US3] Create RegisterController in app/Http/Controllers/Api/V1/Auth/RegisterController.php
-- [ ] T038 [P] [US3] Create LoginController in app/Http/Controllers/Api/V1/Auth/LoginController.php
-- [ ] T039 [P] [US3] Create SocialAuthController in app/Http/Controllers/Api/V1/Auth/SocialAuthController.php
-- [ ] T040 [P] [US3] Create LogoutController in app/Http/Controllers/Api/V1/Auth/LogoutController.php
+- [x] T037 [P] [US3] Create RegisterController in app/Http/Controllers/Api/V1/Auth/RegisterController.php
+- [x] T038 [P] [US3] Create LoginController in app/Http/Controllers/Api/V1/Auth/LoginController.php
+- [x] T039 [P] [US3] Create SocialAuthController in app/Http/Controllers/Api/V1/Auth/SocialAuthController.php
+- [x] T040 [P] [US3] Create LogoutController in app/Http/Controllers/Api/V1/Auth/LogoutController.php
 
 #### Account Namespace Controllers
 
-- [ ] T041 [P] [US3] Move ProfileController to namespace in app/Http/Controllers/Api/V1/Account/ProfileController.php
-- [ ] T042 [P] [US3] Create ProgressionController (renamed from UserLevelsController) in app/Http/Controllers/Api/V1/Account/ProgressionController.php
-- [ ] T043 [P] [US3] Create RecordsController (renamed from UserStatsController) in app/Http/Controllers/Api/V1/Account/RecordsController.php
-- [ ] T044 [P] [US3] Create AlertsController (renamed from AlertController) in app/Http/Controllers/Api/V1/Account/AlertsController.php
+- [x] T041 [P] [US3] Move ProfileController to namespace in app/Http/Controllers/Api/V1/Account/ProfileController.php
+- [x] T042 [P] [US3] Create ProgressionController (renamed from UserLevelsController) in app/Http/Controllers/Api/V1/Account/ProgressionController.php
+- [x] T043 [P] [US3] Create RecordsController (renamed from UserStatsController) in app/Http/Controllers/Api/V1/Account/RecordsController.php
+- [x] T044 [P] [US3] Create AlertsController (renamed from AlertController) in app/Http/Controllers/Api/V1/Account/AlertsController.php
 
 #### Services and DTOs
 
-- [ ] T045 [US3] Create AuthService with registration, login, social auth logic in app/Services/AuthService.php
-- [ ] T046 [US3] Create ProfileService with update and validation logic in app/Services/ProfileService.php
-- [ ] T047 [US3] Create ProgressionService with XP and level calculation in app/Services/ProgressionService.php
-- [ ] T048 [US3] Add Auth namespace routes to routes/api.php (POST /v1/auth/register, POST /v1/auth/login, POST /v1/auth/social, POST /v1/auth/logout)
-- [ ] T049 [US3] Add Account namespace routes to routes/api.php (GET /v1/account/profile, PATCH /v1/account/profile, GET /v1/account/progression, GET /v1/account/records, GET /v1/account/alerts, POST /v1/account/alerts/read)
-- [ ] T050 [US3] Create ProfileData DTO in app/DataTransferObjects/Account/ProfileData.php
-- [ ] T051 [US3] Create ProgressionData DTO in app/DataTransferObjects/Account/ProgressionData.php
-- [ ] T052 [US3] Create RecordsData DTO in app/DataTransferObjects/Account/RecordsData.php
-- [ ] T053 [US3] Create AlertData DTO in app/DataTransferObjects/Account/AlertData.php
+- [x] T045 [US3] Create AuthService with registration, login, social auth logic in app/Services/AuthService.php
+- [x] T046 [US3] Create ProfileService with update and validation logic in app/Services/ProfileService.php (already existed)
+- [x] T047 [US3] Create ProgressionService with XP and level calculation in app/Services/ProgressionService.php
+- [x] T048 [US3] Add Auth namespace routes to routes/api.php (POST /v1/auth/register, POST /v1/auth/login, POST /v1/auth/social, POST /v1/auth/logout)
+- [x] T049 [US3] Add Account namespace routes to routes/api.php (GET /v1/account/profile, PATCH /v1/account/profile, GET /v1/account/progression, GET /v1/account/records, GET /v1/account/alerts, POST /v1/account/alerts/read)
+- [x] T050 [US3] Create ProfileData DTO in app/DataTransferObjects/Account/ProfileData.php
+- [x] T051 [US3] Create ProgressionData DTO in app/DataTransferObjects/Account/ProgressionData.php
+- [x] T052 [US3] Create RecordsData DTO in app/DataTransferObjects/Account/RecordsData.php
+- [x] T053 [US3] Create AlertData DTO in app/DataTransferObjects/Account/AlertData.php
 
 #### Cleanup
 
-- [ ] T054 [US3] Delete old UserLevelsController from app/Http/Controllers/Api/V1/UserLevelsController.php
-- [ ] T055 [US3] Delete old UserStatsController from app/Http/Controllers/Api/V1/UserStatsController.php
-- [ ] T056 [US3] Delete old AlertController from app/Http/Controllers/Api/V1/AlertController.php
+- [x] T054 [US3] Delete old UserLevelsController from app/Http/Controllers/Api/V1/UserLevelsController.php
+- [x] T055 [US3] Delete old UserStatsController from app/Http/Controllers/Api/V1/UserStatsController.php
+- [x] T056 [US3] Delete old AlertController from app/Http/Controllers/Api/V1/AlertController.php
 
 **Checkpoint**: Auth and Account endpoints operational - authentication flows, profile management, progression tracking, and notifications functional
 
@@ -161,30 +161,30 @@ All paths assume Laravel project structure at repository root:
 
 #### Models
 
-- [ ] T057 [P] [US4] Create MatchmakingSignal model in app/Models/MatchmakingSignal.php
-- [ ] T058 [P] [US4] Create Proposal model (replaces RematchRequest) in app/Models/Proposal.php
+- [x] T057 [P] [US4] Create MatchmakingSignal model in app/Models/MatchmakingSignal.php
+- [x] T058 [P] [US4] Create Proposal model (replaces RematchRequest) in app/Models/Game/Proposal.php
 
 #### Controllers
 
-- [ ] T059 [P] [US4] Refactor LobbyController to include player seat management in app/Http/Controllers/Api/V1/Floor/LobbyController.php
-- [ ] T060 [P] [US4] Create SignalController (renamed from QuickplayController) in app/Http/Controllers/Api/V1/Floor/SignalController.php
-- [ ] T061 [P] [US4] Create ProposalController (renamed from RematchController) in app/Http/Controllers/Api/V1/Floor/ProposalController.php
+- [x] T059 [P] [US4] Refactor LobbyController to include player seat management in app/Http/Controllers/Api/V1/Floor/LobbyController.php
+- [x] T060 [P] [US4] Create SignalController (renamed from QuickplayController) in app/Http/Controllers/Api/V1/Floor/SignalController.php
+- [x] T061 [P] [US4] Create ProposalController (renamed from RematchController) in app/Http/Controllers/Api/V1/Floor/ProposalController.php
 
 #### Services and Events
 
-- [ ] T062 [US4] Create FloorCoordinationService with matchmaking logic in app/Services/FloorCoordinationService.php
-- [ ] T063 [US4] Create LobbyPlayerJoined event with ShouldBroadcast in app/Events/LobbyPlayerJoined.php
-- [ ] T064 [US4] Create ProposalSent event with ShouldBroadcast in app/Events/ProposalSent.php
-- [ ] T065 [US4] Add Floor namespace routes to routes/api.php (GET /v1/floor/lobbies, POST /v1/floor/lobbies, POST /v1/floor/lobbies/{id}/seat, POST /v1/floor/signals, DELETE /v1/floor/signals/{id}, POST /v1/floor/proposals, POST /v1/floor/proposals/{id}/accept, POST /v1/floor/proposals/{id}/decline)
-- [ ] T066 [US4] Create LobbyData DTO in app/DataTransferObjects/Floor/LobbyData.php
-- [ ] T067 [US4] Create SignalData DTO in app/DataTransferObjects/Floor/SignalData.php
-- [ ] T068 [US4] Create ProposalData DTO in app/DataTransferObjects/Floor/ProposalData.php
+- [x] T062 [US4] Create FloorCoordinationService with matchmaking logic in app/Services/Floor/FloorCoordinationService.php
+- [x] T063 [US4] Create LobbyPlayerJoined event with ShouldBroadcast in app/Events/Floor/LobbyPlayerJoined.php
+- [x] T064 [US4] Create ProposalSent event with ShouldBroadcast in app/Events/Floor/ProposalSent.php
+- [x] T065 [US4] Add Floor namespace routes to routes/api.php (GET /v1/floor/lobbies, POST /v1/floor/lobbies, POST /v1/floor/lobbies/{id}/seat, POST /v1/floor/signals, DELETE /v1/floor/signals/{id}, POST /v1/floor/proposals, POST /v1/floor/proposals/{id}/accept, POST /v1/floor/proposals/{id}/decline)
+- [x] T066 [US4] Create LobbyData DTO in app/DataTransferObjects/Floor/LobbyData.php
+- [x] T067 [US4] Create SignalData DTO in app/DataTransferObjects/Floor/SignalData.php
+- [x] T068 [US4] Create ProposalData DTO in app/DataTransferObjects/Floor/ProposalData.php
 
 #### Cleanup
 
-- [ ] T069 [US4] Delete old LobbyPlayerController from app/Http/Controllers/Api/V1/LobbyPlayerController.php
-- [ ] T070 [US4] Delete old QuickplayController from app/Http/Controllers/Api/V1/QuickplayController.php
-- [ ] T071 [US4] Delete old RematchController from app/Http/Controllers/Api/V1/RematchController.php
+- [x] T069 [US4] Delete old LobbyPlayerController from app/Http/Controllers/Api/V1/LobbyPlayerController.php
+- [x] T070 [US4] Delete old QuickplayController from app/Http/Controllers/Api/V1/QuickplayController.php
+- [x] T071 [US4] Delete old RematchController from app/Http/Controllers/Api/V1/RematchController.php
 
 **Checkpoint**: Floor endpoints operational - lobby coordination, matchmaking signals, and proposals functional
 
@@ -200,26 +200,26 @@ All paths assume Laravel project structure at repository root:
 
 #### Controllers
 
-- [ ] T072 [P] [US5] Refactor GameController to simplify to listing and state retrieval in app/Http/Controllers/Api/V1/Games/GameController.php
-- [ ] T073 [P] [US5] Move GameActionController to namespace in app/Http/Controllers/Api/V1/Games/GameActionController.php
-- [ ] T074 [P] [US5] Create GameTurnController in app/Http/Controllers/Api/V1/Games/GameTurnController.php
-- [ ] T075 [P] [US5] Create GameTimelineController in app/Http/Controllers/Api/V1/Games/GameTimelineController.php
-- [ ] T076 [P] [US5] Create GameConcedeController in app/Http/Controllers/Api/V1/Games/GameConcedeController.php
-- [ ] T077 [P] [US5] Create GameAbandonController in app/Http/Controllers/Api/V1/Games/GameAbandonController.php
-- [ ] T078 [P] [US5] Create GameOutcomeController in app/Http/Controllers/Api/V1/Games/GameOutcomeController.php
-- [ ] T079 [P] [US5] Create GameSyncController with catch-up endpoint in app/Http/Controllers/Api/V1/Games/GameSyncController.php
+- [x] T072 [P] [US5] Refactor GameController to simplify to listing and state retrieval in app/Http/Controllers/Api/V1/Games/GameController.php
+- [x] T073 [P] [US5] Move GameActionController to namespace in app/Http/Controllers/Api/V1/Games/GameActionController.php
+- [x] T074 [P] [US5] Create GameTurnController in app/Http/Controllers/Api/V1/Games/GameTurnController.php
+- [x] T075 [P] [US5] Create GameTimelineController in app/Http/Controllers/Api/V1/Games/GameTimelineController.php
+- [x] T076 [P] [US5] Create GameConcedeController in app/Http/Controllers/Api/V1/Games/GameConcedeController.php
+- [x] T077 [P] [US5] Create GameAbandonController in app/Http/Controllers/Api/V1/Games/GameAbandonController.php
+- [x] T078 [P] [US5] Create GameOutcomeController in app/Http/Controllers/Api/V1/Games/GameOutcomeController.php
+- [x] T079 [P] [US5] Create GameSyncController with catch-up endpoint in app/Http/Controllers/Api/V1/Games/GameSyncController.php
 
 #### Events and Services
 
-- [ ] T080 [US5] Create GameActionExecuted event with ShouldBroadcast in app/Events/GameActionExecuted.php
-- [ ] T081 [US5] Create GameStatusChanged event with ShouldBroadcast in app/Events/GameStatusChanged.php
-- [ ] T082 [US5] Create GameOutcomeService with XP and reward calculation in app/Services/GameOutcomeService.php
-- [ ] T083 [US5] Add idempotency middleware to game action routes in routes/api.php
-- [ ] T084 [US5] Add Games namespace routes to routes/api.php (GET /v1/games, GET /v1/games/{ulid}, POST /v1/games/{ulid}/actions, GET /v1/games/{ulid}/turn, GET /v1/games/{ulid}/timeline, POST /v1/games/{ulid}/concede, POST /v1/games/{ulid}/abandon, GET /v1/games/{ulid}/outcome, GET /v1/games/{ulid}/sync)
-- [ ] T085 [US5] Create GameData DTO in app/DataTransferObjects/Games/GameData.php
-- [ ] T086 [US5] Create GameActionData DTO in app/DataTransferObjects/Games/GameActionData.php
-- [ ] T087 [US5] Create GameTurnData DTO in app/DataTransferObjects/Games/GameTurnData.php
-- [ ] T088 [US5] Create GameOutcomeData DTO in app/DataTransferObjects/Games/GameOutcomeData.php
+- [x] T080 [US5] Create GameActionExecuted event with ShouldBroadcast in app/Events/GameActionExecuted.php
+- [x] T081 [US5] Create GameStatusChanged event with ShouldBroadcast in app/Events/GameStatusChanged.php
+- [x] T082 [US5] Create GameOutcomeService with XP and reward calculation in app/Services/GameOutcomeService.php
+- [x] T083 [US5] Add idempotency middleware to game action routes in routes/api.php
+- [x] T084 [US5] Add Games namespace routes to routes/api.php (GET /v1/games, GET /v1/games/{ulid}, POST /v1/games/{ulid}/actions, GET /v1/games/{ulid}/turn, GET /v1/games/{ulid}/timeline, POST /v1/games/{ulid}/concede, POST /v1/games/{ulid}/abandon, GET /v1/games/{ulid}/outcome, GET /v1/games/{ulid}/sync)
+- [x] T085 [US5] Create GameData DTO in app/DataTransferObjects/Games/GameData.php
+- [x] T086 [US5] Create GameActionData DTO in app/DataTransferObjects/Games/GameActionData.php
+- [x] T087 [US5] Create GameTurnData DTO in app/DataTransferObjects/Games/GameTurnData.php
+- [x] T088 [US5] Create GameOutcomeData DTO in app/DataTransferObjects/Games/GameOutcomeData.php
 
 **Checkpoint**: Games endpoints operational - gameplay state sync, action execution, turn management, and exit options functional
 
@@ -235,26 +235,26 @@ All paths assume Laravel project structure at repository root:
 
 #### Models
 
-- [ ] T089 [P] [US6] Verify Balance model exists in app/Models/Balance.php (migration already created)
-- [ ] T090 [P] [US6] Verify Transaction model exists in app/Models/Transaction.php (migration already created)
+- [x] T089 [P] [US6] Verify Balance model exists in app/Models/Balance.php (migration already created)
+- [x] T090 [P] [US6] Verify Transaction model exists in app/Models/Transaction.php (migration already created)
 
 #### Controllers
 
-- [ ] T091 [P] [US6] Create BalanceController in app/Http/Controllers/Api/V1/Economy/BalanceController.php
-- [ ] T092 [P] [US6] Create TransactionController in app/Http/Controllers/Api/V1/Economy/TransactionController.php
-- [ ] T093 [P] [US6] Create CashierController with approved client authorization in app/Http/Controllers/Api/V1/Economy/CashierController.php
-- [ ] T094 [P] [US6] Create PlanController (extract from BillingController) in app/Http/Controllers/Api/V1/Economy/PlanController.php
-- [ ] T095 [P] [US6] Create ReceiptController (extract from BillingController) in app/Http/Controllers/Api/V1/Economy/ReceiptController.php
+- [x] T091 [P] [US6] Create BalanceController in app/Http/Controllers/Api/V1/Economy/BalanceController.php
+- [x] T092 [P] [US6] Create TransactionController in app/Http/Controllers/Api/V1/Economy/TransactionController.php
+- [x] T093 [P] [US6] Create CashierController with approved client authorization in app/Http/Controllers/Api/V1/Economy/CashierController.php
+- [x] T094 [P] [US6] Create PlanController (extract from BillingController) in app/Http/Controllers/Api/V1/Economy/PlanController.php
+- [x] T095 [P] [US6] Create ReceiptController (extract from BillingController) in app/Http/Controllers/Api/V1/Economy/ReceiptController.php
 
 #### Services
 
-- [ ] T096 [US6] Create EconomyService with balance operations and transaction recording in app/Services/EconomyService.php
-- [ ] T097 [US6] Create ReceiptVerificationService for Apple, Google, Telegram in app/Services/ReceiptVerificationService.php
-- [ ] T098 [US6] Add idempotency middleware to cashier route in routes/api.php
-- [ ] T099 [US6] Add Economy namespace routes to routes/api.php (GET /v1/economy/balance, GET /v1/economy/transactions, POST /v1/economy/cashier, GET /v1/economy/plans, POST /v1/economy/receipts/{provider})
-- [ ] T100 [US6] Create BalanceData DTO in app/DataTransferObjects/Economy/BalanceData.php
-- [ ] T101 [US6] Create TransactionData DTO in app/DataTransferObjects/Economy/TransactionData.php
-- [ ] T102 [US6] Create PlanData DTO in app/DataTransferObjects/Economy/PlanData.php
+- [x] T096 [US6] Create EconomyService with balance operations and transaction recording in app/Services/EconomyService.php
+- [x] T097 [US6] Create ReceiptVerificationService for Apple, Google, Telegram in app/Services/ReceiptVerificationService.php
+- [x] T098 [US6] Add idempotency middleware to cashier route in routes/api.php
+- [x] T099 [US6] Add Economy namespace routes to routes/api.php (GET /v1/economy/balance, GET /v1/economy/transactions, POST /v1/economy/cashier, GET /v1/economy/plans, POST /v1/economy/receipts/{provider})
+- [x] T100 [US6] Create BalanceData DTO in app/DataTransferObjects/Economy/BalanceData.php
+- [x] T101 [US6] Create TransactionData DTO in app/DataTransferObjects/Economy/TransactionData.php
+- [x] T102 [US6] Create PlanData DTO in app/DataTransferObjects/Economy/PlanData.php
 
 #### Cleanup
 
@@ -274,17 +274,17 @@ All paths assume Laravel project structure at repository root:
 
 #### Controllers
 
-- [ ] T104 [P] [US7] Create LiveScoresController with SSE streams in app/Http/Controllers/Api/V1/Feeds/LiveScoresController.php
-- [ ] T105 [P] [US7] Move LeaderboardController to namespace in app/Http/Controllers/Api/V1/Feeds/LeaderboardController.php
-- [ ] T106 [P] [US7] Create CasinoFloorController with SSE streams in app/Http/Controllers/Api/V1/Feeds/CasinoFloorController.php
+- [x] T104 [P] [US7] Create LiveScoresController with SSE streams in app/Http/Controllers/Api/V1/Feeds/LiveScoresController.php
+- [x] T105 [P] [US7] Move LeaderboardController to namespace in app/Http/Controllers/Api/V1/Feeds/LeaderboardController.php
+- [x] T106 [P] [US7] Create CasinoFloorController with SSE streams in app/Http/Controllers/Api/V1/Feeds/CasinoFloorController.php
 
 #### Services and Events
 
-- [ ] T107 [US7] Create DataFeedService with SSE streaming logic in app/Services/DataFeedService.php
-- [ ] T108 [US7] Create GameActivityEvent for feed broadcasting in app/Events/GameActivityEvent.php
-- [ ] T109 [US7] Create LeaderboardUpdateEvent for feed broadcasting in app/Events/LeaderboardUpdateEvent.php
-- [ ] T110 [US7] Add Feeds namespace routes to routes/api.php (GET /v1/feeds/games, GET /v1/feeds/wins, GET /v1/feeds/leaderboards, GET /v1/feeds/tournaments, GET /v1/feeds/challenges, GET /v1/feeds/achievements)
-- [ ] T111 [US7] Create FeedEventData DTO in app/DataTransferObjects/Feeds/FeedEventData.php
+- [x] T107 [US7] Create DataFeedService with SSE streaming logic in app/Services/DataFeedService.php
+- [x] T108 [US7] Create GameActivityEvent for feed broadcasting in app/Events/GameActivityEvent.php
+- [x] T109 [US7] Create LeaderboardUpdateEvent for feed broadcasting in app/Events/LeaderboardUpdateEvent.php
+- [x] T110 [US7] Add Feeds namespace routes to routes/api.php (GET /v1/feeds/games, GET /v1/feeds/wins, GET /v1/feeds/leaderboards, GET /v1/feeds/tournaments, GET /v1/feeds/challenges, GET /v1/feeds/achievements)
+- [x] T111 [US7] Create FeedEventData DTO in app/DataTransferObjects/Feeds/FeedEventData.php
 
 **Checkpoint**: Feeds endpoints operational - real-time SSE streams for games, wins, leaderboards, tournaments, challenges, and achievements functional
 
@@ -300,26 +300,26 @@ All paths assume Laravel project structure at repository root:
 
 #### Models
 
-- [ ] T112 [P] [US8] Verify Tournament model exists in app/Models/Tournament.php (migration already created)
-- [ ] T113 [P] [US8] Verify TournamentUser pivot model exists in app/Models/TournamentUser.php (migration already created)
+- [x] T112 [P] [US8] Verify Tournament model exists in app/Models/Tournament.php (migration already created)
+- [x] T113 [P] [US8] Verify TournamentUser pivot model exists in app/Models/TournamentUser.php (migration already created)
 
 #### Controllers
 
-- [ ] T114 [P] [US8] Create CompetitionController in app/Http/Controllers/Api/V1/Competitions/CompetitionController.php
-- [ ] T115 [P] [US8] Create EntryController in app/Http/Controllers/Api/V1/Competitions/EntryController.php
-- [ ] T116 [P] [US8] Create StructureController in app/Http/Controllers/Api/V1/Competitions/StructureController.php
-- [ ] T117 [P] [US8] Create BracketController in app/Http/Controllers/Api/V1/Competitions/BracketController.php
-- [ ] T118 [P] [US8] Create StandingsController in app/Http/Controllers/Api/V1/Competitions/StandingsController.php
+- [x] T114 [P] [US8] Create CompetitionController in app/Http/Controllers/Api/V1/Competitions/CompetitionController.php
+- [x] T115 [P] [US8] Create EntryController in app/Http/Controllers/Api/V1/Competitions/EntryController.php
+- [x] T116 [P] [US8] Create StructureController in app/Http/Controllers/Api/V1/Competitions/StructureController.php
+- [x] T117 [P] [US8] Create BracketController in app/Http/Controllers/Api/V1/Competitions/BracketController.php
+- [x] T118 [P] [US8] Create StandingsController in app/Http/Controllers/Api/V1/Competitions/StandingsController.php
 
 #### Services and Events
 
-- [ ] T119 [US8] Create CompetitionService with bracket management and advancement logic in app/Services/CompetitionService.php
-- [ ] T120 [US8] Create TournamentBracketUpdated event with ShouldBroadcast in app/Events/TournamentBracketUpdated.php
-- [ ] T121 [US8] Add idempotency middleware to tournament entry route in routes/api.php
-- [ ] T122 [US8] Add Competitions namespace routes to routes/api.php (GET /v1/competitions, GET /v1/competitions/{ulid}, POST /v1/competitions/{ulid}/enter, GET /v1/competitions/{ulid}/structure, GET /v1/competitions/{ulid}/bracket, GET /v1/competitions/{ulid}/standings)
-- [ ] T123 [US8] Create CompetitionData DTO in app/DataTransferObjects/Competitions/CompetitionData.php
-- [ ] T124 [US8] Create BracketData DTO in app/DataTransferObjects/Competitions/BracketData.php
-- [ ] T125 [US8] Create StandingData DTO in app/DataTransferObjects/Competitions/StandingData.php
+- [x] T119 [US8] Create CompetitionService with bracket management and advancement logic in app/Services/CompetitionService.php
+- [x] T120 [US8] Create TournamentBracketUpdated event with ShouldBroadcast in app/Events/TournamentBracketUpdated.php
+- [x] T121 [US8] Add idempotency middleware to tournament entry route in routes/api.php
+- [x] T122 [US8] Add Competitions namespace routes to routes/api.php (GET /v1/competitions, GET /v1/competitions/{ulid}, POST /v1/competitions/{ulid}/enter, GET /v1/competitions/{ulid}/structure, GET /v1/competitions/{ulid}/bracket, GET /v1/competitions/{ulid}/standings)
+- [x] T123 [US8] Create CompetitionData DTO in app/DataTransferObjects/Competitions/CompetitionData.php
+- [x] T124 [US8] Create BracketData DTO in app/DataTransferObjects/Competitions/BracketData.php
+- [x] T125 [US8] Create StandingData DTO in app/DataTransferObjects/Competitions/StandingData.php
 
 **Checkpoint**: Competition endpoints operational - tournament discovery, registration, structure, brackets, and standings functional
 
@@ -329,21 +329,21 @@ All paths assume Laravel project structure at repository root:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T126 [P] Update quickstart.md with all new endpoint examples and authentication flows
-- [ ] T127 [P] Update IMPLEMENTATION_NOTES.md with final route mappings
-- [ ] T128 [P] Update CONTROLLER_MIGRATION_CHECKLIST.md with completion status
-- [ ] T129 Code review and refactoring across all namespaces for consistency
-- [ ] T130 Performance optimization: Add query caching for library endpoints
-- [ ] T131 Performance optimization: Add eager loading for game state queries
-- [ ] T132 Security audit: Verify all routes have proper authentication middleware
-- [ ] T133 Security audit: Verify idempotency keys are enforced on all state-mutating operations
-- [ ] T134 [P] Documentation: Generate OpenAPI spec from controllers using Laravel OpenAPI annotations
-- [ ] T135 [P] Documentation: Add inline PHPDoc comments to all public controller methods
-- [ ] T136 Run Pest test suite to validate existing tests still pass with new structure
-- [ ] T137 Run Laravel Pint code formatter on all modified files
-- [ ] T138 Run PHPStan static analysis on new controllers and services
-- [ ] T139 Verify all old controller files have been deleted
-- [ ] T140 Run quickstart.md validation scripts to ensure all examples work
+- [x] T126 [P] Update quickstart.md with all new endpoint examples and authentication flows
+- [x] T127 [P] Update IMPLEMENTATION_NOTES.md with final route mappings
+- [x] T128 [P] Update CONTROLLER_MIGRATION_CHECKLIST.md with completion status
+- [x] T129 Code review and refactoring across all namespaces for consistency
+- [x] T130 Performance optimization: Add query caching for library endpoints
+- [x] T131 Performance optimization: Add eager loading for game state queries
+- [x] T132 Security audit: Verify all routes have proper authentication middleware
+- [x] T133 Security audit: Verify idempotency keys are enforced on all state-mutating operations
+- [x] T134 [P] Documentation: Generate OpenAPI spec from controllers using Laravel OpenAPI annotations
+- [x] T135 [P] Documentation: Add inline PHPDoc comments to all public controller methods
+- [x] T136 Run Pest test suite to validate existing tests still pass with new structure
+- [x] T137 Run Laravel Pint code formatter on all modified files
+- [x] T138 Run PHPStan static analysis on new controllers and services
+- [x] T139 Verify all old controller files have been deleted
+- [x] T140 Run quickstart.md validation scripts to ensure all examples work
 
 ---
 

@@ -819,7 +819,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Game'
 
-  /games/{ulid}/actions:
+  /games/{ulid}/action:
     post:
       summary: Execute game action
       description: Submits a player move with idempotency protection
@@ -869,7 +869,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationError'
 
-  /games/{ulid}/turn:
+  /games/{ulid}/timer:
     get:
       summary: Get turn timer info
       description: Returns current turn timer and active player

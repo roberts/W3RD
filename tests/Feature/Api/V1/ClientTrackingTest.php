@@ -30,13 +30,16 @@ describe('Client Tracking', function () {
 
         // Request rematch
         $rematchResponse = $this->actingAs($player1)
-            ->postJson("/api/v1/games/{$game->ulid}/rematch");
+            ->postJson('/api/v1/floor/proposals', [
+                'type' => 'rematch',
+                'original_game_ulid' => $game->ulid,
+            ]);
 
         $rematchUlid = $rematchResponse->json('data.ulid');
 
         // Accept rematch
         $response = $this->actingAs($player2)
-            ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
+            ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
 
         $response->assertOk();
 
@@ -56,7 +59,7 @@ describe('Client Tracking', function () {
         // Create lobby with min_players = 2
         $lobbyResponse = $this->actingAs($host)
             ->withHeader('X-Client-Key', $client->id)
-            ->postJson('/api/v1/games/lobbies', [
+            ->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'game_mode' => 'standard',
                 'is_public' => false,
@@ -71,7 +74,7 @@ describe('Client Tracking', function () {
 
         // Invite player2 using their actual username
         $inviteResponse = $this->actingAs($host)
-            ->postJson("/api/v1/games/lobbies/{$lobbyUlid}/players", [
+            ->postJson("/api/v1/floor/lobbies/{$lobbyUlid}/players", [
                 'username' => $player2->username,
             ]);
 
@@ -80,7 +83,7 @@ describe('Client Tracking', function () {
         // Player2 accepts invitation using their actual username
         $acceptResponse = $this->actingAs($player2)
             ->withHeader('X-Client-Key', $client->id)
-            ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$player2->username}", [
+            ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$player2->username}", [
                 'status' => 'accepted',
             ]);
 
@@ -106,13 +109,16 @@ describe('Client Tracking', function () {
 
         // Request rematch
         $rematchResponse = $this->actingAs($player1)
-            ->postJson("/api/v1/games/{$game->ulid}/rematch");
+            ->postJson('/api/v1/floor/proposals', [
+                'type' => 'rematch',
+                'original_game_ulid' => $game->ulid,
+            ]);
 
         $rematchUlid = $rematchResponse->json('data.ulid');
 
         // Accept rematch WITHOUT client header
         $response = $this->actingAs($player2)
-            ->postJson("/api/v1/games/rematch/{$rematchUlid}/accept");
+            ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
 
         $response->assertOk();
 

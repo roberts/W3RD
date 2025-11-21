@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Models\Game;
+
+use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+/**
+ * @property int $id
+ * @property string $ulid
+ * @property int $requesting_user_id
+ * @property int $opponent_user_id
+ * @property string $title_slug
+ * @property int|null $mode_id
+ * @property string $type
+ * @property int|null $original_game_id
+ * @property int|null $game_id
+ * @property array|null $game_settings
+ * @property \Illuminate\Support\Carbon|null $responded_at
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
+class Proposal extends Model
+{
+    use HasFactory, HasUlids;
+
+    protected $fillable = [
+        'ulid',
+        'requesting_user_id',
+        'opponent_user_id',
+        'title_slug',
+        'mode_id',
+        'type',
+        'original_game_id',
+        'game_id',
+        'game_settings',
+        'responded_at',
+        'status',
+        'expires_at',
+    ];
+
+    protected $casts = [
+        'game_settings' => 'array',
+        'responded_at' => 'datetime',
+        'expires_at' => 'datetime',
+    ];
+
+    /**
+     * Ensure ULIDs are generated for the "ulid" column instead of the primary key.
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
+    public function requestingUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requesting_user_id');
+    }
+
+    public function opponentUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'opponent_user_id');
+    }
+
+    public function originalGame(): BelongsTo
+    {
+        return $this->belongsTo(Game::class, 'original_game_id');
+    }
+
+    public function game(): BelongsTo
+    {
+        return $this->belongsTo(Game::class);
+    }
+
+    public function mode(): BelongsTo
+    {
+        return $this->belongsTo(Mode::class);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending' && (! $this->expires_at || $this->expires_at->isFuture());
+    }
+
+    public function hasExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast() && $this->status === 'pending';
+    }
+
+    public function accept(): void
+    {
+        $this->status = 'accepted';
+        $this->responded_at = now();
+        $this->save();
+    }
+
+    public function decline(): void
+    {
+        $this->status = 'declined';
+        $this->responded_at = now();
+        $this->save();
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+}

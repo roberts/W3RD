@@ -20,7 +20,7 @@ describe('Lobby Management', function () {
         it('authenticated user can create a private lobby', function () {
             $host = User::factory()->create();
 
-            $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($host)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => false,
                 'min_players' => 2,
@@ -43,7 +43,7 @@ describe('Lobby Management', function () {
         it('authenticated user can create a public lobby', function () {
             $host = User::factory()->create();
 
-            $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($host)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => true,
                 'min_players' => 4,
@@ -62,7 +62,7 @@ describe('Lobby Management', function () {
             $invitee1 = User::factory()->create();
             $invitee2 = User::factory()->create();
 
-            $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($host)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => false,
                 'invitees' => [$invitee1->id, $invitee2->id],
@@ -92,7 +92,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
             $scheduledTime = now()->addHours(2)->toIso8601String();
 
-            $response = $this->actingAs($host)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($host)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => true,
                 'min_players' => 4,
@@ -116,7 +116,7 @@ describe('Lobby Management', function () {
             Lobby::factory()->public()->create();
             Lobby::factory()->private()->create();
 
-            $response = $this->actingAs($host)->getJson('/api/v1/games/lobbies');
+            $response = $this->actingAs($host)->getJson('/api/v1/floor/lobbies');
 
             $response->assertStatus(200)
                 ->assertJsonStructure([
@@ -138,7 +138,7 @@ describe('Lobby Management', function () {
                 'status' => LobbyPlayerStatus::ACCEPTED,
             ]);
 
-            $response = $this->actingAs($host)->getJson("/api/v1/games/lobbies/{$lobby->ulid}");
+            $response = $this->actingAs($host)->getJson("/api/v1/floor/lobbies/{$lobby->ulid}");
 
             $response->assertStatus(200)
                 ->assertJsonStructure([
@@ -154,7 +154,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($host)->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}");
+            $response = $this->actingAs($host)->deleteJson("/api/v1/floor/lobbies/{$lobby->ulid}");
 
             $response->assertStatus(204);
 
@@ -169,7 +169,7 @@ describe('Lobby Management', function () {
             $otherUser = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($otherUser)->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}");
+            $response = $this->actingAs($otherUser)->deleteJson("/api/v1/floor/lobbies/{$lobby->ulid}");
 
             $response->assertStatus(403);
         });
@@ -180,7 +180,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($host)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/ready-check");
+            $response = $this->actingAs($host)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/ready-check");
 
             $response->assertStatus(202)
                 ->assertJson([
@@ -193,7 +193,7 @@ describe('Lobby Management', function () {
             $otherUser = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($otherUser)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/ready-check");
+            $response = $this->actingAs($otherUser)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/ready-check");
 
             $response->assertStatus(403);
         });
@@ -216,7 +216,7 @@ describe('Lobby Management', function () {
             ]);
 
             // Host cancels (simulating disconnect)
-            $response = $this->actingAs($host)->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}");
+            $response = $this->actingAs($host)->deleteJson("/api/v1/floor/lobbies/{$lobby->ulid}");
 
             $response->assertStatus(204);
 
@@ -233,7 +233,7 @@ describe('Lobby Management', function () {
             ]);
 
             // No other players - should not be able to start
-            $response = $this->actingAs($host)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/ready-check");
+            $response = $this->actingAs($host)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/ready-check");
 
             // Should succeed in creating ready check, but game won't start without players
             $response->assertStatus(202);
@@ -255,7 +255,7 @@ describe('Lobby Management', function () {
 
             // Spam ready check
             for ($i = 0; $i < 5; $i++) {
-                $response = $this->actingAs($host)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/ready-check");
+                $response = $this->actingAs($host)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/ready-check");
                 expect($response->status())->toBeIn([202, 429]); // Either succeeds or rate limited
             }
         });
@@ -268,7 +268,7 @@ describe('Lobby Management', function () {
             // Create lobby from mobile
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '2') // Mobile
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/floor/lobbies', [
                     'game_title' => 'connect-four',
                     'is_public' => true,
                 ]);
@@ -278,7 +278,7 @@ describe('Lobby Management', function () {
             // View from web
             $response2 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '1') // Web
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
             $response2->assertStatus(200)
                 ->assertJsonPath('data.ulid', $lobbyUlid);
@@ -296,7 +296,7 @@ describe('Lobby Management', function () {
             // Host invites from web (client_id 1)
             $response1 = $this->actingAs($host)
                 ->withHeader('X-Client-Key', '1') // Web
-                ->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+                ->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/players", [
                     'username' => $invitee->username,
                 ]);
 
@@ -305,7 +305,7 @@ describe('Lobby Management', function () {
             // Invitee accepts from mobile (client_id 2)
             $response2 = $this->actingAs($invitee)
                 ->withHeader('X-Client-Key', '2') // Mobile
-                ->putJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}", [
+                ->putJson("/api/v1/floor/lobbies/{$lobby->ulid}/players/{$invitee->username}", [
                     'status' => 'accepted',
                 ]);
 
@@ -322,14 +322,14 @@ describe('Lobby Management', function () {
             // Join from web (use PUT to accept/join public lobby)
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '1')
-                ->putJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$user->username}", [
+                ->putJson("/api/v1/floor/lobbies/{$lobby->ulid}/players/{$user->username}", [
                     'status' => 'accepted',
                 ]);
 
             // Try to join from mobile (same user)
             $response2 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '2')
-                ->putJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$user->username}", [
+                ->putJson("/api/v1/floor/lobbies/{$lobby->ulid}/players/{$user->username}", [
                     'status' => 'accepted',
                 ]);
 
@@ -344,7 +344,7 @@ describe('Lobby Management', function () {
 
             $scheduledTime = now()->addHours(2);
 
-            $response = $this->actingAs($user)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($user)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => false,
                 'scheduled_at' => $scheduledTime->toIso8601String(),
@@ -359,7 +359,7 @@ describe('Lobby Management', function () {
 
             $pastTime = now()->subHours(1);
 
-            $response = $this->actingAs($user)->postJson('/api/v1/games/lobbies', [
+            $response = $this->actingAs($user)->postJson('/api/v1/floor/lobbies', [
                 'game_title' => 'connect-four',
                 'is_public' => false,
                 'scheduled_at' => $pastTime->toIso8601String(),

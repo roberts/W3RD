@@ -50,4 +50,24 @@ return [
         'expiration_minutes' => 5, // Rematch requests expire after 5 minutes
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Floor Coordination Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Settings for matchmaking signals and proposals that power the casino
+    | floor coordination namespace.
+    |
+    */
+
+    'floor' => [
+        'matchmaking' => [
+            'signal_ttl_minutes' => 5,
+        ],
+        'proposals' => [
+            'max_active_per_user' => 5,
+            'expiration_minutes' => 5,
+        ],
+    ],
+
 ];

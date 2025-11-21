@@ -48,9 +48,13 @@ class GameHelper
     /**
      * Submit a game action.
      */
-    public static function submitAction(Game $game, User $user, array $actionData): TestResponse
+    public static function submitAction(Game $game, User $user, array $actionData, ?string $idempotencyKey = null): TestResponse
     {
-        return test()->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", $actionData);
+        $idempotencyKey = $idempotencyKey ?? \Illuminate\Support\Str::uuid()->toString();
+
+        return test()->actingAs($user)
+            ->withHeader('X-Idempotency-Key', $idempotencyKey)
+            ->postJson("/api/v1/games/{$game->ulid}/action", $actionData);
     }
 
     /**

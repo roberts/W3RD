@@ -96,7 +96,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             $rematchRequest->refresh();
             expect($rematchRequest->status)->toBe('accepted')
-                ->and($rematchRequest->new_game_id)->not->toBeNull();
+                ->and($rematchRequest->game_id)->not->toBeNull();
 
             Event::assertDispatched(RematchAccepted::class);
         });

@@ -12,7 +12,7 @@ use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Models\Game\RematchRequest;
+use App\Models\Game\Proposal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,10 +24,12 @@ class RematchService
     /**
      * Create a rematch request.
      */
-    public function createRematchRequest(Game $game, User $requestingUser): RematchRequest
+    public function createRematchRequest(Game $game, User $requestingUser): Proposal
     {
+        $status = $this->resolveGameStatus($game);
+
         // Validate game is completed
-        if ($game->status !== GameStatus::COMPLETED) {
+        if ($status !== GameStatus::COMPLETED) {
             throw new RematchNotAvailableException('Can only request rematch for completed games.');
         }
 
@@ -69,7 +71,7 @@ class RematchService
         }
 
         // Check for existing pending request
-        $existing = RematchRequest::where('original_game_id', $game->id)
+        $existing = Proposal::where('original_game_id', $game->id)
             ->where('status', 'pending')
             ->first();
 
@@ -77,12 +79,16 @@ class RematchService
             throw new RematchNotAvailableException('A rematch request already exists for this game.');
         }
 
-        $expirationMinutes = config('protocol.rematch.expiration_minutes', 5);
+        $expirationMinutes = config('protocol.floor.proposals.expiration_minutes', 5);
 
-        $rematchRequest = RematchRequest::create([
+        $rematchRequest = Proposal::create([
             'original_game_id' => $game->id,
             'requesting_user_id' => $requestingUser->id,
             'opponent_user_id' => $opponent->user_id,
+            'title_slug' => $game->title_slug->value,
+            'mode_id' => $game->mode_id,
+            'type' => 'rematch',
+            'game_settings' => $game->game_settings,
             'status' => 'pending',
             'expires_at' => Carbon::now()->addMinutes($expirationMinutes),
         ]);
@@ -117,7 +123,7 @@ class RematchService
     /**
      * Accept a rematch request and create a new game.
      */
-    public function acceptRematchRequest(RematchRequest $rematchRequest, User $acceptingUser, bool $isAutoAccept = false): Game
+    public function acceptRematchRequest(Proposal $rematchRequest, User $acceptingUser, bool $isAutoAccept = false): Game
     {
         // Validate user is the opponent (skip for auto-accepts)
         if (! $isAutoAccept && $rematchRequest->opponent_user_id !== $acceptingUser->id) {
@@ -188,7 +194,8 @@ class RematchService
             // Update rematch request
             $rematchRequest->update([
                 'status' => 'accepted',
-                'new_game_id' => $newGame->id,
+                'game_id' => $newGame->id,
+                'responded_at' => now(),
             ]);
 
             event(new RematchAccepted($rematchRequest, $newGame));
@@ -200,7 +207,7 @@ class RematchService
     /**
      * Decline a rematch request.
      */
-    public function declineRematchRequest(RematchRequest $rematchRequest, User $decliningUser): RematchRequest
+    public function declineRematchRequest(Proposal $rematchRequest, User $decliningUser): Proposal
     {
         // Validate user is the opponent by comparing user ID directly
         if ($rematchRequest->opponent_user_id !== $decliningUser->id) {
@@ -212,7 +219,10 @@ class RematchService
             throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
-        $rematchRequest->update(['status' => 'declined']);
+        $rematchRequest->update([
+            'status' => 'declined',
+            'responded_at' => now(),
+        ]);
 
         event(new RematchDeclined($rematchRequest));
 
@@ -224,15 +234,23 @@ class RematchService
      */
     public function expireOldRequests(): int
     {
-        $expired = RematchRequest::where('status', 'pending')
+        $expired = Proposal::where('status', 'pending')
             ->where('expires_at', '<=', Carbon::now())
             ->get();
 
         foreach ($expired as $request) {
-            $request->update(['status' => 'expired']);
+            $request->update([
+                'status' => 'expired',
+                'responded_at' => now(),
+            ]);
             event(new RematchExpired($request));
         }
 
         return $expired->count();
+    }
+
+    private function resolveGameStatus(Game $game): GameStatus
+    {
+        return $game->status;
     }
 }

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     public function __construct(
-        private AuthService $authService,
         private TrackAuthenticationEntryAction $trackEntry
     ) {}
 

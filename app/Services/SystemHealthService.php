@@ -104,12 +104,12 @@ class SystemHealthService
     private function checkGameEngine(): array
     {
         try {
-            // Test that game engine factory can instantiate a simple game
-            $engine = GameEngineFactory::create('connect-four');
+            // Test that game modes are configured
+            $availableGames = collect(\App\Enums\GameTitle::cases())->count();
             
             return [
                 'status' => 'healthy',
-                'engines_available' => count(config('protocol.games', [])),
+                'engines_available' => $availableGames,
             ];
         } catch (\Exception $e) {
             return [

@@ -148,6 +148,14 @@ class User extends Authenticatable
         return $this->hasMany(UserTitleLevel::class);
     }
 
+    public function tournaments(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Tournament::class, 'tournament_user')
+            ->using(\App\Models\TournamentUser::class)
+            ->withPivot(['status', 'seed', 'placement', 'earnings'])
+            ->withTimestamps();
+    }
+
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);

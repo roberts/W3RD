@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Mode $mode
  * @property \Illuminate\Database\Eloquent\Collection<int, Player> $players
  * @property \Illuminate\Database\Eloquent\Collection<int, Action> $actions
+ * @property Player|null $winner
  * @property GameStatus $status
  * @property int|null $mode_id
  * @property int|null $creator_id
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $winner_position
  * @property int|null $turn_number
  * @property array|null $game_state
+ * @property array|null $game_settings
  * @property \Illuminate\Support\Carbon|null $started_at
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon|null $expires_at
@@ -34,6 +36,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property OutcomeType|null $outcome_type
  * @property array|null $outcome_details
  * @property GameTitle $title_slug
+ * @property string $game_title
+ * @property array|null $final_scores
+ * @property array|null $xp_awarded
+ * @property array|null $rewards
  */
 class Game extends Model
 {
@@ -65,6 +71,9 @@ class Game extends Model
         'outcome_type' => OutcomeType::class,
         'outcome_details' => 'array',
         'game_state' => 'array',
+        'final_scores' => 'array',
+        'xp_awarded' => 'array',
+        'rewards' => 'array',
         'turn_number' => 'integer',
         'mode_id' => 'integer',
         'winner_position' => 'integer',
@@ -118,8 +127,7 @@ class Game extends Model
         return $this->hasMany(Action::class);
     }
 
-    // Helper methods
-    public function isFinished(): bool
+    public function isCompleted(): bool
     {
         return $this->status === GameStatus::COMPLETED;
     }

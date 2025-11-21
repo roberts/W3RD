@@ -108,8 +108,11 @@ describe('Profile Management', function () {
                 'name' => 'ab', // Too short
             ]);
 
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors(['name']);
+            $response->assertStatus(422);
+            // Check custom error format
+            $errors = $response->json('errors');
+            $hasNameError = collect($errors)->contains('field', 'name');
+            expect($hasNameError)->toBeTrue();
         });
     });
 
@@ -170,8 +173,11 @@ describe('Profile Management', function () {
                 'username' => 'takenusername',
             ]);
 
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors(['username']);
+            $response->assertStatus(422);
+            // Check custom error format
+            $errors = $response->json('errors');
+            $hasUsernameError = collect($errors)->contains('field', 'username');
+            expect($hasUsernameError)->toBeTrue();
         });
 
         it('validates username length', function () {
@@ -187,8 +193,11 @@ describe('Profile Management', function () {
                 'username' => 'ab', // Too short (min 3)
             ]);
 
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors(['username']);
+            $response->assertStatus(422);
+            // Check custom error format
+            $errors = $response->json('errors');
+            $hasUsernameError = collect($errors)->contains('field', 'username');
+            expect($hasUsernameError)->toBeTrue();
         });
     });
 });

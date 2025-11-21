@@ -194,7 +194,7 @@ describe('RematchService', function () {
 
             $request->refresh();
             expect($request->status)->toBe('accepted')
-                ->and($request->new_game_id)->toBe($newGame->id);
+                ->and($request->game_id)->toBe($newGame->id);
         });
     });
 

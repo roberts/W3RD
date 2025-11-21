@@ -24,7 +24,7 @@ describe('Lobby Player Management', function () {
             $invitee = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($host)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+            $response = $this->actingAs($host)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/players", [
                 'username' => $invitee->username,
             ]);
 
@@ -43,7 +43,7 @@ describe('Lobby Player Management', function () {
             $invitee = User::factory()->create();
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
-            $response = $this->actingAs($otherUser)->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+            $response = $this->actingAs($otherUser)->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/players", [
                 'username' => $invitee->username,
             ]);
 
@@ -64,7 +64,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($invitee)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}",
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$invitee->username}",
                 ['status' => 'accepted']
             );
 
@@ -88,7 +88,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($invitee)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}",
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$invitee->username}",
                 ['status' => 'declined']
             );
 
@@ -106,7 +106,7 @@ describe('Lobby Player Management', function () {
             $lobby = Lobby::factory()->public()->create(['host_id' => $host->id, 'min_players' => 3]);
 
             $response = $this->actingAs($joiner)->putJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$joiner->username}",
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$joiner->username}",
                 ['status' => 'accepted']
             );
 
@@ -132,7 +132,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($host)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}"
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$player->username}"
             );
 
             $response->assertStatus(204);
@@ -147,7 +147,7 @@ describe('Lobby Player Management', function () {
             $lobby = Lobby::factory()->create(['host_id' => $host->id]);
 
             $response = $this->actingAs($host)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$host->username}"
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$host->username}"
             );
 
             $response->assertStatus(422);
@@ -165,7 +165,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($otherUser)->deleteJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}"
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$player->username}"
             );
 
             $response->assertStatus(403);
@@ -189,7 +189,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($invitee)->postJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$invitee->username}/accept"
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$invitee->username}/accept"
             );
 
             // Should reject accepting invitation to cancelled lobby
@@ -215,7 +215,7 @@ describe('Lobby Player Management', function () {
             ]);
 
             $response = $this->actingAs($user)->postJson(
-                "/api/v1/games/lobbies/{$lobby->ulid}/players/{$user->username}/join"
+                "/api/v1/floor/lobbies/{$lobby->ulid}/players/{$user->username}/join"
             );
 
             // Should reject joining full lobby (400/422) or accept gracefully if not enforced
@@ -246,7 +246,7 @@ describe('Lobby Player Management', function () {
             // Non-host tries to kick from different client
             $response = $this->actingAs($player)
                 ->withHeader('X-Client-Key', '2')
-                ->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$otherPlayer->username}");
+                ->deleteJson("/api/v1/floor/lobbies/{$lobby->ulid}/players/{$otherPlayer->username}");
 
             $response->assertStatus(403);
         });
@@ -266,12 +266,12 @@ describe('Lobby Player Management', function () {
             // Host kicks from one session
             $response1 = $this->actingAs($host)
                 ->withHeader('X-Client-Key', '1')
-                ->deleteJson("/api/v1/games/lobbies/{$lobby->ulid}/players/{$player->username}");
+                ->deleteJson("/api/v1/floor/lobbies/{$lobby->ulid}/players/{$player->username}");
 
             // Host verifies from different session
             $response2 = $this->actingAs($host)
                 ->withHeader('X-Client-Key', '2')
-                ->getJson("/api/v1/games/lobbies/{$lobby->ulid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobby->ulid}");
 
             expect($response1->status())->toBe(204);
             expect($response2->status())->toBe(200);
@@ -298,7 +298,7 @@ describe('Lobby Player Management', function () {
 
             $extraUser = User::factory()->create();
             $response = $this->actingAs($extraUser)
-                ->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+                ->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/players", [
                     'username' => $extraUser->username,
                 ]);
 
@@ -328,7 +328,7 @@ describe('Lobby Player Management', function () {
             // Try to add 5th player
             $extraUser = User::factory()->create();
             $response = $this->actingAs($extraUser)
-                ->postJson("/api/v1/games/lobbies/{$lobby->ulid}/players", [
+                ->postJson("/api/v1/floor/lobbies/{$lobby->ulid}/players", [
                     'username' => $extraUser->username,
                 ]);
 

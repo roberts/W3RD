@@ -64,7 +64,9 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // Player 1 makes valid move
-        $response1 = $this->actingAs($user1)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response1 = $this->actingAs($user1)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 0],
         ]);
@@ -73,7 +75,9 @@ describe('Concurrent Game Actions', function () {
         // Note: In tests, these run sequentially, so after player1's move completes,
         // it IS now player2's turn. To test true concurrency, this would need
         // async processing. For now, expect player 2 to succeed since it's their turn.
-        $response2 = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response2 = $this->actingAs($user2)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 1],
         ]);
@@ -103,7 +107,9 @@ describe('Concurrent Game Actions', function () {
         // Make 5 rapid moves
         for ($i = 0; $i < 5; $i++) {
             $currentUser = $i % 2 === 0 ? $user1 : $user2;
-            $response = $this->actingAs($currentUser)->postJson("/api/v1/games/{$game->ulid}/action", [
+            $response = $this->actingAs($currentUser)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
                 'action_type' => 'drop_piece',
                 'action_details' => ['column' => $i % 7],
             ]);
@@ -136,12 +142,16 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // Submit same action twice rapidly
-        $response1 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response1 = $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 3],
         ]);
 
-        $response2 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response2 = $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 3],
         ]);
@@ -173,7 +183,9 @@ describe('Concurrent Game Actions', function () {
         $originalTurn = $game->turn_number;
 
         // Submit invalid action
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response = $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 99], // Invalid column
         ]);
@@ -206,7 +218,9 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // This tests that the action is atomic - either fully completes or fully rolls back
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response = $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 3],
         ]);
@@ -273,7 +287,9 @@ describe('Database Transaction Safety', function () {
         $originalState = $game->game_state;
 
         // Invalid action should not persist any changes
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response = $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => -1], // Invalid
         ]);
@@ -303,7 +319,9 @@ describe('Database Transaction Safety', function () {
         ]);
 
         // Submit invalid action
-        $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $this->actingAs($user)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 999],
         ]);
@@ -341,7 +359,9 @@ describe('Database Transaction Safety', function () {
         ]);
 
         // Make winning move
-        $response = $this->actingAs($user1)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response = $this->actingAs($user1)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 3],
         ]);
@@ -352,7 +372,9 @@ describe('Database Transaction Safety', function () {
         expect($game->status)->toBe(GameStatusEnum::COMPLETED);
 
         // Try to make another move (should fail - game completed)
-        $response2 = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
+        $response2 = $this->actingAs($user2)
+                ->withHeader('X-Idempotency-Key', \Illuminate\Support\Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
             'action_type' => 'drop_piece',
             'action_details' => ['column' => 4],
         ]);

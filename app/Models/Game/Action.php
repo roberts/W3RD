@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ActionType $action_type
  * @property array|null $action_details
  * @property string|null $status
+ * @property array|null $resulting_state
  * @property Player $player
  * @property Game $game
  * @property \Illuminate\Support\Carbon|null $created_at

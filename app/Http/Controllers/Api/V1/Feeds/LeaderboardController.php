@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Feeds;
 
 use App\Enums\GameTitle;
 use App\Exceptions\ResourceNotFoundException;

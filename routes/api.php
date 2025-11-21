@@ -9,17 +9,33 @@ use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
-use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BillingController;
-use App\Http\Controllers\Api\V1\GameActionController;
-use App\Http\Controllers\Api\V1\GameController;
-use App\Http\Controllers\Api\V1\LeaderboardController;
+use App\Http\Controllers\Api\V1\Competitions\BracketController;
+use App\Http\Controllers\Api\V1\Competitions\CompetitionController;
+use App\Http\Controllers\Api\V1\Competitions\EntryController;
+use App\Http\Controllers\Api\V1\Competitions\StandingsController;
+use App\Http\Controllers\Api\V1\Competitions\StructureController;
+use App\Http\Controllers\Api\V1\Economy\BalanceController;
+use App\Http\Controllers\Api\V1\Economy\CashierController;
+use App\Http\Controllers\Api\V1\Economy\PlanController;
+use App\Http\Controllers\Api\V1\Economy\ReceiptController;
+use App\Http\Controllers\Api\V1\Economy\TransactionController;
+use App\Http\Controllers\Api\V1\Feeds\CasinoFloorController;
+use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
+use App\Http\Controllers\Api\V1\Feeds\LiveScoresController;
+use App\Http\Controllers\Api\V1\Floor\LobbyController;
+use App\Http\Controllers\Api\V1\Floor\ProposalController;
+use App\Http\Controllers\Api\V1\Floor\SignalController;
+use App\Http\Controllers\Api\V1\Games\GameAbandonController;
+use App\Http\Controllers\Api\V1\Games\GameActionController;
+use App\Http\Controllers\Api\V1\Games\GameConcedeController;
+use App\Http\Controllers\Api\V1\Games\GameController;
+use App\Http\Controllers\Api\V1\Games\GameOutcomeController;
+use App\Http\Controllers\Api\V1\Games\GameSyncController;
+use App\Http\Controllers\Api\V1\Games\GameTimelineController;
+use App\Http\Controllers\Api\V1\Games\GameTimerController;
 use App\Http\Controllers\Api\V1\Library\GameLibraryController;
 use App\Http\Controllers\Api\V1\Library\GameRulesController;
-use App\Http\Controllers\Api\V1\LobbyController;
-use App\Http\Controllers\Api\V1\LobbyPlayerController;
-use App\Http\Controllers\Api\V1\QuickplayController;
-use App\Http\Controllers\Api\V1\RematchController;
 use App\Http\Controllers\Api\V1\System\ConfigController;
 use App\Http\Controllers\Api\V1\System\HealthController;
 use App\Http\Controllers\Api\V1\System\TimeController;
@@ -84,9 +100,103 @@ Route::prefix('v1')->group(function () {
     });
 
     // ========================================
+    // Floor Namespace - Matchmaking & Lobbies
+    // ========================================
+    Route::middleware('auth:sanctum')->prefix('floor')->group(function () {
+        Route::controller(LobbyController::class)->prefix('lobbies')->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::get('/{lobby_ulid}', 'show');
+            Route::delete('/{lobby_ulid}', 'destroy');
+            Route::post('/{lobby_ulid}/ready-check', 'readyCheck');
+            Route::post('/{lobby_ulid}/seat', 'seat');
+            Route::post('/{lobby_ulid}/players', 'invite');
+            Route::put('/{lobby_ulid}/players/{username}', 'respond');
+            Route::delete('/{lobby_ulid}/players/{username}', 'kick');
+        });
+
+        Route::post('/signals', [SignalController::class, 'store']);
+        Route::delete('/signals/{signal:ulid}', [SignalController::class, 'destroy']);
+
+        Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::post('/proposals/{proposal:ulid}/accept', [ProposalController::class, 'accept']);
+        Route::post('/proposals/{proposal:ulid}/decline', [ProposalController::class, 'decline']);
+    });
+
+    // ========================================
+    // Games Namespace - Active Game Management
+    // ========================================
+    Route::middleware('auth:sanctum')->prefix('games')->group(function () {
+        Route::get('/', [GameController::class, 'index']);
+        Route::get('/{gameUlid}', [GameController::class, 'show']);
+        
+        // Action submission with idempotency
+        Route::post('/{gameUlid}/action', [GameActionController::class, 'store'])
+            ->middleware('idempotency');
+        Route::get('/{gameUlid}/options', [GameActionController::class, 'options']);
+        
+        // Timer and timeline information
+        Route::get('/{gameUlid}/timer', [GameTimerController::class, 'show']);
+        Route::get('/{gameUlid}/timeline', [GameTimelineController::class, 'show']);
+        
+        // Game exit options
+        Route::post('/{gameUlid}/concede', [GameConcedeController::class, 'store']);
+        Route::post('/{gameUlid}/abandon', [GameAbandonController::class, 'store']);
+        
+        // Outcome and sync
+        Route::get('/{gameUlid}/outcome', [GameOutcomeController::class, 'show']);
+        Route::get('/{gameUlid}/sync', [GameSyncController::class, 'show']);
+    });
+
+    // ========================================
+    // Economy Namespace - Balance & Subscriptions
+    // ========================================
+    Route::middleware('auth:sanctum')->prefix('economy')->group(function () {
+        Route::get('/balance', [BalanceController::class, 'index']);
+        Route::get('/transactions', [TransactionController::class, 'index']);
+        
+        // Cashier operations (approved clients only, with idempotency)
+        Route::post('/cashier', [CashierController::class, 'store'])
+            ->middleware('idempotency');
+        
+        Route::get('/plans', [PlanController::class, 'index']);
+        Route::post('/receipts/{provider}', [ReceiptController::class, 'store']);
+    });
+
+    // ========================================
+    // Feeds Namespace - Real-Time Data Streams
+    // ========================================
+    Route::prefix('feeds')->group(function () {
+        // SSE endpoints for live data
+        Route::get('/games', [LiveScoresController::class, 'games']);
+        Route::get('/wins', [LiveScoresController::class, 'wins']);
+        Route::get('/leaderboards/{gameTitle}', [LeaderboardController::class, 'show']);
+        Route::get('/tournaments', [CasinoFloorController::class, 'tournaments']);
+        Route::get('/challenges', [CasinoFloorController::class, 'challenges']);
+        Route::get('/achievements', [CasinoFloorController::class, 'achievements']);
+    });
+
+    // ========================================
+    // Competitions Namespace - Tournaments
+    // ========================================
+    Route::prefix('competitions')->group(function () {
+        Route::get('/', [CompetitionController::class, 'index']);
+        Route::get('/{tournamentUlid}', [CompetitionController::class, 'show']);
+        
+        Route::middleware('auth:sanctum')->group(function () {
+            // Entry with idempotency
+            Route::post('/{tournamentUlid}/enter', [EntryController::class, 'store'])
+                ->middleware('idempotency');
+            
+            Route::get('/{tournamentUlid}/structure', [StructureController::class, 'show']);
+            Route::get('/{tournamentUlid}/bracket', [BracketController::class, 'show']);
+            Route::get('/{tournamentUlid}/standings', [StandingsController::class, 'show']);
+        });
+    });
+
+    // ========================================
     // Legacy Routes (will be migrated to namespaces)
     // ========================================
-    Route::get('/leaderboard/{gameTitle}', [LeaderboardController::class, 'show']);
 
     // Gamer Protocol (requires authentication)
     Route::middleware('auth:sanctum')->group(function () {
@@ -109,43 +219,6 @@ Route::prefix('v1')->group(function () {
             Route::get('/levels', [UserLevelsController::class, 'show']);
             Route::get('/alerts', [AlertController::class, 'index']);
             Route::post('/alerts/mark-as-read', [AlertController::class, 'markAsRead']);
-        });
-
-        // Game Routes
-        Route::prefix('games')->group(function () {
-            // Quickplay (Public Matchmaking) - must be before /games/{gameUlid}
-            Route::prefix('quickplay')->controller(QuickplayController::class)->group(function () {
-                Route::post('/', 'join');
-                Route::delete('/', 'leave');
-                Route::post('/accept', 'accept');
-            });
-
-            // Rematch Requests
-            Route::post('/rematch/{requestId}/accept', [RematchController::class, 'accept']);
-            Route::post('/rematch/{requestId}/decline', [RematchController::class, 'decline']);
-
-            // Lobbies - must be before /games/{gameUlid}
-            Route::prefix('lobbies')->group(function () {
-                Route::get('/', [LobbyController::class, 'index']);
-                Route::post('/', [LobbyController::class, 'store']);
-                Route::get('/{lobby_ulid}', [LobbyController::class, 'show']);
-                Route::delete('/{lobby_ulid}', [LobbyController::class, 'destroy']);
-                Route::post('/{lobby_ulid}/ready-check', [LobbyController::class, 'readyCheck']);
-
-                // Lobby Players
-                Route::post('/{lobby_ulid}/players', [LobbyPlayerController::class, 'store']);
-                Route::put('/{lobby_ulid}/players/{username}', [LobbyPlayerController::class, 'update']);
-                Route::delete('/{lobby_ulid}/players/{username}', [LobbyPlayerController::class, 'destroy']);
-            });
-
-            // Games
-            Route::get('/', [GameController::class, 'index']);
-            Route::get('/{gameUlid}', [GameController::class, 'show']);
-            Route::post('/{gameUlid}/action', [GameActionController::class, 'store']);
-            Route::get('/{gameUlid}/options', [GameActionController::class, 'options']);
-            Route::get('/{gameUlid}/history', [GameController::class, 'history']);
-            Route::post('/{gameUlid}/forfeit', [GameController::class, 'forfeit']);
-            Route::post('/{gameUlid}/rematch', [GameController::class, 'requestRematch']);
         });
     });
 });

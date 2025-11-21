@@ -67,6 +67,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            // If the exception has a custom response (like from FormRequest), use it
+            if ($e->response) {
+                return $e->response;
+            }
+
             $correlationId = (string) Str::uuid();
 
             return response()->json([

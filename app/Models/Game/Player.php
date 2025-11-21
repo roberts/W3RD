@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $client_id
  * @property string|null $name
  * @property int|null $position_id
+ * @property int $position
  * @property string|null $color
  * @property User $user
  * @property Client $client

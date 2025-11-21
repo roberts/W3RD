@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
+use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Events\GameFound;
-use App\Http\Controllers\Api\V1\QuickplayController;
 use App\Services\Agents\AgentSchedulingService;
 use App\Services\GameCreationService;
 use App\Services\PlayerActivityService;
@@ -221,7 +221,7 @@ class ProcessQuickplayQueue implements ShouldQueue
             // Apply penalties to non-accepters
             foreach ([$userId1, $userId2] as $userId) {
                 if (! isset($acceptances[$userId]) || $acceptances[$userId] === '0') {
-                    app(QuickplayController::class)->applyDodgePenalty($userId);
+                    app(ApplyDodgePenaltyAction::class)->execute($userId);
                 }
             }
 

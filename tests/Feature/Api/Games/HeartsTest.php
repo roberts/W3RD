@@ -33,7 +33,7 @@ describe('Hearts Game API', function () {
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/floor/lobbies', [
                     'game_title' => 'hearts',
                     'game_mode' => 'standard',
                     'max_players' => 4,
@@ -46,7 +46,7 @@ describe('Hearts Game API', function () {
             // Other players join
             foreach ([$users[1], $users[2], $users[3]] as $user) {
                 $this->actingAs($user)
-                    ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                         'status' => 'accepted',
                     ])
                     ->assertStatus(200);
@@ -54,7 +54,7 @@ describe('Hearts Game API', function () {
 
             // Check if game was auto-started
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -81,7 +81,7 @@ describe('Hearts Game API', function () {
 
             // Create lobby with 4 max players
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/floor/lobbies', [
                     'game_title' => 'hearts',
                     'game_mode' => 'standard',
                     'min_players' => 4,
@@ -95,7 +95,7 @@ describe('Hearts Game API', function () {
             // Only 2 other players join (3 total, need 4)
             foreach ([$users[1], $users[2]] as $user) {
                 $this->actingAs($user)
-                    ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                         'status' => 'accepted',
                     ])
                     ->assertStatus(200);
@@ -103,7 +103,7 @@ describe('Hearts Game API', function () {
 
             // Try to start game with only 3 players - should fail
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
             // Game should not be created (game.ulid should be null)
             expect($lobbyCheck->json('data.lobby.status'))->toBe('pending')
@@ -118,7 +118,7 @@ describe('Hearts Game API', function () {
 
                 // Create and start game
                 $lobbyResponse = $this->actingAs($users[0])
-                    ->postJson('/api/v1/games/lobbies', [
+                    ->postJson('/api/v1/floor/lobbies', [
                         'game_title' => 'hearts',
                         'game_mode' => 'standard',
                         'max_players' => 4,
@@ -128,14 +128,14 @@ describe('Hearts Game API', function () {
                 $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
-                    $this->actingAs($user)
-                        ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                        $this->actingAs($user)
+                            ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }
 
                 $lobbyCheck = $this->actingAs($users[0])
-                    ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                    ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -190,7 +190,7 @@ describe('Hearts Game API', function () {
 
                 // Create and start game
                 $lobbyResponse = $this->actingAs($users[0])
-                    ->postJson('/api/v1/games/lobbies', [
+                    ->postJson('/api/v1/floor/lobbies', [
                         'game_title' => 'hearts',
                         'game_mode' => 'standard',
                         'max_players' => 4,
@@ -200,14 +200,14 @@ describe('Hearts Game API', function () {
                 $lobbyUlid = $lobbyResponse->json('data.ulid');
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
-                    $this->actingAs($user)
-                        ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                        $this->actingAs($user)
+                            ->putJson("/api/v1/floor/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }
 
                 $lobbyCheck = $this->actingAs($users[0])
-                    ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                    ->getJson("/api/v1/floor/lobbies/{$lobbyUlid}");
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 

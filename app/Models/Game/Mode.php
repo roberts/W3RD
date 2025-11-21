@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property GameTitle $title_slug
+ * @property string $slug
+ * @property string $name
+ * @property bool $is_active
+ * @property int|null $turn_time_limit_seconds
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 class Mode extends Model
 {
     use HasFactory;

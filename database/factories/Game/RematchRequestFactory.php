@@ -27,7 +27,7 @@ class RematchRequestFactory extends Factory
             'original_game_id' => Game::factory(),
             'requesting_user_id' => User::factory(),
             'opponent_user_id' => User::factory(),
-            'new_game_id' => null,
+            'game_id' => null,
             'status' => 'pending',
             'expires_at' => now()->addMinutes(5),
         ];
@@ -40,7 +40,7 @@ class RematchRequestFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'accepted',
-            'new_game_id' => Game::factory(),
+            'game_id' => Game::factory(),
         ]);
     }
 

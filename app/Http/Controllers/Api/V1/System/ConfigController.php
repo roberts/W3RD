@@ -27,9 +27,12 @@ class ConfigController extends Controller
                 'leaderboards' => true,
                 'sse_feeds' => true,
             ],
-            'supported_games' => Title::query()
-                ->select('key', 'name', 'min_players', 'max_players')
-                ->get(),
+            'supported_games' => collect(\App\Enums\GameTitle::cases())->map(fn ($title) => [
+                'key' => $title->value,
+                'name' => $title->label(),
+                'min_players' => $title->minPlayers(),
+                'max_players' => $title->maxPlayers(),
+            ]),
             'limits' => [
                 'max_concurrent_games' => 10,
                 'max_lobby_players' => 8,

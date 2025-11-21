@@ -16,6 +16,8 @@ class JoinQuickplayRequest extends FormRequest
         return [
             'game_title' => 'required|string',
             'game_mode' => 'nullable|string|in:standard,blitz,rapid',
+            'skill_rating' => 'nullable|integer|min:1|max:5000',
+            'preferences' => 'nullable|array',
         ];
     }
 

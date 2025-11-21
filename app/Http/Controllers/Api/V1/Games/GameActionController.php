@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Actions\Game\FindGameByUlidAction;
 use App\Actions\Game\HandleTimeoutAction;

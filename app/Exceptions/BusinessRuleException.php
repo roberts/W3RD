@@ -57,4 +57,20 @@ class BusinessRuleException extends Exception
             429
         );
     }
+
+    public static function tournamentRegistrationClosed(): self
+    {
+        return new self(
+            'TOURNAMENT_REGISTRATION_CLOSED',
+            'Tournament registration is closed'
+        );
+    }
+
+    public static function alreadyInTournament(): self
+    {
+        return new self(
+            'ALREADY_IN_TOURNAMENT',
+            'You are already registered for this tournament'
+        );
+    }
 }

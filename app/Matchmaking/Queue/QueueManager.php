@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Queue;
 
-use App\Matchmaking\Queue\Actions\JoinQueueAction;
-use App\Matchmaking\Queue\Actions\LeaveQueueAction;
 use App\DataTransferObjects\Matchmaking\QueueJoinResult;
 use App\Enums\GameTitle;
+use App\Matchmaking\Queue\Actions\JoinQueueAction;
+use App\Matchmaking\Queue\Actions\LeaveQueueAction;
 use App\Models\Auth\User;
 
 /**

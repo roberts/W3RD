@@ -2,12 +2,12 @@
 
 namespace App\Jobs;
 
-use App\Matchmaking\Queue\Actions\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Matchmaking\Queue\Actions\ApplyDodgePenaltyAction;
 use App\Services\Agents\AgentSchedulingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

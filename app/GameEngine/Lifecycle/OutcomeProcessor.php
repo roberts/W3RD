@@ -8,9 +8,7 @@ use App\Models\Game\Player;
 
 class OutcomeProcessor
 {
-    public function __construct(protected ProgressionManager $progressionManager)
-    {
-    }
+    public function __construct(protected ProgressionManager $progressionManager) {}
 
     /**
      * Calculate and store XP and rewards for game completion.

@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Redis;
 
 class JoinQuickplayQueueAction
 {
-    public function __construct(private PlayerActivityManager $playerActivityManager)
-    {
-    }
+    public function __construct(private PlayerActivityManager $playerActivityManager) {}
 
     /**
      * Add a user to the quickplay queue.

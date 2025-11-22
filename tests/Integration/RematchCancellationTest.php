@@ -2,11 +2,11 @@
 
 use App\Enums\PlayerActivityState;
 use App\Events\ProposalCancelled;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Proposal;
-use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;

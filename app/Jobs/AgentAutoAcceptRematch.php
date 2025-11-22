@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Enums\PlayerActivityState;
 use App\Events\ProposalCancelled;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use App\Models\Game\Proposal;
-use App\GameEngine\Player\PlayerActivityManager;
 use App\Services\RematchService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

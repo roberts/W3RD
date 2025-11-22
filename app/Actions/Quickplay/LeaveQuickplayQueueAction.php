@@ -4,8 +4,8 @@ namespace App\Actions\Quickplay;
 
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Models\Auth\User;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
 
 class LeaveQuickplayQueueAction

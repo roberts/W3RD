@@ -10,7 +10,6 @@ use App\Enums\GameAttributes\GamePacing;
 use App\Enums\GameAttributes\GameSequence;
 use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameAttributes\GameVisibility;
-use App\Games\BaseGameState;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\GameReporterContract;
@@ -18,15 +17,13 @@ use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Kernel\GameKernel;
 use App\GameEngine\Managers\PacingManager;
 use App\GameEngine\Managers\SequenceManager;
-use App\GameEngine\Managers\VisibilityManager;
 use App\GameEngine\TimerExpired\TimerExpiredManager;
 use App\GameEngine\ValidationResult;
+use App\Models\Auth\User;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
-use App\Models\Auth\User;
 use App\Providers\GameServiceProvider;
 use Carbon\Carbon;
-use Illuminate\Foundation\Application;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
@@ -76,7 +73,7 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
         $pacingDriver = GameServiceProvider::makePacingDriver(static::getPacing());
         $sequenceDriver = GameServiceProvider::makeSequenceDriver(static::getSequence());
         $visibilityDriver = GameServiceProvider::makeVisibilityDriver(static::getVisibility());
-        
+
         // Resolve TimerExpiredManager from container if not provided
         $timerExpiredManager = $timerExpiredManager ?? app(TimerExpiredManager::class);
         $timerExpiredDriver = $timerExpiredManager->getDriverFor(static::getTimer());
@@ -127,6 +124,7 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
     public function applyAction(object $gameState, object $action): object
     {
         $this->gameState = $this->kernel->applyAction($gameState, $action);
+
         return $this->gameState;
     }
 

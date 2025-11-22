@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Managers;
 
-use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\Interfaces\VisibilityDriver;
 
 class VisibilityManager

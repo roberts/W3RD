@@ -6,9 +6,9 @@ use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
-use App\Services\Agents\AgentSchedulingService;
 use App\GameEngine\Lifecycle\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Services\Agents\AgentSchedulingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -29,9 +29,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private const RECENT_OPPONENT_LIMIT = 3; // Remember last N opponents
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function handle(): void
     {

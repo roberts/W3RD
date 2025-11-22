@@ -9,11 +9,11 @@ use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\PacingDriver;
 use App\GameEngine\Interfaces\SequenceDriver;
-use App\GameEngine\TimerExpired\HandlerContract as TimerExpiredDriver;
 use App\GameEngine\Interfaces\VisibilityDriver;
+use App\GameEngine\TimerExpired\HandlerContract as TimerExpiredDriver;
 use App\GameEngine\ValidationResult;
-use App\Models\Game\Game;
 use App\Models\Auth\User;
+use App\Models\Game\Game;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 
@@ -41,7 +41,7 @@ class GameKernel
             if (! class_exists($handlerClass)) {
                 throw new InvalidArgumentException("Handler class {$handlerClass} not found.");
             }
-            
+
             // Use container to resolve handlers, allowing dependency injection
             $rules = $config['rules'] ?? [];
             $this->handlers[$actionClass] = $this->container->makeWith($handlerClass, ['rules' => $rules]);

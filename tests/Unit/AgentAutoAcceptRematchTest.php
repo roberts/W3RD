@@ -3,12 +3,12 @@
 use App\Enums\PlayerActivityState;
 use App\Events\ProposalAccepted;
 use App\Events\ProposalCancelled;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Proposal;
-use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;

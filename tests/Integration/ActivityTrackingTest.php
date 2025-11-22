@@ -6,11 +6,11 @@ use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
+use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
-use App\GameEngine\Lifecycle\GameBuilder;
-use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 

@@ -22,9 +22,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchService
 {
-    public function __construct(private PlayerActivityManager $playerActivityManager)
-    {
-    }
+    public function __construct(private PlayerActivityManager $playerActivityManager) {}
 
     /**
      * Create a rematch request.

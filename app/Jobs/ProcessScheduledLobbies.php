@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Enums\LobbyStatus;
-use App\Models\Game\Lobby;
 use App\GameEngine\Lifecycle\GameBuilder;
+use App\Models\Game\Lobby;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

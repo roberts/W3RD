@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Games\Checkers\Modes;
 
+use App\Enums\GameAttributes\GameTimer;
 use App\Games\Checkers\CheckersArbiter;
 use App\Games\Checkers\CheckersConfig;
 use App\Games\Checkers\CheckersProtocol;
 use App\Games\Checkers\CheckersReporter;
-use App\Enums\GameAttributes\GameTimer;
 
 /**
  * Standard Checkers mode implementation.

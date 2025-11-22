@@ -14,17 +14,17 @@ class TimerExpiredManager extends Manager
 {
     public function createForfeitDriver(): HandlerContract
     {
-        return new ForfeitDriver();
+        return new ForfeitDriver;
     }
 
     public function createPassDriver(): HandlerContract
     {
-        return new PassDriver();
+        return new PassDriver;
     }
 
     public function createNoneDriver(): HandlerContract
     {
-        return new NoneDriver();
+        return new NoneDriver;
     }
 
     public function getDefaultDriver(): string

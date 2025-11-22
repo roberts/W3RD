@@ -12,7 +12,6 @@ use App\Models\Game\Player;
 use App\Models\Game\Proposal;
 use App\Services\RematchService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Redis;
 use Mockery;
 
 describe('RematchService', function () {

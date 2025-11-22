@@ -20,7 +20,7 @@ class SynchronousTurnDriver implements PacingDriver
     public function validateActionTime(Game $game): void
     {
         if ($game->turn_ends_at && now()->isAfter($game->turn_ends_at)) {
-            throw new TurnTimerExpiredException();
+            throw new TurnTimerExpiredException;
         }
     }
 }

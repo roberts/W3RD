@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Managers;
 
-use App\Enums\GameAttributes\GameSequence;
 use App\GameEngine\Interfaces\SequenceDriver;
 
 class SequenceManager

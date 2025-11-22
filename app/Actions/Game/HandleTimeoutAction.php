@@ -4,7 +4,6 @@ namespace App\Actions\Game;
 
 use App\DataTransferObjects\Game\TimeoutResult;
 use App\Enums\GameStatus;
-use App\GameEngine\GameOutcome;
 use App\GameEngine\TimerExpired\TimerExpiredManager;
 use App\Http\Traits\ApiResponses;
 use App\Models\Game\Game;
@@ -14,9 +13,7 @@ class HandleTimeoutAction
 {
     use ApiResponses;
 
-    public function __construct(private TimerExpiredManager $timerExpiredManager)
-    {
-    }
+    public function __construct(private TimerExpiredManager $timerExpiredManager) {}
 
     /**
      * Check if the current turn has timed out and handle accordingly.
@@ -37,7 +34,7 @@ class HandleTimeoutAction
         /** @var Player|null $player */
         $player = $game->players()->where('id', $game->current_player_id)->first();
 
-        if (!$player) {
+        if (! $player) {
             return TimeoutResult::noTimeout();
         }
 

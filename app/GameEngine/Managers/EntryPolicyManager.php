@@ -16,9 +16,9 @@ class EntryPolicyManager
     public static function make(GameEntryPolicy $policy): EntryPolicyDriver
     {
         return match ($policy) {
-            GameEntryPolicy::LOCKED_ON_START => new LockedOnStartDriver(),
-            GameEntryPolicy::DROP_IN_DROP_OUT => new DropInDropOutDriver(),
-            GameEntryPolicy::REPLACEMENT_ONLY => new ReplacementOnlyDriver(),
+            GameEntryPolicy::LOCKED_ON_START => new LockedOnStartDriver,
+            GameEntryPolicy::DROP_IN_DROP_OUT => new DropInDropOutDriver,
+            GameEntryPolicy::REPLACEMENT_ONLY => new ReplacementOnlyDriver,
             default => throw new InvalidArgumentException("Unsupported game entry policy: {$policy->value}"),
         };
     }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\GameEngine\Drivers\Sequence;
 
 use App\GameEngine\Interfaces\SequenceDriver;
-use App\Models\Game\Game;
 use App\Models\Auth\User;
+use App\Models\Game\Game;
 
 class SequentialDriver implements SequenceDriver
 {

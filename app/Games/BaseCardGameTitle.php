@@ -10,6 +10,10 @@ use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameArbiterContract;
 use App\GameEngine\Interfaces\GameReporterContract;
+use App\GameEngine\Traits\Pacing\SynchronousPacing;
+use App\GameEngine\Traits\Sequence\SequentialTurns;
+use App\GameEngine\Traits\TimerExpired\ForfeitOnTimerExpired;
+use App\GameEngine\Traits\Visibility\HiddenInformation;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 
@@ -22,7 +26,12 @@ use App\Models\Game\Game;
  */
 abstract class BaseCardGameTitle extends BaseGameTitle
 {
-    // Game Attribute Implementations
+    use SequentialTurns;
+    use SynchronousPacing;
+    use HiddenInformation;
+    use ForfeitOnTimerExpired;
+
+    // Game Attribute Implementations - these are now pure metadata
     public static function getPacing(): GamePacing
     {
         return GamePacing::TURN_BASED_SYNC;

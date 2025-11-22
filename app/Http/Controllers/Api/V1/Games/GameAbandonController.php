@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Actions\Game\FindGameByUlidAction;
-use App\Enums\GameStatus;
-use App\Enums\OutcomeType;
-use App\Events\GameStatusChanged;
+use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
@@ -17,7 +15,8 @@ class GameAbandonController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected FindGameByUlidAction $findGame
+        protected FindGameByUlidAction $findGame,
+        protected PlayerInitiatedConclusion $conclusionService
     ) {}
 
     /**
@@ -35,16 +34,8 @@ class GameAbandonController extends Controller
             return $error;
         }
 
-        // Mark game as abandoned (no winner)
-        $game->status = GameStatus::ABANDONED;
-        $game->winner_id = null;
-        $game->outcome_type = OutcomeType::ABANDONED;
-        $game->completed_at = now();
-        $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
-        $game->save();
-
-        // Broadcast status change
-        event(new GameStatusChanged($game));
+        // Process the abandon through GameEngine
+        $this->conclusionService->processAbandon($game);
 
         return $this->messageResponse('Game abandoned', 200);
     }

@@ -6,7 +6,7 @@ use App\Actions\Quickplay\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
-use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Services\Agents\AgentSchedulingService;
 use Illuminate\Bus\Queueable;

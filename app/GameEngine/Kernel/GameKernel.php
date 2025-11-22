@@ -7,10 +7,7 @@ namespace App\GameEngine\Kernel;
 use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
-use App\GameEngine\Interfaces\PacingDriver;
-use App\GameEngine\Interfaces\SequenceDriver;
-use App\GameEngine\Interfaces\VisibilityDriver;
-use App\GameEngine\TimerExpired\HandlerContract as TimerExpiredDriver;
+use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\ValidationResult;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -24,10 +21,7 @@ class GameKernel
 
     public function __construct(
         private GameConfigContract $config,
-        public PacingDriver $pacingDriver,
-        public SequenceDriver $sequenceDriver,
-        public VisibilityDriver $visibilityDriver,
-        public TimerExpiredDriver $timerExpiredDriver,
+        public GameTitleContract $gameTitle,
         private ?Container $container = null,
     ) {
         $this->container = $container ?? app();
@@ -51,10 +45,10 @@ class GameKernel
     public function validatePlayerAction(Game $game, object $gameState, User $player, object $action): ValidationResult
     {
         // 1. Pacing Check (Is player too slow?)
-        $this->pacingDriver->validateActionTime($game);
+        $this->gameTitle->validateActionTime($game);
 
         // 2. Sequence Check (Is it the player's turn?)
-        if (! $this->sequenceDriver->isPlayerTurn($game, $player)) {
+        if (! $this->gameTitle->isPlayerTurn($game, $player)) {
             return ValidationResult::invalid(
                 GameErrorCode::NOT_PLAYER_TURN->value,
                 'It is not your turn to act.'
@@ -94,15 +88,15 @@ class GameKernel
 
     public function advanceGame(Game $game): Game
     {
-        $game = $this->sequenceDriver->advanceTurn($game);
-        $this->pacingDriver->startTurnTimer($game);
+        $game = $this->gameTitle->advanceTurn($game);
+        $this->gameTitle->startTurnTimer($game);
 
         return $game;
     }
 
     public function redactStateForPlayer(object $gameState, User $player): object
     {
-        return $this->visibilityDriver->redact($gameState, $player);
+        return $this->gameTitle->redact($gameState, $player);
     }
 
     public function getAvailableActions(object $state, string $playerUlid): array
@@ -134,25 +128,5 @@ class GameKernel
     {
         // Convert App\GameEngine\Actions\PlacePiece to place_piece
         return strtolower(class_basename($actionClass));
-    }
-
-    public function getPacingDriver(): PacingDriver
-    {
-        return $this->pacingDriver;
-    }
-
-    public function getSequenceDriver(): SequenceDriver
-    {
-        return $this->sequenceDriver;
-    }
-
-    public function getVisibilityDriver(): VisibilityDriver
-    {
-        return $this->visibilityDriver;
-    }
-
-    public function getTimerExpiredDriver(): TimerExpiredDriver
-    {
-        return $this->timerExpiredDriver;
     }
 }

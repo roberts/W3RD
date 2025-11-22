@@ -11,5 +11,6 @@ parameters:
     tmpDir: var/cache/phpstan
 
     ignoreErrors:
+        - '#Trait .* is used zero times and is not analysed\.#'
 
     excludePaths:

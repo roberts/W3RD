@@ -170,20 +170,20 @@ The attribute system currently drives four major, scalable components within the
 #### 1. Game Visibility & The `GameRedactor`
 
 *   **Attribute**: `getVisibility(): GameVisibility`
-*   **Values**: `PERFECT_INFORMATION`, `HIDDEN_INFORMATION`
+*   **Values**: `FULL_INFORMATION`, `HIDDEN_INFORMATION`
 *   **Engine Logic**: When preparing an API response, the engine checks this attribute.
-    *   If `PERFECT_INFORMATION` (like Checkers), the entire game state is returned as-is via the `NullGameRedactor`.
+    *   If `FULL_INFORMATION` (like Checkers), the entire game state is returned as-is via the `NullGameRedactor`.
     *   If `HIDDEN_INFORMATION` (like Hearts), the request is routed through a game-specific `GameRedactor` (e.g., `HeartsRedactor`) which is responsible for removing sensitive data (like other players' hands) before sending the state to the user.
 *   **Scalability**: To add a new game with hidden info (e.g., Poker), you simply create a `PokerRedactor`, and the `GameRedactorServiceProvider` will automatically use it based on the game's `getVisibility()` attribute.
 
-#### 2. Game Pacing & The `TimeoutJob`
+#### 2. Game Pacing & The `TimerExpiredJob`
 
 *   **Attribute**: `getPacing(): GamePacing`
 *   **Values**: `NONE`, `RELAXED`, `STANDARD`, `BLITZ`
 *   **Engine Logic**: After a player's turn, the `GameActionController` checks this attribute.
-    *   It dispatches a `TimeoutJob` with a delay corresponding to the pacing value (e.g., 15 seconds for `BLITZ`, 5 minutes for `RELAXED`).
+    *   It dispatches a `TimerExpiredJob` with a delay corresponding to the pacing value (e.g., 15 seconds for `BLITZ`, 5 minutes for `RELAXED`).
     *   If the pacing is `NONE`, no job is dispatched.
-*   **Scalability**: Adding new time controls (e.g., a `TOURNAMENT` pace) is as simple as adding a case to the enum and a corresponding delay in the controller's `dispatchTimeoutJob` method.
+*   **Scalability**: Adding new time controls (e.g., a `TOURNAMENT` pace) is as simple as adding a case to the enum and a corresponding delay in the controller's `dispatchTimerExpiredJob` method.
 
 #### 3. Game Sequence & Turn Management
 

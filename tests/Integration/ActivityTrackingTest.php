@@ -6,7 +6,7 @@ use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
-use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use App\Models\Game\Game;

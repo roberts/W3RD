@@ -15,14 +15,10 @@ use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Kernel\GameKernel;
-use App\GameEngine\Managers\PacingManager;
-use App\GameEngine\Managers\SequenceManager;
-use App\GameEngine\TimerExpired\TimerExpiredManager;
 use App\GameEngine\ValidationResult;
 use App\Models\Auth\User;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
-use App\Providers\GameServiceProvider;
 use Carbon\Carbon;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
@@ -60,34 +56,15 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
     public function __construct(
         Game $game,
-        ?PacingManager $pacingManager = null,
-        ?SequenceManager $sequenceManager = null,
-        ?TimerExpiredManager $timerExpiredManager = null,
     ) {
         $this->game = $game;
 
         $gameStateClass = $this->getGameStateClass();
         $this->gameState = $gameStateClass::fromArray($game->game_state);
 
-        // Resolve drivers via the service provider factory methods
-        $pacingDriver = GameServiceProvider::makePacingDriver(static::getPacing());
-        $sequenceDriver = GameServiceProvider::makeSequenceDriver(static::getSequence());
-        $visibilityDriver = GameServiceProvider::makeVisibilityDriver(static::getVisibility());
-
-        // Resolve TimerExpiredManager from container if not provided
-        $timerExpiredManager = $timerExpiredManager ?? app(TimerExpiredManager::class);
-        $timerExpiredDriver = $timerExpiredManager->getDriverFor(static::getTimer());
-
-        // Wrap drivers in manager instances
-        $pacingManager = $pacingManager ?? new PacingManager($pacingDriver);
-        $sequenceManager = $sequenceManager ?? new SequenceManager($sequenceDriver);
-
         $this->kernel = new GameKernel(
             config: $this->getGameConfig(),
-            pacingDriver: $pacingManager->getDriver(),
-            sequenceDriver: $sequenceManager->getDriver(),
-            visibilityDriver: $visibilityDriver,
-            timerExpiredDriver: $timerExpiredDriver,
+            gameTitle: $this,
         );
     }
 

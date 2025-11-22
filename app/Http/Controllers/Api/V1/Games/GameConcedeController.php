@@ -3,15 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Actions\Game\FindGameByUlidAction;
-use App\Enums\GameStatus;
-use App\Enums\OutcomeType;
-use App\Events\GameCompleted;
-use App\Events\GameStatusChanged;
-use App\Exceptions\GameAccessDeniedException;
+use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Game\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +15,8 @@ class GameConcedeController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected FindGameByUlidAction $findGame
+        protected FindGameByUlidAction $findGame,
+        protected PlayerInitiatedConclusion $conclusionService
     ) {}
 
     /**
@@ -39,37 +35,8 @@ class GameConcedeController extends Controller
             return $error;
         }
 
-        // Determine the winner (opponent of the conceding player)
-        /** @var Player|null $opponent */
-        $opponent = $game->players()
-            ->where('user_id', '!=', $user->id)
-            ->first();
-
-        if (! $opponent) {
-            throw new GameAccessDeniedException(
-                'Cannot determine opponent for this game',
-                $game->ulid,
-                ['user_id' => $user->id]
-            );
-        }
-
-        // Update game status
-        $game->status = GameStatus::COMPLETED;
-        $game->winner_id = $opponent->user_id;
-        $game->outcome_type = OutcomeType::FORFEIT;
-        $game->completed_at = now();
-        $game->duration_seconds = (int) now()->diffInSeconds($game->started_at ?? $game->created_at);
-        $game->save();
-
-        // Broadcast status change
-        event(new GameStatusChanged($game));
-
-        // Dispatch GameCompleted event for activity tracking and cooldown
-        event(new GameCompleted(
-            game: $game,
-            winnerUlid: $opponent->ulid,
-            isDraw: false
-        ));
+        // Process the concede through GameEngine
+        $this->conclusionService->processConcede($game, $user);
 
         return $this->messageResponse('Game conceded successfully', 200);
     }

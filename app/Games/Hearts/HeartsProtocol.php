@@ -11,8 +11,10 @@ use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
+use App\GameEngine\Traits\Sequence\PhaseBasedTurns;
 use App\Games\BaseCardGameTitle;
 use App\Games\Hearts\Actions\HeartsActionMapper;
+use App\Models\Auth\User;
 use App\Models\Game\Game;
 
 /**
@@ -22,6 +24,25 @@ use App\Models\Game\Game;
  */
 abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleContract
 {
+    use PhaseBasedTurns;
+    
+    // Override the parent's SequentialTurns trait methods with PhaseBasedTurns behavior
+    public function isPlayerTurn(Game $game, User $player): bool
+    {
+        $phase = $game->game_state['current_phase'] ?? null;
+
+        // Delegate to a phase-specific handler to determine who can act.
+        // Phase-specific logic will be implemented in concrete game methods
+        return true; // Placeholder - override in game implementation
+    }
+
+    public function advanceTurn(Game $game): Game
+    {
+        // Logic to advance the phase or the player within the phase.
+        // Phase-specific logic will be implemented in concrete game methods
+        return $game;
+    }
+
     // Game Attribute Implementations
     public static function getSequence(): GameSequence
     {

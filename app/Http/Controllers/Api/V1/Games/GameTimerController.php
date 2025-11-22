@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Actions\Game\FindGameByUlidAction;
+use App\Exceptions\Game\TimerNotAvailableException;
+use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
@@ -15,7 +17,8 @@ class GameTimerController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected FindGameByUlidAction $findGame
+        protected FindGameByUlidAction $findGame,
+        protected TimerInformationService $timerService
     ) {}
 
     /**
@@ -43,6 +46,13 @@ class GameTimerController extends Controller
         $stateClass = $mode->getStateClass();
         $gameState = $stateClass::fromArray($game->game_state ?? []);
 
+        // Get timer information (throws exception if no timer)
+        try {
+            $timerInfo = $this->timerService->getTimerInfo($game, $mode, $gameState);
+        } catch (TimerNotAvailableException $e) {
+            return $this->errorResponse($e->getMessage(), 400);
+        }
+
         // Find current player
         /** @var \App\Models\Game\Player|null $currentPlayer */
         $currentPlayer = $game->players()
@@ -50,8 +60,7 @@ class GameTimerController extends Controller
             ->with('user:id,username')
             ->first();
 
-        $turnData = [
-            'turn_number' => $gameState->turnNumber,
+        return $this->dataResponse([
             'current_player' => [
                 'ulid' => $currentPlayer?->ulid,
                 'user_id' => $currentPlayer?->user_id,
@@ -59,21 +68,7 @@ class GameTimerController extends Controller
             ],
             'is_your_turn' => $gameState->currentPlayerUlid === $player->ulid,
             'phase' => $gameState->phase ?? null,
-        ];
-
-        // Add timeout information if available
-        if (isset($gameState->turnStartedAt) && $game->mode->turn_time_limit_seconds) {
-            $turnStarted = \Carbon\Carbon::parse($gameState->turnStartedAt);
-            $timeLimit = $game->mode->turn_time_limit_seconds;
-            $timeRemaining = max(0, $timeLimit - $turnStarted->diffInSeconds(now()));
-
-            $turnData['timeout'] = [
-                'started_at' => $turnStarted->toIso8601String(),
-                'limit_seconds' => $timeLimit,
-                'remaining_seconds' => $timeRemaining,
-            ];
-        }
-
-        return $this->dataResponse($turnData);
+            'timer' => $timerInfo,
+        ]);
     }
 }

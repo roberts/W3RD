@@ -15,7 +15,7 @@ use App\Events\LobbyReadyCheck;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyStateException;
 use App\Exceptions\PlayerBusyException;
-use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;

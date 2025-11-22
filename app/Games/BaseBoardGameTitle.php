@@ -8,12 +8,21 @@ use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameArbiterContract;
 use App\GameEngine\Interfaces\GameReporterContract;
+use App\GameEngine\Traits\Pacing\SynchronousPacing;
+use App\GameEngine\Traits\Sequence\SequentialTurns;
+use App\GameEngine\Traits\TimerExpired\ForfeitOnTimerExpired;
+use App\GameEngine\Traits\Visibility\FullInformation;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 
 abstract class BaseBoardGameTitle extends BaseGameTitle
 {
-    // Game Attribute Implementations
+    use SequentialTurns;
+    use SynchronousPacing;
+    use FullInformation;
+    use ForfeitOnTimerExpired;
+
+    // Game Attribute Implementations - these are now pure metadata
     public static function getPacing(): GamePacing
     {
         return GamePacing::TURN_BASED_SYNC;
@@ -26,7 +35,7 @@ abstract class BaseBoardGameTitle extends BaseGameTitle
 
     public static function getVisibility(): GameVisibility
     {
-        return GameVisibility::PERFECT_INFORMATION;
+        return GameVisibility::FULL_INFORMATION;
     }
 
     protected const DEFAULT_TURN_TIME_SECONDS = 60;

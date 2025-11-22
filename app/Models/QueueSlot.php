@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MatchmakingSignal extends Model
+class QueueSlot extends Model
 {
     use HasFactory, HasUlids;
+
+    protected $table = 'queue_slots';
 
     protected $fillable = [
         'ulid',
         'user_id',
-        'game_preference',
+        'title_slug',
+        'mode_id',
         'skill_rating',
         'status',
         'preferences',
@@ -28,7 +31,7 @@ class MatchmakingSignal extends Model
     ];
 
     /**
-     * Get the user who created this signal.
+     * Get the user who occupies this queue slot.
      */
     public function user(): BelongsTo
     {
@@ -36,7 +39,7 @@ class MatchmakingSignal extends Model
     }
 
     /**
-     * Check if signal is active.
+     * Check if slot is active.
      */
     public function isActive(): bool
     {
@@ -45,7 +48,7 @@ class MatchmakingSignal extends Model
     }
 
     /**
-     * Check if signal has expired.
+     * Check if slot has expired.
      */
     public function hasExpired(): bool
     {

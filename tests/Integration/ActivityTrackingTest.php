@@ -1,7 +1,7 @@
 <?php
 
-use App\Actions\Quickplay\JoinQuickplayQueueAction;
-use App\Actions\Quickplay\LeaveQuickplayQueueAction;
+use App\Actions\Queue\JoinQueueAction;
+use App\Actions\Queue\LeaveQueueAction;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
@@ -53,39 +53,39 @@ describe('Activity Tracking in Game Creation', function () {
         $this->gameBuilder = app(GameBuilder::class);
     });
 
-    describe('quickplay queue', function () {
-        it('sets IN_QUEUE when joining quickplay', function () {
+    describe('matchmaking queue', function () {
+        it('sets IN_QUEUE when joining queue', function () {
             $user = User::factory()->create();
-            $joinAction = new JoinQuickplayQueueAction;
+            $joinAction = new JoinQueueAction;
 
             $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IN_QUEUE);
         });
 
-        it('sets IDLE when leaving quickplay queue', function () {
+        it('sets IDLE when leaving queue', function () {
             $user = User::factory()->create();
 
             // Join queue first
-            $joinAction = new JoinQuickplayQueueAction;
+            $joinAction = new JoinQueueAction;
             $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
 
             // Then leave
-            $leaveAction = new LeaveQuickplayQueueAction;
-            $leaveAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard');
+            $leaveAction = new LeaveQueueAction;
+            $leaveAction->execute($user);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IDLE);
         });
     });
 
-    describe('game creation from quickplay', function () {
-        it('sets IN_GAME for both players when creating from quickplay match', function () {
+    describe('game creation from queue', function () {
+        it('sets IN_GAME for both players when creating from queue match', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
 
-            // Simulate quickplay match data in Redis
+            // Simulate queue match data in Redis
             $matchId = 'test-match-123';
-            $matchKey = "quickplay:match:{$matchId}";
+            $matchKey = "queue:match:{$matchId}";
             Redis::hmset($matchKey, [
                 'game_title' => 'connect-four',
                 'game_mode' => 'standard',
@@ -93,7 +93,7 @@ describe('Activity Tracking in Game Creation', function () {
                 'player_'.$user2->id.'_client' => '1',
             ]);
 
-            $game = $this->gameBuilder->createFromQuickplayMatch(
+            $game = $this->gameBuilder->createFromQueueMatch(
                 [$user1->id, $user2->id],
                 $matchId
             );

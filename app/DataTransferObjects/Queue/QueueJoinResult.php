@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransferObjects\Quickplay;
+namespace App\DataTransferObjects\Queue;
 
 class QueueJoinResult
 {

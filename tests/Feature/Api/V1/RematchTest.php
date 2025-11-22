@@ -252,12 +252,12 @@ describe('Rematch Management', function () {
 
             $rematchUlid = $rematchResponse->json('data.ulid');
 
-            // Player 1 joins quickplay queue (starts looking for different game)
+            // Player 1 joins matchmaking queue (starts looking for different game)
             Redis::shouldReceive('exists')->andReturn(false)->byDefault();
             Redis::shouldReceive('hset')->andReturn(true);
             Redis::shouldReceive('hgetall')->andReturn([]);
 
-            $this->actingAs($player1)->postJson('/api/v1/floor/signals', [
+            $this->actingAs($player1)->postJson('/api/v1/floor/queue', [
                 'game_title' => 'connect-four',
             ]);
 

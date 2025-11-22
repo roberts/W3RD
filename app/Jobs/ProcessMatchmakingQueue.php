@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Actions\Quickplay\ApplyDodgePenaltyAction;
+use App\Actions\Queue\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 
-class ProcessQuickplayQueue implements ShouldQueue
+class ProcessMatchmakingQueue implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -44,7 +44,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private function processQueue(GameTitle $gameTitle, string $mode): void
     {
-        $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
+        $queueKey = "queue:{$gameTitle->value}:{$mode}";
 
         // Get all players in queue
         $players = Redis::zrange($queueKey, 0, -1, ['WITHSCORES' => true]);
@@ -84,7 +84,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
     private function getWaitTime(int $userId): int
     {
-        $joinTimestamp = Redis::hget('quickplay:timestamps', (string) $userId);
+        $joinTimestamp = Redis::hget('queue:timestamps', (string) $userId);
 
         if (! $joinTimestamp) {
             return 0;
@@ -148,8 +148,8 @@ class ProcessQuickplayQueue implements ShouldQueue
 
         // Only remove from queue once we successfully found an agent
         Redis::zrem($queueKey, (string) $userId);
-        Redis::hdel('quickplay:timestamps', (string) $userId);
-        Redis::hdel('quickplay:clients', (string) $userId);
+        Redis::hdel('queue:timestamps', (string) $userId);
+        Redis::hdel('queue:clients', (string) $userId);
 
         \Log::info('Matched user with AI agent', [
             'user_id' => $userId,
@@ -165,12 +165,12 @@ class ProcessQuickplayQueue implements ShouldQueue
     private function createMatchConfirmation(int $userId1, int $userId2, GameTitle $gameTitle, string $mode, string $queueKey): void
     {
         $matchId = (string) Str::ulid();
-        $confirmKey = "quickplay:accept:{$matchId}";
-        $matchKey = "quickplay:match:{$matchId}";
+        $confirmKey = "queue:accept:{$matchId}";
+        $matchKey = "queue:match:{$matchId}";
 
         // Get client_ids for both players
-        $client1 = Redis::hget('quickplay:clients', (string) $userId1);
-        $client2 = Redis::hget('quickplay:clients', (string) $userId2);
+        $client1 = Redis::hget('queue:clients', (string) $userId1);
+        $client2 = Redis::hget('queue:clients', (string) $userId2);
 
         // Create confirmation hash with TTL
         Redis::hset($confirmKey, (string) $userId1, '0');
@@ -212,7 +212,7 @@ class ProcessQuickplayQueue implements ShouldQueue
     {
         // After timeout, check if both players accepted
         dispatch(function () use ($matchId, $userId1, $userId2) {
-            $confirmKey = "quickplay:accept:{$matchId}";
+            $confirmKey = "queue:accept:{$matchId}";
 
             if (! Redis::exists($confirmKey)) {
                 return; // Already processed
@@ -244,7 +244,7 @@ class ProcessQuickplayQueue implements ShouldQueue
     {
         try {
             // Get client ID for human player
-            $clientId = Redis::hget('quickplay:clients', (string) $humanUserId) ?: 1;
+            $clientId = Redis::hget('queue:clients', (string) $humanUserId) ?: 1;
 
             // Prepare player data
             $playerData = [
@@ -254,7 +254,7 @@ class ProcessQuickplayQueue implements ShouldQueue
 
             // Create the game
             $gameBuilder = app(GameBuilder::class);
-            $game = $gameBuilder->createFromQuickplay($playerData, $gameTitle, $mode);
+            $game = $gameBuilder->createFromQueue($playerData, $gameTitle, $mode);
 
             // Track recent opponents for both human and agent
             Redis::lpush("recent_opponents:{$humanUserId}", $agentUserId);

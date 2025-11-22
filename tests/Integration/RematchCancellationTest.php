@@ -126,7 +126,7 @@ describe('Automatic Rematch Cancellation', function () {
     });
 
     describe('integration with activity states', function () {
-        it('triggers cancellation when joining quickplay queue', function () {
+        it('triggers cancellation when joining matchmaking queue', function () {
             $user = User::factory()->create();
             $opponent = User::factory()->create();
 

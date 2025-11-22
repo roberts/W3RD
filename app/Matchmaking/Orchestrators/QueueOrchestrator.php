@@ -6,113 +6,115 @@ namespace App\Matchmaking\Orchestrators;
 
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Matchmaking\Quickplay\QueueManager;
-use App\Matchmaking\Quickplay\SignalManager;
-use App\Matchmaking\Results\QuickplayResult;
+use App\Matchmaking\Queue\QueueManager;
+use App\Matchmaking\Queue\SlotManager;
+use App\Matchmaking\Results\QueueResult;
 use App\Matchmaking\Shared\PlayerAvailabilityChecker;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Orchestrates the complete quickplay matchmaking workflow.
- * Coordinates queue operations, signal creation, and availability checks.
+ * Orchestrates the complete queue matchmaking workflow.
+ * Coordinates queue operations, slot creation, and availability checks.
  */
-class QuickplayOrchestrator
+class QueueOrchestrator
 {
     public function __construct(
         private PlayerAvailabilityChecker $availabilityChecker,
         private QueueManager $queueManager,
-        private SignalManager $signalManager
+        private SlotManager $slotManager
     ) {}
 
     /**
-     * Process a user joining the quickplay queue.
+     * Process a user joining the matchmaking queue.
      *
      * Workflow:
      * 1. Attempt to join the queue (checks cooldown)
-     * 2. Create matchmaking signal
+     * 2. Create queue slot
      * 3. Update player state to IN_QUEUE
-     * 4. Return success result with signal
+     * 4. Return success result with slot
      */
     public function joinQueue(
         User $user,
         GameTitle $gameTitle,
         string $gameMode,
+        int $modeId,
         int $clientId,
         array $preferences = [],
         ?int $skillRating = null
-    ): QuickplayResult {
+    ): QueueResult {
         // Step 1: Attempt to join queue (handles cooldown check)
         $queueResult = $this->queueManager->joinQueue($user, $gameTitle, $gameMode, $clientId);
 
         if (! $queueResult->success) {
-            Log::info('Quickplay join failed: Cooldown active', [
+            Log::info('Queue join failed: Cooldown active', [
                 'user_id' => $user->id,
                 'cooldown_remaining' => $queueResult->cooldownRemaining,
             ]);
 
-            return QuickplayResult::cooldownActive(
+            return QueueResult::cooldownActive(
                 $queueResult->cooldownRemaining,
                 $queueResult->errorMessage
             );
         }
 
-        // Step 2: Create matchmaking signal
-        $signal = $this->signalManager->createSignal(
+        // Step 2: Create queue slot
+        $slot = $this->slotManager->createSlot(
             $user,
             $gameTitle,
             $gameMode,
+            $modeId,
             $clientId,
             $preferences,
             $skillRating
         );
 
-        // Step 3: Update player state (note: JoinQuickplayQueueAction already sets this, but we do it again for clarity)
+        // Step 3: Update player state (note: JoinQueueAction already sets this, but we do it again for clarity)
         $this->availabilityChecker->setState($user->id, PlayerActivityState::IN_QUEUE);
 
-        Log::info('Player joined quickplay queue', [
+        Log::info('Player joined matchmaking queue', [
             'user_id' => $user->id,
-            'signal_id' => $signal->id,
+            'slot_id' => $slot->id,
             'game_title' => $gameTitle->value,
             'game_mode' => $gameMode,
         ]);
 
-        return QuickplayResult::success($signal);
+        return QueueResult::success($slot);
     }
 
     /**
-     * Process a user leaving the quickplay queue.
+     * Process a user leaving the matchmaking queue.
      *
      * Workflow:
      * 1. Remove user from the queue
-     * 2. Cancel their matchmaking signal
+     * 2. Cancel their queue slot
      * 3. Return success result
      */
-    public function cancelQueue(User $user): QuickplayResult
+    public function cancelQueue(User $user): QueueResult
     {
         try {
             // Step 1: Leave the queue
             $this->queueManager->leaveQueue($user);
 
-            // Step 2: Cancel the signal
-            $signal = $this->signalManager->cancelSignal($user);
+            // Step 2: Cancel the slot
+            $slot = $this->slotManager->cancelSlot($user);
 
             // Step 3: Clear player state
             $this->availabilityChecker->setState($user->id, PlayerActivityState::IDLE);
 
-            Log::info('Player left quickplay queue', [
+            Log::info('Player left matchmaking queue', [
                 'user_id' => $user->id,
             ]);
 
-            return QuickplayResult::success($signal);
+            return QueueResult::success($slot);
         } catch (\Exception $e) {
-            Log::error('Failed to leave quickplay queue', [
+            Log::error('Failed to leave matchmaking queue', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return QuickplayResult::failed(
+            return QueueResult::failed(
                 'Failed to leave matchmaking queue.',
                 ['error' => $e->getMessage()]
             );

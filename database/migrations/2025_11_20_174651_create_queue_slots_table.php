@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('matchmaking_signals', function (Blueprint $table) {
+        Schema::create('queue_slots', function (Blueprint $table) {
             $table->id();
             $table->char('ulid', 26)->unique()->index();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('game_preference')->nullable(); // game title slug
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('title_slug', 50)->index();
+            $table->foreignId('mode_id')->constrained('modes');
             $table->integer('skill_rating')->nullable();
             $table->string('status')->default('active'); // active, matched, cancelled, expired
             $table->json('preferences')->nullable(); // Additional matchmaking preferences
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
-            $table->index(['status', 'game_preference']);
+            $table->index(['status', 'title_slug']);
             $table->index(['user_id', 'status']);
         });
     }

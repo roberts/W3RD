@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Actions\Quickplay;
+namespace App\Actions\Queue;
 
-use App\DataTransferObjects\Quickplay\QueueJoinResult;
+use App\DataTransferObjects\Queue\QueueJoinResult;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
 
-class JoinQuickplayQueueAction
+class JoinQueueAction
 {
     public function __construct(private PlayerActivityManager $playerActivityManager) {}
 
     /**
-     * Add a user to the quickplay queue.
+     * Add a user to the matchmaking queue.
      */
     public function execute(User $user, GameTitle $gameTitle, string $gameMode, int $clientId): QueueJoinResult
     {
         // Check for cooldown
-        $cooldownKey = "cooldown:quickplay:{$user->id}";
+        $cooldownKey = "cooldown:queue:{$user->id}";
         if (Redis::exists($cooldownKey)) {
             $ttl = Redis::ttl($cooldownKey);
 
@@ -27,16 +27,16 @@ class JoinQuickplayQueueAction
         }
 
         // Add to queue (sorted set by skill level)
-        $queueKey = "quickplay:{$gameTitle->value}:{$gameMode}";
+        $queueKey = "queue:{$gameTitle->value}:{$gameMode}";
         $skillLevel = $this->getUserSkillLevel($user, $gameTitle);
 
         Redis::zadd($queueKey, $skillLevel, (string) $user->id);
 
         // Store join timestamp
-        Redis::hset('quickplay:timestamps', (string) $user->id, now()->timestamp);
+        Redis::hset('queue:timestamps', (string) $user->id, now()->timestamp);
 
         // Store client_id for this player
-        Redis::hset('quickplay:clients', (string) $user->id, (string) $clientId);
+        Redis::hset('queue:clients', (string) $user->id, (string) $clientId);
 
         // Set player activity state to IN_QUEUE
         $this->playerActivityManager->setState($user->id, PlayerActivityState::IN_QUEUE);

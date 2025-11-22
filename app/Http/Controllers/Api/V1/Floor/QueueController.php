@@ -3,29 +3,30 @@
 namespace App\Http\Controllers\Api\V1\Floor;
 
 use App\Actions\Client\ResolveClientIdAction;
-use App\DataTransferObjects\Floor\SignalData;
+use App\DataTransferObjects\Queue\QueueSlotData;
 use App\Enums\GameTitle;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Http\Requests\Floor\StoreSignalRequest;
+use App\Http\Requests\Floor\StoreQueueRequest;
 use App\Http\Traits\ApiResponses;
-use App\Matchmaking\Orchestrators\QuickplayOrchestrator;
-use App\Models\MatchmakingSignal;
+use App\Matchmaking\Orchestrators\QueueOrchestrator;
+use App\Models\Game\Mode;
+use App\Models\QueueSlot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
-class SignalController extends Controller
+class QueueController extends Controller
 {
     use ApiResponses;
 
     public function __construct(
         protected ResolveClientIdAction $resolveClientId,
-        protected QuickplayOrchestrator $quickplayOrchestrator
+        protected QueueOrchestrator $queueOrchestrator
     ) {
         $this->middleware('auth:sanctum');
     }
 
-    public function store(StoreSignalRequest $request): JsonResponse
+    public function store(StoreQueueRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
@@ -40,14 +41,28 @@ class SignalController extends Controller
         }
 
         $gameMode = $validated['game_mode'] ?? 'standard';
+        
+        // Resolve the mode from the database
+        $mode = Mode::firstOrCreate(
+            [
+                'title_slug' => $gameTitle->value,
+                'slug' => $gameMode,
+            ],
+            [
+                'name' => ucfirst($gameMode),
+                'is_active' => true,
+            ]
+        );
+        
         $clientId = $this->resolveClientId->execute($request);
         $preferences = $validated['preferences'] ?? [];
         $skillRating = $validated['skill_rating'] ?? null;
 
-        $result = $this->quickplayOrchestrator->joinQueue(
+        $result = $this->queueOrchestrator->joinQueue(
             $request->user(),
             $gameTitle,
             $gameMode,
+            $mode->id,
             $clientId,
             $preferences,
             $skillRating
@@ -77,20 +92,20 @@ class SignalController extends Controller
         }
 
         return $this->createdResponse(
-            SignalData::fromModel($result->signal)->toArray(),
-            'Matchmaking signal created'
+            QueueSlotData::fromModel($result->slot)->toArray(),
+            'Queue slot created'
         );
     }
 
-    public function destroy(Request $request, MatchmakingSignal $signal): JsonResponse
+    public function destroy(Request $request, QueueSlot $slot): JsonResponse
     {
         $user = $request->user();
 
-        if ($signal->user_id !== $user->id) {
-            return $this->forbiddenResponse('You can only cancel your own signal');
+        if ($slot->user_id !== $user->id) {
+            return $this->forbiddenResponse('You can only cancel your own queue slot');
         }
 
-        $result = $this->quickplayOrchestrator->cancelQueue($user);
+        $result = $this->queueOrchestrator->cancelQueue($user);
 
         if (! $result->success) {
             return $this->errorResponse(
@@ -102,8 +117,8 @@ class SignalController extends Controller
         }
 
         return $this->dataResponse(
-            SignalData::fromModel($signal->fresh())->toArray(),
-            'Matchmaking signal cancelled'
+            QueueSlotData::fromModel($slot->fresh())->toArray(),
+            'Queue slot cancelled'
         );
     }
 }

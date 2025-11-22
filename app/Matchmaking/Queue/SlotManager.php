@@ -2,29 +2,30 @@
 
 declare(strict_types=1);
 
-namespace App\Matchmaking\Quickplay;
+namespace App\Matchmaking\Queue;
 
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
-use App\Models\MatchmakingSignal;
+use App\Models\QueueSlot;
 use Carbon\Carbon;
 
 /**
- * Manages matchmaking signal lifecycle (create, cancel, expire).
+ * Manages queue slot lifecycle (create, cancel, expire).
  */
-class SignalManager
+class SlotManager
 {
     /**
-     * Create or update a matchmaking signal for a user.
+     * Create or update a queue slot for a user.
      */
-    public function createSignal(
+    public function createSlot(
         User $user,
         GameTitle $gameTitle,
         string $gameMode,
+        int $modeId,
         int $clientId,
         array $preferences = [],
         ?int $skillRating = null
-    ): MatchmakingSignal {
+    ): QueueSlot {
         $ttl = (int) config('protocol.floor.matchmaking.signal_ttl_minutes', 5);
 
         $preferences = array_merge(
@@ -35,10 +36,11 @@ class SignalManager
             $preferences
         );
 
-        return MatchmakingSignal::updateOrCreate(
+        return QueueSlot::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'game_preference' => $gameTitle->value,
+                'title_slug' => $gameTitle->value,
+                'mode_id' => $modeId,
                 'skill_rating' => $skillRating,
                 'status' => 'active',
                 'preferences' => $preferences,
@@ -48,31 +50,31 @@ class SignalManager
     }
 
     /**
-     * Cancel an active signal for a user.
+     * Cancel an active slot for a user.
      */
-    public function cancelSignal(User $user): ?MatchmakingSignal
+    public function cancelSlot(User $user): ?QueueSlot
     {
-        $signal = MatchmakingSignal::where('user_id', $user->id)
+        $slot = QueueSlot::where('user_id', $user->id)
             ->where('status', 'active')
             ->first();
 
-        if (! $signal) {
+        if (! $slot) {
             return null;
         }
 
-        $signal->update([
+        $slot->update([
             'status' => 'cancelled',
             'expires_at' => Carbon::now(),
         ]);
 
-        return $signal;
+        return $slot;
     }
 
     /**
-     * Check if a signal has expired.
+     * Check if a slot has expired.
      */
-    public function isExpired(MatchmakingSignal $signal): bool
+    public function isExpired(QueueSlot $slot): bool
     {
-        return $signal->expires_at && $signal->expires_at->isPast();
+        return $slot->expires_at && $slot->expires_at->isPast();
     }
 }

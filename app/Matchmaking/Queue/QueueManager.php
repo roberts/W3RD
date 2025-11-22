@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Matchmaking\Quickplay;
+namespace App\Matchmaking\Queue;
 
-use App\Actions\Quickplay\JoinQuickplayQueueAction;
-use App\Actions\Quickplay\LeaveQuickplayQueueAction;
-use App\DataTransferObjects\Quickplay\QueueJoinResult;
+use App\Actions\Queue\JoinQueueAction;
+use App\Actions\Queue\LeaveQueueAction;
+use App\DataTransferObjects\Queue\QueueJoinResult;
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
 
 /**
- * Manages quickplay queue operations (join, leave).
+ * Manages queue operations (join, leave).
  */
 class QueueManager
 {
     public function __construct(
-        private JoinQuickplayQueueAction $joinQueue,
-        private LeaveQuickplayQueueAction $leaveQueue
+        private JoinQueueAction $joinQueue,
+        private LeaveQueueAction $leaveQueue
     ) {}
 
     /**

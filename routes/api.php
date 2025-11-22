@@ -23,7 +23,7 @@ use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
 use App\Http\Controllers\Api\V1\Feeds\LiveScoresController;
 use App\Http\Controllers\Api\V1\Floor\LobbyController;
 use App\Http\Controllers\Api\V1\Floor\ProposalController;
-use App\Http\Controllers\Api\V1\Floor\SignalController;
+use App\Http\Controllers\Api\V1\Floor\QueueController;
 use App\Http\Controllers\Api\V1\Games\GameAbandonController;
 use App\Http\Controllers\Api\V1\Games\GameActionController;
 use App\Http\Controllers\Api\V1\Games\GameConcedeController;
@@ -111,8 +111,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{lobby_ulid}/players/{username}', 'kick');
         });
 
-        Route::post('/signals', [SignalController::class, 'store']);
-        Route::delete('/signals/{signal:ulid}', [SignalController::class, 'destroy']);
+        Route::post('/queue', [QueueController::class, 'store']);
+        Route::delete('/queue/{slot:ulid}', [QueueController::class, 'destroy']);
 
         Route::post('/proposals', [ProposalController::class, 'store']);
         Route::post('/proposals/{proposal:ulid}/accept', [ProposalController::class, 'accept']);

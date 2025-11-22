@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Results;
 
-use App\Models\MatchmakingSignal;
+use App\Models\QueueSlot;
 
 /**
- * Result object for quickplay/matchmaking operations.
+ * Result object for queue/matchmaking operations.
  */
-readonly class QuickplayResult
+readonly class QueueResult
 {
     private function __construct(
         public bool $success,
-        public ?MatchmakingSignal $signal,
+        public ?QueueSlot $slot,
         public ?string $errorMessage,
         public ?int $cooldownRemaining,
         public array $context,
     ) {}
 
-    public static function success(?MatchmakingSignal $signal, array $context = []): self
+    public static function success(?QueueSlot $slot, array $context = []): self
     {
         return new self(
             success: true,
-            signal: $signal,
+            slot: $slot,
             errorMessage: null,
             cooldownRemaining: null,
             context: $context,
@@ -34,7 +34,7 @@ readonly class QuickplayResult
     {
         return new self(
             success: false,
-            signal: null,
+            slot: null,
             errorMessage: $message,
             cooldownRemaining: $remainingSeconds,
             context: ['cooldown_remaining' => $remainingSeconds],
@@ -45,7 +45,7 @@ readonly class QuickplayResult
     {
         return new self(
             success: false,
-            signal: null,
+            slot: null,
             errorMessage: $message,
             cooldownRemaining: null,
             context: $context,
@@ -68,13 +68,14 @@ readonly class QuickplayResult
             'context' => $this->context,
         ];
 
-        if ($this->signal) {
-            $response['signal'] = [
-                'ulid' => $this->signal->ulid,
-                'game_preference' => $this->signal->game_preference,
-                'preferences' => $this->signal->preferences,
-                'status' => $this->signal->status,
-                'expires_at' => $this->signal->expires_at?->toIso8601String(),
+        if ($this->slot) {
+            $response['slot'] = [
+                'ulid' => $this->slot->ulid,
+                'title_slug' => $this->slot->title_slug,
+                'mode_id' => $this->slot->mode_id,
+                'preferences' => $this->slot->preferences,
+                'status' => $this->slot->status,
+                'expires_at' => $this->slot->expires_at?->toIso8601String(),
             ];
         }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Quickplay;
+namespace App\Actions\Queue;
 
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
@@ -8,10 +8,10 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Redis;
 
-class LeaveQuickplayQueueAction
+class LeaveQueueAction
 {
     /**
-     * Remove a user from all quickplay queues.
+     * Remove a user from all matchmaking queues.
      */
     public function execute(User $user): void
     {
@@ -19,16 +19,16 @@ class LeaveQuickplayQueueAction
         $gameTitles = GameTitle::cases();
         foreach ($gameTitles as $gameTitle) {
             foreach (['standard', 'blitz', 'rapid'] as $mode) {
-                $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
+                $queueKey = "queue:{$gameTitle->value}:{$mode}";
                 Redis::zrem($queueKey, (string) $user->id);
             }
         }
 
         // Remove timestamp
-        Redis::hdel('quickplay:timestamps', (string) $user->id);
+        Redis::hdel('queue:timestamps', (string) $user->id);
 
         // Remove client_id
-        Redis::hdel('quickplay:clients', (string) $user->id);
+        Redis::hdel('queue:clients', (string) $user->id);
 
         // Set player activity to IDLE
         $activityService = app(PlayerActivityManager::class);

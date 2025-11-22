@@ -1,7 +1,7 @@
 <?php
 
 use App\Jobs\ExpireProposals;
-use App\Jobs\ProcessQuickplayQueue;
+use App\Jobs\ProcessMatchmakingQueue;
 use App\Jobs\ProcessScheduledLobbies;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -11,8 +11,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Schedule the quickplay queue processor
-Schedule::job(new ProcessQuickplayQueue)->everyTenSeconds();
+// Schedule the matchmaking queue processor
+Schedule::job(new ProcessMatchmakingQueue)->everyTenSeconds();
 
 // Schedule the scheduled lobbies processor
 Schedule::job(new ProcessScheduledLobbies)->everyMinute();

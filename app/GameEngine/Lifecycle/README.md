@@ -16,7 +16,7 @@ Lifecycle/
 Handles game initialization and setup before gameplay begins.
 
 ### GameBuilder
-- Creates games from lobbies or quickplay matches
+- Creates games from lobbies or queue matches
 - Sets up initial player positions and colors
 - Manages game creation transactions
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Quickplay;
+namespace App\Actions\Queue;
 
 use App\Enums\GameTitle;
 use Illuminate\Support\Facades\Redis;
@@ -12,8 +12,8 @@ class ApplyDodgePenaltyAction
      */
     public function execute(int $userId): void
     {
-        $penaltyKey = "cooldown:quickplay:{$userId}";
-        $offenseKey = "quickplay:offenses:{$userId}";
+        $penaltyKey = "cooldown:queue:{$userId}";
+        $offenseKey = "queue:offenses:{$userId}";
 
         // Get offense count
         $offenses = (int) Redis::get($offenseKey) ?: 0;
@@ -36,7 +36,7 @@ class ApplyDodgePenaltyAction
         $gameTitles = GameTitle::cases();
         foreach ($gameTitles as $gameTitle) {
             foreach (['standard', 'blitz', 'rapid'] as $mode) {
-                $queueKey = "quickplay:{$gameTitle->value}:{$mode}";
+                $queueKey = "queue:{$gameTitle->value}:{$mode}";
                 Redis::zrem($queueKey, (string) $userId);
             }
         }

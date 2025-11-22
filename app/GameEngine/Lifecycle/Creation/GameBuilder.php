@@ -19,11 +19,11 @@ use Illuminate\Support\Facades\Redis;
 class GameBuilder
 {
     /**
-     * Create a game from quickplay match.
+     * Create a game from matchmaking queue.
      *
      * @param  array  $playerData  Array of ['user_id' => int, 'client_id' => int]
      */
-    public function createFromQuickplay(array $playerData, GameTitle $gameTitle, string $gameMode = 'standard'): Game
+    public function createFromQueue(array $playerData, GameTitle $gameTitle, string $gameMode = 'standard'): Game
     {
         return DB::transaction(function () use ($playerData, $gameTitle, $gameMode) {
             // Get or create mode
@@ -157,12 +157,12 @@ class GameBuilder
     }
 
     /**
-     * Create a game from a quickplay match by match ID.
+     * Create a game from a queue match by match ID.
      */
-    public function createFromQuickplayMatch(array $playerIds, string $matchId): Game
+    public function createFromQueueMatch(array $playerIds, string $matchId): Game
     {
         // Get game title and mode from match ID stored in Redis
-        $matchKey = "quickplay:match:{$matchId}";
+        $matchKey = "queue:match:{$matchId}";
         $matchData = Redis::hgetall($matchKey);
 
         $gameTitle = GameTitle::from($matchData['game_title'] ?? 'connect-four');
@@ -178,8 +178,8 @@ class GameBuilder
             ];
         }, $playerIds);
 
-        // Create the game using the existing quickplay method
-        $game = $this->createFromQuickplay($playerData, $gameTitle, $gameMode);
+        // Create the game using the existing queue method
+        $game = $this->createFromQueue($playerData, $gameTitle, $gameMode);
 
         // Set both players to IN_GAME state
         $activityService = app(PlayerActivityManager::class);
@@ -188,13 +188,13 @@ class GameBuilder
         }
 
         // Clean up Redis
-        Redis::del("quickplay:accept:{$matchId}");
+        Redis::del("queue:accept:{$matchId}");
         Redis::del($matchKey);
 
         // Remove players from queue and client tracking
         foreach ($playerIds as $playerId) {
-            Redis::hdel('quickplay:timestamps', $playerId);
-            Redis::hdel('quickplay:clients', $playerId);
+            Redis::hdel('queue:timestamps', $playerId);
+            Redis::hdel('queue:clients', $playerId);
         }
 
         return $game;

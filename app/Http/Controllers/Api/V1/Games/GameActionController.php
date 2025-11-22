@@ -6,7 +6,6 @@ use App\Actions\Game\FindGameByUlidAction;
 use App\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\GameEngine;
-use App\GameEngine\Interfaces\GameRedactor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Game\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;

@@ -2,7 +2,7 @@
 
 namespace App\Matchmaking\Events;
 
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;

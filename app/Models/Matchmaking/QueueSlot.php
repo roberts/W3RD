@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Matchmaking;
 
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;

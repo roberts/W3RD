@@ -14,7 +14,7 @@ use App\Matchmaking\Lobby\LobbyPlayerManager;
 use App\Matchmaking\Lobby\LobbyValidator;
 use App\Matchmaking\Results\LobbyOperationResult;
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

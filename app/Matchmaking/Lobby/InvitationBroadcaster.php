@@ -4,7 +4,7 @@ namespace App\Matchmaking\Lobby;
 
 use App\Matchmaking\Events\LobbyInvitation;
 use App\Matchmaking\Events\LobbyReadyCheck;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 
 /**
  * Handles broadcasting of lobby-related events

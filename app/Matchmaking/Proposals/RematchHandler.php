@@ -13,7 +13,7 @@ use App\Matchmaking\Events\ProposalDeclined;
 use App\Matchmaking\Results\ProposalResult;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

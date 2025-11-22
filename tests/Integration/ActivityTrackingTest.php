@@ -10,7 +10,7 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 

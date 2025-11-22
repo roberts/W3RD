@@ -1,16 +1,16 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Matchmaking;
 
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
 use App\Models\Game\Mode;
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<\App\Models\QueueSlot>
+ * @extends Factory<\App\Models\Matchmaking\QueueSlot>
  */
 class QueueSlotFactory extends Factory
 {

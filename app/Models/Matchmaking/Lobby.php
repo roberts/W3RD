@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models\Game;
+namespace App\Models\Matchmaking;
 
 use App\Enums\GameTitle;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
-use Database\Factories\Game\LobbyFactory;
+use App\Models\Game\Game;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,14 +31,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Lobby extends Model
 {
     use HasFactory, HasUlids;
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return LobbyFactory::new();
-    }
 
     protected $fillable = [
         'ulid',
@@ -68,6 +60,20 @@ class Lobby extends Model
     public function uniqueIds(): array
     {
         return ['ulid'];
+    }
+
+    /**
+     * Scope to find a lobby by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
     }
 
     public function host(): BelongsTo

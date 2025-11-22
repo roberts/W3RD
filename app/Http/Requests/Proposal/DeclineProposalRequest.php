@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Proposal;
 
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DeclineProposalRequest extends FormRequest

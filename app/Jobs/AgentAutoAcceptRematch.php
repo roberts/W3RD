@@ -7,7 +7,7 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Matchmaking\Events\ProposalCancelled;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use App\Models\Auth\User;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

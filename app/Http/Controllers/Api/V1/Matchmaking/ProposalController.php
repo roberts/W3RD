@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Floor;
+namespace App\Http\Controllers\Api\V1\Matchmaking;
 
 use App\Actions\User\ResolveUsernameAction;
-use App\DataTransferObjects\Floor\ProposalData;
+use App\DataTransferObjects\Matchmaking\ProposalData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Proposal\AcceptProposalRequest;
 use App\Http\Requests\Proposal\DeclineProposalRequest;
@@ -11,7 +11,7 @@ use App\Http\Requests\Proposal\StoreProposalRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use App\Models\Game\Game;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace Database\Factories\Game;
+namespace Database\Factories\Matchmaking;
 
 use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Proposal>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matchmaking\Proposal>
  */
 class ProposalFactory extends Factory
 {

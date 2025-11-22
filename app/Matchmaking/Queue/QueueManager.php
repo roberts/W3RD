@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Queue;
 
-use App\Actions\Queue\JoinQueueAction;
-use App\Actions\Queue\LeaveQueueAction;
-use App\DataTransferObjects\Queue\QueueJoinResult;
+use App\Matchmaking\Queue\Actions\JoinQueueAction;
+use App\Matchmaking\Queue\Actions\LeaveQueueAction;
+use App\DataTransferObjects\Matchmaking\QueueJoinResult;
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
 

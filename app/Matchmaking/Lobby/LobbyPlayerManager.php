@@ -6,8 +6,8 @@ use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Events\LobbyInvitation as LobbyInvitationEvent;
 use App\Matchmaking\Events\LobbyPlayerJoined;
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
-use App\Models\Game\LobbyPlayer;
+use App\Models\Matchmaking\Lobby;
+use App\Models\Matchmaking\LobbyPlayer;
 
 /**
  * Manages lobby player operations: invitations, acceptances, kicking, seating

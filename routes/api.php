@@ -21,9 +21,9 @@ use App\Http\Controllers\Api\V1\Economy\TransactionController;
 use App\Http\Controllers\Api\V1\Feeds\CasinoFloorController;
 use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
 use App\Http\Controllers\Api\V1\Feeds\LiveScoresController;
-use App\Http\Controllers\Api\V1\Floor\LobbyController;
-use App\Http\Controllers\Api\V1\Floor\ProposalController;
-use App\Http\Controllers\Api\V1\Floor\QueueController;
+use App\Http\Controllers\Api\V1\Matchmaking\LobbyController;
+use App\Http\Controllers\Api\V1\Matchmaking\ProposalController;
+use App\Http\Controllers\Api\V1\Matchmaking\QueueController;
 use App\Http\Controllers\Api\V1\Games\GameAbandonController;
 use App\Http\Controllers\Api\V1\Games\GameActionController;
 use App\Http\Controllers\Api\V1\Games\GameConcedeController;
@@ -96,9 +96,9 @@ Route::prefix('v1')->group(function () {
     });
 
     // ========================================
-    // Floor Namespace - Matchmaking & Lobbies
+    // Matchmaking Namespace - Matchmaking & Lobbies
     // ========================================
-    Route::middleware('auth:sanctum')->prefix('floor')->group(function () {
+    Route::middleware('auth:sanctum')->prefix('matchmaking')->group(function () {
         Route::controller(LobbyController::class)->prefix('lobbies')->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store');

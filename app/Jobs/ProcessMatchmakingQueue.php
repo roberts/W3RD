@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Actions\Queue\ApplyDodgePenaltyAction;
+use App\Matchmaking\Queue\Actions\ApplyDodgePenaltyAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;

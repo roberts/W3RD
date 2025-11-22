@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DataTransferObjects\Queue;
+namespace App\DataTransferObjects\Matchmaking;
 
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 use Spatie\LaravelData\Data;
 
 class QueueSlotData extends Data

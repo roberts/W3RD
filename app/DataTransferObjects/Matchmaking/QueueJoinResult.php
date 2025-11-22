@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransferObjects\Queue;
+namespace App\DataTransferObjects\Matchmaking;
 
 class QueueJoinResult
 {

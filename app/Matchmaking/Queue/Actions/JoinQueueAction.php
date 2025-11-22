@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Queue;
+namespace App\Matchmaking\Queue\Actions;
 
-use App\DataTransferObjects\Queue\QueueJoinResult;
+use App\DataTransferObjects\Matchmaking\QueueJoinResult;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;

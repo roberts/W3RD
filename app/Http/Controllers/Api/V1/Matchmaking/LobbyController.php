@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Floor;
+namespace App\Http\Controllers\Api\V1\Matchmaking;
 
-use App\Actions\Lobby\FindLobbyByUlidAction;
 use App\Http\Requests\Lobby\CancelLobbyRequest;
 use App\Http\Requests\Lobby\CreateLobbyRequest;
 use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
@@ -13,7 +12,7 @@ use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;
 use App\Models\Game\Game;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -23,7 +22,6 @@ class LobbyController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected FindLobbyByUlidAction $findLobby,
         protected LobbyOrchestrator $lobbyOrchestrator
     ) {}
 
@@ -75,7 +73,7 @@ class LobbyController extends Controller
      */
     public function show(Request $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = $this->findLobby->execute($lobbyUlid, ['host.avatar.image', 'players.user.avatar.image']);
+        $lobby = Lobby::withUlid($lobbyUlid, ['host.avatar.image', 'players.user.avatar.image'])->firstOrFail();
 
         $data = [
             'lobby' => LobbyResource::make($lobby),
@@ -97,7 +95,7 @@ class LobbyController extends Controller
      */
     public function destroy(CancelLobbyRequest $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = $this->findLobby->execute($lobbyUlid);
+        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->cancelLobby($lobby, $request->user());
 
@@ -113,7 +111,7 @@ class LobbyController extends Controller
      */
     public function readyCheck(InitiateReadyCheckRequest $request, string $lobbyUlid): JsonResponse
     {
-        $lobby = $this->findLobby->execute($lobbyUlid);
+        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->initiateReadyCheck($lobby, $request->user());
 
@@ -134,7 +132,7 @@ class LobbyController extends Controller
     public function invite(InvitePlayerRequest $request, string $lobbyUlid): JsonResponse
     {
         $validated = $request->validated();
-        $lobby = $this->findLobby->execute($lobbyUlid);
+        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->invitePlayer($lobby, $request->user(), $validated['username']);
 
@@ -153,7 +151,7 @@ class LobbyController extends Controller
     public function respond(RespondToInvitationRequest $request, string $lobbyUlid, string $username): JsonResponse
     {
         $validated = $request->validated();
-        $lobby = $this->findLobby->execute($lobbyUlid);
+        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         if ($validated['status'] === 'accepted') {
             $result = $this->lobbyOrchestrator->acceptInvitationOrJoin($lobby, $request->user(), $username, $request);
@@ -188,7 +186,7 @@ class LobbyController extends Controller
      */
     public function kick(Request $request, string $lobbyUlid, string $username): JsonResponse
     {
-        $lobby = $this->findLobby->execute($lobbyUlid);
+        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->kickPlayer($lobby, $request->user(), $username);
 

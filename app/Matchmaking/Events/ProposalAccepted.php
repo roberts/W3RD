@@ -3,7 +3,7 @@
 namespace App\Matchmaking\Events;
 
 use App\Models\Game\Game;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

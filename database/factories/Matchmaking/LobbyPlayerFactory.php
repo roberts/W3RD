@@ -1,11 +1,11 @@
 <?php
 
-namespace Database\Factories\Game;
+namespace Database\Factories\Matchmaking;
 
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
-use App\Models\Game\LobbyPlayer;
+use App\Models\Matchmaking\Lobby;
+use App\Models\Matchmaking\LobbyPlayer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LobbyPlayerFactory extends Factory

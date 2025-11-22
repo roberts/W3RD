@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Results;
 
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 
 /**
  * Result object for lobby operations.

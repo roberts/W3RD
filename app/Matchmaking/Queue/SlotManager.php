@@ -6,7 +6,7 @@ namespace App\Matchmaking\Queue;
 
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 use Carbon\Carbon;
 
 /**

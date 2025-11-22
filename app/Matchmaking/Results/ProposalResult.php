@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Matchmaking\Results;
 
 use App\Models\Game\Game;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 
 /**
  * Result object for proposal operations (rematch/challenge).

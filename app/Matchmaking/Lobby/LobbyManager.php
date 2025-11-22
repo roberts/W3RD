@@ -6,8 +6,8 @@ use App\Enums\GameTitle;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
-use App\Models\Game\LobbyPlayer;
+use App\Models\Matchmaking\Lobby;
+use App\Models\Matchmaking\LobbyPlayer;
 
 /**
  * Manages core lobby operations: creation, cancellation, status updates

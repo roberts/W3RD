@@ -3,7 +3,7 @@
 namespace App\Matchmaking\Events;
 
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;

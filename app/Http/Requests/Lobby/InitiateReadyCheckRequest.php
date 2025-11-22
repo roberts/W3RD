@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Lobby;
 
 use App\Matchmaking\Enums\LobbyStatus;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InitiateReadyCheckRequest extends FormRequest

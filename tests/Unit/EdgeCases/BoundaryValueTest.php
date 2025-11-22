@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Support\Facades\Redis;
 
 beforeEach(function () {

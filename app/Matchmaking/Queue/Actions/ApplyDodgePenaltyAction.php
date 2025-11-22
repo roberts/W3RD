@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Queue;
+namespace App\Matchmaking\Queue\Actions;
 
 use App\Enums\GameTitle;
 use Illuminate\Support\Facades\Redis;

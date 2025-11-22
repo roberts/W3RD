@@ -32,7 +32,7 @@ describe('Agent Matchmaking', function () {
         $humanUser = User::factory()->create();
 
         // Simulate queue request for checkers
-        // This would typically be an API call: POST /api/v1/floor/queue
+        // This would typically be an API call: POST /api/v1/matchmaking/queue
         // For this test, we're testing the underlying service logic
 
         // The actual queue service integration will be tested once

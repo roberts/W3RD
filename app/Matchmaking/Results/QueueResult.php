@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Results;
 
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 
 /**
  * Result object for queue/matchmaking operations.

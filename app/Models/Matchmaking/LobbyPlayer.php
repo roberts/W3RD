@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Models\Game;
+namespace App\Models\Matchmaking;
 
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
-use Database\Factories\Game\LobbyPlayerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,14 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LobbyPlayer extends Model
 {
     use HasFactory;
-
-    /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return LobbyPlayerFactory::new();
-    }
 
     protected $fillable = [
         'lobby_id',

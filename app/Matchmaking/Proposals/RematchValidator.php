@@ -10,7 +10,7 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Support\Facades\Redis;
 
 /**

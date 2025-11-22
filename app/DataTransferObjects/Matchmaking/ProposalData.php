@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DataTransferObjects\Floor;
+namespace App\DataTransferObjects\Matchmaking;
 
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Spatie\LaravelData\Data;
 
 class ProposalData extends Data

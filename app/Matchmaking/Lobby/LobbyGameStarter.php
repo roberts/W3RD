@@ -3,7 +3,7 @@
 namespace App\Matchmaking\Lobby;
 
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
 
 /**
  * Handles game creation from lobby when conditions are met

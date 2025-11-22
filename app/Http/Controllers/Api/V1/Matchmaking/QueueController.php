@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Floor;
+namespace App\Http\Controllers\Api\V1\Matchmaking;
 
 use App\Actions\Client\ResolveClientIdAction;
-use App\DataTransferObjects\Queue\QueueSlotData;
+use App\DataTransferObjects\Matchmaking\QueueSlotData;
 use App\Enums\GameTitle;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Http\Requests\Floor\StoreQueueRequest;
+use App\Http\Requests\Matchmaking\StoreQueueRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\QueueOrchestrator;
 use App\Models\Game\Mode;
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

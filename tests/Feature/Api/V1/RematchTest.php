@@ -3,7 +3,7 @@
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Models\Game\Proposal;
+use App\Models\Matchmaking\Proposal;
 use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\GameHelper;
 
@@ -27,7 +27,7 @@ describe('Rematch Management', function () {
             $player2 = User::factory()->create();
             $game = GameHelper::createCompletedGame($player1, $player2);
 
-            $response = $this->actingAs($player1)->postJson('/api/v1/floor/proposals', [
+            $response = $this->actingAs($player1)->postJson('/api/v1/matchmaking/proposals', [
                 'type' => 'rematch',
                 'original_game_ulid' => $game->ulid,
             ]);
@@ -50,7 +50,7 @@ describe('Rematch Management', function () {
                 ['user' => $player2, 'position_id' => 2],
             ]);
 
-            $response = $this->actingAs($player1)->postJson('/api/v1/floor/proposals', [
+            $response = $this->actingAs($player1)->postJson('/api/v1/matchmaking/proposals', [
                 'type' => 'rematch',
                 'original_game_ulid' => $game->ulid,
             ]);
@@ -64,7 +64,7 @@ describe('Rematch Management', function () {
             $nonPlayer = User::factory()->create();
             $game = GameHelper::createCompletedGame($player1, $player2);
 
-            $response = $this->actingAs($nonPlayer)->postJson('/api/v1/floor/proposals', [
+            $response = $this->actingAs($nonPlayer)->postJson('/api/v1/matchmaking/proposals', [
                 'type' => 'rematch',
                 'original_game_ulid' => $game->ulid,
             ]);
@@ -81,7 +81,7 @@ describe('Rematch Management', function () {
 
             // Player1 requests rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $originalGame->ulid,
                 ]);
@@ -90,7 +90,7 @@ describe('Rematch Management', function () {
 
             // Player2 accepts rematch
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/accept");
 
             $response->assertOk()
                 ->assertJsonStructure([
@@ -115,7 +115,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -124,7 +124,7 @@ describe('Rematch Management', function () {
 
             // Accept rematch
             $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/accept");
 
             // Verify notification/event was sent (implementation-dependent)
             // This test passes as notification system varies by implementation
@@ -152,7 +152,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -161,7 +161,7 @@ describe('Rematch Management', function () {
 
             // Decline rematch
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/decline");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/decline");
 
             $response->assertOk()
                 ->assertJson(['message' => 'Rematch request declined']);
@@ -174,7 +174,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -183,7 +183,7 @@ describe('Rematch Management', function () {
 
             // Decline rematch
             $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/decline");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/decline");
 
             // Verify notification/event was sent (implementation-dependent)
             expect(true)->toBeTrue();
@@ -197,7 +197,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -206,7 +206,7 @@ describe('Rematch Management', function () {
 
             // Non-player tries to decline
             $response = $this->actingAs($nonPlayer)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/decline");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/decline");
 
             $response->assertForbidden();
         });
@@ -220,7 +220,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -233,7 +233,7 @@ describe('Rematch Management', function () {
 
             // Try to accept expired rematch
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/accept");
 
             $response->assertStatus(422);
         });
@@ -245,7 +245,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -257,7 +257,7 @@ describe('Rematch Management', function () {
             Redis::shouldReceive('hset')->andReturn(true);
             Redis::shouldReceive('hgetall')->andReturn([]);
 
-            $this->actingAs($player1)->postJson('/api/v1/floor/queue', [
+            $this->actingAs($player1)->postJson('/api/v1/matchmaking/queue', [
                 'game_title' => 'connect-four',
             ]);
 
@@ -275,7 +275,7 @@ describe('Rematch Management', function () {
             $responses = [];
             for ($i = 0; $i < 5; $i++) {
                 $responses[] = $this->actingAs($player1)
-                    ->postJson('/api/v1/floor/proposals', [
+                    ->postJson('/api/v1/matchmaking/proposals', [
                         'type' => 'rematch',
                         'original_game_ulid' => $game->ulid,
                     ]);
@@ -296,7 +296,7 @@ describe('Rematch Management', function () {
 
             // First rematch request
             $rematchResponse1 = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -305,11 +305,11 @@ describe('Rematch Management', function () {
 
             // Decline it
             $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid1}/decline");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid1}/decline");
 
             // Second rematch request should be allowed
             $rematchResponse2 = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -325,7 +325,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -341,7 +341,7 @@ describe('Rematch Management', function () {
 
             // Try to accept
             $response = $this->actingAs($player2)
-                ->postJson("/api/v1/floor/proposals/{$rematchUlid}/accept");
+                ->postJson("/api/v1/matchmaking/proposals/{$rematchUlid}/accept");
 
             $response->assertStatus(422);
         });
@@ -355,7 +355,7 @@ describe('Rematch Management', function () {
 
             // Request rematch
             $rematchResponse = $this->actingAs($player1)
-                ->postJson('/api/v1/floor/proposals', [
+                ->postJson('/api/v1/matchmaking/proposals', [
                     'type' => 'rematch',
                     'original_game_ulid' => $game->ulid,
                 ]);
@@ -379,11 +379,11 @@ describe('Rematch Management', function () {
             $game2 = GameHelper::createCompletedGame($player1, $player2);
 
             // Request rematches
-            $this->actingAs($player1)->postJson('/api/v1/floor/proposals', [
+            $this->actingAs($player1)->postJson('/api/v1/matchmaking/proposals', [
                 'type' => 'rematch',
                 'original_game_ulid' => $game1->ulid,
             ]);
-            $this->actingAs($player1)->postJson('/api/v1/floor/proposals', [
+            $this->actingAs($player1)->postJson('/api/v1/matchmaking/proposals', [
                 'type' => 'rematch',
                 'original_game_ulid' => $game2->ulid,
             ]);

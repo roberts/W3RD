@@ -3,12 +3,12 @@
 use App\Enums\GameTitle;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Models\Auth\User;
-use App\Models\QueueSlot;
+use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Redis;
 
-// Floor queue slots provide a normalized interface for joining/cancelling matchmaking queues.
-describe('Floor Queue API', function () {
+// Matchmaking queue slots provide a normalized interface for joining/cancelling matchmaking queues.
+describe('Matchmaking Queue API', function () {
     beforeEach(function () {
         Bus::fake();
 
@@ -25,7 +25,7 @@ describe('Floor Queue API', function () {
     });
 
     it('requires authentication to join queue', function () {
-        $response = $this->postJson('/api/v1/floor/queue', [
+        $response = $this->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
         ]);
 
@@ -35,7 +35,7 @@ describe('Floor Queue API', function () {
     it('creates a queue slot with default mode', function () {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->postJson('/api/v1/floor/queue', [
+        $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
         ]);
 
@@ -51,7 +51,7 @@ describe('Floor Queue API', function () {
     it('stores preferences and skill rating when provided', function () {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->postJson('/api/v1/floor/queue', [
+        $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CHECKERS->value,
             'game_mode' => 'blitz',
             'skill_rating' => 1850,
@@ -71,7 +71,7 @@ describe('Floor Queue API', function () {
     it('rejects unsupported game titles', function () {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->postJson('/api/v1/floor/queue', [
+        $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => 'holographic-chess',
         ]);
 
@@ -89,7 +89,7 @@ describe('Floor Queue API', function () {
             ->with($cooldownKey)
             ->andReturn(180);
 
-        $response = $this->actingAs($user)->postJson('/api/v1/floor/queue', [
+        $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
         ]);
 
@@ -106,7 +106,7 @@ describe('Floor Queue API', function () {
         ]);
 
         $response = $this->actingAs($user)
-            ->deleteJson("/api/v1/floor/queue/{$slot->ulid}");
+            ->deleteJson("/api/v1/matchmaking/queue/{$slot->ulid}");
 
         $response->assertOk()
             ->assertJsonPath('data.status', 'cancelled')
@@ -121,7 +121,7 @@ describe('Floor Queue API', function () {
         $slot = QueueSlot::factory()->for($owner)->create();
 
         $response = $this->actingAs($otherUser)
-            ->deleteJson("/api/v1/floor/queue/{$slot->ulid}");
+            ->deleteJson("/api/v1/matchmaking/queue/{$slot->ulid}");
 
         $response->assertForbidden();
     });

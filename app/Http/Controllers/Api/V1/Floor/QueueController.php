@@ -41,7 +41,7 @@ class QueueController extends Controller
         }
 
         $gameMode = $validated['game_mode'] ?? 'standard';
-        
+
         // Resolve the mode from the database
         $mode = Mode::firstOrCreate(
             [
@@ -53,7 +53,7 @@ class QueueController extends Controller
                 'is_active' => true,
             ]
         );
-        
+
         $clientId = $this->resolveClientId->execute($request);
         $preferences = $validated['preferences'] ?? [];
         $skillRating = $validated['skill_rating'] ?? null;

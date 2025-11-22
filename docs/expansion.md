@@ -474,7 +474,7 @@ When actions are invalid, provide actionable suggestions showing users what they
 ### Implementation
 
 #### Expand ValidationResult Class
-**File:** `app/Games/ValidationResult.php`
+**File:** `app/GameTitles/ValidationResult.php`
 
 ```php
 class ValidationResult
@@ -733,7 +733,7 @@ function showActionSuggestions(suggestions, hints) {
 Add to base game classes:
 
 ```php
-// app/Games/ConnectFour/BaseConnectFour.php
+// app/GameTitles/ConnectFour/BaseConnectFour.php
 protected function getAvailableColumnsWithContext(GameState $gameState): array
 {
     $columns = [];
@@ -751,7 +751,7 @@ protected function getAvailableColumnsWithContext(GameState $gameState): array
     return $columns;
 }
 
-// app/Games/Checkers/BaseCheckers.php
+// app/GameTitles/Checkers/BaseCheckers.php
 protected function findAvailableJumps(GameState $gameState, string $playerUlid): array
 {
     $jumps = [];

@@ -23,7 +23,7 @@ This plan outlines the implementation of a flexible and extensible game framewor
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- **Library-First**: **PASS**. The logic for each game (Checkers, Hearts) will be encapsulated within its own directory (`app/Games/Checkers`, `app/Games/Hearts`), making them self-contained modules.
+- **Library-First**: **PASS**. The logic for each game (Checkers, Hearts) will be encapsulated within its own directory (`app/GameTitles/Checkers`, `app/GameTitles/Hearts`), making them self-contained modules.
 - **CLI Interface**: **PASS**. While not a CLI-focused feature, new games will be manageable via existing Artisan commands for interacting with the application.
 - **Test-First**: **PASS**. The implementation will follow a TDD approach. Tests will be written for game logic, state transitions, and rule enforcement before the features are implemented.
 - **Integration Testing**: **PASS**. Integration tests will be created to ensure the new game titles integrate correctly with the core game management system.
@@ -85,7 +85,7 @@ tests/
 └── ... # Other existing directories
 ```
 
-**Structure Decision**: The existing Laravel project structure will be used. New game logic will be added within the `app/Games` directory, with each game in its own subdirectory. This keeps the game logic organized and modular. New contracts will be placed in `app/Games/Contracts` to be accessible by all games.
+**Structure Decision**: The existing Laravel project structure will be used. New game logic will be added within the `app/Games` directory, with each game in its own subdirectory. This keeps the game logic organized and modular. New contracts will be placed in `app/GameTitles/Contracts` to be accessible by all games.
 
 ## API Endpoint Testing
 

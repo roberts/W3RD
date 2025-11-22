@@ -1,8 +1,8 @@
 <?php
 
 use App\GameEngine\Actions\PlayCard;
-use App\Games\Hearts\HeartsTable;
-use App\Games\Hearts\Modes\StandardMode;
+use App\GameTitles\Hearts\HeartsTable;
+use App\GameTitles\Hearts\Modes\StandardMode;
 use App\Models\Game\Game;
 
 test('hearts engine validates and applies play card', function () {

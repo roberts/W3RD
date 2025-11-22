@@ -14,7 +14,7 @@ The architecture is built on these key concepts:
 
 ## Directory Structure
 
-All core game logic is organized by business domain rather than technical type. This aligns with Domain-Driven Design (DDD) principles, making the codebase more intuitive and scalable. The primary domain for all game logic resides in `app/Games/`.
+All core game logic is organized by business domain rather than technical type. This aligns with Domain-Driven Design (DDD) principles, making the codebase more intuitive and scalable. The primary domain for all game logic resides in `app/GameTitles/`.
 
 To enable this, the `composer.json` file must be updated to autoload this directory:
 ```json
@@ -22,7 +22,7 @@ To enable this, the `composer.json` file must be updated to autoload this direct
 "autoload": {
     "psr-4": {
         "App\\": "app/",
-        "App\\Games\\": "app/Games/",
+        "App\\Games\\": "app/GameTitles/",
         // ...
     }
 },
@@ -32,7 +32,7 @@ After updating, run `composer dump-autoload`.
 The following structure for a "Chess" game should be used as a template:
 
 ```
-app/Games/Chess/
+app/GameTitles/Chess/
 ├── Modes/
 │   ├── StandardMode.php
 │   └── BlitzMode.php
@@ -121,7 +121,7 @@ To provide rule information to clients via an API, we store descriptions in simp
 
 ### Base and Mode-Specific Rules
 
-*   **Base Rules:** The `app/Games/Chess/rules.php` file contains the title, description, and rules common to all modes of Chess.
+*   **Base Rules:** The `app/GameTitles/Chess/rules.php` file contains the title, description, and rules common to all modes of Chess.
 *   **Mode Variations:** An optional, smaller `rules.php` file can be placed inside a mode's directory (e.g., `Modes/Blitz/rules.php`) to define only the rules that are different or additional for that mode.
 
 An API controller is responsible for loading the base rule array, then loading the mode-specific array and merging them together to produce a complete set of rules for the client.

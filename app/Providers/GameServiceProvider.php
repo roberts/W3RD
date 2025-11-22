@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\GameEngine\Handlers\PlacePieceHandler;
-use App\Games\BaseGameTitle;
+use App\GameTitles\BaseGameTitle;
 use App\Models\Game\Game;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,17 +48,17 @@ class GameServiceProvider extends ServiceProvider
     {
         $map = [
             'checkers' => [
-                'standard' => \App\Games\Checkers\Modes\StandardMode::class,
+                'standard' => \App\GameTitles\Checkers\Modes\StandardMode::class,
             ],
             'hearts' => [
-                'standard' => \App\Games\Hearts\Modes\StandardMode::class,
+                'standard' => \App\GameTitles\Hearts\Modes\StandardMode::class,
             ],
             'connect-four' => [
-                'standard' => \App\Games\ConnectFour\Modes\StandardMode::class,
-                'pop-out' => \App\Games\ConnectFour\Modes\PopOutMode::class,
-                'five' => \App\Games\ConnectFour\Modes\FiveMode::class,
-                'eight-by-seven' => \App\Games\ConnectFour\Modes\EightBySevenMode::class,
-                'nine-by-six' => \App\Games\ConnectFour\Modes\NineBySixMode::class,
+                'standard' => \App\GameTitles\ConnectFour\Modes\StandardMode::class,
+                'pop-out' => \App\GameTitles\ConnectFour\Modes\PopOutMode::class,
+                'five' => \App\GameTitles\ConnectFour\Modes\FiveMode::class,
+                'eight-by-seven' => \App\GameTitles\ConnectFour\Modes\EightBySevenMode::class,
+                'nine-by-six' => \App\GameTitles\ConnectFour\Modes\NineBySixMode::class,
             ],
         ];
 

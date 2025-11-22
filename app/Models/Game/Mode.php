@@ -3,7 +3,7 @@
 namespace App\Models\Game;
 
 use App\Enums\GameTitle;
-use App\Games\BaseGameTitle;
+use App\GameTitles\BaseGameTitle;
 use App\Providers\GameServiceProvider;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

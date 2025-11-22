@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Games\Contracts;
+namespace App\GameTitles\Contracts;
 
 use Spatie\LaravelData\Contracts\DataObject;
 

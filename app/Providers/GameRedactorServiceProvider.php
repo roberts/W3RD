@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\Interfaces\GameRedactor;
 use App\GameEngine\Redactors\NullGameRedactor;
-use App\Games\Hearts\HeartsRedactor;
+use App\GameTitles\Hearts\HeartsRedactor;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;

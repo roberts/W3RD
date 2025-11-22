@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Games\ConnectFour\Actions\PopOut;
-use App\Games\ConnectFour\Modes\FiveMode;
-use App\Games\ConnectFour\Modes\PopOutMode;
+use App\GameTitles\ConnectFour\Actions\PopOut;
+use App\GameTitles\ConnectFour\Modes\FiveMode;
+use App\GameTitles\ConnectFour\Modes\PopOutMode;
 use App\Models\Game\Game;
 use Illuminate\Support\Str;
 

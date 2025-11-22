@@ -14,14 +14,14 @@ These entities are conceptual and will be implemented as PHP classes, many of wh
 Represents a game like "Checkers" or "Hearts".
 
 - **Implementation**: A PHP class that implements `GameTitleContract`.
-- **Examples**: `app/Games/Checkers/CheckersTitle.php`, `app/Games/Hearts/HeartsTitle.php`.
+- **Examples**: `app/GameTitles/Checkers/CheckersTitle.php`, `app/GameTitles/Hearts/HeartsTitle.php`.
 
 ### 2. `GameMode`
 
 Represents a specific ruleset, like "Standard".
 
 - **Implementation**: A PHP class that implements `GameModeContract`.
-- **Examples**: `app/Games/Checkers/Modes/Standard.php`, `app/Games/Hearts/Modes/Standard.php`.
+- **Examples**: `app/GameTitles/Checkers/Modes/Standard.php`, `app/GameTitles/Hearts/Modes/Standard.php`.
 
 ### 3. `GameState`
 

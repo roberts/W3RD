@@ -5,7 +5,7 @@ This document outlines the plan for implementing the "Connect Four" game and its
 ## 1. Technical Context
 
 - **Primary Technology**: Laravel 12, PHP 8.3, Livewire/Volt
-- **Core Architecture**: The implementation will use the Domain-Driven Design (DDD) structure in a dedicated `app/Games/` directory.
+- **Core Architecture**: The implementation will use the Domain-Driven Design (DDD) structure in a dedicated `app/GameTitles/` directory.
 - **Key Patterns**:
     - Strategy Pattern for Game Modes (`AbstractConnectFourMode`, concrete `Mode` classes).
     - Data Transfer Objects (DTOs) for player actions (`DropDisc.php`, `PopOut.php`).

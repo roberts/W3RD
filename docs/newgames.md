@@ -13,10 +13,10 @@ The architecture follows a **trait-based composition model** where games inherit
 
 ## Directory Structure
 
-Each game resides in its own directory under `app/Games/{GameTitle}/`. The standard structure is:
+Each game resides in its own directory under `app/GameTitles/{GameTitle}/`. The standard structure is:
 
 ```text
-app/Games/Checkers/
+app/GameTitles/Checkers/
 ├── CheckersProtocol.php      # Abstract Protocol: Coordinates components
 ├── CheckersConfig.php        # Config: Action Registry + Initial State
 ├── CheckersArbiter.php       # Arbiter: Win/Loss/Draw detection
@@ -199,11 +199,11 @@ class CheckersActionMapper implements ActionMapperContract
 
 | Category | Game State Name | Player State Name | Examples |
 |----------|----------------|-------------------|----------|
-| **Board Games** | `{Game}Board` | `{Game}Player` | `CheckersBoard`, `ChessBoard` |
-| **Card Games** | `{Game}Table` | `{Game}Hand` | `HeartsTable`, `PokerHand` |
-| **Strategy** | `{Game}Map` | `{Game}Faction` | `RiskMap`, `CivWorld` |
-| **Trivia** | `{Game}Stage` | `{Game}Contestant` | `TriviaStage` |
-| **Economy** | `{Game}Market` | `{Game}Portfolio` | `StockMarket` |
+| **Board Games** | `{GameTitle}Board` | `{GameTitle}Player` | `CheckersBoard`, `ChessBoard` |
+| **Card Games** | `{GameTitle}Table` | `{GameTitle}Hand` | `HeartsTable`, `PokerHand` |
+| **Strategy** | `{GameTitle}Map` | `{GameTitle}Faction` | `RiskMap`, `CivWorld` |
+| **Trivia** | `{GameTitle}Stage` | `{GameTitle}Contestant` | `TriviaStage` |
+| **Economy** | `{GameTitle}Market` | `{GameTitle}Portfolio` | `StockMarket` |
 
 **Characteristics**:
 - Use `readonly` properties for immutability
@@ -292,7 +292,7 @@ class MovePieceHandler implements GameActionHandlerInterface
 **Role**: Concrete implementations providing specific game variations.
 
 **Characteristics**:
-- Extend the abstract `{Game}Protocol` class
+- Extend the abstract `{GameTitle}Protocol` class
 - Inject specific Config/Arbiter/Reporter instances
 - Define mode-specific rules or parameters
 - Entry point for instantiation
@@ -468,7 +468,7 @@ app/GameEngine/
 - Multiple games need the same validation logic
 - Examples: `PlacePiece`, `MovePiece`, `PlayCard`, `DrawCard`
 
-**Use Game-Specific Actions** (`app/Games/{Game}/Actions/`) when:
+**Use Game-Specific Actions** (`app/GameTitles/{GameTitle}/Actions/`) when:
 - Action is unique to one game
 - Action has game-specific parameters
 - Examples: `DealCards` (Hearts), `ClaimRemainingTricks` (Hearts)
@@ -481,7 +481,7 @@ The system is built on three inheritance layers that provide increasing specific
 
 ### Layer 1: Universal Base (`BaseGameTitle`)
 
-**Location**: `app/Games/BaseGameTitle.php`
+**Location**: `app/GameTitles/BaseGameTitle.php`
 
 **Purpose**: Universal foundation for **all** games (board, card, real-time, async).
 
@@ -517,7 +517,7 @@ abstract class BaseGameTitle
 
 #### BaseBoardGameTitle
 
-**Location**: `app/Games/BaseBoardGameTitle.php`
+**Location**: `app/GameTitles/BaseBoardGameTitle.php`
 
 **Includes Traits**:
 - `SequentialTurns`: Turn-based progression logic
@@ -532,7 +532,7 @@ abstract class BaseGameTitle
 
 #### BaseCardGameTitle
 
-**Location**: `app/Games/BaseCardGameTitle.php`
+**Location**: `app/GameTitles/BaseCardGameTitle.php`
 
 **Includes Traits**:
 - `SequentialTurns`: Turn-based progression logic
@@ -694,19 +694,19 @@ This walkthrough demonstrates adding a new game from scratch using **Tic-Tac-Toe
 ### Step 1: Create Directory Structure
 
 ```bash
-mkdir -p app/Games/TicTacToe/{Actions,Handlers,Enums,Modes}
+mkdir -p app/GameTitles/TicTacToe/{Actions,Handlers,Enums,Modes}
 ```
 
 ### Step 2: Create State DTO
 
-**File**: `app/Games/TicTacToe/TicTacToeBoard.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeBoard.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
 class TicTacToeBoard
 {
@@ -750,14 +750,14 @@ class TicTacToeBoard
 
 ### Step 3: Create Action DTO
 
-**File**: `app/Games/TicTacToe/Actions/PlaceMark.php`
+**File**: `app/GameTitles/TicTacToe/Actions/PlaceMark.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe\Actions;
+namespace App\GameTitles\TicTacToe\Actions;
 
 use App\GameEngine\Interfaces\GameActionContract;
 
@@ -785,20 +785,20 @@ class PlaceMark implements GameActionContract
 
 ### Step 4: Create Action Handler
 
-**File**: `app/Games/TicTacToe/Handlers/PlaceMarkHandler.php`
+**File**: `app/GameTitles/TicTacToe/Handlers/PlaceMarkHandler.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe\Handlers;
+namespace App\GameTitles\TicTacToe\Handlers;
 
 use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\ValidationResult;
-use App\Games\TicTacToe\Actions\PlaceMark;
-use App\Games\TicTacToe\TicTacToeBoard;
+use App\GameTitles\TicTacToe\Actions\PlaceMark;
+use App\GameTitles\TicTacToe\TicTacToeBoard;
 
 class PlaceMarkHandler implements GameActionHandlerInterface
 {
@@ -864,14 +864,14 @@ class PlaceMarkHandler implements GameActionHandlerInterface
 
 ### Step 5: Create Action Mapper
 
-**File**: `app/Games/TicTacToe/Actions/TicTacToeActionMapper.php`
+**File**: `app/GameTitles/TicTacToe/Actions/TicTacToeActionMapper.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe\Actions;
+namespace App\GameTitles\TicTacToe\Actions;
 
 use App\Exceptions\InvalidActionDataException;
 use App\GameEngine\Interfaces\ActionMapperContract;
@@ -924,18 +924,18 @@ class TicTacToeActionMapper implements ActionMapperContract
 
 ### Step 6: Create Config
 
-**File**: `app/Games/TicTacToe/TicTacToeConfig.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeConfig.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
 use App\GameEngine\Interfaces\GameConfigContract;
-use App\Games\TicTacToe\Actions\PlaceMark;
-use App\Games\TicTacToe\Handlers\PlaceMarkHandler;
+use App\GameTitles\TicTacToe\Actions\PlaceMark;
+use App\GameTitles\TicTacToe\Handlers\PlaceMarkHandler;
 
 class TicTacToeConfig implements GameConfigContract
 {
@@ -958,14 +958,14 @@ class TicTacToeConfig implements GameConfigContract
 
 ### Step 7: Create Arbiter
 
-**File**: `app/Games/TicTacToe/TicTacToeArbiter.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeArbiter.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameArbiterContract;
@@ -1044,14 +1044,14 @@ class TicTacToeArbiter implements GameArbiterContract
 
 ### Step 8: Create Reporter
 
-**File**: `app/Games/TicTacToe/TicTacToeReporter.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeReporter.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameReporterContract;
@@ -1113,22 +1113,22 @@ class TicTacToeReporter implements GameReporterContract
 
 ### Step 9: Create Protocol
 
-**File**: `app/Games/TicTacToe/TicTacToeProtocol.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeProtocol.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
 use App\Enums\GameAttributes\GameComplexity;
 use App\Enums\GameAttributes\GameDynamic;
 use App\Enums\GameAttributes\GameTimer;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
-use App\Games\BaseBoardGameTitle;
-use App\Games\TicTacToe\Actions\TicTacToeActionMapper;
+use App\GameTitles\BaseBoardGameTitle;
+use App\GameTitles\TicTacToe\Actions\TicTacToeActionMapper;
 
 abstract class TicTacToeProtocol extends BaseBoardGameTitle implements GameTitleContract
 {
@@ -1204,19 +1204,19 @@ abstract class TicTacToeProtocol extends BaseBoardGameTitle implements GameTitle
 
 ### Step 10: Create Mode
 
-**File**: `app/Games/TicTacToe/Modes/StandardMode.php`
+**File**: `app/GameTitles/TicTacToe/Modes/StandardMode.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Games\TicTacToe\Modes;
+namespace App\GameTitles\TicTacToe\Modes;
 
-use App\Games\TicTacToe\TicTacToeArbiter;
-use App\Games\TicTacToe\TicTacToeConfig;
-use App\Games\TicTacToe\TicTacToeProtocol;
-use App\Games\TicTacToe\TicTacToeReporter;
+use App\GameTitles\TicTacToe\TicTacToeArbiter;
+use App\GameTitles\TicTacToe\TicTacToeConfig;
+use App\GameTitles\TicTacToe\TicTacToeProtocol;
+use App\GameTitles\TicTacToe\TicTacToeReporter;
 
 class StandardMode extends TicTacToeProtocol
 {
@@ -1252,7 +1252,7 @@ enum GameTitle: string
 Add to `app/Providers/GameServiceProvider.php`:
 
 ```php
-use App\Games\TicTacToe\Modes\StandardMode as TicTacToeStandardMode;
+use App\GameTitles\TicTacToe\Modes\StandardMode as TicTacToeStandardMode;
 
 protected static array $modeMap = [
     // ... existing mappings
@@ -1269,8 +1269,8 @@ protected static array $modeMap = [
 ```php
 <?php
 
-use App\Games\TicTacToe\TicTacToeArbiter;
-use App\Games\TicTacToe\TicTacToeBoard;
+use App\GameTitles\TicTacToe\TicTacToeArbiter;
+use App\GameTitles\TicTacToe\TicTacToeBoard;
 
 test('detects horizontal win', function () {
     $board = [

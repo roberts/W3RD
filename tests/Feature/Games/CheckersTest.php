@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Games\Checkers\CheckersArbiter;
-use App\Games\Checkers\CheckersBoard;
-use App\Games\Checkers\Modes\StandardMode;
+use App\GameTitles\Checkers\CheckersArbiter;
+use App\GameTitles\Checkers\CheckersBoard;
+use App\GameTitles\Checkers\Modes\StandardMode;
 use App\Models\Game\Game;
 
 describe('Checkers Game Logic', function () {

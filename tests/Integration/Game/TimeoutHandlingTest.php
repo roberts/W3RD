@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\GameStatusEnum;
-use App\Games\Hearts\Handlers\ForfeitHandler;
-use App\Games\Hearts\Handlers\NoneHandler;
-use App\Games\Hearts\Handlers\PassHandler;
+use App\GameTitles\Hearts\Handlers\ForfeitHandler;
+use App\GameTitles\Hearts\Handlers\NoneHandler;
+use App\GameTitles\Hearts\Handlers\PassHandler;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 

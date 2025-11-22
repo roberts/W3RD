@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $ulid
  * @property GameTitle $game_title
- * @property string $game_mode
+ * @property GameTitle $title_slug
+ * @property int|null $mode_id
  * @property int $host_id
  * @property LobbyStatus $status
  * @property bool $is_public
@@ -34,8 +35,8 @@ class Lobby extends Model
 
     protected $fillable = [
         'ulid',
-        'game_title',
-        'game_mode',
+        'title_slug',
+        'mode_id',
         'host_id',
         'game_id',
         'is_public',
@@ -45,7 +46,7 @@ class Lobby extends Model
     ];
 
     protected $casts = [
-        'game_title' => GameTitle::class,
+        'title_slug' => GameTitle::class,
         'is_public' => 'boolean',
         'min_players' => 'integer',
         'scheduled_at' => 'datetime',
@@ -74,6 +75,11 @@ class Lobby extends Model
         }
 
         return $query;
+    }
+
+    public function mode(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Game\Mode::class);
     }
 
     public function host(): BelongsTo
@@ -111,8 +117,8 @@ class Lobby extends Model
         $acceptedCount = $this->acceptedPlayers()->count();
 
         // If the game requires an exact player count, check for exact match
-        if ($this->game_title->requiresExactPlayerCount()) {
-            return $acceptedCount === $this->game_title->minPlayers();
+        if ($this->title_slug->requiresExactPlayerCount()) {
+            return $acceptedCount === $this->title_slug->minPlayers();
         }
 
         // Otherwise, just check if we have minimum players

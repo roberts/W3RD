@@ -50,7 +50,7 @@ class LobbyController extends Controller
         $result = $this->lobbyOrchestrator->createLobby(
             $user,
             $validated['game_title'],
-            $validated['game_mode'] ?? null,
+            $validated['mode_id'],
             $validated['is_public'] ?? false,
             $validated['min_players'] ?? 2,
             $validated['scheduled_at'] ?? null,

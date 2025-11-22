@@ -5,6 +5,7 @@ namespace Database\Factories\Matchmaking;
 use App\Enums\GameTitle;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
+use App\Models\Game\Mode;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -14,9 +15,11 @@ class LobbyFactory extends Factory
 
     public function definition(): array
     {
+        $mode = Mode::factory()->create();
+
         return [
-            'game_title' => fake()->randomElement(GameTitle::cases()),
-            'game_mode' => null,
+            'title_slug' => $mode->title_slug,
+            'mode_id' => $mode->id,
             'host_id' => User::factory(),
             'is_public' => fake()->boolean(),
             'min_players' => fake()->numberBetween(2, 4),

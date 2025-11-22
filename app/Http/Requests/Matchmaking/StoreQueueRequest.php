@@ -15,8 +15,7 @@ class StoreQueueRequest extends FormRequest
     {
         return [
             'game_title' => 'required|string',
-            'game_mode' => 'nullable|string',
-            'mode_id' => 'nullable|integer|exists:modes,id',
+            'mode_id' => 'required|integer|exists:modes,id',
             'skill_rating' => 'nullable|integer|min:1|max:5000',
             'preferences' => 'nullable|array',
         ];

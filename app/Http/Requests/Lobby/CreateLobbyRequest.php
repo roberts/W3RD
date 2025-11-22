@@ -15,7 +15,7 @@ class CreateLobbyRequest extends FormRequest
     {
         return [
             'game_title' => 'required|string',
-            'game_mode' => 'nullable|string|in:standard,blitz,rapid',
+            'mode_id' => 'required|integer|exists:modes,id',
             'is_public' => 'boolean',
             'min_players' => 'integer|min:2|max:8',
             'scheduled_at' => 'nullable|date|after:now',
@@ -28,7 +28,8 @@ class CreateLobbyRequest extends FormRequest
     {
         return [
             'game_title.required' => 'Game title is required',
-            'game_mode.in' => 'Game mode must be one of: standard, blitz, rapid',
+            'mode_id.required' => 'Mode is required',
+            'mode_id.exists' => 'Invalid mode selected',
             'min_players.min' => 'Minimum players must be at least 2',
             'min_players.max' => 'Maximum players cannot exceed 8',
             'scheduled_at.after' => 'Scheduled time must be in the future',

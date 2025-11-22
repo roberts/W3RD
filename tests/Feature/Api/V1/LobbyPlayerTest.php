@@ -2,6 +2,7 @@
 
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
+use App\Models\Game\Mode;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
 use Illuminate\Support\Facades\Redis;
@@ -282,9 +283,15 @@ describe('Lobby Player Management', function () {
         it('enforces game-specific player limits for connect-four', function () {
             $host = User::factory()->create();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
-                'game_title' => 'connect-four',
+                'title_slug' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => true,
             ]);
 
@@ -309,9 +316,15 @@ describe('Lobby Player Management', function () {
         it('enforces game-specific player limits for hearts', function () {
             $host = User::factory()->create();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'hearts',
+                'slug' => 'standard',
+            ]);
+
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
-                'game_title' => 'hearts',
+                'title_slug' => 'hearts',
+                'mode_id' => $mode->id,
                 'is_public' => true,
             ]);
 

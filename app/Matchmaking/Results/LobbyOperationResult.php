@@ -51,8 +51,8 @@ readonly class LobbyOperationResult
             'success' => true,
             'lobby' => [
                 'ulid' => $this->lobby->ulid,
-                'game_title' => $this->lobby->game_title->value,
-                'game_mode' => $this->lobby->game_mode,
+                'game_title' => $this->lobby->title_slug->value,
+                'game_mode' => $this->lobby->mode?->slug, // @phpstan-ignore-line
                 'status' => $this->lobby->status->value,
                 'is_public' => $this->lobby->is_public,
                 'host_id' => $this->lobby->host_id,

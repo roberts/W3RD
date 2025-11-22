@@ -84,15 +84,6 @@ class GameBuilder
     public function createFromLobby(Lobby $lobby): Game
     {
         return DB::transaction(function () use ($lobby) {
-            // Get or create mode
-            $mode = Mode::firstOrCreate([
-                'title_slug' => $lobby->game_title,
-                'slug' => $lobby->game_mode ?? 'standard',
-            ], [
-                'name' => ucfirst($lobby->game_mode ?? 'standard'),
-                'description' => ucfirst($lobby->game_mode ?? 'standard').' mode',
-            ]);
-
             // Get accepted players
             $lobbyPlayers = $lobby->players()
                 ->where('status', 'accepted')
@@ -101,8 +92,8 @@ class GameBuilder
 
             // Create the game first
             $game = Game::create([
-                'title_slug' => $lobby->game_title,
-                'mode_id' => $mode->id,
+                'title_slug' => $lobby->title_slug,
+                'mode_id' => $lobby->mode_id,
                 'creator_id' => $lobby->host_id,
                 'status' => GameStatus::ACTIVE,
                 'game_state' => [], // Temporary empty state

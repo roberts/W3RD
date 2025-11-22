@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
+use App\Models\Game\Mode;
 use App\Models\Game\Player;
 use Illuminate\Support\Facades\Redis;
 
@@ -31,11 +32,17 @@ describe('Hearts Game API', function () {
         test('can create hearts game through lobby', function () {
             $users = User::factory()->count(4)->create();
 
+            // Create a mode for hearts
+            $mode = \App\Models\Game\Mode::factory()->create([
+                'title_slug' => 'hearts',
+                'slug' => 'standard',
+            ]);
+
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
                 ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'hearts',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'max_players' => 4,
                     'is_public' => true,
                 ]);
@@ -79,11 +86,17 @@ describe('Hearts Game API', function () {
         test('hearts game requires exactly 4 players', function () {
             $users = User::factory()->count(3)->create();
 
+            // Create a mode for hearts
+            $mode = Mode::factory()->create([
+                'title_slug' => 'hearts',
+                'slug' => 'standard',
+            ]);
+
             // Create lobby with 4 max players
             $lobbyResponse = $this->actingAs($users[0])
                 ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'hearts',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'min_players' => 4,
                     'max_players' => 4,
                     'is_public' => true,
@@ -116,11 +129,17 @@ describe('Hearts Game API', function () {
             test('can pass cards in hearts game', function () {
                 $users = User::factory()->count(4)->create();
 
-                // Create and start game
+                // Create a mode for hearts
+                $mode = \App\Models\Game\Mode::factory()->create([
+                    'title_slug' => 'hearts',
+                    'slug' => 'standard',
+                ]);
+
+                // Create lobby and start game
                 $lobbyResponse = $this->actingAs($users[0])
                     ->postJson('/api/v1/matchmaking/lobbies', [
                         'game_title' => 'hearts',
-                        'game_mode' => 'standard',
+                        'mode_id' => $mode->id,
                         'max_players' => 4,
                         'is_public' => true,
                     ]);
@@ -188,11 +207,17 @@ describe('Hearts Game API', function () {
             test('can play card in hearts game', function () {
                 $users = User::factory()->count(4)->create();
 
+                // Create a mode for hearts
+                $mode = Mode::factory()->create([
+                    'title_slug' => 'hearts',
+                    'slug' => 'standard',
+                ]);
+
                 // Create and start game
                 $lobbyResponse = $this->actingAs($users[0])
                     ->postJson('/api/v1/matchmaking/lobbies', [
                         'game_title' => 'hearts',
-                        'game_mode' => 'standard',
+                        'mode_id' => $mode->id,
                         'max_players' => 4,
                         'is_public' => true,
                     ]);

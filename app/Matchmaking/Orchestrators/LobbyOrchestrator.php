@@ -40,7 +40,7 @@ class LobbyOrchestrator
     public function createLobby(
         User $host,
         string $gameTitleSlug,
-        ?string $gameMode,
+        int $modeId,
         bool $isPublic,
         int $minPlayers,
         ?string $scheduledAt,
@@ -58,7 +58,7 @@ class LobbyOrchestrator
             $lobby = $this->lobbyManager->createLobby(
                 $host,
                 $gameTitle,
-                $gameMode,
+                $modeId,
                 $isPublic,
                 $minPlayers,
                 $scheduledAt,

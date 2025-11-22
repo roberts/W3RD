@@ -3,6 +3,7 @@
 use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
+use App\Models\Game\Mode;
 use App\Models\Game\Player;
 use Illuminate\Support\Facades\Redis;
 
@@ -56,12 +57,17 @@ describe('Client Tracking', function () {
         $player2 = User::factory()->create();
         $client = Client::factory()->withTrademarks()->create(['api_key' => 'test-client-key-lobby']);
 
+        $mode = Mode::factory()->create([
+            'title_slug' => 'connect-four',
+            'slug' => 'standard',
+        ]);
+
         // Create lobby with min_players = 2
         $lobbyResponse = $this->actingAs($host)
             ->withHeader('X-Client-Key', $client->id)
             ->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
-                'game_mode' => 'standard',
+                'mode_id' => $mode->id,
                 'is_public' => false,
                 'min_players' => 2,
                 'max_players' => 2,

@@ -19,16 +19,16 @@ class LobbyManager
      */
     public function createLobby(
         User $host,
-        GameTitle $gameTitle,
-        ?string $gameMode,
+        GameTitle $titleSlug,
+        int $modeId,
         bool $isPublic,
         int $minPlayers,
         ?string $scheduledAt,
         int $clientId
     ): Lobby {
         $lobby = Lobby::create([
-            'game_title' => $gameTitle,
-            'game_mode' => $gameMode,
+            'title_slug' => $titleSlug,
+            'mode_id' => $modeId,
             'host_id' => $host->id,
             'is_public' => $isPublic,
             'min_players' => $minPlayers,

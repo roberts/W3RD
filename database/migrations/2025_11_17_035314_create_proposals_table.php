@@ -13,8 +13,8 @@ return new class extends Migration
             $table->char('ulid', 26)->unique()->index();
             $table->foreignId('requesting_user_id')->constrained('users');
             $table->foreignId('opponent_user_id')->constrained('users');
-            $table->string('title_slug')->nullable();
-            $table->foreignId('mode_id')->nullable();
+            $table->string('title_slug', 50)->nullable();
+            $table->foreignId('mode_id')->nullable()->constrained('modes');
             $table->string('type')->default('rematch'); // rematch, casual, tournament
             $table->foreignId('original_game_id')->nullable()->constrained('games');
             $table->foreignId('game_id')->nullable()->constrained('games');

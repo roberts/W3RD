@@ -40,19 +40,8 @@ class QueueController extends Controller
             );
         }
 
-        $gameMode = $validated['game_mode'] ?? 'standard';
-
-        // Resolve the mode from the database
-        $mode = Mode::firstOrCreate(
-            [
-                'title_slug' => $gameTitle->value,
-                'slug' => $gameMode,
-            ],
-            [
-                'name' => ucfirst($gameMode),
-                'is_active' => true,
-            ]
-        );
+        // Get the mode from the database
+        $mode = Mode::findOrFail($validated['mode_id']);
 
         $clientId = $this->resolveClientId->execute($request);
         $preferences = $validated['preferences'] ?? [];
@@ -61,7 +50,7 @@ class QueueController extends Controller
         $result = $this->queueOrchestrator->joinQueue(
             $request->user(),
             $gameTitle,
-            $gameMode,
+            $mode->slug,
             $mode->id,
             $clientId,
             $preferences,

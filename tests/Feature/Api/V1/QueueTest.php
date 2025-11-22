@@ -4,6 +4,7 @@ use App\Enums\GameTitle;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
+use App\Models\Game\Mode;
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Redis;
@@ -36,8 +37,14 @@ describe('Matchmaking Queue API', function () {
     it('creates a queue slot with default mode', function () {
         $user = User::factory()->create();
 
+        $mode = Mode::factory()->create([
+            'title_slug' => GameTitle::CONNECT_FOUR,
+            'slug' => 'standard',
+        ]);
+
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
+            'mode_id' => $mode->id,
         ]);
 
         $response->assertCreated()
@@ -52,9 +59,14 @@ describe('Matchmaking Queue API', function () {
     it('stores preferences and skill rating when provided', function () {
         $user = User::factory()->create();
 
+        $mode = Mode::factory()->create([
+            'title_slug' => GameTitle::CHECKERS,
+            'slug' => 'blitz',
+        ]);
+
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CHECKERS->value,
-            'game_mode' => 'blitz',
+            'mode_id' => $mode->id,
             'skill_rating' => 1850,
             'preferences' => [
                 'region' => 'na-east',
@@ -90,8 +102,14 @@ describe('Matchmaking Queue API', function () {
             ->with($cooldownKey)
             ->andReturn(180);
 
+        $mode = Mode::factory()->create([
+            'title_slug' => GameTitle::CONNECT_FOUR,
+            'slug' => 'standard',
+        ]);
+
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
+            'mode_id' => $mode->id,
         ]);
 
         $response->assertStatus(429)

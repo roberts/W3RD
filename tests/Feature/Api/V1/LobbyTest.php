@@ -3,6 +3,7 @@
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
+use App\Models\Game\Mode;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
 use Illuminate\Support\Facades\Redis;
@@ -20,8 +21,14 @@ describe('Lobby Management', function () {
         it('authenticated user can create a private lobby', function () {
             $host = User::factory()->create();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => false,
                 'min_players' => 2,
             ]);
@@ -33,7 +40,7 @@ describe('Lobby Management', function () {
                 ]);
 
             $this->assertDatabaseHas('lobbies', [
-                'game_title' => 'connect-four',
+                'title_slug' => 'connect-four',
                 'host_id' => $host->id,
                 'is_public' => false,
                 'status' => 'pending',
@@ -43,8 +50,14 @@ describe('Lobby Management', function () {
         it('authenticated user can create a public lobby', function () {
             $host = User::factory()->create();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => true,
                 'min_players' => 4,
             ]);
@@ -62,8 +75,14 @@ describe('Lobby Management', function () {
             $invitee1 = User::factory()->create();
             $invitee2 = User::factory()->create();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => false,
                 'invitees' => [$invitee1->id, $invitee2->id],
             ]);
@@ -92,8 +111,14 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
             $scheduledTime = now()->addHours(2)->toIso8601String();
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => true,
                 'min_players' => 4,
                 'scheduled_at' => $scheduledTime,
@@ -344,8 +369,14 @@ describe('Lobby Management', function () {
 
             $scheduledTime = now()->addHours(2);
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => false,
                 'scheduled_at' => $scheduledTime->toIso8601String(),
             ]);
@@ -359,8 +390,14 @@ describe('Lobby Management', function () {
 
             $pastTime = now()->subHours(1);
 
+            $mode = Mode::factory()->create([
+                'title_slug' => 'connect-four',
+                'slug' => 'standard',
+            ]);
+
             $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
+                'mode_id' => $mode->id,
                 'is_public' => false,
                 'scheduled_at' => $pastTime->toIso8601String(),
             ]);

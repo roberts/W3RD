@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Lobby;
 
-use App\Enums\LobbyStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Game\Lobby;
 use Illuminate\Foundation\Http\FormRequest;
 

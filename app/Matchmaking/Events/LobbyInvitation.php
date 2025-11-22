@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace App\Matchmaking\Events;
 
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;

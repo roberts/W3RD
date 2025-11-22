@@ -2,7 +2,7 @@
 
 namespace App\Models\Game;
 
-use App\Enums\LobbyPlayerStatus;
+use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
 use Database\Factories\Game\LobbyPlayerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

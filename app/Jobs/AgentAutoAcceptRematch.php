@@ -3,11 +3,11 @@
 namespace App\Jobs;
 
 use App\Enums\PlayerActivityState;
-use App\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCancelled;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use App\Models\Auth\User;
 use App\Models\Game\Proposal;
-use App\Services\RematchService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -98,10 +98,21 @@ class AgentAutoAcceptRematch implements ShouldQueue
             return;
         }
 
-        $rematchService = app(RematchService::class);
+        $orchestrator = app(ProposalOrchestrator::class);
 
         try {
-            $newGame = $rematchService->acceptRematchRequest($proposal, $agentUser, isAutoAccept: true);
+            $result = $orchestrator->acceptProposal($proposal, $agentUser, isAutoAccept: true);
+            
+            if (!$result->success) {
+                Log::warning('Agent auto-accept failed', [
+                    'proposal_id' => $proposal->ulid,
+                    'agent_id' => $this->agentUserId,
+                    'error' => $result->errorMessage,
+                ]);
+                return;
+            }
+            
+            $newGame = $result->game;
 
             Log::info('Agent auto-accepted rematch', [
                 'proposal_id' => $this->proposalId,

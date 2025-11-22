@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\ProposalDeclined;
+use App\Matchmaking\Events\ProposalDeclined;
 use App\Models\Alert;
 
 class SendProposalDeclinedAlert

@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Floor;
 
 use App\Actions\Client\ResolveClientIdAction;
-use App\Actions\Quickplay\JoinQuickplayQueueAction;
-use App\Actions\Quickplay\LeaveQuickplayQueueAction;
 use App\DataTransferObjects\Floor\SignalData;
 use App\Enums\GameTitle;
-use App\Exceptions\CooldownActiveException;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Http\Requests\Floor\StoreSignalRequest;
 use App\Http\Traits\ApiResponses;
+use App\Matchmaking\Orchestrators\QuickplayOrchestrator;
 use App\Models\MatchmakingSignal;
-use App\Services\Floor\FloorCoordinationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -23,9 +20,7 @@ class SignalController extends Controller
 
     public function __construct(
         protected ResolveClientIdAction $resolveClientId,
-        protected JoinQuickplayQueueAction $joinQueue,
-        protected LeaveQuickplayQueueAction $leaveQueue,
-        protected FloorCoordinationService $floorService
+        protected QuickplayOrchestrator $quickplayOrchestrator
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -46,33 +41,43 @@ class SignalController extends Controller
 
         $gameMode = $validated['game_mode'] ?? 'standard';
         $clientId = $this->resolveClientId->execute($request);
+        $preferences = $validated['preferences'] ?? [];
+        $skillRating = $validated['skill_rating'] ?? null;
 
-        $result = $this->joinQueue->execute(
+        $result = $this->quickplayOrchestrator->joinQueue(
             $request->user(),
             $gameTitle,
             $gameMode,
-            $clientId
+            $clientId,
+            $preferences,
+            $skillRating
         );
 
         if (! $result->success) {
-            throw new CooldownActiveException(
-                $result->errorMessage ?? 'Please wait before joining another game',
-                'post_game',
-                $result->cooldownRemaining,
-                ['cooldown_remaining' => $result->cooldownRemaining]
+            $statusCode = $result->cooldownRemaining !== null ? 429 : 422;
+            $errors = $result->context;
+            
+            // Add retry_after for cooldowns
+            if ($result->cooldownRemaining !== null) {
+                $errors['retry_after'] = $result->cooldownRemaining;
+            }
+            
+            $response = $this->errorResponse(
+                $result->errorMessage,
+                $statusCode,
+                null,
+                $errors
             );
+            
+            if ($result->cooldownRemaining !== null) {
+                $response->header('Retry-After', (string) $result->cooldownRemaining);
+            }
+            
+            return $response;
         }
 
-        $signal = $this->floorService->createSignal(
-            $request->user(),
-            $gameTitle,
-            $gameMode,
-            $validated['preferences'] ?? [],
-            $validated['skill_rating'] ?? null
-        );
-
         return $this->createdResponse(
-            SignalData::fromModel($signal)->toArray(),
+            SignalData::fromModel($result->signal)->toArray(),
             'Matchmaking signal created'
         );
     }
@@ -85,11 +90,19 @@ class SignalController extends Controller
             return $this->forbiddenResponse('You can only cancel your own signal');
         }
 
-        $this->leaveQueue->execute($user);
-        $cancelled = $this->floorService->cancelSignal($signal);
+        $result = $this->quickplayOrchestrator->cancelQueue($user);
+
+        if (! $result->success) {
+            return $this->errorResponse(
+                $result->errorMessage,
+                422,
+                null,
+                $result->context
+            );
+        }
 
         return $this->dataResponse(
-            SignalData::fromModel($cancelled->fresh())->toArray(),
+            SignalData::fromModel($signal->fresh())->toArray(),
             'Matchmaking signal cancelled'
         );
     }

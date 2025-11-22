@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Events\GameCompleted;
-use App\Events\ProposalAccepted;
-use App\Events\ProposalCancelled;
-use App\Events\ProposalCreated;
-use App\Events\ProposalDeclined;
-use App\Events\ProposalExpired;
+use App\Matchmaking\Events\ProposalAccepted;
+use App\Matchmaking\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCreated;
+use App\Matchmaking\Events\ProposalDeclined;
+use App\Matchmaking\Events\ProposalExpired;
 use App\GameEngine\GameEngine;
 use App\Listeners\SendProposalAcceptedAlert;
 use App\Listeners\SendProposalCancelledAlert;

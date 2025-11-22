@@ -4,7 +4,7 @@ use App\Actions\Quickplay\JoinQuickplayQueueAction;
 use App\Actions\Quickplay\LeaveQuickplayQueueAction;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
-use App\Enums\LobbyStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;

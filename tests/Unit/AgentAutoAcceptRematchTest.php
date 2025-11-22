@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\PlayerActivityState;
-use App\Events\ProposalAccepted;
-use App\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalAccepted;
+use App\Matchmaking\Events\ProposalCancelled;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\Agent;

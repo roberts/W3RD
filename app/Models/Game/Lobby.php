@@ -3,8 +3,8 @@
 namespace App\Models\Game;
 
 use App\Enums\GameTitle;
-use App\Enums\LobbyPlayerStatus;
-use App\Enums\LobbyStatus;
+use App\Matchmaking\Enums\LobbyPlayerStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use Database\Factories\Game\LobbyFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;

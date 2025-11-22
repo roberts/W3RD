@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\RematchService;
+use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,8 +16,8 @@ class ExpireProposals implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(RematchService $rematchService): void
+    public function handle(ProposalOrchestrator $proposalOrchestrator): void
     {
-        $rematchService->expireOldRequests();
+        $proposalOrchestrator->expireOldProposals();
     }
 }

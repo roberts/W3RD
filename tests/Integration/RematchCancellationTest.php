@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\PlayerActivityState;
-use App\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCancelled;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Models\Auth\User;

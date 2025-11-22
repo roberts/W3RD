@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace App\Matchmaking\Events;
 
 use App\Models\Game\Proposal;
 use Illuminate\Broadcasting\InteractsWithSockets;

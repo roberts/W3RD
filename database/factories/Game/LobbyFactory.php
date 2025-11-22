@@ -3,7 +3,7 @@
 namespace Database\Factories\Game;
 
 use App\Enums\GameTitle;
-use App\Enums\LobbyStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use Illuminate\Database\Eloquent\Factories\Factory;

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCancelled;
 use App\Models\Game\Proposal;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCancelled;
 use App\Models\Alert;
 use App\Models\Auth\User;
 

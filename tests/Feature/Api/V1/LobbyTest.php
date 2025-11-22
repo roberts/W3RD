@@ -1,7 +1,7 @@
 <?php
 
-use App\Enums\LobbyPlayerStatus;
-use App\Enums\LobbyStatus;
+use App\Matchmaking\Enums\LobbyPlayerStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;

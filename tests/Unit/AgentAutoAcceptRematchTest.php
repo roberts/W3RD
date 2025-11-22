@@ -3,9 +3,9 @@
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Matchmaking\Events\ProposalAccepted;
 use App\Matchmaking\Events\ProposalCancelled;
-use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;

@@ -2,7 +2,6 @@
 
 namespace Database\Factories\Matchmaking;
 
-use App\Enums\GameTitle;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Mode;

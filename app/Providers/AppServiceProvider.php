@@ -8,6 +8,7 @@ use App\Events\ProposalCancelled;
 use App\Events\ProposalCreated;
 use App\Events\ProposalDeclined;
 use App\Events\ProposalExpired;
+use App\GameEngine\GameEngine;
 use App\Listeners\SendProposalAcceptedAlert;
 use App\Listeners\SendProposalCancelledAlert;
 use App\Listeners\SendProposalCreatedAlert;
@@ -25,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(GameEngine::class);
     }
 
     /**

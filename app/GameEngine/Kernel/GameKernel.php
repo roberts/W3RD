@@ -7,6 +7,7 @@ namespace App\GameEngine\Kernel;
 use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
+use App\GameEngine\Results\ActionKernelResult;
 use App\GameEngine\ValidationResult;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
@@ -50,6 +51,27 @@ class GameKernel
             $rules = $config['rules'] ?? [];
             $this->handlers[$actionClass] = $this->container->makeWith($handlerClass, ['rules' => $rules]);
         }
+    }
+
+    /**
+     * Process an action (validate + apply).
+     *
+     * This is the primary entry point for the kernel. It validates the action
+     * and applies it if valid, returning a result that indicates success or failure.
+     *
+     * This method keeps the kernel pure - no side effects, just validation and application.
+     */
+    public function processAction(object $state, object $action): ActionKernelResult
+    {
+        $validationResult = $this->validateAction($state, $action);
+
+        if (! $validationResult->isValid) {
+            return ActionKernelResult::invalid($validationResult);
+        }
+
+        $newState = $this->applyAction($state, $action);
+
+        return ActionKernelResult::valid($newState);
     }
 
     public function validateAction(object $state, object $action): ValidationResult

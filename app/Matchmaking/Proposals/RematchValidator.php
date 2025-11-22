@@ -7,6 +7,7 @@ namespace App\Matchmaking\Proposals;
 use App\Enums\GameStatus;
 use App\Exceptions\RematchNotAvailableException;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -95,13 +96,13 @@ class RematchValidator
         }
 
         // Validate request is still pending
-        if ($proposal->status !== 'pending') {
+        if ($proposal->status !== ProposalStatus::PENDING) {
             throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
         // Validate not expired
         if ($proposal->expires_at->isPast()) {
-            $proposal->update(['status' => 'expired']);
+            $proposal->update(['status' => ProposalStatus::EXPIRED]);
             throw new RematchNotAvailableException('This rematch request has expired.');
         }
     }

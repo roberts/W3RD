@@ -2,6 +2,8 @@
 
 namespace Database\Factories\Matchmaking;
 
+use App\Matchmaking\Enums\ProposalStatus;
+use App\Matchmaking\Enums\ProposalType;
 use App\Models\Access\Client;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -28,7 +30,8 @@ class ProposalFactory extends Factory
             'requesting_user_id' => User::factory(),
             'opponent_user_id' => User::factory(),
             'game_id' => null,
-            'status' => 'pending',
+            'type' => ProposalType::REMATCH,
+            'status' => ProposalStatus::PENDING,
             'expires_at' => now()->addMinutes(5),
         ];
     }
@@ -39,7 +42,7 @@ class ProposalFactory extends Factory
     public function accepted(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'accepted',
+            'status' => ProposalStatus::ACCEPTED,
             'game_id' => Game::factory(),
         ]);
     }
@@ -50,7 +53,7 @@ class ProposalFactory extends Factory
     public function declined(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'declined',
+            'status' => ProposalStatus::DECLINED,
         ]);
     }
 
@@ -60,7 +63,7 @@ class ProposalFactory extends Factory
     public function expired(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'expired',
+            'status' => ProposalStatus::EXPIRED,
             'expires_at' => now()->subMinutes(10),
         ]);
     }
@@ -71,7 +74,7 @@ class ProposalFactory extends Factory
     public function cancelled(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'cancelled',
+            'status' => ProposalStatus::CANCELLED,
         ]);
     }
 

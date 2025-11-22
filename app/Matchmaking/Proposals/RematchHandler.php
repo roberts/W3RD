@@ -7,6 +7,8 @@ namespace App\Matchmaking\Proposals;
 use App\Enums\GameStatus;
 use App\Exceptions\RematchNotAvailableException;
 use App\Jobs\AgentAutoAcceptRematch;
+use App\Matchmaking\Enums\ProposalStatus;
+use App\Matchmaking\Enums\ProposalType;
 use App\Matchmaking\Events\ProposalAccepted;
 use App\Matchmaking\Events\ProposalCreated;
 use App\Matchmaking\Events\ProposalDeclined;
@@ -51,9 +53,9 @@ class RematchHandler implements ProposalHandler
                 'opponent_user_id' => $opponent->user_id,
                 'title_slug' => $game->title_slug->value,
                 'mode_id' => $game->mode_id,
-                'type' => 'rematch',
+                'type' => ProposalType::REMATCH,
                 'game_settings' => $game->game_settings,
-                'status' => 'pending',
+                'status' => ProposalStatus::PENDING,
                 'expires_at' => Carbon::now()->addMinutes($expirationMinutes),
             ]);
 
@@ -135,12 +137,12 @@ class RematchHandler implements ProposalHandler
             }
 
             // Validate request is still pending
-            if ($proposal->status !== 'pending') {
+            if ($proposal->status !== ProposalStatus::PENDING) {
                 throw new RematchNotAvailableException('This rematch request is no longer pending.');
             }
 
             $proposal->update([
-                'status' => 'declined',
+                'status' => ProposalStatus::DECLINED,
                 'responded_at' => now(),
             ]);
 

@@ -60,8 +60,8 @@ readonly class ProposalResult
         if ($this->proposal) {
             $response['proposal'] = [
                 'ulid' => $this->proposal->ulid,
-                'type' => $this->proposal->type,
-                'status' => $this->proposal->status,
+                'type' => $this->proposal->type->value,
+                'status' => $this->proposal->status->value,
                 'requesting_user_id' => $this->proposal->requesting_user_id,
                 'opponent_user_id' => $this->proposal->opponent_user_id,
                 'title_slug' => $this->proposal->title_slug,

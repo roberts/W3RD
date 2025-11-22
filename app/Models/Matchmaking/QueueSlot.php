@@ -2,6 +2,7 @@
 
 namespace App\Models\Matchmaking;
 
+use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ class QueueSlot extends Model
     ];
 
     protected $casts = [
+        'status' => QueueSlotStatus::class,
         'preferences' => 'array',
         'expires_at' => 'datetime',
     ];
@@ -43,7 +45,7 @@ class QueueSlot extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === 'active'
+        return $this->status === QueueSlotStatus::ACTIVE
             && (! $this->expires_at || $this->expires_at->isFuture());
     }
 

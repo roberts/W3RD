@@ -25,11 +25,11 @@ class ProposalSent implements ShouldBroadcast
     {
         return [
             'proposal_ulid' => $this->proposal->ulid,
-            'type' => $this->proposal->type,
+            'type' => $this->proposal->type->value,
             'title_slug' => $this->proposal->title_slug,
             'requesting_user_id' => $this->proposal->requesting_user_id,
             'opponent_user_id' => $this->proposal->opponent_user_id,
-            'status' => $this->proposal->status,
+            'status' => $this->proposal->status->value,
             'expires_at' => optional($this->proposal->expires_at)?->toIso8601String(),
         ];
     }

@@ -3,6 +3,7 @@
 namespace Database\Factories\Matchmaking;
 
 use App\Enums\GameTitle;
+use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Mode;
 use App\Models\Matchmaking\QueueSlot;
@@ -39,7 +40,7 @@ class QueueSlotFactory extends Factory
             'title_slug' => $gameTitle->value,
             'mode_id' => $mode->id,
             'skill_rating' => $this->faker->numberBetween(1, 5000),
-            'status' => 'active',
+            'status' => QueueSlotStatus::ACTIVE,
             'preferences' => [
                 'game_mode' => $gameMode,
                 'region' => $this->faker->randomElement(['na-east', 'na-west', 'eu-central']),
@@ -51,7 +52,7 @@ class QueueSlotFactory extends Factory
     public function cancelled(): self
     {
         return $this->state(fn () => [
-            'status' => 'cancelled',
+            'status' => QueueSlotStatus::CANCELLED,
             'expires_at' => now()->subMinute(),
         ]);
     }

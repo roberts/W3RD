@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Matchmaking\Events\ProposalCancelled;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use App\Models\Auth\User;
@@ -42,10 +43,10 @@ class AgentAutoAcceptRematch implements ShouldQueue
         }
 
         // Check if still pending
-        if ($proposal->status !== 'pending') {
+        if ($proposal->status !== ProposalStatus::PENDING) {
             Log::info('Rematch request no longer pending', [
                 'proposal_id' => $this->proposalId,
-                'status' => $proposal->status,
+                'status' => $proposal->status->value,
             ]);
 
             return;

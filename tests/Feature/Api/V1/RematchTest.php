@@ -1,5 +1,6 @@
 <?php
 
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -263,7 +264,7 @@ describe('Rematch Management', function () {
 
             // Rematch should be auto-cancelled
             $rematch = Proposal::where('ulid', $rematchUlid)->first();
-            expect($rematch->status)->toBeIn(['cancelled', 'pending']); // May be cancelled automatically
+            expect($rematch->status)->toBeIn([ProposalStatus::CANCELLED, ProposalStatus::PENDING]); // May be cancelled automatically
         });
 
         it('prevents rematch request spam', function () {

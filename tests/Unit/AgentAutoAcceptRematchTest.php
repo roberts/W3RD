@@ -5,6 +5,7 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Matchmaking\Events\ProposalAccepted;
 use App\Matchmaking\Events\ProposalCancelled;
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -97,7 +98,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('accepted')
+            expect($proposal->status)->toBe(ProposalStatus::ACCEPTED)
                 ->and($proposal->game_id)->not->toBeNull();
 
             Event::assertDispatched(ProposalAccepted::class);
@@ -158,7 +159,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            expect($proposal->fresh()->status)->toBe('declined');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::DECLINED);
             Event::assertNotDispatched(ProposalAccepted::class);
         });
 
@@ -181,7 +182,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('cancelled');
+            expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
                 return $event->proposal->id === $proposal->id
@@ -208,7 +209,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('cancelled');
+            expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
                 return $event->proposal->id === $proposal->id
@@ -235,7 +236,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('cancelled');
+            expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
         });
     });
 
@@ -262,7 +263,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             // Should cancel since agent user not found
-            expect($proposal->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::CANCELLED);
             Event::assertDispatched(ProposalCancelled::class);
         });
 
@@ -284,7 +285,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $job->handle();
 
             // Should skip without error
-            expect($proposal->fresh()->status)->toBe('accepted');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::ACCEPTED);
         });
     });
 });

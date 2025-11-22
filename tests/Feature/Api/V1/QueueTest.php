@@ -2,6 +2,7 @@
 
 use App\Enums\GameTitle;
 use App\Jobs\CheckAndCancelPendingProposals;
+use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Support\Facades\Bus;
@@ -102,7 +103,7 @@ describe('Matchmaking Queue API', function () {
     it('allows a player to cancel their own queue slot', function () {
         $user = User::factory()->create();
         $slot = QueueSlot::factory()->for($user)->create([
-            'status' => 'active',
+            'status' => QueueSlotStatus::ACTIVE,
         ]);
 
         $response = $this->actingAs($user)
@@ -113,7 +114,7 @@ describe('Matchmaking Queue API', function () {
             ->assertJson(['message' => 'Queue slot cancelled']);
 
         $slot->refresh();
-        expect($slot->status)->toBe('cancelled');
+        expect($slot->status)->toBe(QueueSlotStatus::CANCELLED);
     });
 
     it('prevents cancelling another players queue slot', function () {

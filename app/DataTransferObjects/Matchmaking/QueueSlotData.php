@@ -29,7 +29,7 @@ class QueueSlotData extends Data
             mode_id: $slot->mode_id,
             game_mode: $slot->preferences['game_mode'] ?? null,
             skill_rating: $slot->skill_rating,
-            status: $slot->status,
+            status: $slot->status->value,
             preferences: $slot->preferences ?? [],
             expires_at: optional($slot->expires_at)?->toIso8601String(),
             created_at: $slot->created_at->toIso8601String(),

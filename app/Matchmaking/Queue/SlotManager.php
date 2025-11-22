@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Matchmaking\Queue;
 
 use App\Enums\GameTitle;
+use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
 use App\Models\Matchmaking\QueueSlot;
 use Carbon\Carbon;
@@ -42,7 +43,7 @@ class SlotManager
                 'title_slug' => $gameTitle->value,
                 'mode_id' => $modeId,
                 'skill_rating' => $skillRating,
-                'status' => 'active',
+                'status' => QueueSlotStatus::ACTIVE,
                 'preferences' => $preferences,
                 'expires_at' => Carbon::now()->addMinutes($ttl),
             ]
@@ -55,7 +56,7 @@ class SlotManager
     public function cancelSlot(User $user): ?QueueSlot
     {
         $slot = QueueSlot::where('user_id', $user->id)
-            ->where('status', 'active')
+            ->where('status', QueueSlotStatus::ACTIVE)
             ->first();
 
         if (! $slot) {
@@ -63,7 +64,7 @@ class SlotManager
         }
 
         $slot->update([
-            'status' => 'cancelled',
+            'status' => QueueSlotStatus::CANCELLED,
             'expires_at' => Carbon::now(),
         ]);
 

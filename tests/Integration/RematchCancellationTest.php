@@ -4,6 +4,7 @@ use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Matchmaking\Events\ProposalCancelled;
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Matchmaking\Proposal;
@@ -40,7 +41,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('cancelled');
+            expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
                 return $event->rematchRequest->id === $proposal->id
@@ -61,7 +62,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job->handle();
 
             $proposal->refresh();
-            expect($proposal->status)->toBe('cancelled');
+            expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
                 return $event->rematchRequest->id === $proposal->id
@@ -85,8 +86,8 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($rematch1->fresh()->status)->toBe('cancelled')
-                ->and($rematch2->fresh()->status)->toBe('cancelled');
+            expect($rematch1->fresh()->status)->toBe(ProposalStatus::CANCELLED)
+                ->and($rematch2->fresh()->status)->toBe(ProposalStatus::CANCELLED);
         });
 
         it('does not cancel accepted or declined rematches', function () {
@@ -141,7 +142,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($proposal->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::CANCELLED);
         });
 
         it('triggers cancellation when joining lobby', function () {
@@ -157,7 +158,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($proposal->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::CANCELLED);
         });
 
         it('triggers cancellation when starting another game', function () {
@@ -173,7 +174,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($proposal->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::CANCELLED);
         });
 
         it('does not cancel when user goes IDLE', function () {
@@ -187,7 +188,7 @@ describe('Automatic Rematch Cancellation', function () {
             // IDLE doesn't trigger cancellation job, but verify rematch stays pending
             $this->activityService->setState($user->id, PlayerActivityState::IDLE);
 
-            expect($proposal->fresh()->status)->toBe('pending');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::PENDING);
         });
 
         it('cancels rematches when user logs out', function () {
@@ -205,7 +206,7 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($proposal->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe(ProposalStatus::CANCELLED);
         });
     });
 });

@@ -2,6 +2,8 @@
 
 namespace App\Models\Matchmaking;
 
+use App\Matchmaking\Enums\ProposalStatus;
+use App\Matchmaking\Enums\ProposalType;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Mode;
@@ -17,12 +19,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $opponent_user_id
  * @property string $title_slug
  * @property int|null $mode_id
- * @property string $type
+ * @property ProposalType $type
  * @property int|null $original_game_id
  * @property int|null $game_id
  * @property array|null $game_settings
  * @property \Illuminate\Support\Carbon|null $responded_at
- * @property string $status
+ * @property ProposalStatus $status
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
@@ -47,6 +49,8 @@ class Proposal extends Model
     ];
 
     protected $casts = [
+        'type' => ProposalType::class,
+        'status' => ProposalStatus::class,
         'game_settings' => 'array',
         'responded_at' => 'datetime',
         'expires_at' => 'datetime',
@@ -87,24 +91,24 @@ class Proposal extends Model
 
     public function isPending(): bool
     {
-        return $this->status === 'pending' && (! $this->expires_at || $this->expires_at->isFuture());
+        return $this->status === ProposalStatus::PENDING && (! $this->expires_at || $this->expires_at->isFuture());
     }
 
     public function hasExpired(): bool
     {
-        return $this->expires_at !== null && $this->expires_at->isPast() && $this->status === 'pending';
+        return $this->expires_at !== null && $this->expires_at->isPast() && $this->status === ProposalStatus::PENDING;
     }
 
     public function accept(): void
     {
-        $this->status = 'accepted';
+        $this->status = ProposalStatus::ACCEPTED;
         $this->responded_at = now();
         $this->save();
     }
 
     public function decline(): void
     {
-        $this->status = 'declined';
+        $this->status = ProposalStatus::DECLINED;
         $this->responded_at = now();
         $this->save();
     }

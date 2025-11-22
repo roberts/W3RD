@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Orchestrators;
 
+use App\Matchmaking\Enums\ProposalStatus;
 use App\Matchmaking\Events\ProposalExpired;
 use App\Matchmaking\Proposals\ProposalFactory;
 use App\Matchmaking\Results\ProposalResult;
@@ -61,11 +62,11 @@ class ProposalOrchestrator
         bool $isAutoAccept = false
     ): ProposalResult {
         try {
-            $handler = $this->factory->getHandler($proposal->type);
+            $handler = $this->factory->getHandler($proposal->type->value);
 
             Log::info('Accepting proposal', [
                 'proposal_id' => $proposal->ulid,
-                'type' => $proposal->type,
+                'type' => $proposal->type->value,
                 'accepting_user_id' => $acceptingUser->id,
                 'is_auto_accept' => $isAutoAccept,
             ]);
@@ -87,11 +88,11 @@ class ProposalOrchestrator
     public function declineProposal(Proposal $proposal, User $decliningUser): ProposalResult
     {
         try {
-            $handler = $this->factory->getHandler($proposal->type);
+            $handler = $this->factory->getHandler($proposal->type->value);
 
             Log::info('Declining proposal', [
                 'proposal_id' => $proposal->ulid,
-                'type' => $proposal->type,
+                'type' => $proposal->type->value,
                 'declining_user_id' => $decliningUser->id,
             ]);
 
@@ -111,13 +112,13 @@ class ProposalOrchestrator
      */
     public function expireOldProposals(): int
     {
-        $expired = Proposal::where('status', 'pending')
+        $expired = Proposal::where('status', ProposalStatus::PENDING)
             ->where('expires_at', '<=', Carbon::now())
             ->get();
 
         foreach ($expired as $proposal) {
             $proposal->update([
-                'status' => 'expired',
+                'status' => ProposalStatus::EXPIRED,
                 'responded_at' => now(),
             ]);
             event(new ProposalExpired($proposal));

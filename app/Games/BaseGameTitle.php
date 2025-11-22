@@ -64,7 +64,6 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
         $this->kernel = new GameKernel(
             config: $this->getGameConfig(),
-            gameTitle: $this,
         );
     }
 
@@ -88,11 +87,6 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
         return $this->gameState;
     }
 
-    public function validatePlayerAction(User $player, object $action): ValidationResult
-    {
-        return $this->kernel->validatePlayerAction($this->game, $this->gameState, $player, $action);
-    }
-
     public function validateAction(object $gameState, object $action): ValidationResult
     {
         return $this->kernel->validateAction($gameState, $action);
@@ -103,16 +97,6 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
         $this->gameState = $this->kernel->applyAction($gameState, $action);
 
         return $this->gameState;
-    }
-
-    public function advanceGame(): void
-    {
-        $this->game = $this->kernel->advanceGame($this->game);
-    }
-
-    public function getRedactedStateForPlayer(User $player): object
-    {
-        return $this->kernel->redactStateForPlayer($this->gameState, $player);
     }
 
     public function getActionDeadline(object $gameState, Game $game): Carbon

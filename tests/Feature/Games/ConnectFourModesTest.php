@@ -19,7 +19,6 @@ describe('ConnectFour Modes', function () {
         $config = $method->invoke($mode);
 
         $actions = $config->getActionRegistry();
-
         expect($actions)->toHaveKey(PopOut::class);
     });
 

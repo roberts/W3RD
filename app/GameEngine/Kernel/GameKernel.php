@@ -13,13 +13,13 @@ use InvalidArgumentException;
 
 /**
  * GameKernel: Lean action handler registry for managing game actions.
- * 
+ *
  * Responsibilities:
  * - Initialize and manage action handlers from config
  * - Validate actions using appropriate handlers
  * - Apply actions to game state
  * - Aggregate available actions across all handlers
- * 
+ *
  * Does NOT handle:
  * - Validation orchestration (pacing/sequence checks) - BaseGameTitle does this
  * - Turn advancement - TurnManager handles this

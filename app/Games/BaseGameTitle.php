@@ -16,7 +16,6 @@ use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Kernel\GameKernel;
 use App\GameEngine\ValidationResult;
-use App\Models\Auth\User;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use Carbon\Carbon;

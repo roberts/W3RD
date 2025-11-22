@@ -8,6 +8,7 @@ use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
+use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,7 +55,7 @@ class GameTimerController extends Controller
         }
 
         // Find current player
-        /** @var \App\Models\Game\Player|null $currentPlayer */
+        /** @var Player|null $currentPlayer */
         $currentPlayer = $game->players()
             ->where('ulid', $gameState->currentPlayerUlid)
             ->with('user:id,username')

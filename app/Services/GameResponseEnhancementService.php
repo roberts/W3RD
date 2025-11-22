@@ -8,6 +8,7 @@ use App\GameEngine\GameOutcome;
 use App\GameTitles\BaseGameTitle;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 
 /**
@@ -24,7 +25,7 @@ class GameResponseEnhancementService
     public function generateActionContext(Game $game, object $gameState, BaseGameTitle $mode, Action $actionRecord): array
     {
         $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
-        /** @var \App\Models\Game\Player|null $currentPlayer */
+        /** @var Player|null $currentPlayer */
         $currentPlayer = $currentPlayerUlid
             ? $game->players()->where('ulid', $currentPlayerUlid)->first()
             : null;
@@ -78,7 +79,7 @@ class GameResponseEnhancementService
         ];
 
         if ($outcome->winnerUlid) {
-            /** @var \App\Models\Game\Player|null $winner */
+            /** @var Player|null $winner */
             $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
             if ($winner) {
                 $details['winner'] = [

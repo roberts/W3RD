@@ -11,6 +11,7 @@ use App\Events\GameStatusChanged;
 use App\Exceptions\GameAccessDeniedException;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 
 /**
  * Handles player-initiated game endings (concede/forfeit and abandon).
@@ -24,7 +25,7 @@ class PlayerInitiatedConclusion
     public function processConcede(Game $game, User $concedingUser): void
     {
         // Find the opponent
-        /** @var \App\Models\Game\Player|null $opponent */
+        /** @var Player|null $opponent */
         $opponent = $game->players()
             ->where('user_id', '!=', $concedingUser->id)
             ->first();

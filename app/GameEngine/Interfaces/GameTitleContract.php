@@ -12,6 +12,8 @@ use App\Enums\GameAttributes\GamePacing;
 use App\Enums\GameAttributes\GameSequence;
 use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameAttributes\GameVisibility;
+use App\Exceptions\Game\TurnTimerExpiredException;
+use App\GameEngine\GameOutcome;
 use App\GameEngine\ValidationResult;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -308,7 +310,7 @@ interface GameTitleContract
      *
      * @param  Game  $game  The game instance
      *
-     * @throws \App\Exceptions\Game\TurnTimerExpiredException If time has expired
+     * @throws TurnTimerExpiredException If time has expired
      */
     public function validateActionTime(Game $game): void;
 
@@ -346,7 +348,7 @@ interface GameTitleContract
      * @param  Game  $game  The game instance
      * @param  object  $gameState  The current game state
      * @param  string  $playerUlid  The ULID of the player whose timer expired
-     * @return \App\GameEngine\GameOutcome The outcome of the timer expiration
+     * @return GameOutcome The outcome of the timer expiration
      */
-    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): \App\GameEngine\GameOutcome;
+    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): GameOutcome;
 }

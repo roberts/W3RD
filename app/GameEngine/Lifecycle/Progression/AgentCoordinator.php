@@ -6,7 +6,9 @@ namespace App\GameEngine\Lifecycle\Progression;
 
 use App\Enums\GameStatus;
 use App\GameEngine\Interfaces\GameTitleContract;
+use App\Models\Auth\User;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Services\Agents\AgentService;
 use Illuminate\Support\Facades\Log;
 
@@ -37,14 +39,14 @@ class AgentCoordinator
         }
 
         // Find the player record
-        /** @var \App\Models\Game\Player|null $player */
+        /** @var Player|null $player */
         $player = $game->players()->where('ulid', $currentPlayerUlid)->first();
 
         if (! $player) {
             return;
         }
 
-        /** @var \App\Models\Auth\User|null $user */
+        /** @var User|null $user */
         $user = $player->user;
 
         if (! $user) {

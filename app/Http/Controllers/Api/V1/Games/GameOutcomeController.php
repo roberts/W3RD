@@ -6,6 +6,7 @@ use App\Actions\Game\FindGameByUlidAction;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
+use App\Models\Game\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,7 +33,7 @@ class GameOutcomeController extends Controller
             return $this->errorResponse('Game is not yet completed', 400);
         }
 
-        /** @var \App\Models\Game\Player|null $winner */
+        /** @var Player|null $winner */
         $winner = $game->players()->where('user_id', $game->winner_id)->first();
 
         $outcomeData = [

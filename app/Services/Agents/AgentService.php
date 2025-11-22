@@ -3,7 +3,9 @@
 namespace App\Services\Agents;
 
 use App\Exceptions\AgentConfigurationException;
+use App\Interfaces\AgentContract;
 use App\Jobs\CalculateAgentAction;
+use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use Illuminate\Support\Facades\Log;
@@ -57,7 +59,7 @@ class AgentService
      *
      * @throws AgentConfigurationException If logic class doesn't exist or doesn't implement AgentContract
      */
-    public function getAgentLogic(User $user): \App\Interfaces\AgentContract
+    public function getAgentLogic(User $user): AgentContract
     {
         if (! $user->isAgent()) {
             throw new AgentConfigurationException(
@@ -67,7 +69,7 @@ class AgentService
             );
         }
 
-        /** @var \App\Models\Auth\Agent $agent */
+        /** @var Agent $agent */
         $agent = $user->agent;
         $logicClass = $agent->ai_logic_path;
 
@@ -85,7 +87,7 @@ class AgentService
 
         $logic = app($logicClass);
 
-        if (! $logic instanceof \App\Interfaces\AgentContract) {
+        if (! $logic instanceof AgentContract) {
             Log::error('Agent logic class does not implement AgentContract', [
                 'agent_id' => $agent->id,
                 'logic_class' => $logicClass,
@@ -93,7 +95,7 @@ class AgentService
             throw new AgentConfigurationException(
                 "Agent logic must implement AgentContract: {$logicClass}",
                 $logicClass,
-                ['agent_id' => $agent->id, 'required_interface' => \App\Interfaces\AgentContract::class]
+                ['agent_id' => $agent->id, 'required_interface' => AgentContract::class]
             );
         }
 

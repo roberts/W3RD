@@ -4,6 +4,7 @@ namespace App\DataTransferObjects\Competitions;
 
 use App\Models\Auth\User;
 use App\Models\Tournament;
+use App\Models\TournamentUser;
 use Spatie\LaravelData\Data;
 
 class StandingData extends Data
@@ -19,7 +20,7 @@ class StandingData extends Data
 
     public static function fromUser(User $user, Tournament $tournament): self
     {
-        /** @var \App\Models\TournamentUser $pivot */
+        /** @var TournamentUser $pivot */
         $pivot = $user->tournaments()
             ->where('tournament_id', $tournament->id)
             ->first()

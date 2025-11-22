@@ -145,7 +145,7 @@ class GameBuilder
             // Set all players to IN_GAME state
             $activityService = app(PlayerActivityManager::class);
             foreach ($players as $player) {
-                /** @var \App\Models\Game\Player $player */
+                /** @var Player $player */
                 $activityService->setState($player->user_id, PlayerActivityState::IN_GAME);
             }
 

@@ -5,7 +5,7 @@ namespace App\Actions\Quickplay;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Models\Auth\User;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Support\Facades\Redis;
 
 class LeaveQuickplayQueueAction
@@ -31,7 +31,7 @@ class LeaveQuickplayQueueAction
         Redis::hdel('quickplay:clients', (string) $user->id);
 
         // Set player activity to IDLE
-        $activityService = app(PlayerActivityService::class);
+        $activityService = app(PlayerActivityManager::class);
         $activityService->setState($user->id, PlayerActivityState::IDLE);
     }
 }

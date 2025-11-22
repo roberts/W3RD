@@ -1,16 +1,21 @@
 <?php
 
-namespace App\Services;
+namespace App\GameEngine\Lifecycle;
 
+use App\GameEngine\Player\ProgressionManager;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 
-class GameOutcomeService
+class OutcomeProcessor
 {
+    public function __construct(protected ProgressionManager $progressionManager)
+    {
+    }
+
     /**
      * Calculate and store XP and rewards for game completion.
      */
-    public function processOutcome(Game $game): void
+    public function process(Game $game): void
     {
         if (! $game->isCompleted()) {
             return;
@@ -41,6 +46,14 @@ class GameOutcomeService
 
             $xpAwarded[$player->ulid] = $playerXp;
             $rewards[$player->ulid] = $playerRewards;
+
+            // Delegate XP awarding to ProgressionManager
+            $this->progressionManager->awardXp(
+                $player->user_id,
+                $game->title_slug->value,
+                $playerXp,
+                'game_completion'
+            );
         }
 
         // Update game with calculated outcome data

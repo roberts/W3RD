@@ -127,11 +127,11 @@ class ProposalFactory extends Factory
                 'requesting_user_id' => $requestingUser->getKey(),
                 'opponent_user_id' => $opponentUser->getKey(),
             ];
-        })->afterCreating(function (RematchRequest $rematchRequest) {
+        })->afterCreating(function (Proposal $proposal) {
             // Attach for easy access in tests
-            $rematchRequest->game = $rematchRequest->originalGame; // @phpstan-ignore-line
-            $rematchRequest->requesting_user = $rematchRequest->requestingUser; // @phpstan-ignore-line
-            $rematchRequest->opponent_user = $rematchRequest->opponentUser; // @phpstan-ignore-line
+            $proposal->game = $proposal->originalGame; // @phpstan-ignore-line
+            $proposal->requesting_user = $proposal->requestingUser; // @phpstan-ignore-line
+            $proposal->opponent_user = $proposal->opponentUser; // @phpstan-ignore-line
         });
     }
 }

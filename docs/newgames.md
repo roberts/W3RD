@@ -195,11 +195,11 @@ The attribute system currently drives four major, scalable components within the
     *   If `PHASE_BASED`, it can delegate to a more complex state machine to determine the next phase or player.
 *   **Scalability**: This allows the same engine to handle a traditional board game, a fast-paced real-time game, and a complex card game with distinct phases (passing, playing, scoring) without changing the core action-handling loop.
 
-#### 4. Game Dynamics & The `GameConclusionService`
+#### 4. Game Dynamics & The `ConclusionManager`
 
 *   **Attribute**: `getDynamic(): GameDynamic`
 *   **Values**: `ONE_VS_ONE`, `LAST_MAN_STANDING`, `SCORE_BASED`, `FREE_FOR_ALL`
-*   **Engine Logic**: The `checkEndCondition` method has been **removed** from individual game protocols. Instead, the `GameActionController` calls the `GameConclusionService` after every move.
+*   **Engine Logic**: The `checkEndCondition` method has been **removed** from individual game protocols. Instead, the `GameActionController` calls the `ConclusionManager` after every move.
     *   This service checks the game's `getDynamic()` attribute.
     *   It then applies the correct logic to determine a winner (e.g., checking for one active player for `LAST_MAN_STANDING`, or comparing scores for `SCORE_BASED`).
-*   **Scalability**: To add a new win condition (e.g., `CAPTURE_THE_FLAG`), you add a case to the `GameDynamic` enum and implement the corresponding logic within a new private method in the `GameConclusionService`. No changes are needed in the game protocols themselves.
+*   **Scalability**: To add a new win condition (e.g., `CAPTURE_THE_FLAG`), you add a case to the `GameDynamic` enum and implement the corresponding logic within a new private method in the `ConclusionManager`. No changes are needed in the game protocols themselves.

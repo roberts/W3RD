@@ -4,16 +4,19 @@ namespace App\Actions\Game;
 
 use App\DataTransferObjects\Game\TimeoutResult;
 use App\Enums\GameStatus;
+use App\GameEngine\GameOutcome;
+use App\GameEngine\TimerExpired\TimerExpiredManager;
 use App\Http\Traits\ApiResponses;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
-use App\Services\Timeouts\ForfeitHandler;
-use App\Services\Timeouts\NoneHandler;
-use App\Services\Timeouts\PassHandler;
 
 class HandleTimeoutAction
 {
     use ApiResponses;
+
+    public function __construct(private TimerExpiredManager $timerExpiredManager)
+    {
+    }
 
     /**
      * Check if the current turn has timed out and handle accordingly.
@@ -28,17 +31,17 @@ class HandleTimeoutAction
             return TimeoutResult::noTimeout();
         }
 
-        $penalty = $mode->getTimeoutPenalty();
+        $timer = $mode->getTimer();
+        $driver = $this->timerExpiredManager->getDriverFor($timer);
 
-        // Get timeout handler
-        $timeoutHandler = match ($penalty) {
-            'forfeit' => new ForfeitHandler,
-            'pass' => new PassHandler,
-            'none' => new NoneHandler,
-            default => new NoneHandler,
-        };
+        /** @var Player|null $player */
+        $player = $game->players()->where('id', $game->current_player_id)->first();
 
-        $outcome = $timeoutHandler->handleTimeout($game, $gameState, $gameState->currentPlayerUlid);
+        if (!$player) {
+            return TimeoutResult::noTimeout();
+        }
+
+        $outcome = $driver->handleTimerExpired($game, $gameState, $player->ulid);
 
         if ($outcome->isFinished) {
             $game->status = GameStatus::COMPLETED;
@@ -50,7 +53,6 @@ class HandleTimeoutAction
                 /** @var Player $winner */
                 $winner = $game->players()->where('ulid', $outcome->winnerUlid)->first();
                 $game->winner_id = $winner->id;
-                $game->winner_position = $outcome->winnerPosition;
             }
 
             $game->save();
@@ -60,27 +62,22 @@ class HandleTimeoutAction
                     'Your turn has timed out. You have forfeited the game.',
                     408,
                     'action_timeout',
-                    ['game_status' => 'completed', 'penalty' => $penalty]
+                    ['game_status' => 'completed', 'penalty' => $driver->getName()]
                 )
             );
         }
 
-        // Pass strategy - advance to next player
-        if ($penalty === 'pass') {
-            $gameState = $gameState->withNextPlayer();
-            $game->game_state = $gameState->toArray();
-            $game->save();
+        // The driver should have updated the game state if the penalty was 'pass'
+        $game->game_state = $outcome->getGameState();
+        $game->save();
 
-            return TimeoutResult::timeout(
-                $this->errorResponse(
-                    'Your turn has timed out and has been passed.',
-                    408,
-                    'action_timeout',
-                    ['penalty' => 'pass']
-                )
-            );
-        }
-
-        return TimeoutResult::noTimeout();
+        return TimeoutResult::timeout(
+            $this->errorResponse(
+                'Your turn has timed out and has been passed.',
+                408,
+                'action_timeout',
+                ['penalty' => $driver->getName()]
+            )
+        );
     }
 }

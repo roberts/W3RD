@@ -7,8 +7,8 @@ use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
 use App\Services\Agents\AgentSchedulingService;
-use App\Services\GameCreationService;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -28,6 +28,10 @@ class ProcessQuickplayQueue implements ShouldQueue
     private const SKILL_RANGE = 5; // Skill level difference tolerance
 
     private const RECENT_OPPONENT_LIMIT = 3; // Remember last N opponents
+
+    public function __construct()
+    {
+    }
 
     public function handle(): void
     {
@@ -251,8 +255,8 @@ class ProcessQuickplayQueue implements ShouldQueue
             ];
 
             // Create the game
-            $gameCreationService = app(GameCreationService::class);
-            $game = $gameCreationService->createFromQuickplay($playerData, $gameTitle, $mode);
+            $gameBuilder = app(GameBuilder::class);
+            $game = $gameBuilder->createFromQuickplay($playerData, $gameTitle, $mode);
 
             // Track recent opponents for both human and agent
             Redis::lpush("recent_opponents:{$humanUserId}", $agentUserId);
@@ -261,8 +265,7 @@ class ProcessQuickplayQueue implements ShouldQueue
             Redis::lpush("recent_opponents:{$agentUserId}", $humanUserId);
             Redis::ltrim("recent_opponents:{$agentUserId}", 0, self::RECENT_OPPONENT_LIMIT - 1);
 
-            // Set both players' activity state to IN_GAME
-            $activityService = app(PlayerActivityService::class);
+            $activityService = app(PlayerActivityManager::class);
             $activityService->setState($humanUserId, PlayerActivityState::IN_GAME);
             $activityService->setState($agentUserId, PlayerActivityState::IN_GAME);
 

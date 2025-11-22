@@ -3,27 +3,27 @@
 declare(strict_types=1);
 
 use App\Enums\GameStatus;
+use App\Enums\PlayerActivityState;
 use App\Exceptions\RematchNotAvailableException;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
+use App\Models\Game\Player;
 use App\Models\Game\Proposal;
 use App\Services\RematchService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
+use Mockery;
 
 describe('RematchService', function () {
     beforeEach(function () {
-        $this->service = new RematchService;
+        $this->playerActivityManager = Mockery::mock(PlayerActivityManager::class);
+        $this->service = new RematchService($this->playerActivityManager);
 
-        // Mock Redis for PlayerActivityService
         // Default to 'idle' state so opponents are available for rematch
-        Redis::shouldReceive('setex')->andReturn(true)->byDefault();
-        Redis::shouldReceive('get')->andReturn('idle')->byDefault();
-        Redis::shouldReceive('expire')->andReturn(true)->byDefault();
-        Redis::shouldReceive('del')->andReturn(true)->byDefault();
-        Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
-        Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
-        Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+        $this->playerActivityManager->shouldReceive('getState')
+            ->andReturn(PlayerActivityState::IDLE)
+            ->byDefault();
     });
 
     describe('Create Rematch Request Validation', function () {
@@ -44,12 +44,18 @@ describe('RematchService', function () {
                 ->toThrow(RematchNotAvailableException::class, 'not a player');
         });
 
-        test('throws exception when opponent not found', function () {
-            $user = User::factory()->create();
-            $game = Game::factory()->completed()->withPlayers([$user])->create(['creator_id' => $user->id]);
+        test('throws exception when opponent is busy', function () {
+            $user1 = User::factory()->create();
+            $user2 = User::factory()->create();
+            $game = Game::factory()->completed()->withPlayers([$user1, $user2])->create(['creator_id' => $user1->id]);
 
-            expect(fn () => $this->service->createRematchRequest($game, $user))
-                ->toThrow(RematchNotAvailableException::class, 'opponent');
+            // Mock opponent as busy
+            $this->playerActivityManager->shouldReceive('getState')
+                ->with($user2->id)
+                ->andReturn(PlayerActivityState::IN_GAME);
+
+            expect(fn () => $this->service->createRematchRequest($game, $user1))
+                ->toThrow(RematchNotAvailableException::class, 'currently in_game');
         });
 
         test('throws exception when pending request already exists', function () {

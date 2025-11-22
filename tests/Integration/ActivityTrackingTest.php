@@ -9,8 +9,8 @@ use App\Enums\PlayerActivityState;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
-use App\Services\GameCreationService;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 
@@ -49,8 +49,8 @@ describe('Activity Tracking in Game Creation', function () {
         Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
 
-        $this->activityService = app(PlayerActivityService::class);
-        $this->gameCreationService = app(GameCreationService::class);
+        $this->activityManager = app(PlayerActivityManager::class);
+        $this->gameBuilder = app(GameBuilder::class);
     });
 
     describe('quickplay queue', function () {
@@ -93,7 +93,7 @@ describe('Activity Tracking in Game Creation', function () {
                 'player_'.$user2->id.'_client' => '1',
             ]);
 
-            $game = $this->gameCreationService->createFromQuickplayMatch(
+            $game = $this->gameBuilder->createFromQuickplayMatch(
                 [$user1->id, $user2->id],
                 $matchId
             );
@@ -143,7 +143,7 @@ describe('Activity Tracking in Game Creation', function () {
                 'status' => 'accepted',
             ]);
 
-            $game = $this->gameCreationService->createFromLobby($lobby);
+            $game = $this->gameBuilder->createFromLobby($lobby);
 
             expect($game->status)->toBe(GameStatus::ACTIVE)
                 ->and($this->activityService->getState($host->id))->toBe(PlayerActivityState::IN_GAME)
@@ -190,8 +190,8 @@ describe('Activity Tracking in Game Creation', function () {
             $user2 = User::factory()->create();
 
             // Set both in game
-            $this->activityService->setState($user1->id, PlayerActivityState::IN_GAME);
-            $this->activityService->setState($user2->id, PlayerActivityState::IN_GAME);
+            $this->activityManager->setState($user1->id, PlayerActivityState::IN_GAME);
+            $this->activityManager->setState($user2->id, PlayerActivityState::IN_GAME);
 
             // Simulate game completion (done via GameCompleted event listener)
             $this->activityService->setState($user1->id, PlayerActivityState::IDLE);

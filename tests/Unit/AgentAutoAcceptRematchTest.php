@@ -8,7 +8,7 @@ use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Proposal;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
@@ -18,6 +18,8 @@ uses(RefreshDatabase::class);
 describe('AgentAutoAcceptRematch Job', function () {
     beforeEach(function () {
         Event::fake();
+
+        $this->playerActivityManager = app(PlayerActivityManager::class);
 
         $this->states = [];
         $this->hashKeys = [];
@@ -65,7 +67,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
 
-        $this->activityService = app(PlayerActivityService::class);
+        $this->activityService = app(PlayerActivityManager::class);
     });
 
     describe('successful auto-accept', function () {
@@ -74,7 +76,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -91,12 +93,12 @@ describe('AgentAutoAcceptRematch Job', function () {
                 'human_user_id' => $humanUser->id,
             ]);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            $rematchRequest->refresh();
-            expect($rematchRequest->status)->toBe('accepted')
-                ->and($rematchRequest->game_id)->not->toBeNull();
+            $proposal->refresh();
+            expect($proposal->status)->toBe('accepted')
+                ->and($proposal->game_id)->not->toBeNull();
 
             Event::assertDispatched(ProposalAccepted::class);
         });
@@ -106,7 +108,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -124,7 +126,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             expect(Redis::exists($cooldownKey))->toBeTrue();
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
             expect(Redis::exists($cooldownKey))->toBeFalse();
@@ -133,7 +135,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
     describe('validation checks', function () {
         it('does nothing if rematch request not found', function () {
-            $job = new AgentAutoAcceptRematch('non-existent-ulid', 999);
+            $job = new AgentAutoAcceptRematch('non-existent-ulid', 999, $this->playerActivityManager);
             $job->handle();
 
             Event::assertNotDispatched(ProposalAccepted::class);
@@ -147,16 +149,16 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             $game = Game::factory()->completed()->create();
 
-            $rematchRequest = Proposal::factory()->declined()->create([
+            $proposal = Proposal::factory()->declined()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
             ]);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            expect($rematchRequest->fresh()->status)->toBe('declined');
+            expect($proposal->fresh()->status)->toBe('declined');
             Event::assertNotDispatched(ProposalAccepted::class);
         });
 
@@ -165,7 +167,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -175,14 +177,14 @@ describe('AgentAutoAcceptRematch Job', function () {
             $this->activityService->setState($humanUser->id, PlayerActivityState::IDLE);
             $this->activityService->setState($agentUser->id, PlayerActivityState::IN_GAME);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            $rematchRequest->refresh();
-            expect($rematchRequest->status)->toBe('cancelled');
+            $proposal->refresh();
+            expect($proposal->status)->toBe('cancelled');
 
-            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
-                return $event->rematchRequest->id === $rematchRequest->id
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'opponent_unavailable';
             });
         });
@@ -192,7 +194,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -202,14 +204,14 @@ describe('AgentAutoAcceptRematch Job', function () {
             $this->activityService->setState($humanUser->id, PlayerActivityState::IN_QUEUE);
             $this->activityService->setState($agentUser->id, PlayerActivityState::IDLE);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            $rematchRequest->refresh();
-            expect($rematchRequest->status)->toBe('cancelled');
+            $proposal->refresh();
+            expect($proposal->status)->toBe('cancelled');
 
-            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($rematchRequest) {
-                return $event->rematchRequest->id === $rematchRequest->id
+            Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'requester_unavailable';
             });
         });
@@ -219,7 +221,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -229,11 +231,11 @@ describe('AgentAutoAcceptRematch Job', function () {
             $this->activityService->setState($humanUser->id, PlayerActivityState::IN_LOBBY);
             $this->activityService->setState($agentUser->id, PlayerActivityState::IN_QUEUE);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
-            $rematchRequest->refresh();
-            expect($rematchRequest->status)->toBe('cancelled');
+            $proposal->refresh();
+            expect($proposal->status)->toBe('cancelled');
         });
     });
 
@@ -244,7 +246,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
             $game = Game::factory()->completed()->create();
 
-            $rematchRequest = Proposal::factory()->create([
+            $proposal = Proposal::factory()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $fakeAgentUser->id,
@@ -254,13 +256,13 @@ describe('AgentAutoAcceptRematch Job', function () {
             $fakeAgentId = $fakeAgentUser->id;
             $fakeAgentUser->delete(); // Delete to simulate missing user
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $fakeAgentId);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $fakeAgentId, $this->playerActivityManager);
 
             // Should not throw exception
             $job->handle();
 
             // Should cancel since agent user not found
-            expect($rematchRequest->fresh()->status)->toBe('cancelled');
+            expect($proposal->fresh()->status)->toBe('cancelled');
             Event::assertDispatched(ProposalCancelled::class);
         });
 
@@ -269,7 +271,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             $game = Game::factory()->completed()->withAgentOpponent($humanUser, 'alwaysAvailable')->create();
             $agentUser = $game->agent_user;
 
-            $rematchRequest = Proposal::factory()->accepted()->create([
+            $proposal = Proposal::factory()->accepted()->create([
                 'original_game_id' => $game->id,
                 'requesting_user_id' => $humanUser->id,
                 'opponent_user_id' => $agentUser->id,
@@ -278,11 +280,11 @@ describe('AgentAutoAcceptRematch Job', function () {
             $this->activityService->setState($humanUser->id, PlayerActivityState::IDLE);
             $this->activityService->setState($agentUser->id, PlayerActivityState::IDLE);
 
-            $job = new AgentAutoAcceptRematch($rematchRequest->ulid, $agentUser->id);
+            $job = new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, $this->playerActivityManager);
             $job->handle();
 
             // Should skip without error
-            expect($rematchRequest->fresh()->status)->toBe('accepted');
+            expect($proposal->fresh()->status)->toBe('accepted');
         });
     });
 });

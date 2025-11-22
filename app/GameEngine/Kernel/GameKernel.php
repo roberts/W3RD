@@ -7,7 +7,14 @@ namespace App\GameEngine\Kernel;
 use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
+use App\GameEngine\Interfaces\PacingDriver;
+use App\GameEngine\Interfaces\SequenceDriver;
+use App\GameEngine\TimerExpired\HandlerContract as TimerExpiredDriver;
+use App\GameEngine\Interfaces\VisibilityDriver;
 use App\GameEngine\ValidationResult;
+use App\Models\Game\Game;
+use App\Models\Auth\User;
+use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 
 class GameKernel
@@ -16,8 +23,14 @@ class GameKernel
     protected array $handlers = [];
 
     public function __construct(
-        protected GameConfigContract $config
+        private GameConfigContract $config,
+        public PacingDriver $pacingDriver,
+        public SequenceDriver $sequenceDriver,
+        public VisibilityDriver $visibilityDriver,
+        public TimerExpiredDriver $timerExpiredDriver,
+        private ?Container $container = null,
     ) {
+        $this->container = $container ?? app();
         $this->initializeHandlers();
     }
 
@@ -28,9 +41,28 @@ class GameKernel
             if (! class_exists($handlerClass)) {
                 throw new InvalidArgumentException("Handler class {$handlerClass} not found.");
             }
-            // In a real app, we might use the container to resolve this to allow dependency injection
-            $this->handlers[$actionClass] = new $handlerClass($config['rules'] ?? []);
+            
+            // Use container to resolve handlers, allowing dependency injection
+            $rules = $config['rules'] ?? [];
+            $this->handlers[$actionClass] = $this->container->makeWith($handlerClass, ['rules' => $rules]);
         }
+    }
+
+    public function validatePlayerAction(Game $game, object $gameState, User $player, object $action): ValidationResult
+    {
+        // 1. Pacing Check (Is player too slow?)
+        $this->pacingDriver->validateActionTime($game);
+
+        // 2. Sequence Check (Is it the player's turn?)
+        if (! $this->sequenceDriver->isPlayerTurn($game, $player)) {
+            return ValidationResult::invalid(
+                GameErrorCode::NOT_PLAYER_TURN->value,
+                'It is not your turn to act.'
+            );
+        }
+
+        // 3. Game-specific action validation
+        return $this->validateAction($gameState, $action);
     }
 
     public function validateAction(object $state, object $action): ValidationResult
@@ -58,6 +90,19 @@ class GameKernel
         }
 
         return $handler->apply($state, $action);
+    }
+
+    public function advanceGame(Game $game): Game
+    {
+        $game = $this->sequenceDriver->advanceTurn($game);
+        $this->pacingDriver->startTurnTimer($game);
+
+        return $game;
+    }
+
+    public function redactStateForPlayer(object $gameState, User $player): object
+    {
+        return $this->visibilityDriver->redact($gameState, $player);
     }
 
     public function getAvailableActions(object $state, string $playerUlid): array
@@ -89,5 +134,25 @@ class GameKernel
     {
         // Convert App\GameEngine\Actions\PlacePiece to place_piece
         return strtolower(class_basename($actionClass));
+    }
+
+    public function getPacingDriver(): PacingDriver
+    {
+        return $this->pacingDriver;
+    }
+
+    public function getSequenceDriver(): SequenceDriver
+    {
+        return $this->sequenceDriver;
+    }
+
+    public function getVisibilityDriver(): VisibilityDriver
+    {
+        return $this->visibilityDriver;
+    }
+
+    public function getTimerExpiredDriver(): TimerExpiredDriver
+    {
+        return $this->timerExpiredDriver;
     }
 }

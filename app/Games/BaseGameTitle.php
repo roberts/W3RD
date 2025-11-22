@@ -3,17 +3,30 @@
 namespace App\Games;
 
 use App\Enums\GameAttributes\GameContinuity;
+use App\Enums\GameAttributes\GameDynamic;
 use App\Enums\GameAttributes\GameEntryPolicy;
 use App\Enums\GameAttributes\GameLifecycle;
+use App\Enums\GameAttributes\GamePacing;
+use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameTimer;
+use App\Enums\GameAttributes\GameVisibility;
+use App\Games\BaseGameState;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameConfigContract;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Kernel\GameKernel;
+use App\GameEngine\Managers\PacingManager;
+use App\GameEngine\Managers\SequenceManager;
+use App\GameEngine\Managers\VisibilityManager;
+use App\GameEngine\TimerExpired\TimerExpiredManager;
 use App\GameEngine\ValidationResult;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
+use App\Models\Auth\User;
+use App\Providers\GameServiceProvider;
 use Carbon\Carbon;
+use Illuminate\Foundation\Application;
 
 abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 {
@@ -48,14 +61,37 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
     protected GameKernel $kernel;
 
-    public function __construct(Game $game)
-    {
+    public function __construct(
+        Game $game,
+        ?PacingManager $pacingManager = null,
+        ?SequenceManager $sequenceManager = null,
+        ?TimerExpiredManager $timerExpiredManager = null,
+    ) {
         $this->game = $game;
 
         $gameStateClass = $this->getGameStateClass();
         $this->gameState = $gameStateClass::fromArray($game->game_state);
 
-        $this->kernel = new GameKernel($this->getGameConfig());
+        // Resolve drivers via the service provider factory methods
+        $pacingDriver = GameServiceProvider::makePacingDriver(static::getPacing());
+        $sequenceDriver = GameServiceProvider::makeSequenceDriver(static::getSequence());
+        $visibilityDriver = GameServiceProvider::makeVisibilityDriver(static::getVisibility());
+        
+        // Resolve TimerExpiredManager from container if not provided
+        $timerExpiredManager = $timerExpiredManager ?? app(TimerExpiredManager::class);
+        $timerExpiredDriver = $timerExpiredManager->getDriverFor(static::getTimer());
+
+        // Wrap drivers in manager instances
+        $pacingManager = $pacingManager ?? new PacingManager($pacingDriver);
+        $sequenceManager = $sequenceManager ?? new SequenceManager($sequenceDriver);
+
+        $this->kernel = new GameKernel(
+            config: $this->getGameConfig(),
+            pacingDriver: $pacingManager->getDriver(),
+            sequenceDriver: $sequenceManager->getDriver(),
+            visibilityDriver: $visibilityDriver,
+            timerExpiredDriver: $timerExpiredDriver,
+        );
     }
 
     /**
@@ -78,6 +114,11 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
         return $this->gameState;
     }
 
+    public function validatePlayerAction(User $player, object $action): ValidationResult
+    {
+        return $this->kernel->validatePlayerAction($this->game, $this->gameState, $player, $action);
+    }
+
     public function validateAction(object $gameState, object $action): ValidationResult
     {
         return $this->kernel->validateAction($gameState, $action);
@@ -85,7 +126,18 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
     public function applyAction(object $gameState, object $action): object
     {
-        return $this->kernel->applyAction($gameState, $action);
+        $this->gameState = $this->kernel->applyAction($gameState, $action);
+        return $this->gameState;
+    }
+
+    public function advanceGame(): void
+    {
+        $this->game = $this->kernel->advanceGame($this->game);
+    }
+
+    public function getRedactedStateForPlayer(User $player): object
+    {
+        return $this->kernel->redactStateForPlayer($this->gameState, $player);
     }
 
     public function getActionDeadline(object $gameState, Game $game): Carbon
@@ -159,4 +211,15 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
             'total_turns' => $game->turn_number ?? 0,
         ];
     }
+
+    // These need to be implemented by the concrete game/mode classes
+    abstract public static function getPacing(): GamePacing;
+
+    abstract public static function getTimer(): GameTimer;
+
+    abstract public static function getSequence(): GameSequence;
+
+    abstract public static function getVisibility(): GameVisibility;
+
+    abstract public static function getDynamic(): GameDynamic;
 }

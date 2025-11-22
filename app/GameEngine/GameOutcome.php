@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\GameEngine;
 
 use App\Enums\OutcomeType;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
 /**
  * Result of checking game end conditions.
@@ -19,22 +22,23 @@ use App\Enums\OutcomeType;
  * Example usage:
  * ```php
  * // Simple win
- * return new GameOutcome(
- *     isFinished: true,
- *     winnerUlid: $playerUlid,
- *     type: OutcomeType::WIN,
- *     details: ['reason' => 'four_in_a_row']
- * );
+ * GameOutcome::from([
+ *     'isFinished' => true,
+ *     'winnerUlid' => $playerUlid,
+ *     'type' => OutcomeType::WIN,
+ *     'details' => ['reason' => 'four_in_a_row']
+ * ]);
  *
  * // Draw
- * return new GameOutcome(
- *     isFinished: true,
- *     type: OutcomeType::DRAW,
- *     details: ['reason' => 'board_full']
- * );
+ * GameOutcome::from([
+ *     'isFinished' => true,
+ *     'type' => OutcomeType::DRAW,
+ *     'details' => ['reason' => 'board_full']
+ * ]);
  * ```
  */
-class GameOutcome
+#[MapName(SnakeCaseMapper::class)]
+class GameOutcome extends Data
 {
     /**
      * Create a new game outcome.
@@ -46,19 +50,28 @@ class GameOutcome
      * @param  array  $details  Flexible game-specific details (reason, scores, rankings, etc.)
      */
     public function __construct(
-        public readonly bool $isFinished,
-        public readonly ?string $winnerUlid = null,
-        public readonly ?int $winnerPosition = null,
-        public readonly ?OutcomeType $type = null,
-        public readonly array $details = [],
+        public bool $isFinished,
+        public ?string $winnerUlid = null,
+        public ?int $winnerPosition = null,
+        public ?OutcomeType $type = null,
+        public array $details = [],
+        public mixed $gameState = null,
     ) {}
 
     /**
      * Create an outcome for a game still in progress.
      */
-    public static function inProgress(): self
+    public static function inProgress(mixed $gameState = null): self
     {
-        return new self(isFinished: false);
+        return new self(isFinished: false, gameState: $gameState);
+    }
+
+    /**
+     * Get the game state.
+     */
+    public function getGameState(): mixed
+    {
+        return $this->gameState;
     }
 
     /**
@@ -103,21 +116,5 @@ class GameOutcome
             type: OutcomeType::DRAW,
             details: $details
         );
-    }
-
-    /**
-     * Convert to array for API responses and storage.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'is_finished' => $this->isFinished,
-            'winner_ulid' => $this->winnerUlid,
-            'winner_position' => $this->winnerPosition,
-            'type' => $this->type?->value,
-            'details' => $this->details,
-        ];
     }
 }

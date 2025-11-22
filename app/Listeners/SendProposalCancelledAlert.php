@@ -13,7 +13,7 @@ class SendProposalCancelledAlert
      */
     public function handle(ProposalCancelled $event): void
     {
-        $rematch = $event->rematchRequest;
+        $rematch = $event->proposal;
 
         $message = match ($event->reason) {
             'opponent_unavailable', 'opponent_left' => 'Your rematch request was cancelled - opponent joined another game',

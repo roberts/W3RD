@@ -6,7 +6,7 @@ use App\Enums\PlayerActivityState;
 use App\Events\ProposalCancelled;
 use App\Models\Auth\User;
 use App\Models\Game\Proposal;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Services\RematchService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,8 +21,9 @@ class AgentAutoAcceptRematch implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        public string $rematchRequestId,
-        public int $agentUserId
+        public string $proposalId,
+        public int $agentUserId,
+        public PlayerActivityManager $playerActivityManager
     ) {}
 
     /**
@@ -30,56 +31,54 @@ class AgentAutoAcceptRematch implements ShouldQueue
      */
     public function handle(): void
     {
-        $rematchRequest = RematchRequest::where('ulid', $this->rematchRequestId)->first();
+        $proposal = Proposal::where('ulid', $this->proposalId)->first();
 
-        if (! $rematchRequest) {
+        if (! $proposal) {
             Log::warning('Rematch request not found for auto-accept', [
-                'rematch_request_id' => $this->rematchRequestId,
+                'proposal_id' => $this->proposalId,
             ]);
 
             return;
         }
 
         // Check if still pending
-        if ($rematchRequest->status !== 'pending') {
+        if ($proposal->status !== 'pending') {
             Log::info('Rematch request no longer pending', [
-                'rematch_request_id' => $this->rematchRequestId,
-                'status' => $rematchRequest->status,
+                'proposal_id' => $this->proposalId,
+                'status' => $proposal->status,
             ]);
 
             return;
         }
 
-        $activityService = app(PlayerActivityService::class);
-
         // Check if agent is still available
-        $agentState = $activityService->getState($this->agentUserId);
+        $agentState = $this->playerActivityManager->getState($this->agentUserId);
 
         if ($agentState !== PlayerActivityState::IDLE) {
             Log::info('Agent no longer available for auto-accept', [
-                'rematch_request_id' => $this->rematchRequestId,
+                'proposal_id' => $this->proposalId,
                 'agent_id' => $this->agentUserId,
-                'agent_state' => $agentState->value,
+                'agent_state' => $agentState ? $agentState->value : 'null',
             ]);
 
             // Cancel the rematch
-            $rematchRequest->update(['status' => 'cancelled']);
-            event(new ProposalCancelled($rematchRequest, 'opponent_unavailable'));
+            $proposal->update(['status' => 'cancelled']);
+            event(new ProposalCancelled($proposal, 'opponent_unavailable'));
 
             return;
         }
 
         // Check if requesting user is still available
-        $requesterState = $activityService->getState($rematchRequest->requesting_user_id);
+        $requesterState = $this->playerActivityManager->getState($proposal->requesting_user_id);
         if ($requesterState !== PlayerActivityState::IDLE) {
             Log::info('Requesting user no longer available', [
-                'rematch_request_id' => $this->rematchRequestId,
-                'requester_id' => $rematchRequest->requesting_user_id,
-                'requester_state' => $requesterState->value,
+                'proposal_id' => $this->proposalId,
+                'requester_id' => $proposal->requesting_user_id,
+                'requester_state' => $requesterState ? $requesterState->value : 'null',
             ]);
 
-            $rematchRequest->update(['status' => 'cancelled']);
-            event(new ProposalCancelled($rematchRequest, 'requester_unavailable'));
+            $proposal->update(['status' => 'cancelled']);
+            event(new ProposalCancelled($proposal, 'requester_unavailable'));
 
             return;
         }
@@ -89,12 +88,12 @@ class AgentAutoAcceptRematch implements ShouldQueue
 
         if (! $agentUser) {
             Log::warning('Agent user not found for auto-accept', [
-                'rematch_request_id' => $this->rematchRequestId,
+                'proposal_id' => $this->proposalId,
                 'agent_id' => $this->agentUserId,
             ]);
 
-            $rematchRequest->update(['status' => 'cancelled']);
-            event(new ProposalCancelled($rematchRequest, 'opponent_unavailable'));
+            $proposal->update(['status' => 'cancelled']);
+            event(new ProposalCancelled($proposal, 'opponent_unavailable'));
 
             return;
         }
@@ -102,10 +101,10 @@ class AgentAutoAcceptRematch implements ShouldQueue
         $rematchService = app(RematchService::class);
 
         try {
-            $newGame = $rematchService->acceptRematchRequest($rematchRequest, $agentUser, isAutoAccept: true);
+            $newGame = $rematchService->acceptRematchRequest($proposal, $agentUser, isAutoAccept: true);
 
             Log::info('Agent auto-accepted rematch', [
-                'rematch_request_id' => $this->rematchRequestId,
+                'proposal_id' => $this->proposalId,
                 'agent_id' => $this->agentUserId,
                 'game_id' => $newGame->id,
             ]);
@@ -115,7 +114,7 @@ class AgentAutoAcceptRematch implements ShouldQueue
 
         } catch (\Exception $e) {
             Log::error('Agent auto-accept failed', [
-                'rematch_request_id' => $this->rematchRequestId,
+                'proposal_id' => $this->proposalId,
                 'agent_id' => $this->agentUserId,
                 'error' => $e->getMessage(),
             ]);

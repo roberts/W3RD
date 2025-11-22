@@ -180,6 +180,7 @@ describe('GameOutcome', function () {
                 'winner_position' => null,
                 'type' => null,
                 'details' => [],
+                'game_state' => null,
             ]);
         });
 
@@ -194,6 +195,7 @@ describe('GameOutcome', function () {
                 'winner_position' => 1,
                 'type' => 'win',
                 'details' => ['reason' => 'four_in_a_row'],
+                'game_state' => null,
             ]);
         });
     });

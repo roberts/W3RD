@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\GameEngine\Timeline;
 
 use App\GameEngine\Interfaces\GameActionContract;
 use App\GameEngine\ValidationResult;
@@ -16,7 +16,7 @@ use App\Models\Game\Player;
  * Centralizes action logging logic that was previously embedded in the controller.
  * Records both successful and failed actions for debugging and replay capabilities.
  */
-class GameActionRecorder
+class ActionRecorder
 {
     /**
      * Record a game action to the database.

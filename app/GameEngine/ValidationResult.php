@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\GameEngine;
 
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
 /**
  * Result of action validation.
  *
@@ -22,7 +26,8 @@ namespace App\GameEngine;
  * return ValidationResult::valid();
  * ```
  */
-class ValidationResult
+#[MapName(SnakeCaseMapper::class)]
+class ValidationResult extends Data
 {
     /**
      * Create a new validation result.
@@ -33,10 +38,10 @@ class ValidationResult
      * @param  array<string, mixed>  $context  Additional context about the error
      */
     public function __construct(
-        public readonly bool $isValid,
-        public readonly ?string $errorCode = null,
-        public readonly ?string $message = null,
-        public readonly array $context = [],
+        public bool $isValid,
+        public ?string $errorCode = null,
+        public ?string $message = null,
+        public array $context = [],
     ) {}
 
     /**
@@ -57,20 +62,5 @@ class ValidationResult
     public static function invalid(string $errorCode, string $message, array $context = []): self
     {
         return new self(false, $errorCode, $message, $context);
-    }
-
-    /**
-     * Convert to array for API responses.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'is_valid' => $this->isValid,
-            'error_code' => $this->errorCode,
-            'message' => $this->message,
-            'context' => $this->context,
-        ];
     }
 }

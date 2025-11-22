@@ -8,6 +8,7 @@ use App\Events\ProposalCreated;
 use App\Events\ProposalDeclined;
 use App\Events\ProposalExpired;
 use App\Exceptions\RematchNotAvailableException;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
@@ -21,6 +22,10 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RematchService
 {
+    public function __construct(private PlayerActivityManager $playerActivityManager)
+    {
+    }
+
     /**
      * Create a rematch request.
      */
@@ -50,10 +55,9 @@ class RematchService
         }
 
         // Check if opponent is available for rematch
-        $activityService = app(PlayerActivityService::class);
-        $opponentState = $activityService->getState($opponent->user_id);
+        $opponentState = $this->playerActivityManager->getState($opponent->user_id);
 
-        if (! $opponentState->isAvailableForRematch()) {
+        if ($opponentState && ! $opponentState->isAvailableForRematch()) {
             throw new RematchNotAvailableException(
                 "Opponent is currently {$opponentState->value}. Cannot request rematch."
             );
@@ -81,7 +85,7 @@ class RematchService
 
         $expirationMinutes = config('protocol.floor.proposals.expiration_minutes', 5);
 
-        $rematchRequest = Proposal::create([
+        $proposal = Proposal::create([
             'original_game_id' => $game->id,
             'requesting_user_id' => $requestingUser->id,
             'opponent_user_id' => $opponent->user_id,
@@ -104,46 +108,46 @@ class RematchService
                 // Schedule delayed auto-accept (1-7 seconds random)
                 $delay = rand(1, 7);
 
-                dispatch(new AgentAutoAcceptRematch($rematchRequest->ulid, $opponentUser->id))
+                dispatch(new AgentAutoAcceptRematch($proposal->ulid, $opponentUser->id, $this->playerActivityManager))
                     ->delay(now()->addSeconds($delay));
 
                 Log::info('Scheduled agent auto-accept', [
-                    'rematch_request_id' => $rematchRequest->ulid,
+                    'rematch_request_id' => $proposal->ulid,
                     'agent_id' => $opponentUser->id,
                     'delay_seconds' => $delay,
                 ]);
             }
         }
 
-        event(new ProposalCreated($rematchRequest));
+        event(new ProposalCreated($proposal));
 
-        return $rematchRequest;
+        return $proposal;
     }
 
     /**
      * Accept a rematch request and create a new game.
      */
-    public function acceptRematchRequest(Proposal $rematchRequest, User $acceptingUser, bool $isAutoAccept = false): Game
+    public function acceptRematchRequest(Proposal $proposal, User $acceptingUser, bool $isAutoAccept = false): Game
     {
         // Validate user is the opponent (skip for auto-accepts)
-        if (! $isAutoAccept && $rematchRequest->opponent_user_id !== $acceptingUser->id) {
+        if (! $isAutoAccept && $proposal->opponent_user_id !== $acceptingUser->id) {
             throw new RematchNotAvailableException('Only the opponent can accept this rematch request.');
         }
 
         // Validate request is still pending
-        if ($rematchRequest->status !== 'pending') {
+        if ($proposal->status !== 'pending') {
             throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
         // Validate not expired
-        if ($rematchRequest->expires_at->isPast()) {
-            $rematchRequest->update(['status' => 'expired']);
+        if ($proposal->expires_at->isPast()) {
+            $proposal->update(['status' => 'expired']);
             throw new RematchNotAvailableException('This rematch request has expired.');
         }
 
-        return DB::transaction(function () use ($rematchRequest) {
+        return DB::transaction(function () use ($proposal) {
             /** @var Game $originalGame */
-            $originalGame = $rematchRequest->originalGame;
+            $originalGame = $proposal->originalGame;
 
             // Get the mode to determine how to initialize game state
             $mode = $originalGame->mode;
@@ -192,13 +196,13 @@ class RematchService
             }
 
             // Update rematch request
-            $rematchRequest->update([
+            $proposal->update([
                 'status' => 'accepted',
                 'game_id' => $newGame->id,
                 'responded_at' => now(),
             ]);
 
-            event(new ProposalAccepted($rematchRequest, $newGame));
+            event(new ProposalAccepted($proposal, $newGame));
 
             return $newGame;
         });
@@ -207,26 +211,26 @@ class RematchService
     /**
      * Decline a rematch request.
      */
-    public function declineRematchRequest(Proposal $rematchRequest, User $decliningUser): Proposal
+    public function declineRematchRequest(Proposal $proposal, User $decliningUser): Proposal
     {
         // Validate user is the opponent by comparing user ID directly
-        if ($rematchRequest->opponent_user_id !== $decliningUser->id) {
+        if ($proposal->opponent_user_id !== $decliningUser->id) {
             throw new AccessDeniedHttpException('Only the opponent can decline this rematch request.');
         }
 
         // Validate request is still pending
-        if ($rematchRequest->status !== 'pending') {
+        if ($proposal->status !== 'pending') {
             throw new RematchNotAvailableException('This rematch request is no longer pending.');
         }
 
-        $rematchRequest->update([
+        $proposal->update([
             'status' => 'declined',
             'responded_at' => now(),
         ]);
 
-        event(new ProposalDeclined($rematchRequest));
+        event(new ProposalDeclined($proposal));
 
-        return $rematchRequest;
+        return $proposal;
     }
 
     /**

@@ -37,6 +37,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property array|null $outcome_details
  * @property GameTitle $title_slug
  * @property string $game_title
+ * @property int|null $max_players
+ * @property \Illuminate\Support\Carbon|null $turn_ends_at
+ * @property int|null $current_player_id
  * @property array|null $final_scores
  * @property array|null $xp_awarded
  * @property array|null $rewards
@@ -63,6 +66,9 @@ class Game extends Model
         'player_count',
         'action_count',
         'duration_seconds',
+        'max_players',
+        'turn_ends_at',
+        'current_player_id',
     ];
 
     protected $casts = [
@@ -83,6 +89,9 @@ class Game extends Model
         'player_count' => 'integer',
         'action_count' => 'integer',
         'duration_seconds' => 'integer',
+        'max_players' => 'integer',
+        'turn_ends_at' => 'datetime',
+        'current_player_id' => 'integer',
     ];
 
     /**

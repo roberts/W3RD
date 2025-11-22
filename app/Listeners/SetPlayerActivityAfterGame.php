@@ -4,12 +4,12 @@ namespace App\Listeners;
 
 use App\Enums\PlayerActivityState;
 use App\Events\GameCompleted;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Player\PlayerActivityManager;
 
 class SetPlayerActivityAfterGame
 {
     public function __construct(
-        protected PlayerActivityService $activityService
+        protected PlayerActivityManager $activityService
     ) {}
 
     /**

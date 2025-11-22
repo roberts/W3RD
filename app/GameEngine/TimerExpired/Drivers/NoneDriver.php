@@ -2,25 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Timeouts;
+namespace App\GameEngine\TimerExpired\Drivers;
 
 use App\GameEngine\GameOutcome;
+use App\GameEngine\TimerExpired\HandlerContract;
 use App\Models\Game\Game;
 
 /**
- * None handler - no penalty for timeout.
+ * None driver - no penalty for timer expiration.
  *
  * Used for casual games or turn-based games where time limits
  * are suggestions rather than strict requirements.
  */
-class NoneHandler implements TimeoutHandlerContract
+class NoneDriver implements HandlerContract
 {
     /**
-     * Handle timeout by doing nothing.
+     * Handle timer expiration by doing nothing.
      *
-     * Game continues normally as if no timeout occurred.
+     * Game continues normally as if no timer expired.
      */
-    public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
+    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): GameOutcome
     {
         // No penalty - game continues
         return GameOutcome::inProgress();

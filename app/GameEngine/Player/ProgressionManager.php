@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\GameEngine\Player;
 
-class ProgressionService
+class ProgressionManager
 {
     /**
      * Calculate XP required to reach next level.

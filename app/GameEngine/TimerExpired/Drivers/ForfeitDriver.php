@@ -2,37 +2,38 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Timeouts;
+namespace App\GameEngine\TimerExpired\Drivers;
 
 use App\GameEngine\GameOutcome;
+use App\GameEngine\TimerExpired\HandlerContract;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
 
 /**
- * Forfeit handler - player loses immediately on timeout.
+ * Forfeit driver - player loses immediately when their timer expires.
  *
  * Used for competitive games where time management is critical.
  * The opponent wins automatically.
  */
-class ForfeitHandler implements TimeoutHandlerContract
+class ForfeitDriver implements HandlerContract
 {
     /**
-     * Handle timeout by forfeiting the game.
+     * Handle timer expiration by forfeiting the game.
      */
-    public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
+    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): GameOutcome
     {
         // Find the opponent (winner)
         /** @var Player|null $winnerPlayer */
         $winnerPlayer = $game->players()
-            ->where('ulid', '!=', $timedOutPlayerUlid)
+            ->where('ulid', '!=', $playerUlid)
             ->first();
 
         if (! $winnerPlayer) {
             // Fallback if no opponent found (shouldn't happen)
-            return GameOutcome::draw('timeout_no_opponent');
+            return GameOutcome::draw('timer_expired_no_opponent');
         }
 
-        return GameOutcome::win($winnerPlayer->ulid, null, 'timeout_forfeit');
+        return GameOutcome::win($winnerPlayer->ulid, null, 'timer_expired_forfeit');
     }
 
     /**

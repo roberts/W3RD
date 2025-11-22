@@ -26,8 +26,8 @@ use App\Models\Auth\User;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
-use App\Services\GameCreationService;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Lifecycle\GameBuilder;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -41,7 +41,8 @@ class LobbyController extends Controller
         protected ResolveClientIdAction $resolveClientId,
         protected FindLobbyByUlidAction $findLobby,
         protected ResolveUsernameAction $resolveUsername,
-        protected GameCreationService $gameCreationService
+        protected GameBuilder $gameBuilder,
+        protected PlayerActivityManager $playerActivityManager
     ) {}
 
     /**
@@ -100,9 +101,7 @@ class LobbyController extends Controller
                     'status' => LobbyPlayerStatus::ACCEPTED,
                 ]);
 
-                // Set host activity to IN_LOBBY
-                $activityService = app(PlayerActivityService::class);
-                $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+                $this->playerActivityManager->setState($user->id, PlayerActivityState::IN_LOBBY);
 
                 // Add invitees
                 if (! empty($validated['invitees'])) {
@@ -176,9 +175,8 @@ class LobbyController extends Controller
         $lobby->markAsCancelled();
 
         // Set all players back to IDLE
-        $activityService = app(PlayerActivityService::class);
         foreach ($playerIds as $playerId) {
-            $activityService->setState($playerId, PlayerActivityState::IDLE);
+            $this->playerActivityManager->setState($playerId, PlayerActivityState::IDLE);
         }
 
         return $this->noContentResponse();
@@ -286,8 +284,7 @@ class LobbyController extends Controller
             ]);
 
             // Set player activity to IN_LOBBY
-            $activityService = app(PlayerActivityService::class);
-            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+            $this->playerActivityManager->setState($user->id, PlayerActivityState::IN_LOBBY);
 
             event(new LobbyPlayerJoined($lobby, $user));
 
@@ -318,9 +315,7 @@ class LobbyController extends Controller
             $lobbyPlayer->update(['client_id' => $clientId]);
             $lobbyPlayer->accept();
 
-            // Set player activity to IN_LOBBY
-            $activityService = app(PlayerActivityService::class);
-            $activityService->setState($user->id, PlayerActivityState::IN_LOBBY);
+            $this->playerActivityManager->setState($user->id, PlayerActivityState::IN_LOBBY);
 
             event(new LobbyPlayerJoined($lobby, $user));
 
@@ -333,9 +328,7 @@ class LobbyController extends Controller
         } else {
             $lobbyPlayer->decline();
 
-            // Player declined, they never entered lobby so set to IDLE
-            $activityService = app(PlayerActivityService::class);
-            $activityService->setState($user->id, PlayerActivityState::IDLE);
+            $this->playerActivityManager->setState($user->id, PlayerActivityState::IDLE);
 
             return $this->messageResponse('Invitation declined');
         }
@@ -378,9 +371,7 @@ class LobbyController extends Controller
 
         $lobbyPlayer->delete();
 
-        // Set kicked player activity to IDLE
-        $activityService = app(PlayerActivityService::class);
-        $activityService->setState($user->id, PlayerActivityState::IDLE);
+        $this->playerActivityManager->setState($user->id, PlayerActivityState::IDLE);
 
         return $this->noContentResponse();
     }
@@ -398,6 +389,6 @@ class LobbyController extends Controller
 
         // Each player has their own client_id stored in lobby_players table
         // GameCreationService will read from there
-        $this->gameCreationService->createFromLobby($lobby);
+        $this->gameBuilder->createFromLobby($lobby);
     }
 }

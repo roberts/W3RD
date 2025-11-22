@@ -2,17 +2,17 @@
 
 use App\Enums\PlayerActivityState;
 use App\Jobs\CheckAndCancelPendingProposals;
-use App\Services\PlayerActivityService;
+use App\GameEngine\Player\PlayerActivityManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
 
 uses(RefreshDatabase::class);
 
-describe('PlayerActivityService', function () {
+describe('PlayerActivityManager', function () {
     beforeEach(function () {
         Queue::fake();
-        $this->service = app(PlayerActivityService::class);
+        $this->service = app(PlayerActivityManager::class);
         $this->userId = 1;
     });
 

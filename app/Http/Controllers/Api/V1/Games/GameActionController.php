@@ -21,8 +21,8 @@ use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 use App\Services\Agents\AgentService;
-use App\Services\Game\GameConclusionService;
-use App\Services\GameActionRecorder;
+use App\GameEngine\Lifecycle\ConclusionManager;
+use App\GameEngine\Timeline\ActionRecorder;
 use App\Services\GameResponseEnhancementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,12 +32,12 @@ class GameActionController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected GameActionRecorder $actionRecorder,
+        protected ActionRecorder $actionRecorder,
         protected HandleTimeoutAction $handleTimeout,
         protected ProcessCoordinatedActionAction $processCoordinatedAction,
         protected FindGameByUlidAction $findGame,
         protected GameResponseEnhancementService $enhancementService,
-        protected GameConclusionService $conclusionService
+        protected ConclusionManager $conclusionService
     ) {}
 
     /**
@@ -152,7 +152,7 @@ class GameActionController extends Controller
             $game->save();
         }
 
-        // Check for end condition using the new GameConclusionService
+        // Check for end condition using the new ConclusionManager
         $this->conclusionService->determineOutcome($game);
         $game->refresh(); // Refresh to get any status changes from the service
 

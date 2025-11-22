@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Account;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
-use App\Services\ProgressionService;
+use App\GameEngine\Player\ProgressionManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,7 +14,7 @@ class ProgressionController extends Controller
     use ApiResponses;
 
     public function __construct(
-        private ProgressionService $progressionService
+        private ProgressionManager $progressionService
     ) {}
 
     /**

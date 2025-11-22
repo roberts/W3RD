@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Game;
+namespace App\GameEngine\Lifecycle;
 
 use App\Enums\GameAttributes\GameDynamic;
 use App\Enums\GameStatus;
@@ -11,7 +11,7 @@ use App\Models\Game\Game;
 use App\Models\Game\Player;
 use App\Providers\GameServiceProvider;
 
-class GameConclusionService
+class ConclusionManager
 {
     public function determineOutcome(Game $game): void
     {

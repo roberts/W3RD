@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\GameEngine\Lifecycle;
 
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameStarted;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Game\Game;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;
@@ -15,7 +16,7 @@ use App\Providers\GameServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
-class GameCreationService
+class GameBuilder
 {
     /**
      * Create a game from quickplay match.
@@ -142,7 +143,7 @@ class GameCreationService
             ]);
 
             // Set all players to IN_GAME state
-            $activityService = app(PlayerActivityService::class);
+            $activityService = app(PlayerActivityManager::class);
             foreach ($players as $player) {
                 /** @var \App\Models\Game\Player $player */
                 $activityService->setState($player->user_id, PlayerActivityState::IN_GAME);
@@ -181,7 +182,7 @@ class GameCreationService
         $game = $this->createFromQuickplay($playerData, $gameTitle, $gameMode);
 
         // Set both players to IN_GAME state
-        $activityService = app(PlayerActivityService::class);
+        $activityService = app(PlayerActivityManager::class);
         foreach ($playerIds as $playerId) {
             $activityService->setState((int) $playerId, PlayerActivityState::IN_GAME);
         }

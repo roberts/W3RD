@@ -4,6 +4,7 @@ namespace App\Games\ConnectFour;
 
 use App\Enums\GameAttributes\GameComplexity;
 use App\Enums\GameAttributes\GameDynamic;
+use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameErrorCode;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\ValidationResult;
@@ -16,6 +17,11 @@ abstract class ConnectFourProtocol extends BaseBoardGameTitle
     public static function getDynamic(): GameDynamic
     {
         return GameDynamic::ONE_VS_ONE;
+    }
+
+    public static function getTimer(): GameTimer
+    {
+        return GameTimer::FORFEIT;
     }
 
     public static function getAdditionalAttributes(): array

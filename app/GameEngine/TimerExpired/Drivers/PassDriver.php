@@ -2,25 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Timeouts;
+namespace App\GameEngine\TimerExpired\Drivers;
 
 use App\GameEngine\GameOutcome;
+use App\GameEngine\TimerExpired\HandlerContract;
 use App\Models\Game\Game;
 
 /**
- * Pass handler - turn is skipped on timeout.
+ * Pass driver - turn is skipped on timer expiration.
  *
  * Used for games where missing a turn is a sufficient penalty.
  * Game continues with the next player.
  */
-class PassHandler implements TimeoutHandlerContract
+class PassDriver implements HandlerContract
 {
     /**
-     * Handle timeout by passing the turn.
+     * Handle timer expiration by passing the turn.
      *
      * The game state is advanced to the next player without any action.
      */
-    public function handleTimeout(Game $game, object $gameState, string $timedOutPlayerUlid): GameOutcome
+    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): GameOutcome
     {
         // Game continues - controller will advance to next player
         return GameOutcome::inProgress();

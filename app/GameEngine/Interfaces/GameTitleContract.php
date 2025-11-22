@@ -10,6 +10,7 @@ use App\Enums\GameAttributes\GameEntryPolicy;
 use App\Enums\GameAttributes\GameLifecycle;
 use App\Enums\GameAttributes\GamePacing;
 use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\ValidationResult;
 use App\Models\Game\Game;
@@ -57,6 +58,8 @@ interface GameTitleContract
 {
     // Engine-Critical Attributes
     public static function getPacing(): GamePacing;
+
+    public static function getTimer(): GameTimer;
 
     public static function getSequence(): GameSequence;
 

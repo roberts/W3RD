@@ -7,6 +7,7 @@ namespace App\Games\Hearts;
 use App\Enums\GameAttributes\GameComplexity;
 use App\Enums\GameAttributes\GameDynamic;
 use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
@@ -30,6 +31,11 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
     public static function getDynamic(): GameDynamic
     {
         return GameDynamic::FREE_FOR_ALL;
+    }
+
+    public static function getTimer(): GameTimer
+    {
+        return GameTimer::FORFEIT;
     }
 
     public static function getAdditionalAttributes(): array

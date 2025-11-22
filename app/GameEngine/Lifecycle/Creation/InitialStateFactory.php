@@ -31,6 +31,7 @@ class InitialStateFactory
      *
      * @param  GameTitleContract  $title  The game title protocol
      * @param  int  $playerCount  Number of players
+     *
      * @throws InvalidArgumentException If player count is invalid
      */
     protected function validatePlayerCount(GameTitleContract $title, int $playerCount): void

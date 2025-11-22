@@ -290,7 +290,6 @@ interface GameTitleContract
      * - TickBasedPacing: Discrete time units
      *
      * @param  Game  $game  The game instance
-     * @return void
      */
     public function startTurnTimer(Game $game): void;
 
@@ -308,7 +307,7 @@ interface GameTitleContract
      * - TickBasedPacing: Validates tick-based time
      *
      * @param  Game  $game  The game instance
-     * @return void
+     *
      * @throws \App\Exceptions\Game\TurnTimerExpiredException If time has expired
      */
     public function validateActionTime(Game $game): void;

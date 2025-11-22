@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Phase-based gameplay with different rules per phase.
  * Game progresses through distinct phases, each with its own turn logic.
- * 
+ *
  * Examples: Hearts (passing phase → trick-taking), Poker (betting rounds)
  */
 trait PhaseBasedTurns

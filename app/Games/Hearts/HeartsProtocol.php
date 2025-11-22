@@ -25,7 +25,7 @@ use App\Models\Game\Game;
 abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleContract
 {
     use PhaseBasedTurns;
-    
+
     // Override the parent's SequentialTurns trait methods with PhaseBasedTurns behavior
     public function isPlayerTurn(Game $game, User $player): bool
     {

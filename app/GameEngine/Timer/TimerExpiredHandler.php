@@ -6,7 +6,6 @@ namespace App\GameEngine\Timer;
 
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\Models\Game\Game;
-use Illuminate\Http\JsonResponse;
 
 /**
  * Handles timer expiration checking and response formatting for game actions.
@@ -22,7 +21,7 @@ class TimerExpiredHandler
 
         // Get current player ULID from game state
         $currentPlayerUlid = $gameState->currentPlayerUlid ?? null;
-        
+
         if (! $currentPlayerUlid) {
             return new TimerExpiredResult(hasExpired: false);
         }

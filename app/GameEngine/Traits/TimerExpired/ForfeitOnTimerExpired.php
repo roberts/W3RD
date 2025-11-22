@@ -11,7 +11,7 @@ use App\Models\Game\Player;
 /**
  * Forfeit timer expiration handling.
  * Player loses immediately when their timer expires.
- * 
+ *
  * Examples: Chess, Checkers, competitive games where time is critical
  */
 trait ForfeitOnTimerExpired

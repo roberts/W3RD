@@ -11,7 +11,7 @@ use App\Models\Game\Game;
 /**
  * Asynchronous turn-based pacing.
  * Play-by-mail style with long timers (24h+). Players can close the app.
- * 
+ *
  * Examples: Words with Friends, Civilization (PbEM), Diplomacy
  */
 trait AsynchronousPacing

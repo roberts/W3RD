@@ -9,7 +9,7 @@ use App\Models\Game\Game;
 /**
  * Tick-based pacing.
  * Server advances state at fixed intervals regardless of input (1s - 1h ticks).
- * 
+ *
  * Examples: Clash of Clans, Travian, Cookie Clicker
  */
 trait TickBasedPacing

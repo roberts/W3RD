@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Synchronous turn-based pacing.
  * Players stay online with short timers (15s - 5m).
- * 
+ *
  * Examples: Hearthstone, Speed Chess (Blitz), Uno
  */
 trait SynchronousPacing

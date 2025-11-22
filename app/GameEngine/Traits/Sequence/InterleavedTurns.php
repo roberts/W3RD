@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Interleaved turn gameplay.
  * Players can act out of order based on game state or initiative.
- * 
+ *
  * Examples: Magic: The Gathering (stack/priority), Real-time strategy (unit initiative)
  */
 trait InterleavedTurns

@@ -9,7 +9,7 @@ use App\Models\Game\Game;
 /**
  * Real-time pacing with sub-second input required.
  * Game state updates continuously (60fps).
- * 
+ *
  * Examples: Counter-Strike, Rocket League, Street Fighter
  */
 trait RealtimePacing

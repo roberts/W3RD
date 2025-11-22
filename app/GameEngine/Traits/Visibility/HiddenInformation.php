@@ -9,7 +9,7 @@ use App\Models\Auth\User;
 /**
  * Hidden information visibility.
  * Players have private information (hands, resources) hidden from opponents.
- * 
+ *
  * Examples: Poker, Hearts, Uno, most card games
  */
 trait HiddenInformation

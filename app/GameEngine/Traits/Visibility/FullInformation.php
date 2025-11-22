@@ -9,7 +9,7 @@ use App\Models\Auth\User;
 /**
  * Full information visibility.
  * All players see the complete, identical game state.
- * 
+ *
  * Examples: Chess, Checkers, Connect Four, Go
  */
 trait FullInformation

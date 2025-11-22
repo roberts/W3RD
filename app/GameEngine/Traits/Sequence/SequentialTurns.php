@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Sequential turn-based gameplay.
  * Players take turns one after another in a fixed order.
- * 
+ *
  * Examples: Chess, Checkers, Connect Four
  */
 trait SequentialTurns

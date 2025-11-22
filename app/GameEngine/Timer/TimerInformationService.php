@@ -54,7 +54,7 @@ class TimerInformationService
     public function hasTimer(GameTitleContract $mode): bool
     {
         $penalty = $mode->getTimeoutPenalty();
-        
+
         return $penalty !== GameTimer::NONE->value;
     }
 

@@ -9,7 +9,7 @@ use App\Models\Auth\User;
 /**
  * Fog of war visibility.
  * Players only see portions of the board/map based on their units' vision.
- * 
+ *
  * Examples: StarCraft, Age of Empires, Civilization
  */
 trait FogOfWar

@@ -1,7 +1,7 @@
 <?php
 
-use App\GameEngine\Lifecycle\Progression\CoordinatedActionProcessor;
 use App\Enums\GameStatusEnum;
+use App\GameEngine\Lifecycle\Progression\CoordinatedActionProcessor;
 use App\Models\Game\Action;
 use App\Models\Game\Game;
 use App\Models\Game\Player;
@@ -13,10 +13,9 @@ use App\Models\Game\Player;
  *   - GameActionContract $action (not array)
  *   - mixed $mode (game mode handler)
  *   - object $gameState
- * 
+ *
  * The tests should be updated to use proper action DTOs and game state objects.
  */
-
 describe('Coordinated Actions Integration', function () {
     describe('All Players Submit Actions', function () {
         it('advances game phase when all 4 players submit coordinated actions', function () {

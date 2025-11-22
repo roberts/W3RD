@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * No timer expiration handling.
  * Timer is informational only, no penalty applied.
- * 
+ *
  * Examples: Casual games, practice modes
  */
 trait NoTimerExpiredPenalty

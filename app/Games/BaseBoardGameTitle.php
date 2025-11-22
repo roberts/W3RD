@@ -17,10 +17,10 @@ use App\Models\Game\Game;
 
 abstract class BaseBoardGameTitle extends BaseGameTitle
 {
+    use ForfeitOnTimerExpired;
+    use FullInformation;
     use SequentialTurns;
     use SynchronousPacing;
-    use FullInformation;
-    use ForfeitOnTimerExpired;
 
     // Game Attribute Implementations - these are now pure metadata
     public static function getPacing(): GamePacing

@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Simultaneous action gameplay.
  * All players act at the same time, then actions resolve together.
- * 
+ *
  * Examples: Rock Paper Scissors, Diplomacy movement phase
  */
 trait SimultaneousTurns

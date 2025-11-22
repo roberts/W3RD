@@ -10,7 +10,7 @@ use App\Models\Game\Game;
 /**
  * Pass/Skip timer expiration handling.
  * Player's turn is skipped when their timer expires.
- * 
+ *
  * Examples: Turn-based games where missing a turn is acceptable
  */
 trait PassOnTimerExpired

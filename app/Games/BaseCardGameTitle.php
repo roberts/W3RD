@@ -26,10 +26,10 @@ use App\Models\Game\Game;
  */
 abstract class BaseCardGameTitle extends BaseGameTitle
 {
+    use ForfeitOnTimerExpired;
+    use HiddenInformation;
     use SequentialTurns;
     use SynchronousPacing;
-    use HiddenInformation;
-    use ForfeitOnTimerExpired;
 
     // Game Attribute Implementations - these are now pure metadata
     public static function getPacing(): GamePacing

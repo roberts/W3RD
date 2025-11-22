@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Matchmaking\Proposals;
 
 use App\Enums\GameStatus;
+use App\Exceptions\RematchNotAvailableException;
+use App\Jobs\AgentAutoAcceptRematch;
 use App\Matchmaking\Events\ProposalAccepted;
 use App\Matchmaking\Events\ProposalCreated;
 use App\Matchmaking\Events\ProposalDeclined;
-use App\Exceptions\RematchNotAvailableException;
-use App\Jobs\AgentAutoAcceptRematch;
 use App\Matchmaking\Results\ProposalResult;
 use App\Models\Auth\User;
 use App\Models\Game\Game;
-use App\Models\Game\Player;
 use App\Models\Game\Proposal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

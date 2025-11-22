@@ -6,7 +6,6 @@ namespace App\Matchmaking\Shared;
 
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
-use App\Models\Auth\User;
 
 /**
  * Service to check if players are available for matchmaking activities.

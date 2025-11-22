@@ -2,11 +2,11 @@
 
 namespace App\Matchmaking\Lobby;
 
-use App\Matchmaking\Enums\LobbyStatus;
-use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyStateException;
 use App\Exceptions\PlayerBusyException;
+use App\Matchmaking\Enums\LobbyPlayerStatus;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Game\Lobby;
 use App\Models\Game\LobbyPlayer;

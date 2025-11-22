@@ -56,23 +56,23 @@ class SignalController extends Controller
         if (! $result->success) {
             $statusCode = $result->cooldownRemaining !== null ? 429 : 422;
             $errors = $result->context;
-            
+
             // Add retry_after for cooldowns
             if ($result->cooldownRemaining !== null) {
                 $errors['retry_after'] = $result->cooldownRemaining;
             }
-            
+
             $response = $this->errorResponse(
                 $result->errorMessage,
                 $statusCode,
                 null,
                 $errors
             );
-            
+
             if ($result->cooldownRemaining !== null) {
                 $response->header('Retry-After', (string) $result->cooldownRemaining);
             }
-            
+
             return $response;
         }
 

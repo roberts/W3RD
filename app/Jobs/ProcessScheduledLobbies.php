@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Matchmaking\Enums\LobbyStatus;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Game\Lobby;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

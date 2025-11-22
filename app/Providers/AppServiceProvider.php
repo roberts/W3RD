@@ -3,11 +3,6 @@
 namespace App\Providers;
 
 use App\Events\GameCompleted;
-use App\Matchmaking\Events\ProposalAccepted;
-use App\Matchmaking\Events\ProposalCancelled;
-use App\Matchmaking\Events\ProposalCreated;
-use App\Matchmaking\Events\ProposalDeclined;
-use App\Matchmaking\Events\ProposalExpired;
 use App\GameEngine\GameEngine;
 use App\Listeners\SendProposalAcceptedAlert;
 use App\Listeners\SendProposalCancelledAlert;
@@ -16,6 +11,11 @@ use App\Listeners\SendProposalDeclinedAlert;
 use App\Listeners\SendProposalExpiredAlert;
 use App\Listeners\SetAgentCooldownAfterGame;
 use App\Listeners\SetPlayerActivityAfterGame;
+use App\Matchmaking\Events\ProposalAccepted;
+use App\Matchmaking\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCreated;
+use App\Matchmaking\Events\ProposalDeclined;
+use App\Matchmaking\Events\ProposalExpired;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 

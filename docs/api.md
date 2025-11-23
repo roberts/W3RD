@@ -133,7 +133,6 @@ Public catalog of available games, rules, and leaderboards.
 | `GET` | `/library` | List all available game titles | Public |
 | `GET` | `/library/{titleKey}` | Get detailed game information | Public |
 | `GET` | `/library/{titleKey}/rules` | Get complete rule documentation | Public |
-| `GET` | `/library/{titleKey}/leaderboards` | Get game-specific leaderboards | Public |
 
 **Example: List Games**
 
@@ -279,12 +278,10 @@ User profile, statistics, alerts, and transaction history.
 |--------|----------|---------|------|
 | `GET` | `/account/profile` | Get full user profile | Bearer + Client Key |
 | `PATCH` | `/account/profile` | Update profile (avatar, bio, socials) | Bearer + Client Key |
-| `GET` | `/account/stats` | Get gameplay statistics | Bearer + Client Key |
-| `GET` | `/account/stats/{titleKey}` | Get game-specific statistics | Bearer + Client Key |
 | `GET` | `/account/progression` | Get levels and XP across all games | Bearer + Client Key |
+| `GET` | `/account/records` | Get gameplay records and statistics | Bearer + Client Key |
 | `GET` | `/account/alerts` | Get user notifications (paginated) | Bearer + Client Key |
 | `POST` | `/account/alerts/read` | Mark alerts as read | Bearer + Client Key |
-| `GET` | `/account/transactions` | Get financial transaction history | Bearer + Client Key |
 
 **Example: Get Profile**
 
@@ -659,9 +656,9 @@ Response (202 Accepted - action queued):
 }
 ```
 
-**Get Available Moves:**
+**Get Available Actions:**
 ```http
-GET /v1/games/01J3GAME.../available-moves
+GET /v1/games/01J3GAME.../options
 Authorization: Bearer 1|abc123...
 X-Client-Key: your-client-key
 ```
@@ -767,7 +764,6 @@ Balance tracking and subscription management for entertainment purposes.
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/economy/balance` | Get user's balance for authenticated client | Bearer + Client Key |
-| `GET` | `/economy/balances` | Get all user balances across all clients | Bearer + Client Key |
 | `GET` | `/economy/transactions` | Get transaction history (balances + payments) | Bearer + Client Key |
 | `POST` | `/economy/cashier` | Add or remove tokens/chips (approved clients only) | Bearer + Client Key |
 | `GET` | `/economy/plans` | List subscription plans | Bearer + Client Key |
@@ -801,35 +797,6 @@ Response (shows balance for the authenticated client):
     "chips": 250.00,
     "locked_in_games": 50.00
   }
-}
-```
-
-**Get All Balances Across Clients**:
-```http
-GET /v1/economy/balances
-Authorization: Bearer 1|abc123...
-X-Client-Key: your-client-key
-```
-
-Response:
-```json
-{
-  "data": [
-    {
-      "client_id": 5,
-      "client_name": "MyGameApp",
-      "tokens": 500.00,
-      "chips": 250.00,
-      "locked_in_games": 50.00
-    },
-    {
-      "client_id": 12,
-      "client_name": "AnotherClient",
-      "tokens": 1000.00,
-      "chips": 0.00,
-      "locked_in_games": 0.00
-    }
-  ]
 }
 ```
 
@@ -1001,7 +968,6 @@ Tournament management, brackets, and standings.
 | `GET` | `/competitions` | List active tournaments | Bearer + Client Key |
 | `GET` | `/competitions/{ulid}` | Get tournament details | Bearer + Client Key |
 | `POST` | `/competitions/{ulid}/enter` | Register for tournament | Bearer + Client Key |
-| `POST` | `/competitions/{ulid}/leave` | Leave tournament (before start) | Bearer + Client Key |
 | `GET` | `/competitions/{ulid}/structure` | Get tournament format rules | Bearer + Client Key |
 | `GET` | `/competitions/{ulid}/bracket` | Get tournament bracket | Bearer + Client Key |
 | `GET` | `/competitions/{ulid}/standings` | Get current standings | Bearer + Client Key |

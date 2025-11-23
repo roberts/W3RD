@@ -174,7 +174,7 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
     /**
      * Get the redactor for this game title.
-     * 
+     *
      * By default, returns NullGameRedactor for full information games.
      * Override in subclasses for games with hidden information.
      */

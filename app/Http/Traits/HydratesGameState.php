@@ -2,7 +2,6 @@
 
 namespace App\Http\Traits;
 
-use App\GameEngine\ModeRegistry;
 use App\Models\Games\Game;
 
 trait HydratesGameState

@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api\V1\Feeds;
 use App\Enums\GameTitle;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponses;
-use App\Models\Gamification\UserTitleLevel;
 use App\Services\Feeds\LeaderboardService;
 use Illuminate\Http\JsonResponse;
 

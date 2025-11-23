@@ -9,7 +9,6 @@ use App\Enums\PlayerActivityState;
 use App\Events\GameFound;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
-use App\Models\Auth\User;
 use App\Services\Agents\AgentSchedulingService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;

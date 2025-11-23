@@ -44,6 +44,7 @@ class MatchmakingService
             // Check for AI fallback
             if ($waitTime >= self::AI_FALLBACK_THRESHOLD) {
                 $this->agentMatcher->matchWithAgent($userId, $gameTitle, $mode, $queueKey);
+
                 continue;
             }
 

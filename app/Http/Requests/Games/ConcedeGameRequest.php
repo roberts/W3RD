@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\Games;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class ConcedeGameRequest extends FormRequest
+class ConcedeGameRequest extends BaseGameRequest
 {
     public function authorize(): bool
     {
-        return true; // Authorization handled in controller via GamePlayerAuthorization trait
+        return $this->authorizeGameAccess() && $this->authorizeActiveGame();
     }
 
     public function rules(): array

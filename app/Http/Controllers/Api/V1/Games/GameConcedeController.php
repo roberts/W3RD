@@ -6,13 +6,11 @@ use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ConcedeGameRequest;
 use App\Http\Traits\ApiResponses;
-use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 
 class GameConcedeController extends Controller
 {
-    use ApiResponses, GamePlayerAuthorization;
+    use ApiResponses;
 
     public function __construct(
         protected PlayerInitiatedConclusion $conclusionService
@@ -24,16 +22,7 @@ class GameConcedeController extends Controller
     public function store(ConcedeGameRequest $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
-        $validated = $request->validated();
-        $game = Game::withUlid($gameUlid, ['players'])->firstOrFail();
-
-        // Verify user is a player in this game
-        $player = $this->authorizeGamePlayer($game);
-
-        // Check if game is still active
-        if ($error = $this->authorizeActiveGame($game)) {
-            return $error;
-        }
+        $game = $request->game();
 
         // Process the concede through GameEngine
         $this->conclusionService->processConcede($game, $user);

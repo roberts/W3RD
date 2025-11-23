@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\Games;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class ProcessGameActionRequest extends FormRequest
+class ProcessGameActionRequest extends BaseGameRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->authorizeGameAccess() && $this->authorizeActiveGame();
     }
 
     public function rules(): array

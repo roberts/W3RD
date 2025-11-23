@@ -5,17 +5,15 @@ namespace App\Http\Controllers\Api\V1\Games;
 use App\Exceptions\Game\TimerNotAvailableException;
 use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Traits\ApiResponses;
-use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Games\Game;
 use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GameTimerController extends Controller
 {
-    use ApiResponses, GamePlayerAuthorization;
+    use ApiResponses;
 
     public function __construct(
         protected TimerInformationService $timerService
@@ -24,12 +22,10 @@ class GameTimerController extends Controller
     /**
      * Get current timer information for a game.
      */
-    public function show(Request $request, string $gameUlid): JsonResponse
+    public function show(ViewGameRequest $request, string $gameUlid): JsonResponse
     {
-        $game = Game::withUlid($gameUlid, ['players.user', 'mode'])->firstOrFail();
-
-        // Verify user is a player in this game
-        $player = $this->authorizeGamePlayer($game);
+        $game = $request->game();
+        $player = $request->player();
 
         // Get the mode handler
         $mode = $this->handleServiceCall(

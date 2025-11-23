@@ -3,26 +3,21 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Traits\ApiResponses;
-use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Games\Game;
 use App\Models\Games\Player;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GameOutcomeController extends Controller
 {
-    use ApiResponses, GamePlayerAuthorization;
+    use ApiResponses;
 
     /**
      * Get final outcome of a completed game including XP, rewards, and statistics.
      */
-    public function show(Request $request, string $gameUlid): JsonResponse
+    public function show(ViewGameRequest $request, string $gameUlid): JsonResponse
     {
-        $game = Game::withUlid($gameUlid, ['players.user'])->firstOrFail();
-
-        // Verify user is a player in this game
-        $player = $this->authorizeGamePlayer($game);
+        $game = $request->game();
 
         // Check if game is completed
         if (! $game->isCompleted()) {

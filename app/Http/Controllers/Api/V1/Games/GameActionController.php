@@ -7,11 +7,10 @@ use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\GameEngine;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ProcessGameActionRequest;
+use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Games\Action;
 use App\Models\Games\Game;
-use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,8 +28,9 @@ class GameActionController extends Controller
      */
     public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
     {
-        // Find the game by ULID and load the mode relationship
-        $game = Game::withUlid($gameUlid, ['mode'])->firstOrFail();
+        // Get game and player from FormRequest (already authorized)
+        $game = $request->game();
+        $player = $request->player();
 
         // Get the mode handler
         $mode = $this->handleServiceCall(
@@ -41,14 +41,6 @@ class GameActionController extends Controller
 
         if ($mode instanceof JsonResponse) {
             return $mode;
-        }
-
-        // Verify the authenticated user is a player in this game
-        $player = $this->authorizeGamePlayer($game);
-
-        // Check if game is still active
-        if ($error = $this->authorizeActiveGame($game)) {
-            return $error;
         }
 
         // Validate request - basic validation, game-specific validation happens in the action factory
@@ -101,10 +93,10 @@ class GameActionController extends Controller
     /**
      * Get current player options of available actions
      */
-    public function options(string $gameUlid): JsonResponse
+    public function options(ViewGameRequest $request, string $gameUlid): JsonResponse
     {
-        // Find the game by ULID
-        $game = Game::withUlid($gameUlid)->firstOrFail();
+        $game = $request->game();
+        $player = $request->player();
 
         // Get the mode handler
         $mode = $this->handleServiceCall(
@@ -116,9 +108,6 @@ class GameActionController extends Controller
         if ($mode instanceof JsonResponse) {
             return $mode;
         }
-
-        // Get the player
-        $player = $this->authorizeGamePlayer($game);
 
         // Get the current game state
         $gameState = $mode->getGameState();

@@ -3,78 +3,19 @@
 namespace App\Http\Traits;
 
 use App\Enums\GameErrorCode;
-use App\Enums\GameStatus;
-use App\Exceptions\GameAccessDeniedException;
 use App\Exceptions\GameActionDeniedException;
-use App\Models\Games\Game;
 use App\Models\Games\Player;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
+/**
+ * Game player authorization trait for edge cases.
+ * 
+ * For most authorization needs, use BaseGameRequest instead.
+ * This trait is kept for special scenarios like turn validation
+ * or when authorization needs to happen mid-controller logic.
+ */
 trait GamePlayerAuthorization
 {
-    /**
-     * Authorize that the authenticated user is a player in the game.
-     */
-    protected function authorizeGamePlayer(Game $game): Player
-    {
-        /** @var Player|null $player */
-        $player = $game->getPlayerForUser(Auth::id());
-
-        if (! $player) {
-            throw new GameAccessDeniedException(
-                'You are not a player in this game',
-                $game->ulid,
-                ['user_id' => Auth::id()]
-            );
-        }
-
-        return $player;
-    }
-
-    /**
-     * Verify that the game is in active status.
-     *
-     * @throws GameActionDeniedException
-     */
-    protected function authorizeActiveGame(Game $game): ?JsonResponse
-    {
-        if ($game->status !== GameStatus::ACTIVE) {
-            $context = [
-                'game_status' => $game->status->value,
-                'completed_at' => $game->completed_at?->toIso8601String(),
-            ];
-
-            // Add winner information if game is completed
-            if ($game->status === GameStatus::COMPLETED && $game->winner_id) {
-                /** @var Player|null $winner */
-                $winner = $game->players()->where('id', $game->winner_id)->first();
-                if ($winner) {
-                    $context['winner'] = [
-                        'player_ulid' => $winner->ulid,
-                        'player_username' => $winner->user->username,
-                        'player_position' => $winner->position_id,
-                    ];
-                }
-            }
-
-            // Add abandonment reason if available
-            if ($game->status === GameStatus::ABANDONED) {
-                $context['reason'] = 'Game was abandoned by players';
-            }
-
-            throw new GameActionDeniedException(
-                'This game is not active.',
-                GameErrorCode::GAME_ALREADY_COMPLETED->value,
-                $game->title_slug->value,
-                'error',
-                $context
-            );
-        }
-
-        return null;
-    }
-
     /**
      * Verify that it's the player's turn.
      *

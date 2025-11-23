@@ -3,36 +3,21 @@
 namespace App\Http\Requests\Games;
 
 use App\Enums\GameStatus;
-use App\Models\Games\Game;
-use Illuminate\Foundation\Http\FormRequest;
 
-class RequestRematchRequest extends FormRequest
+class RequestRematchRequest extends BaseGameRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $gameUlid = $this->route('gameUlid');
-        $game = Game::where('ulid', $gameUlid)->first();
-
-        if (! $game instanceof Game) {
+        // Authorize game access, but NOT active game (rematches happen after completion)
+        if (! $this->authorizeGameAccess()) {
             return false;
         }
 
-        // User must be a player in the game
-        $isPlayer = $game->getPlayerForUser($this->user()->id) !== null;
-
-        if (! $isPlayer) {
-            return false;
-        }
-
-        // Game must be completed
-        if ($game->status !== GameStatus::COMPLETED) {
-            return false;
-        }
-
-        return true;
+        // Game must be completed to request rematch
+        return $this->game()->status === GameStatus::COMPLETED;
     }
 
     /**

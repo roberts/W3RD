@@ -19,7 +19,7 @@ Complete API reference for the GamerProtocol.io v1 platform. This headless API s
    - [Game Library](#2-game-library)
    - [Authentication](#3-authentication)
    - [Account Management](#4-account-management)
-   - [Floor Coordination](#5-floor-coordination)
+   - [Matchmaking](#5-matchmaking)
    - [Active Games](#6-active-games)
    - [Economy](#7-economy)
    - [Data Feeds](#8-data-feeds)
@@ -40,7 +40,7 @@ The GamerProtocol.io API is organized into 9 logical namespaces that separate co
 | **Library** | Game catalog and rules | Public |
 | **Auth** | Registration, login, tokens | Client Key |
 | **Account** | User profile, stats, transactions | Bearer + Client Key |
-| **Floor** | Matchmaking, lobbies, proposals | Bearer + Client Key |
+| **Matchmaking** | Queue, lobbies, proposals | Bearer + Client Key |
 | **Games** | Active game state and actions | Bearer + Client Key |
 | **Economy** | Balance, transactions, subscriptions | Bearer + Client Key |
 | **Feeds** | Real-time SSE streams | Bearer + Client Key |
@@ -316,30 +316,207 @@ Response:
 
 ---
 
-### 5. Floor Coordination
+### 5. Matchmaking
 
-Matchmaking hub for quickplay, lobbies, challenges, and rematches.
+Matchmaking system including queue, lobbies, and proposals (challenges/rematches).
+
+#### Queue Endpoints
 
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
-| `POST` | `/floor/quickplay` | Join quickplay matchmaking | Bearer + Client Key |
-| `DELETE` | `/floor/quickplay` | Leave quickplay queue | Bearer + Client Key |
-| `GET` | `/floor/quickplay/status` | Check queue position and estimated wait | Bearer + Client Key |
-| `GET` | `/floor/lobbies` | List public lobbies | Bearer + Client Key |
-| `POST` | `/floor/lobbies` | Create new lobby | Bearer + Client Key |
-| `GET` | `/floor/lobbies/{ulid}` | Get lobby details | Bearer + Client Key |
-| `POST` | `/floor/lobbies/{ulid}/join` | Join existing lobby | Bearer + Client Key |
-| `POST` | `/floor/lobbies/{ulid}/leave` | Leave lobby | Bearer + Client Key |
-| `POST` | `/floor/lobbies/{ulid}/start` | Start game from lobby (host only) | Bearer + Client Key |
-| `DELETE` | `/floor/lobbies/{ulid}` | Delete lobby (host only) | Bearer + Client Key |
-| `POST` | `/floor/challenges` | Issue challenge to specific user | Bearer + Client Key |
-| `GET` | `/floor/challenges` | List pending challenges | Bearer + Client Key |
-| `POST` | `/floor/challenges/{ulid}/accept` | Accept challenge | Bearer + Client Key |
-| `POST` | `/floor/challenges/{ulid}/decline` | Decline challenge | Bearer + Client Key |
-| `DELETE` | `/floor/challenges/{ulid}` | Cancel challenge | Bearer + Client Key |
-| `POST` | `/floor/rematches` | Request rematch after game | Bearer + Client Key |
-| `POST` | `/floor/rematches/{ulid}/accept` | Accept rematch | Bearer + Client Key |
-| `POST` | `/floor/rematches/{ulid}/decline` | Decline rematch | Bearer + Client Key |
+| `POST` | `/matchmaking/queue` | Join matchmaking queue | Bearer + Client Key |
+| `DELETE` | `/matchmaking/queue/{ulid}` | Leave queue | Bearer + Client Key |
+
+**Join Queue:**
+```http
+POST /v1/matchmaking/queue
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "game_title": "connect-four",
+  "mode_id": 1,
+  "skill_rating": 1500,
+  "preferences": {}
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01J3ABC...",
+    "game_title": "connect-four",
+    "mode_id": 1,
+    "status": "active",
+    "created_at": "2025-11-22T12:00:00Z"
+  }
+}
+```
+
+**Leave Queue:**
+```http
+DELETE /v1/matchmaking/queue/01J3ABC...
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+#### Lobby Endpoints
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/matchmaking/lobbies` | List public lobbies | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies` | Create new lobby | Bearer + Client Key |
+| `GET` | `/matchmaking/lobbies/{ulid}` | Get lobby details | Bearer + Client Key |
+| `DELETE` | `/matchmaking/lobbies/{ulid}` | Cancel lobby (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{ulid}/ready-check` | Initiate ready check (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{ulid}/seat` | Seat players (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{ulid}/players` | Invite players (host only) | Bearer + Client Key |
+| `PUT` | `/matchmaking/lobbies/{ulid}/players/{username}` | Accept/join lobby | Bearer + Client Key |
+| `DELETE` | `/matchmaking/lobbies/{ulid}/players/{username}` | Kick player (host only) | Bearer + Client Key |
+
+**Create Lobby:**
+```http
+POST /v1/matchmaking/lobbies
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "game_title": "hearts",
+  "mode_id": 2,
+  "is_public": true,
+  "min_players": 4,
+  "scheduled_at": "2025-11-22T20:00:00Z",
+  "invitees": [1, 2, 3]
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01J3DEF...",
+    "host": {
+      "id": 123,
+      "username": "coolplayer"
+    },
+    "game_title": "hearts",
+    "mode": {
+      "id": 2,
+      "slug": "standard",
+      "name": "Standard"
+    },
+    "is_public": true,
+    "min_players": 4,
+    "status": "pending",
+    "scheduled_at": "2025-11-22T20:00:00Z",
+    "players": [
+      {
+        "user_id": 123,
+        "username": "coolplayer",
+        "status": "accepted",
+        "source": "host"
+      },
+      {
+        "user_id": 456,
+        "username": "player2",
+        "status": "pending",
+        "source": "invited"
+      }
+    ],
+    "created_at": "2025-11-22T12:00:00Z"
+  }
+}
+```
+
+**List Public Lobbies:**
+```http
+GET /v1/matchmaking/lobbies?game_title=hearts&mode_id=2
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+**Join/Accept Lobby:**
+```http
+PUT /v1/matchmaking/lobbies/01J3DEF.../players/myusername
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "status": "accepted"
+}
+```
+
+#### Proposal Endpoints (Challenges & Rematches)
+
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `POST` | `/matchmaking/proposals` | Create rematch or challenge | Bearer + Client Key |
+| `POST` | `/matchmaking/proposals/{ulid}/accept` | Accept proposal | Bearer + Client Key |
+| `POST` | `/matchmaking/proposals/{ulid}/decline` | Decline proposal | Bearer + Client Key |
+
+**Request Rematch:**
+```http
+POST /v1/matchmaking/proposals
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "type": "rematch",
+  "game_id": "01J3GAME123",
+  "message": "Good game, rematch?"
+}
+```
+
+**Challenge User:**
+```http
+POST /v1/matchmaking/proposals
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "type": "challenge",
+  "opponent_username": "player2",
+  "game_title": "checkers",
+  "mode_id": 3,
+  "message": "Let's play!"
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01J3PROP...",
+    "type": "challenge",
+    "requester": {
+      "id": 123,
+      "username": "coolplayer"
+    },
+    "recipient": {
+      "id": 456,
+      "username": "player2"
+    },
+    "game_title": "checkers",
+    "mode_id": 3,
+    "status": "pending",
+    "expires_at": "2025-11-22T12:01:00Z",
+    "created_at": "2025-11-22T12:00:00Z"
+  }
+}
+```
+
+**Accept Proposal:**
+```http
+POST /v1/matchmaking/proposals/01J3PROP.../accept
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
 
 ---
 
@@ -351,12 +528,233 @@ Game state, action submission, and game lifecycle management.
 |--------|----------|---------|------|
 | `GET` | `/games` | List user's active and recent games | Bearer + Client Key |
 | `GET` | `/games/{ulid}` | Get current game state | Bearer + Client Key |
-| `POST` | `/games/{ulid}/actions` | Submit game action | Bearer + Client Key |
-| `GET` | `/games/{ulid}/actions` | Get complete action history | Bearer + Client Key |
-| `GET` | `/games/{ulid}/options` | Get valid moves for current turn | Bearer + Client Key |
-| `POST` | `/games/{ulid}/concede` | Concede game (standard penalty) | Bearer + Client Key |
-| `POST` | `/games/{ulid}/abandon` | Abandon game (increased penalty) | Bearer + Client Key |
-| `GET` | `/games/{ulid}/replay` | Get replay data | Bearer + Client Key |
+| `POST` | `/games/{ulid}/action` | Submit game action (idempotent) | Bearer + Client Key |
+| `GET` | `/games/{ulid}/timeline` | Get complete action history | Bearer + Client Key |
+| `GET` | `/games/{ulid}/options` | Get valid actions for current turn | Bearer + Client Key |
+| `POST` | `/games/{ulid}/concede` | Concede game | Bearer + Client Key |
+| `POST` | `/games/{ulid}/abandon` | Abandon game (higher penalty) | Bearer + Client Key |
+| `GET` | `/games/{ulid}/outcome` | Get game outcome and results | Bearer + Client Key |
+| `POST` | `/games/{ulid}/sync` | Sync game state (recovery) | Bearer + Client Key |
+
+**List Games:**
+```http
+GET /v1/games?status=active&limit=20
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "ulid": "01J3GAME...",
+      "title": "Connect Four",
+      "mode": "Standard",
+      "status": "active",
+      "current_turn": "01J3PLY1...",
+      "players": [
+        {
+          "ulid": "01J3PLY1...",
+          "username": "coolplayer",
+          "is_current_turn": true
+        },
+        {
+          "ulid": "01J3PLY2...",
+          "username": "opponent",
+          "is_current_turn": false
+        }
+      ],
+      "created_at": "2025-11-22T12:00:00Z",
+      "updated_at": "2025-11-22T12:05:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 20,
+    "total": 5
+  }
+}
+```
+
+**Get Game State:**
+```http
+GET /v1/games/01J3GAME...
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "ulid": "01J3GAME...",
+    "title": "Connect Four",
+    "mode": "Standard",
+    "status": "active",
+    "current_turn": "01J3PLY1...",
+    "players": [
+      {
+        "ulid": "01J3PLY1...",
+        "user_id": 123,
+        "username": "coolplayer",
+        "color": "red",
+        "is_current_turn": true,
+        "is_winner": false
+      },
+      {
+        "ulid": "01J3PLY2...",
+        "user_id": 456,
+        "username": "opponent",
+        "color": "yellow",
+        "is_current_turn": false,
+        "is_winner": false
+      }
+    ],
+    "state": {
+      "board": [[null, null, null, null, null, null, null], ...],
+      "move_count": 5,
+      "last_move": {
+        "player": "01J3PLY2...",
+        "column": 3,
+        "row": 0
+      }
+    },
+    "created_at": "2025-11-22T12:00:00Z",
+    "updated_at": "2025-11-22T12:05:00Z"
+  }
+}
+```
+
+**Submit Action:**
+```http
+POST /v1/games/01J3GAME.../action
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+Idempotency-Key: unique-request-id-123
+
+{
+  "action": "DROP_PIECE",
+  "parameters": {
+    "column": 3
+  }
+}
+```
+
+Response (202 Accepted - action queued):
+```json
+{
+  "data": {
+    "action_id": "01J3ACT...",
+    "game_ulid": "01J3GAME...",
+    "player_ulid": "01J3PLY1...",
+    "action": "DROP_PIECE",
+    "parameters": {
+      "column": 3
+    },
+    "status": "queued",
+    "created_at": "2025-11-22T12:05:30Z"
+  }
+}
+```
+
+**Get Available Moves:**
+```http
+GET /v1/games/01J3GAME.../available-moves
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "actions": [
+      {
+        "action": "DROP_PIECE",
+        "valid_parameters": {
+          "column": [0, 1, 2, 3, 4, 5, 6]
+        }
+      }
+    ]
+  }
+}
+```
+
+**Get Timeline (Action History):**
+```http
+GET /v1/games/01J3GAME.../timeline
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "action_id": "01J3ACT001",
+      "player": "01J3PLY1...",
+      "action": "DROP_PIECE",
+      "parameters": {"column": 3},
+      "timestamp": "2025-11-22T12:01:00Z"
+    },
+    {
+      "action_id": "01J3ACT002",
+      "player": "01J3PLY2...",
+      "action": "DROP_PIECE",
+      "parameters": {"column": 2},
+      "timestamp": "2025-11-22T12:02:00Z"
+    }
+  ]
+}
+```
+
+**Concede Game:**
+```http
+POST /v1/games/01J3GAME.../concede
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "game_ulid": "01J3GAME...",
+    "status": "completed",
+    "outcome": "conceded",
+    "winner": "01J3PLY2...",
+    "completed_at": "2025-11-22T12:10:00Z"
+  }
+}
+```
+
+**Get Game Outcome:**
+```http
+GET /v1/games/01J3GAME.../outcome
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "game_ulid": "01J3GAME...",
+    "status": "completed",
+    "outcome": "win",
+    "winner": {
+      "ulid": "01J3PLY1...",
+      "username": "coolplayer"
+    },
+    "result_type": "connect_four",
+    "duration_seconds": 300,
+    "completed_at": "2025-11-22T12:10:00Z"
+  }
+}
+```
 
 ---
 

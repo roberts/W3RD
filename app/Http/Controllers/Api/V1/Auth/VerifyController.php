@@ -8,7 +8,6 @@ use App\Http\Traits\ApiResponses;
 use App\Models\Auth\Registration;
 use App\Models\Auth\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
 
 class VerifyController extends Controller
 {

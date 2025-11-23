@@ -65,6 +65,14 @@ class Lobby extends Model
     }
 
     /**
+     * Get the route key name for Laravel route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+
+    /**
      * Scope to find a lobby by ULID with optional eager loading.
      */
     public function scopeWithUlid($query, string $ulid, array $with = [])
@@ -174,10 +182,5 @@ class Lobby extends Model
     public function markAsCancelled(): void
     {
         $this->update(['status' => LobbyStatus::CANCELLED]);
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'ulid';
     }
 }

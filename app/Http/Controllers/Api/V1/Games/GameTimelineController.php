@@ -7,6 +7,7 @@ use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Resources\ActionResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Action;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 
 class GameTimelineController extends Controller
@@ -16,7 +17,7 @@ class GameTimelineController extends Controller
     /**
      * Get chronological action timeline for a game.
      */
-    public function show(ViewGameRequest $request, string $gameUlid): JsonResponse
+    public function show(ViewGameRequest $request, Game $game): JsonResponse
     {
         $game = $request->game();
 

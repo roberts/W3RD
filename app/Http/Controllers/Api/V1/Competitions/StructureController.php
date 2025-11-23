@@ -15,10 +15,8 @@ class StructureController extends Controller
     /**
      * Get tournament structure (format, rules, prize distribution).
      */
-    public function show(Request $request, string $tournamentUlid): JsonResponse
+    public function show(Request $request, Tournament $tournament): JsonResponse
     {
-        $tournament = Tournament::where('ulid', $tournamentUlid)->firstOrFail();
-
         $structureData = [
             'format' => $tournament->format,
             'max_participants' => $tournament->max_participants,

@@ -35,11 +35,11 @@ class GameLibraryController extends Controller
     /**
      * Get detailed metadata for a specific game.
      *
-     * GET /v1/library/{key}
+     * GET /v1/library/{gameTitle}
      */
-    public function show(string $key): JsonResponse
+    public function show(string $gameTitle): JsonResponse
     {
-        $game = $this->libraryService->getGameDetails($key);
+        $game = $this->libraryService->getGameDetails($gameTitle);
 
         return response()->json([
             'data' => $game,
@@ -49,11 +49,11 @@ class GameLibraryController extends Controller
     /**
      * Get entity definitions for a specific game (cards, units, boards, etc).
      *
-     * GET /v1/library/{key}/entities
+     * GET /v1/library/{gameTitle}/entities
      */
-    public function entities(string $key): JsonResponse
+    public function entities(string $gameTitle): JsonResponse
     {
-        $entities = $this->libraryService->getGameEntities($key);
+        $entities = $this->libraryService->getGameEntities($gameTitle);
 
         return response()->json([
             'data' => $entities,

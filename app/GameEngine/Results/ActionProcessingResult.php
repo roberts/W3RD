@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\GameEngine\Results;
 
 use App\GameEngine\GameOutcome;
-use App\GameEngine\Interfaces\GameRedactor;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\ValidationResult;
 use App\Models\Games\Action;
@@ -32,6 +31,7 @@ readonly class ActionProcessingResult
         public ?string $actionSummary,
         public ?ValidationResult $validationError,
         public array $context,
+        public ?GameTitleContract $mode = null,
     ) {}
 
     /**
@@ -56,6 +56,7 @@ readonly class ActionProcessingResult
             actionSummary: $context['action_summary'] ?? null,
             validationError: null,
             context: $context,
+            mode: $mode,
         );
     }
 
@@ -124,7 +125,7 @@ readonly class ActionProcessingResult
             'game' => [
                 'ulid' => $this->game->ulid,
                 'status' => $this->game->status->value,
-                'game_state' => app(GameRedactor::class)->redact($this->game, auth()->user()),
+                'game_state' => $this->mode?->getRedactor()->redact($this->game, auth()->user()) ?? $this->game->game_state,
                 'winner_ulid' => $this->gameState->winnerUlid ?? null,
                 'is_draw' => $this->gameState->isDraw ?? false,
                 'outcome_type' => $this->game->outcome_type?->value,

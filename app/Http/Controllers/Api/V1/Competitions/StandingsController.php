@@ -17,10 +17,9 @@ class StandingsController extends Controller
     /**
      * Get current standings for a tournament.
      */
-    public function show(Request $request, string $tournamentUlid): JsonResponse
+    public function show(Request $request, Tournament $tournament): JsonResponse
     {
-        $tournament = Tournament::withUlid($tournamentUlid, ['users.avatar.image'])
-            ->firstOrFail();
+        $tournament->load(['users.avatar.image']);
 
         /** @var \Illuminate\Database\Eloquent\Collection<int, User> $users */
         $users = $tournament->users()

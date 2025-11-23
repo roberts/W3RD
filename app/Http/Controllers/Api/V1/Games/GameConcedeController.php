@@ -6,6 +6,7 @@ use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ConcedeGameRequest;
 use App\Http\Traits\ApiResponses;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 
 class GameConcedeController extends Controller
@@ -19,7 +20,7 @@ class GameConcedeController extends Controller
     /**
      * Concede a game (forfeit/resign).
      */
-    public function store(ConcedeGameRequest $request, string $gameUlid): JsonResponse
+    public function store(ConcedeGameRequest $request, Game $game): JsonResponse
     {
         $user = $request->user();
         $game = $request->game();

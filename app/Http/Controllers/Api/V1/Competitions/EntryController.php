@@ -20,9 +20,8 @@ class EntryController extends Controller
     /**
      * Enter a tournament.
      */
-    public function store(EnterTournamentRequest $request, string $tournamentUlid): JsonResponse
+    public function store(EnterTournamentRequest $request, Tournament $tournament): JsonResponse
     {
-        $tournament = Tournament::where('ulid', $tournamentUlid)->firstOrFail();
         $user = $request->user();
         $validated = $request->validated();
 

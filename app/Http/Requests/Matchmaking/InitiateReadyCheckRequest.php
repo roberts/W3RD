@@ -13,8 +13,7 @@ class InitiateReadyCheckRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $lobbyUlid = $this->route('lobby_ulid');
-        $lobby = Lobby::where('ulid', $lobbyUlid)->first();
+        $lobby = $this->route('lobby');
 
         if (! $lobby instanceof Lobby) {
             return false;

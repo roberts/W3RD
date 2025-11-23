@@ -12,9 +12,11 @@ use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameAttributes\GameVisibility;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameConfigContract;
+use App\GameEngine\Interfaces\GameRedactor;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Kernel\GameKernel;
+use App\GameEngine\Redactors\NullGameRedactor;
 use App\GameEngine\ValidationResult;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
@@ -168,6 +170,17 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
             'duration_seconds' => $startTime->diffInSeconds($endTime),
             'total_turns' => $game->turn_number ?? 0,
         ];
+    }
+
+    /**
+     * Get the redactor for this game title.
+     * 
+     * By default, returns NullGameRedactor for full information games.
+     * Override in subclasses for games with hidden information.
+     */
+    public function getRedactor(): GameRedactor
+    {
+        return new NullGameRedactor;
     }
 
     // These need to be implemented by the concrete game/mode classes

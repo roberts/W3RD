@@ -30,7 +30,7 @@ class GameActionController extends Controller
     /**
      * Process a player's action in a game.
      */
-    public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
+    public function store(ProcessGameActionRequest $request, Game $game): JsonResponse
     {
         // Get game and player from FormRequest (already authorized)
         $game = $request->game();
@@ -81,7 +81,7 @@ class GameActionController extends Controller
     /**
      * Get current player options of available actions
      */
-    public function options(ViewGameRequest $request, string $gameUlid): JsonResponse
+    public function options(ViewGameRequest $request, Game $game): JsonResponse
     {
         $game = $request->game();
         $player = $request->player();

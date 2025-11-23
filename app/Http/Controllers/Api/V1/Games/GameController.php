@@ -41,11 +41,11 @@ class GameController extends Controller
     /**
      * Get details of a specific game including current state.
      */
-    public function show(Request $request, string $gameUlid): JsonResponse
+    public function show(Request $request, Game $game): JsonResponse
     {
         $user = $request->user();
 
-        $game = Game::withUlid($gameUlid, ['players.user.avatar.image', 'mode'])->firstOrFail()->firstOrFail();
+        $game->load(['players.user.avatar.image', 'mode']);
 
         // Verify user is a player in this game
         $isPlayer = $game->getPlayerForUser($user->id) !== null;

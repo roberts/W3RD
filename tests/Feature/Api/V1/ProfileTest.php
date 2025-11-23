@@ -18,7 +18,7 @@ describe('Profile Management', function () {
                 'social_links' => ['twitter' => '@johndoe'],
             ]);
 
-            $response = $this->actingAs($user)->getJson('/api/v1/me/profile');
+            $response = $this->actingAs($user)->getJson('/api/v1/account/profile');
 
             $response->assertStatus(200)
                 ->assertJson([
@@ -33,7 +33,7 @@ describe('Profile Management', function () {
         });
 
         it('requires authentication', function () {
-            $response = $this->getJson('/api/v1/me/profile');
+            $response = $this->getJson('/api/v1/account/profile');
 
             $response->assertStatus(401);
         });
@@ -43,7 +43,7 @@ describe('Profile Management', function () {
         it('updates name successfully', function () {
             $user = User::factory()->create(['name' => 'Old Name']);
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'name' => 'New Name',
             ]);
 
@@ -63,7 +63,7 @@ describe('Profile Management', function () {
         it('updates bio successfully', function () {
             $user = User::factory()->create(['bio' => 'Old bio']);
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'bio' => 'New bio text',
             ]);
 
@@ -88,7 +88,7 @@ describe('Profile Management', function () {
                 'discord' => 'testuser#1234',
             ];
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'social_links' => $socialLinks,
             ]);
 
@@ -104,7 +104,7 @@ describe('Profile Management', function () {
         it('validates name length', function () {
             $user = User::factory()->create();
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'name' => 'ab', // Too short
             ]);
 
@@ -126,7 +126,7 @@ describe('Profile Management', function () {
             $role->givePermissionTo($permission);
             $user->assignRole($role);
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'username' => 'newusername',
             ]);
 
@@ -146,7 +146,7 @@ describe('Profile Management', function () {
         it('prevents username update without permission', function () {
             $user = User::factory()->create();
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'username' => 'newusername',
             ]);
 
@@ -169,7 +169,7 @@ describe('Profile Management', function () {
             $role->givePermissionTo($permission);
             $user->assignRole($role);
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'username' => 'takenusername',
             ]);
 
@@ -189,7 +189,7 @@ describe('Profile Management', function () {
             $role->givePermissionTo($permission);
             $user->assignRole($role);
 
-            $response = $this->actingAs($user)->patchJson('/api/v1/me/profile', [
+            $response = $this->actingAs($user)->patchJson('/api/v1/account/profile', [
                 'username' => 'ab', // Too short (min 3)
             ]);
 

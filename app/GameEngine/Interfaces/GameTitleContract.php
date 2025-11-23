@@ -219,6 +219,17 @@ interface GameTitleContract
     public function getTimelimit(): int;
 
     /**
+     * Get the redactor for this game title.
+     *
+     * Returns the appropriate redactor based on the game's visibility attribute.
+     * Full information games return NullGameRedactor, while hidden information games
+     * return game-specific redactors that hide private information from opponents.
+     *
+     * @return GameRedactor The redactor instance for this game
+     */
+    public function getRedactor(): GameRedactor;
+
+    /**
      * Get the deadline timestamp for the current action.
      *
      * Calculates when the current player's turn expires, including any grace periods.

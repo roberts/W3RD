@@ -14,6 +14,7 @@ use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Lobby;
+use App\Services\Matchmaking\LobbyQueryService;
 use App\Services\Matchmaking\LobbyResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,8 @@ class LobbyController extends Controller
 
     public function __construct(
         protected LobbyOrchestrator $lobbyOrchestrator,
-        protected LobbyResponseMapper $responseMapper
+        protected LobbyResponseMapper $responseMapper,
+        protected LobbyQueryService $lobbyQueryService
     ) {}
 
     /**
@@ -35,28 +37,10 @@ class LobbyController extends Controller
     {
         $validated = $request->validated();
 
-        $query = Lobby::with(['host.avatar.image', 'players.user.avatar.image']);
-
-        // Apply filters
-        if (isset($validated['is_public'])) {
-            $query->where('is_public', $validated['is_public']);
-        } else {
-            $query->where('is_public', true);
-        }
-
-        if (isset($validated['game_title'])) {
-            $query->whereHas('mode', function ($q) use ($validated) {
-                $q->where('title_slug', $validated['game_title']);
-            });
-        }
-
-        if (isset($validated['status'])) {
-            $query->where('status', $validated['status']);
-        } else {
-            $query->pending();
-        }
-
-        $lobbies = $query->latest()->get();
+        $lobbies = $this->lobbyQueryService
+            ->buildLobbyQuery($validated)
+            ->latest()
+            ->get();
 
         return $this->resourceResponse(LobbyResource::collection($lobbies));
     }
@@ -93,9 +77,9 @@ class LobbyController extends Controller
     /**
      * Get lobby details
      */
-    public function show(Request $request, string $lobbyUlid): JsonResponse
+    public function show(Request $request, Lobby $lobby): JsonResponse
     {
-        $lobby = Lobby::withUlid($lobbyUlid, ['host.avatar.image', 'players.user.avatar.image'])->firstOrFail();
+        $lobby->load(['host.avatar.image', 'players.user.avatar.image']);
 
         $data = [
             'lobby' => LobbyResource::make($lobby),
@@ -115,9 +99,8 @@ class LobbyController extends Controller
     /**
      * Cancel a lobby (Host only)
      */
-    public function destroy(CancelLobbyRequest $request, string $lobbyUlid): JsonResponse
+    public function destroy(CancelLobbyRequest $request, Lobby $lobby): JsonResponse
     {
-        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->cancelLobby($lobby, $request->user());
 
@@ -127,9 +110,8 @@ class LobbyController extends Controller
     /**
      * Initiate a ready check (Host only)
      */
-    public function readyCheck(InitiateReadyCheckRequest $request, string $lobbyUlid): JsonResponse
+    public function readyCheck(InitiateReadyCheckRequest $request, Lobby $lobby): JsonResponse
     {
-        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->initiateReadyCheck($lobby, $request->user());
 
@@ -147,10 +129,9 @@ class LobbyController extends Controller
     /**
      * Invite a player to a lobby (Host only)
      */
-    public function invite(InvitePlayerRequest $request, string $lobbyUlid): JsonResponse
+    public function invite(InvitePlayerRequest $request, Lobby $lobby): JsonResponse
     {
         $validated = $request->validated();
-        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->invitePlayer($lobby, $request->user(), $validated['username']);
 
@@ -164,10 +145,9 @@ class LobbyController extends Controller
     /**
      * Respond to a lobby invitation or join a public lobby
      */
-    public function respond(RespondToInvitationRequest $request, string $lobbyUlid, string $username): JsonResponse
+    public function respond(RespondToInvitationRequest $request, Lobby $lobby, string $username): JsonResponse
     {
         $validated = $request->validated();
-        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         if ($validated['status'] === 'accepted') {
             $result = $this->lobbyOrchestrator->acceptInvitationOrJoin($lobby, $request->user(), $username, $request);
@@ -181,17 +161,16 @@ class LobbyController extends Controller
     /**
      * Convenience endpoint for the authenticated player to take a seat in the lobby.
      */
-    public function seat(RespondToInvitationRequest $request, string $lobbyUlid): JsonResponse
+    public function seat(RespondToInvitationRequest $request, Lobby $lobby): JsonResponse
     {
-        return $this->respond($request, $lobbyUlid, $request->user()->username);
+        return $this->respond($request, $lobby, $request->user()->username);
     }
 
     /**
      * Kick a player from a lobby (Host only)
      */
-    public function kick(KickPlayerRequest $request, string $lobbyUlid, string $username): JsonResponse
+    public function kick(KickPlayerRequest $request, Lobby $lobby, string $username): JsonResponse
     {
-        $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 
         $result = $this->lobbyOrchestrator->kickPlayer($lobby, $request->user(), $username);
 

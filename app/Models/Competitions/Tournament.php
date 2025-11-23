@@ -60,6 +60,14 @@ class Tournament extends Model
     ];
 
     /**
+     * Get the route key name for Laravel route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
+
+    /**
      * Get the users participating in this tournament.
      */
     public function users(): BelongsToMany
@@ -76,11 +84,6 @@ class Tournament extends Model
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'ulid';
     }
 
     /**

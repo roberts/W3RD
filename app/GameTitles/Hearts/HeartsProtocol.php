@@ -10,6 +10,7 @@ use App\Enums\GameAttributes\GameSequence;
 use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GamePhase;
 use App\Exceptions\InvalidGameConfigurationException;
+use App\GameEngine\Interfaces\GameRedactor;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameEngine\Traits\Sequence\PhaseBasedTurns;
 use App\GameTitles\BaseCardGameTitle;
@@ -73,6 +74,11 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
     abstract public function getArbiter(): HeartsArbiter;
 
     abstract protected function getReporter(): HeartsReporter;
+
+    public function getRedactor(): GameRedactor
+    {
+        return new HeartsRedactor;
+    }
 
     public function createInitialState(string ...$playerUlids): object
     {

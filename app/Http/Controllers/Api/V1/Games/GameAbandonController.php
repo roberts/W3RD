@@ -6,6 +6,7 @@ use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\AbandonGameRequest;
 use App\Http\Traits\ApiResponses;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 
 class GameAbandonController extends Controller
@@ -19,7 +20,7 @@ class GameAbandonController extends Controller
     /**
      * Abandon a game (no winner declared, both players penalized).
      */
-    public function store(AbandonGameRequest $request, string $gameUlid): JsonResponse
+    public function store(AbandonGameRequest $request, Game $game): JsonResponse
     {
         $game = $request->game();
 

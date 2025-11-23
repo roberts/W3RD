@@ -18,20 +18,20 @@ abstract class BaseGameRequest extends FormRequest
     /**
      * Get the game from route parameter and authorize player access.
      */
-    protected function authorizeGameAccess(string $paramName = 'gameUlid'): bool
+    protected function authorizeGameAccess(string $paramName = 'game'): bool
     {
-        $gameUlid = $this->route($paramName);
+        $game = $this->route($paramName);
 
-        if (! $gameUlid) {
+        if (! $game instanceof Game) {
             return false;
         }
 
-        try {
-            $this->game = Game::withUlid($gameUlid, ['players', 'mode'])->firstOrFail();
-        } catch (\Exception $e) {
-            return false;
+        // Ensure required relationships are loaded
+        if (! $game->relationLoaded('players') || ! $game->relationLoaded('mode')) {
+            $game->load(['players', 'mode']);
         }
 
+        $this->game = $game;
         $this->player = $this->game->getPlayerForUser($this->user()?->id);
 
         return $this->player !== null;

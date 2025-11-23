@@ -9,11 +9,9 @@ class KickPlayerRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $lobbyUlid = $this->route('lobby_ulid');
+        $lobby = $this->route('lobby');
 
-        if (is_string($lobbyUlid)) {
-            $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
-
+        if ($lobby instanceof Lobby) {
             // Only the lobby host can kick players
             return $lobby->host_id === $this->user()->id;
         }

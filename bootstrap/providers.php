@@ -3,7 +3,5 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
-    App\Providers\GameRedactorServiceProvider::class,
-    App\Providers\GameServiceProvider::class,
     App\Providers\VoltServiceProvider::class,
 ];

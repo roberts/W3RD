@@ -66,9 +66,9 @@ Route::prefix('v1')->group(function () {
     // ========================================
     Route::prefix('library')->group(function () {
         Route::get('/', [GameLibraryController::class, 'index']);
-        Route::get('/{key}', [GameLibraryController::class, 'show']);
-        Route::get('/{key}/rules', [GameRulesController::class, 'show']);
-        Route::get('/{key}/entities', [GameLibraryController::class, 'entities']);
+        Route::get('/{gameTitle}', [GameLibraryController::class, 'show']);
+        Route::get('/{gameTitle}/rules', [GameRulesController::class, 'show']);
+        Route::get('/{gameTitle}/entities', [GameLibraryController::class, 'entities']);
     });
 
     // ========================================
@@ -107,13 +107,13 @@ Route::prefix('v1')->group(function () {
         Route::controller(LobbyController::class)->prefix('lobbies')->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store');
-            Route::get('/{lobby_ulid}', 'show');
-            Route::delete('/{lobby_ulid}', 'destroy');
-            Route::post('/{lobby_ulid}/ready-check', 'readyCheck');
-            Route::post('/{lobby_ulid}/seat', 'seat');
-            Route::post('/{lobby_ulid}/players', 'invite');
-            Route::put('/{lobby_ulid}/players/{username}', 'respond');
-            Route::delete('/{lobby_ulid}/players/{username}', 'kick');
+            Route::get('/{lobby:ulid}', 'show');
+            Route::delete('/{lobby:ulid}', 'destroy');
+            Route::post('/{lobby:ulid}/ready-check', 'readyCheck');
+            Route::post('/{lobby:ulid}/seat', 'seat');
+            Route::post('/{lobby:ulid}/players', 'invite');
+            Route::put('/{lobby:ulid}/players/{username}', 'respond');
+            Route::delete('/{lobby:ulid}/players/{username}', 'kick');
         });
 
         Route::post('/queue', [QueueController::class, 'store']);
@@ -129,24 +129,24 @@ Route::prefix('v1')->group(function () {
     // ========================================
     Route::middleware('auth:sanctum')->prefix('games')->group(function () {
         Route::get('/', [GameController::class, 'index']);
-        Route::get('/{gameUlid}', [GameController::class, 'show']);
+        Route::get('/{game:ulid}', [GameController::class, 'show']);
 
         // Action submission with idempotency
-        Route::post('/{gameUlid}/action', [GameActionController::class, 'store'])
+        Route::post('/{game:ulid}/action', [GameActionController::class, 'store'])
             ->middleware('idempotency');
-        Route::get('/{gameUlid}/options', [GameActionController::class, 'options']);
+        Route::get('/{game:ulid}/options', [GameActionController::class, 'options']);
 
         // Timer and timeline information
-        Route::get('/{gameUlid}/timer', [GameTimerController::class, 'show']);
-        Route::get('/{gameUlid}/timeline', [GameTimelineController::class, 'show']);
+        Route::get('/{game:ulid}/timer', [GameTimerController::class, 'show']);
+        Route::get('/{game:ulid}/timeline', [GameTimelineController::class, 'show']);
 
         // Game exit options
-        Route::post('/{gameUlid}/concede', [GameConcedeController::class, 'store']);
-        Route::post('/{gameUlid}/abandon', [GameAbandonController::class, 'store']);
+        Route::post('/{game:ulid}/concede', [GameConcedeController::class, 'store']);
+        Route::post('/{game:ulid}/abandon', [GameAbandonController::class, 'store']);
 
         // Outcome and sync
-        Route::get('/{gameUlid}/outcome', [GameOutcomeController::class, 'show']);
-        Route::get('/{gameUlid}/sync', [GameSyncController::class, 'show']);
+        Route::get('/{game:ulid}/outcome', [GameOutcomeController::class, 'show']);
+        Route::get('/{game:ulid}/sync', [GameSyncController::class, 'show']);
     });
 
     // ========================================
@@ -187,29 +187,16 @@ Route::prefix('v1')->group(function () {
     // ========================================
     Route::prefix('competitions')->group(function () {
         Route::get('/', [CompetitionController::class, 'index']);
-        Route::get('/{tournamentUlid}', [CompetitionController::class, 'show']);
+        Route::get('/{tournament:ulid}', [CompetitionController::class, 'show']);
 
         Route::middleware('auth:sanctum')->group(function () {
             // Entry with idempotency
-            Route::post('/{tournamentUlid}/enter', [EntryController::class, 'store'])
+            Route::post('/{tournament:ulid}/enter', [EntryController::class, 'store'])
                 ->middleware('idempotency');
 
-            Route::get('/{tournamentUlid}/structure', [StructureController::class, 'show']);
-            Route::get('/{tournamentUlid}/bracket', [BracketController::class, 'show']);
-            Route::get('/{tournamentUlid}/standings', [StandingsController::class, 'show']);
-        });
-    });
-
-    // ========================================
-    // Legacy Routes (will be migrated to namespaces)
-    // ========================================
-
-    // Gamer Protocol (requires authentication)
-    Route::middleware('auth:sanctum')->group(function () {
-        // Personal User Endpoints
-        Route::prefix('me')->group(function () {
-            Route::get('/profile', [ProfileController::class, 'show']);
-            Route::patch('/profile', [ProfileController::class, 'update']);
+            Route::get('/{tournament:ulid}/structure', [StructureController::class, 'show']);
+            Route::get('/{tournament:ulid}/bracket', [BracketController::class, 'show']);
+            Route::get('/{tournament:ulid}/standings', [StandingsController::class, 'show']);
         });
     });
 });

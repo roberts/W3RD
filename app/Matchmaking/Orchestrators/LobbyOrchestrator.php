@@ -3,7 +3,6 @@
 namespace App\Matchmaking\Orchestrators;
 
 use App\Actions\Client\ResolveClientIdAction;
-use App\Actions\User\ResolveUsernameAction;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
@@ -30,8 +29,7 @@ class LobbyOrchestrator
         protected LobbyGameStarter $lobbyGameStarter,
         protected InvitationBroadcaster $invitationBroadcaster,
         protected PlayerActivityManager $playerActivityManager,
-        protected ResolveClientIdAction $resolveClientId,
-        protected ResolveUsernameAction $resolveUsername
+        protected ResolveClientIdAction $resolveClientId
     ) {}
 
     /**
@@ -114,7 +112,7 @@ class LobbyOrchestrator
             $this->lobbyValidator->validateIsHost($lobby, $host);
             $this->lobbyValidator->validateIsPending($lobby);
 
-            $invitee = $this->resolveUsername->execute($username);
+            $invitee = User::withUsername($username)->firstOrFail();
 
             $existing = $this->lobbyPlayerManager->findPlayerInLobby($lobby, $invitee);
             $this->lobbyValidator->validatePlayerNotInLobby($existing, $invitee->username, $lobby->ulid);
@@ -137,7 +135,7 @@ class LobbyOrchestrator
         Request $request
     ): LobbyOperationResult {
         try {
-            $user = $this->resolveUsername->execute($username);
+            $user = User::withUsername($username)->firstOrFail();
             $this->lobbyValidator->validateRespondingForSelf($currentUser, $user);
 
             $lobbyPlayer = $this->lobbyPlayerManager->findPlayerInLobby($lobby, $user);
@@ -187,7 +185,7 @@ class LobbyOrchestrator
     public function declineInvitation(Lobby $lobby, User $currentUser, string $username): LobbyOperationResult
     {
         try {
-            $user = $this->resolveUsername->execute($username);
+            $user = User::withUsername($username)->firstOrFail();
             $this->lobbyValidator->validateRespondingForSelf($currentUser, $user);
 
             $lobbyPlayer = $this->lobbyPlayerManager->findPlayerInLobby($lobby, $user);
@@ -215,7 +213,7 @@ class LobbyOrchestrator
         try {
             $this->lobbyValidator->validateIsHost($lobby, $host);
 
-            $user = $this->resolveUsername->execute($username);
+            $user = User::withUsername($username)->firstOrFail();
             $this->lobbyValidator->validateNotKickingSelf($host, $user, $lobby);
 
             $lobbyPlayer = $this->lobbyPlayerManager->findPlayerInLobby($lobby, $user);

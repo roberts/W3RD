@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Matchmaking;
 
-use App\Actions\User\ResolveUsernameAction;
 use App\DataTransferObjects\Matchmaking\ProposalData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Proposal\AcceptProposalRequest;
@@ -10,6 +9,7 @@ use App\Http\Requests\Proposal\DeclineProposalRequest;
 use App\Http\Requests\Proposal\StoreProposalRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
+use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Http\JsonResponse;
@@ -20,8 +20,7 @@ class ProposalController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected ProposalOrchestrator $proposalOrchestrator,
-        protected ResolveUsernameAction $resolveUsername
+        protected ProposalOrchestrator $proposalOrchestrator
     ) {}
 
     /**
@@ -36,7 +35,7 @@ class ProposalController extends Controller
 
         $opponent = null;
         if (! empty($validated['opponent_username'])) {
-            $opponent = $this->resolveUsername->execute($validated['opponent_username']);
+            $opponent = User::withUsername($validated['opponent_username'])->firstOrFail();
         }
 
         $result = $this->proposalOrchestrator->createProposal(

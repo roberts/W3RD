@@ -1,6 +1,5 @@
 <?php
 
-use App\Actions\User\ResolveUsernameAction;
 use App\Models\Auth\User;
 
 describe('Invalid and Malformed Input Handling', function () {
@@ -10,10 +9,8 @@ describe('Invalid and Malformed Input Handling', function () {
             $emojiUsername = 'user🎮123';
             $user->update(['username' => $emojiUsername]);
 
-            $action = new ResolveUsernameAction;
-
             // Should lowercase and handle emoji
-            $found = $action->execute($emojiUsername);
+            $found = User::withUsername($emojiUsername)->firstOrFail();
             expect($found->id)->toBe($user->id);
         });
     });

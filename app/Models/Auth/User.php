@@ -98,6 +98,14 @@ class User extends Authenticatable
         return 'player'.$paddedNumber;
     }
 
+    /**
+     * Scope to find a user by username (case-insensitive).
+     */
+    public function scopeWithUsername($query, string $username)
+    {
+        return $query->where('username', strtolower($username));
+    }
+
     // Relationships
     public function avatar(): BelongsTo
     {

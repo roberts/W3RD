@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Matchmaking;
 
 use App\Http\Resources\Auth\UserResource;
-use App\Http\Resources\Matchmaking\LobbyPlayerResource;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

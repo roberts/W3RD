@@ -6,13 +6,13 @@ use App\Actions\Client\ResolveClientIdAction;
 use App\DataTransferObjects\Matchmaking\QueueSlotData;
 use App\Enums\GameTitle;
 use App\Exceptions\InvalidGameConfigurationException;
+use App\Http\Mappers\QueueResponseMapper;
 use App\Http\Requests\Matchmaking\CancelQueueRequest;
 use App\Http\Requests\Matchmaking\StoreQueueRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\QueueOrchestrator;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
-use App\Http\Mappers\QueueResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 

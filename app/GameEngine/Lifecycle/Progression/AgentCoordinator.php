@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Lifecycle\Progression;
 
+use App\Agents\Orchestrators\AgentService;
 use App\Enums\GameStatus;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Agents\Orchestrators\AgentService;
 use Illuminate\Support\Facades\Log;
 
 /**

@@ -11,7 +11,7 @@ class AlertQueryService
     /**
      * Build a query for user alerts with filters applied.
      *
-     * @param array<string, mixed> $filters
+     * @param  array<string, mixed>  $filters
      * @return HasMany<Alert>
      */
     public function buildUserAlertsQuery(User $user, array $filters): HasMany

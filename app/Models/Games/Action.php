@@ -67,7 +67,7 @@ class Action extends Model
     /**
      * Scope to find an action by ULID with optional eager loading.
      *
-     * @param array<int, string> $with
+     * @param  array<int, string>  $with
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {

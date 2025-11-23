@@ -1,8 +1,8 @@
 <?php
 
+use App\Agents\Scheduling\AgentSchedulingService;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Agents\Scheduling\AgentSchedulingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 

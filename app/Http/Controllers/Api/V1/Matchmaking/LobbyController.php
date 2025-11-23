@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Matchmaking;
 
+use App\Http\Mappers\LobbyResponseMapper;
 use App\Http\Requests\Matchmaking\CancelLobbyRequest;
 use App\Http\Requests\Matchmaking\CreateLobbyRequest;
 use App\Http\Requests\Matchmaking\InitiateReadyCheckRequest;
@@ -15,7 +16,6 @@ use App\Matchmaking\Orchestrators\LobbyOrchestrator;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Lobby;
 use App\Services\Matchmaking\LobbyQueryService;
-use App\Http\Mappers\LobbyResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

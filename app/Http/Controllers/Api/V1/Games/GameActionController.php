@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\GameEngine\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\Actions\ActionMapper;
+use App\GameEngine\Events\GameActionProcessed;
 use App\GameEngine\GameEngine;
 use App\GameEngine\ModeRegistry;
 use App\Http\Controllers\Controller;

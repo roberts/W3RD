@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Agents\Orchestrators\AgentService;
+use App\Agents\Scheduling\AgentSchedulingService;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
-use App\Agents\Orchestrators\AgentService;
-use App\Agents\Scheduling\AgentSchedulingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

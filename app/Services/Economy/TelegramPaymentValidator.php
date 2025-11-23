@@ -8,7 +8,7 @@ class TelegramPaymentValidator
      * Validate Telegram Mini App payment data.
      */
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function validate(array $data, string $hash): bool
     {

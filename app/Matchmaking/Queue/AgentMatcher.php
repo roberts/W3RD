@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Queue;
 
+use App\Agents\Scheduling\AgentSchedulingService;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Matchmaking\Events\GameFound;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
-use App\Agents\Scheduling\AgentSchedulingService;
+use App\Matchmaking\Events\GameFound;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 

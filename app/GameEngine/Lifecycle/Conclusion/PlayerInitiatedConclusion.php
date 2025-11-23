@@ -6,9 +6,9 @@ namespace App\GameEngine\Lifecycle\Conclusion;
 
 use App\Enums\GameStatus;
 use App\Enums\OutcomeType;
+use App\Exceptions\GameAccessDeniedException;
 use App\GameEngine\Events\GameCompleted;
 use App\GameEngine\Events\GameStatusChanged;
-use App\Exceptions\GameAccessDeniedException;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Player;

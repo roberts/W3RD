@@ -56,7 +56,7 @@ class Player extends Model
     /**
      * Scope to find a player by ULID with optional eager loading.
      *
-     * @param array<int, string> $with
+     * @param  array<int, string>  $with
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {

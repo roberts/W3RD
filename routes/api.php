@@ -6,8 +6,10 @@ use App\Http\Controllers\Api\V1\Account\ProgressionController;
 use App\Http\Controllers\Api\V1\Account\RecordsController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
+use App\Http\Controllers\Api\V1\Auth\RefreshController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
+use App\Http\Controllers\Api\V1\Auth\VerifyController;
 use App\Http\Controllers\Api\V1\Competitions\BracketController;
 use App\Http\Controllers\Api\V1\Competitions\CompetitionController;
 use App\Http\Controllers\Api\V1\Competitions\EntryController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Api\V1\Economy\BalanceController;
 use App\Http\Controllers\Api\V1\Economy\CashierController;
 use App\Http\Controllers\Api\V1\Economy\PlanController;
 use App\Http\Controllers\Api\V1\Economy\ReceiptController;
+use App\Http\Controllers\Api\V1\Economy\SubscriptionController;
 use App\Http\Controllers\Api\V1\Economy\TransactionController;
 use App\Http\Controllers\Api\V1\Feeds\CasinoFloorController;
 use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
@@ -74,12 +77,14 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         // Public routes
         Route::post('/register', RegisterController::class);
+        Route::post('/verify', VerifyController::class);
         Route::post('/login', LoginController::class);
         Route::post('/social', SocialAuthController::class);
 
         // Protected routes
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', LogoutController::class);
+            Route::post('/refresh', RefreshController::class);
         });
     });
 
@@ -157,6 +162,11 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/plans', [PlanController::class, 'index']);
         Route::post('/receipts/{provider}', [ReceiptController::class, 'store']);
+
+        // Subscription management
+        Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
+        Route::get('/subscription', [SubscriptionController::class, 'show']);
+        Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel']);
     });
 
     // ========================================

@@ -233,7 +233,7 @@ Content-Type: application/json
 Response:
 ```json
 {
-  "message": "Verification email sent. Please check your inbox.",
+  "message": "Registration successful. Please check your email to verify your account.",
   "registration_id": "01J3ABC..."
 }
 ```

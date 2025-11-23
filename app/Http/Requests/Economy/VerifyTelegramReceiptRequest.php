@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Billing;
+namespace App\Http\Requests\Economy;
 
 use Illuminate\Foundation\Http\FormRequest;
 

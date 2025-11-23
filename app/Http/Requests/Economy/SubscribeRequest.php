@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Billing;
+namespace App\Http\Requests\Economy;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateStripeSubscriptionRequest extends FormRequest
+class SubscribeRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,7 +14,8 @@ class CreateStripeSubscriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'plan' => 'required|string',
+            'plan' => 'required|string|in:pro,elite',
+            'payment_method' => 'nullable|string',
         ];
     }
 
@@ -23,6 +24,7 @@ class CreateStripeSubscriptionRequest extends FormRequest
         return [
             'plan.required' => 'Subscription plan is required',
             'plan.string' => 'Subscription plan must be a string',
+            'plan.in' => 'Invalid subscription plan selected',
         ];
     }
 }

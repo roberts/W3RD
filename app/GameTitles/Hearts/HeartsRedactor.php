@@ -4,7 +4,7 @@ namespace App\GameTitles\Hearts;
 
 use App\GameEngine\Interfaces\GameRedactor;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 class HeartsRedactor implements GameRedactor
 {

@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Services\Agents\AgentSchedulingService;
 use App\Services\Agents\AgentService;
 use Illuminate\Bus\Queueable;

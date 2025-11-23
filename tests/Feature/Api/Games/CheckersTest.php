@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -32,7 +32,7 @@ describe('Checkers Game API', function () {
             $users = User::factory()->count(2)->create();
 
             // Create a mode for checkers
-            $mode = \App\Models\Game\Mode::factory()->create([
+            $mode = \App\Models\Games\Mode::factory()->create([
                 'title_slug' => 'checkers',
                 'slug' => 'standard',
             ]);

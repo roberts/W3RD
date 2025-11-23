@@ -1,13 +1,13 @@
 <?php
 
-namespace Database\Factories\Billing;
+namespace Database\Factories\Economy;
 
 use App\Models\Auth\User;
-use App\Models\Billing\Subscription;
+use App\Models\Economy\Subscription;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Billing\Subscription>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Economy\Subscription>
  */
 class SubscriptionFactory extends Factory
 {

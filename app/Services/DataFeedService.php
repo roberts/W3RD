@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\Facades\Redis;
 
 class DataFeedService

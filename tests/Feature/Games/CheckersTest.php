@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\GameTitles\Checkers\CheckersArbiter;
 use App\GameTitles\Checkers\CheckersBoard;
 use App\GameTitles\Checkers\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 describe('Checkers Game Logic', function () {
     test('can create initial game state', function () {

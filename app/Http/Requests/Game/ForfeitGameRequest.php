@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Game;
 
 use App\Enums\GameStatus;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ForfeitGameRequest extends FormRequest

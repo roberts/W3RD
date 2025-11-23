@@ -7,7 +7,7 @@ namespace App\GameEngine\Timer;
 use App\Enums\GameAttributes\GamePacing;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\Jobs\TimerExpiredJob;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Schedules timer expiration jobs for game turns.

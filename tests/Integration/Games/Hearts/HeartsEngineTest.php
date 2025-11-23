@@ -3,7 +3,7 @@
 use App\GameEngine\Actions\PlayCard;
 use App\GameTitles\Hearts\HeartsTable;
 use App\GameTitles\Hearts\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 test('hearts engine validates and applies play card', function () {
     $game = new Game(['game_state' => []]);

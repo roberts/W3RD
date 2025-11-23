@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Tournament;
+use App\Models\Competitions\Tournament;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;

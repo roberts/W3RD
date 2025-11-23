@@ -2,7 +2,7 @@
 
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
 use Illuminate\Support\Facades\Redis;

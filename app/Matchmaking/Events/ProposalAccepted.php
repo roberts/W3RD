@@ -2,7 +2,7 @@
 
 namespace App\Matchmaking\Events;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;

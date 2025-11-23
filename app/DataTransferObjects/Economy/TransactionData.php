@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects\Economy;
 
-use App\Models\Transaction;
+use App\Models\Economy\Transaction;
 use Spatie\LaravelData\Data;
 
 class TransactionData extends Data

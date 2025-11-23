@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Auth\User;
 
 describe('Password Confirmation', function () {
     it('renders confirm password screen', function () {

@@ -6,8 +6,8 @@ use App\Matchmaking\Enums\ProposalStatus;
 use App\Matchmaking\Enums\ProposalType;
 use App\Models\Access\Client;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

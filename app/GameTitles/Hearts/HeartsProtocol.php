@@ -15,7 +15,7 @@ use App\GameEngine\Traits\Sequence\PhaseBasedTurns;
 use App\GameTitles\BaseCardGameTitle;
 use App\GameTitles\Hearts\Actions\HeartsActionMapper;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Base Hearts game implementation.

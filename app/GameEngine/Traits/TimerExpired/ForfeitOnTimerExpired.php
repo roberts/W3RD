@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\GameEngine\Traits\TimerExpired;
 
 use App\GameEngine\GameOutcome;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * Forfeit timer expiration handling.

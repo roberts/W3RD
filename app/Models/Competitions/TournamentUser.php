@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Competitions;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 

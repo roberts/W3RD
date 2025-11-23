@@ -4,7 +4,7 @@ use App\Enums\GameTitle;
 use App\Jobs\CheckAndCancelPendingProposals;
 use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Redis;

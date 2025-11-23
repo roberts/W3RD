@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\GameEngine\Timer\TimerExpiredHandler;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Providers\GameServiceProvider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

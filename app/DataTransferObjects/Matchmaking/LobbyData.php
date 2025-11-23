@@ -3,6 +3,7 @@
 namespace App\DataTransferObjects\Matchmaking;
 
 use App\Models\Matchmaking\Lobby;
+use App\Models\Matchmaking\LobbyPlayer;
 use Spatie\LaravelData\Data;
 
 class LobbyData extends Data
@@ -31,7 +32,7 @@ class LobbyData extends Data
                 'id' => $lobby->host_id,
                 'username' => optional($lobby->host)->username,
             ],
-            players: $lobby->players->map(function (\App\Models\Matchmaking\LobbyPlayer $player) {
+            players: $lobby->players->map(function (LobbyPlayer $player) {
                 return [
                     'id' => $player->user_id,
                     'status' => $player->status->value,

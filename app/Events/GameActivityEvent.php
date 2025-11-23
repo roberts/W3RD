@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

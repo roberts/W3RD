@@ -5,7 +5,7 @@ namespace Database\Factories\Matchmaking;
 use App\Enums\GameTitle;
 use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;

@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\GameCompleted;
-use App\Models\Game\Player;
+use App\Models\Games\Player;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 

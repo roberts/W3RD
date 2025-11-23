@@ -1,9 +1,10 @@
 <?php
 
 use App\Matchmaking\Enums\ProposalStatus;
+use App\Models\Account\Alert;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\GameHelper;
@@ -364,7 +365,7 @@ describe('Rematch Management', function () {
             $rematchResponse->assertStatus(201);
 
             // Notification should be created (check alerts table)
-            $alerts = \App\Models\Alert::where('user_id', $player2->id)
+            $alerts = Alert::where('user_id', $player2->id)
                 ->where('type', 'rematch_request')
                 ->get();
 
@@ -390,7 +391,7 @@ describe('Rematch Management', function () {
             ]);
 
             // Player 2 should have rematch notifications
-            $alerts = \App\Models\Alert::where('user_id', $player2->id)
+            $alerts = Alert::where('user_id', $player2->id)
                 ->where('type', 'rematch_request')
                 ->get();
 

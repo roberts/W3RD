@@ -1,13 +1,13 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Account;
 
-use App\Models\Alert;
+use App\Models\Account\Alert;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Alert>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Account\Alert>
  */
 class AlertFactory extends Factory
 {

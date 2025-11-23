@@ -6,8 +6,8 @@ namespace App\GameEngine\Lifecycle\Progression;
 
 use App\DataTransferObjects\Game\CoordinatedActionResult;
 use App\GameEngine\Interfaces\GameActionContract;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 /**
  * Handles coordinated actions where multiple players must submit actions

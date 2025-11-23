@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Game\Action;
+use App\Models\Games\Action;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

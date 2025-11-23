@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Traits\Pacing;
 
 use App\Exceptions\Game\TurnTimerExpiredException;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Synchronous turn-based pacing.

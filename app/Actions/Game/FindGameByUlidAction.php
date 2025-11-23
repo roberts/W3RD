@@ -2,7 +2,7 @@
 
 namespace App\Actions\Game;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 class FindGameByUlidAction
 {

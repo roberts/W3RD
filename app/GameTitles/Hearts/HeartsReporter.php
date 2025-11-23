@@ -7,8 +7,8 @@ namespace App\GameTitles\Hearts;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\Interfaces\GameReporterContract;
 use App\GameTitles\BaseGameReporter;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 class HeartsReporter extends BaseGameReporter implements GameReporterContract
 {

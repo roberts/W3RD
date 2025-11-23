@@ -10,8 +10,8 @@ use App\Events\GameCompleted;
 use App\Events\GameStatusChanged;
 use App\Exceptions\GameAccessDeniedException;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * Handles player-initiated game endings (concede/forfeit and abandon).

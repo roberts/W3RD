@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Lifecycle\Progression;
 
 use App\Enums\GameAttributes\GameSequence;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Handles turn advancement logic for sequential and phase-based games.

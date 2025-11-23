@@ -8,7 +8,7 @@ use App\Exceptions\InvalidGameConfigurationException;
 use App\GameTitles\Hearts\HeartsPlayer;
 use App\GameTitles\Hearts\HeartsTable;
 use App\GameTitles\Hearts\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('Hearts Game Logic', function () {

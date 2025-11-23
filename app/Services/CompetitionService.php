@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Events\TournamentBracketUpdated;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Auth\User;
-use App\Models\Tournament;
+use App\Models\Competitions\Tournament;
 use Illuminate\Support\Facades\DB;
 
 class CompetitionService

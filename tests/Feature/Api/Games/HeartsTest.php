@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
-use App\Models\Game\Player;
+use App\Models\Games\Mode;
+use App\Models\Games\Player;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -33,7 +33,7 @@ describe('Hearts Game API', function () {
             $users = User::factory()->count(4)->create();
 
             // Create a mode for hearts
-            $mode = \App\Models\Game\Mode::factory()->create([
+            $mode = \App\Models\Games\Mode::factory()->create([
                 'title_slug' => 'hearts',
                 'slug' => 'standard',
             ]);
@@ -130,7 +130,7 @@ describe('Hearts Game API', function () {
                 $users = User::factory()->count(4)->create();
 
                 // Create a mode for hearts
-                $mode = \App\Models\Game\Mode::factory()->create([
+                $mode = \App\Models\Games\Mode::factory()->create([
                     'title_slug' => 'hearts',
                     'slug' => 'standard',
                 ]);
@@ -174,7 +174,7 @@ describe('Hearts Game API', function () {
                 $currentPlayerUlid = $gameState['currentPlayerUlid'];
 
                 // Find the user object for current player
-                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $player = \App\Models\Games\Player::where('ulid', $currentPlayerUlid)->first();
                 $currentUser = $player->user;
 
                 // Pass cards (using current player to pass authorization)
@@ -252,7 +252,7 @@ describe('Hearts Game API', function () {
                 $currentPlayerUlid = $gameState['currentPlayerUlid'];
 
                 // Find the user object for current player
-                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $player = \App\Models\Games\Player::where('ulid', $currentPlayerUlid)->first();
                 $currentUser = $player->user;
 
                 // Play a card (C2 is required to start)

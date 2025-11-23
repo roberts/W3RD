@@ -7,7 +7,7 @@ namespace App\GameEngine\Timer;
 use App\Enums\GameAttributes\GameTimer;
 use App\Exceptions\Game\TimerNotAvailableException;
 use App\GameEngine\Interfaces\GameTitleContract;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Carbon\Carbon;
 
 /**

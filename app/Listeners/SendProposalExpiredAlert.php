@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Matchmaking\Events\ProposalExpired;
-use App\Models\Alert;
+use App\Models\Account\Alert;
 
 class SendProposalExpiredAlert
 {

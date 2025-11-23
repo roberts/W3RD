@@ -6,7 +6,7 @@ use App\Actions\Game\FindGameByUlidAction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

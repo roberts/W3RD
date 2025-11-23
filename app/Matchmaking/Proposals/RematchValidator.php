@@ -9,8 +9,8 @@ use App\Exceptions\RematchNotAvailableException;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Support\Facades\Redis;
 

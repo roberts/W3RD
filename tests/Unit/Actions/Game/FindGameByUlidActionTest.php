@@ -1,9 +1,9 @@
 <?php
 
 use App\Actions\Game\FindGameByUlidAction;
-use App\Models\Game\Game;
-use App\Models\Game\Mode;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
+use App\Models\Games\Player;
 
 describe('FindGameByUlidAction', function () {
     describe('Eager Loading', function () {

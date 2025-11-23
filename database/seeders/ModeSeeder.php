@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use Illuminate\Database\Seeder;
 
 class ModeSeeder extends Seeder

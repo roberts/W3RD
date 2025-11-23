@@ -6,7 +6,7 @@ namespace App\GameEngine\Lifecycle\Conclusion;
 
 use App\Enums\OutcomeType;
 use App\GameEngine\GameOutcome;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Evaluates game outcomes and determines winners, rankings, and scores.

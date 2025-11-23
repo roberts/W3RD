@@ -10,7 +10,7 @@ use App\Exceptions\InvalidGameConfigurationException;
 use App\GameEngine\Interfaces\GameTitleContract;
 use App\GameTitles\BaseBoardGameTitle;
 use App\GameTitles\Checkers\Actions\CheckersActionMapper;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Base Checkers game implementation.

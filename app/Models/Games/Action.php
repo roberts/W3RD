@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Game;
+namespace App\Models\Games;
 
 use App\Enums\ActionType;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;

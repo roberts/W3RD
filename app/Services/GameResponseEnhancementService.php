@@ -6,9 +6,9 @@ namespace App\Services;
 
 use App\GameEngine\GameOutcome;
 use App\GameTitles\BaseGameTitle;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
 
 /**

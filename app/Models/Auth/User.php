@@ -3,11 +3,13 @@
 namespace App\Models\Auth;
 
 use App\Models\Access\Client;
-use App\Models\Alert;
-use App\Models\Billing\Quota;
-use App\Models\Billing\Strike;
+use App\Models\Account\Alert;
+use App\Models\Competitions\Tournament;
+use App\Models\Competitions\TournamentUser;
 use App\Models\Content\Avatar;
-use App\Models\Game\Player;
+use App\Models\Economy\Quota;
+use App\Models\Economy\Strike;
+use App\Models\Games\Player;
 use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
@@ -150,8 +152,8 @@ class User extends Authenticatable
 
     public function tournaments(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\Tournament::class, 'tournament_user')
-            ->using(\App\Models\TournamentUser::class)
+        return $this->belongsToMany(Tournament::class, 'tournament_user')
+            ->using(TournamentUser::class)
             ->withPivot(['status', 'seed', 'placement', 'earnings'])
             ->withTimestamps();
     }

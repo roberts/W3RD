@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Timer;
 
 use App\GameEngine\Interfaces\GameTitleContract;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Handles timer expiration checking and response formatting for game actions.

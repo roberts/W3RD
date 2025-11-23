@@ -14,8 +14,8 @@ use App\GameEngine\Traits\Pacing\SynchronousPacing;
 use App\GameEngine\Traits\Sequence\SequentialTurns;
 use App\GameEngine\Traits\TimerExpired\ForfeitOnTimerExpired;
 use App\GameEngine\Traits\Visibility\HiddenInformation;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 /**
  * Base class for card game titles.

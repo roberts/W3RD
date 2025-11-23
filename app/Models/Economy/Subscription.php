@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Billing;
+namespace App\Models\Economy;
 
 use Laravel\Cashier\Subscription as CashierSubscription;
 

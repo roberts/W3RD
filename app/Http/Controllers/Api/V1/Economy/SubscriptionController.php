@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Economy;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Economy\SubscribeRequest;
 use App\Http\Traits\ApiResponses;
-use App\Models\Billing\Subscription;
+use App\Models\Economy\Subscription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

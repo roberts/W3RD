@@ -1,14 +1,14 @@
 <?php
 
-namespace Database\Factories\Billing;
+namespace Database\Factories\Economy;
 
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
-use App\Models\Billing\Quota;
+use App\Models\Economy\Quota;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Billing\Quota>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Economy\Quota>
  */
 class QuotaFactory extends Factory
 {

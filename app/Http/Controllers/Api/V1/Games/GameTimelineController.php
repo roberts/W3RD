@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ActionResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Game\Action;
+use App\Models\Games\Action;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\GameEngine\Interfaces;
 
 use App\GameEngine\GameOutcome;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 /**
  * Contract for game reporting and analysis.

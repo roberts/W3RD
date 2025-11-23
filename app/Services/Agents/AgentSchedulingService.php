@@ -4,7 +4,7 @@ namespace App\Services\Agents;
 
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 

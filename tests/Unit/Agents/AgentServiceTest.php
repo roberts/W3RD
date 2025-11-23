@@ -4,7 +4,7 @@ use App\Exceptions\AgentConfigurationException;
 use App\Jobs\CalculateAgentAction;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Services\Agents\AgentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;

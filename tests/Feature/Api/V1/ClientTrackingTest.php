@@ -2,9 +2,9 @@
 
 use App\Models\Access\Client;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Mode;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
+use App\Models\Games\Player;
 use Illuminate\Support\Facades\Redis;
 
 describe('Client Tracking', function () {

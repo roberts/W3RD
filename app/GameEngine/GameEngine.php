@@ -14,8 +14,8 @@ use App\GameEngine\Timeline\ActionRecorder;
 use App\GameEngine\Timer\TimerExpiredHandler;
 use App\GameEngine\Timer\TimerScheduler;
 use App\GameTitles\BaseGameTitle;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Services\GameResponseEnhancementService;
 
 /**

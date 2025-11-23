@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Lifecycle\Conclusion;
 
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * Calculates final rankings for multiplayer games.

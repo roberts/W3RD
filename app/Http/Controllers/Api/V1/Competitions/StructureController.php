@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Competitions;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
-use App\Models\Tournament;
+use App\Models\Competitions\Tournament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

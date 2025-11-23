@@ -3,8 +3,8 @@
 namespace App\GameEngine\Lifecycle\Conclusion;
 
 use App\GameEngine\Player\ProgressionManager;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 class OutcomeProcessor
 {

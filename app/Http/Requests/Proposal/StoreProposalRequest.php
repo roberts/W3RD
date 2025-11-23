@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Proposal;
 
 use App\Enums\GameStatus;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProposalRequest extends FormRequest

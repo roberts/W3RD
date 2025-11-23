@@ -4,7 +4,7 @@ namespace Database\Factories\Matchmaking;
 
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

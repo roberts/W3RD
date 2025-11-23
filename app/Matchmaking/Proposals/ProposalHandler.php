@@ -6,7 +6,7 @@ namespace App\Matchmaking\Proposals;
 
 use App\Matchmaking\Results\ProposalResult;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
 
 /**

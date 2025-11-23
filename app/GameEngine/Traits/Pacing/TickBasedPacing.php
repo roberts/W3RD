@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Traits\Pacing;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Tick-based pacing.

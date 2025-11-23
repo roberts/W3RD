@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\GameEngine\Handlers\PlacePieceHandler;
 use App\GameTitles\BaseGameTitle;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\ServiceProvider;
 
 class GameServiceProvider extends ServiceProvider

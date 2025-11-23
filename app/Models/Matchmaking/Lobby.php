@@ -6,7 +6,8 @@ use App\Enums\GameTitle;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -79,7 +80,7 @@ class Lobby extends Model
 
     public function mode(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Game\Mode::class);
+        return $this->belongsTo(Mode::class);
     }
 
     public function host(): BelongsTo

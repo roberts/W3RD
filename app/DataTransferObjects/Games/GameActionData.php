@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects\Games;
 
-use App\Models\Game\Action;
+use App\Models\Games\Action;
 use Spatie\LaravelData\Data;
 
 class GameActionData extends Data

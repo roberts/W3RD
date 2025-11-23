@@ -4,8 +4,8 @@ namespace Tests\Feature\Helpers;
 
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Mode;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
 use Illuminate\Testing\TestResponse;
 
 class GameHelper

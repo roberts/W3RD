@@ -2,9 +2,9 @@
 
 use App\Enums\GameStatusEnum;
 use App\GameEngine\Lifecycle\Progression\CoordinatedActionProcessor;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * NOTE: These tests need to be refactored to match the new API.

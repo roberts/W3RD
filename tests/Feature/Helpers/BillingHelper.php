@@ -3,8 +3,8 @@
 namespace Tests\Feature\Helpers;
 
 use App\Models\Auth\User;
-use App\Models\Billing\Plan;
-use App\Models\Billing\Subscription;
+use App\Models\Economy\Plan;
+use App\Models\Economy\Subscription;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Testing\TestResponse;
 

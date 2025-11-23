@@ -7,8 +7,8 @@ use App\Enums\GameStatus;
 use App\Enums\OutcomeType;
 use App\Events\GameCompleted;
 use App\GameEngine\GameOutcome;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
 
 class ConclusionManager

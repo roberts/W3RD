@@ -6,9 +6,9 @@ namespace App\GameEngine\Timeline;
 
 use App\GameEngine\Interfaces\GameActionContract;
 use App\GameEngine\ValidationResult;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * Service for recording game actions to the database.

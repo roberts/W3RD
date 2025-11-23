@@ -10,7 +10,7 @@ use App\Http\Requests\Proposal\DeclineProposalRequest;
 use App\Http\Requests\Proposal\StoreProposalRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;

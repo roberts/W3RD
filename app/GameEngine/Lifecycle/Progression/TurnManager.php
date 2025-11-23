@@ -6,7 +6,7 @@ namespace App\GameEngine\Lifecycle\Progression;
 
 use App\Enums\GameAttributes\GameSequence;
 use App\GameEngine\Interfaces\GameTitleContract;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Manages turn progression based on game sequence type.

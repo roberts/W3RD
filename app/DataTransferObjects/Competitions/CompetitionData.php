@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects\Competitions;
 
-use App\Models\Tournament;
+use App\Models\Competitions\Tournament;
 use Spatie\LaravelData\Data;
 
 class CompetitionData extends Data

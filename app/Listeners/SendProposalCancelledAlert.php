@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Matchmaking\Events\ProposalCancelled;
-use App\Models\Alert;
+use App\Models\Account\Alert;
 use App\Models\Auth\User;
 
 class SendProposalCancelledAlert

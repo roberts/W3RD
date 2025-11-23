@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Auth\User;
-use App\Models\Balance;
-use App\Models\Transaction;
+use App\Models\Economy\Balance;
+use App\Models\Economy\Transaction;
 use Illuminate\Support\Facades\DB;
 
 class EconomyService

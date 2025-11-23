@@ -16,7 +16,7 @@ use App\Exceptions\Game\TurnTimerExpiredException;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\ValidationResult;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Carbon\Carbon;
 
 /**

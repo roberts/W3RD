@@ -1,13 +1,13 @@
 <?php
 
-namespace Database\Factories\Game;
+namespace Database\Factories\Games;
 
 use App\Enums\GameTitle;
-use App\Models\Game\Mode;
+use App\Models\Games\Mode;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Mode>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Mode>
  */
 class ModeFactory extends Factory
 {

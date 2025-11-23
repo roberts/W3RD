@@ -12,8 +12,8 @@ use App\GameEngine\Traits\Pacing\SynchronousPacing;
 use App\GameEngine\Traits\Sequence\SequentialTurns;
 use App\GameEngine\Traits\TimerExpired\ForfeitOnTimerExpired;
 use App\GameEngine\Traits\Visibility\FullInformation;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 abstract class BaseBoardGameTitle extends BaseGameTitle
 {

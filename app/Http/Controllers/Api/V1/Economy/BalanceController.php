@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Economy;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
-use App\Models\Balance;
+use App\Models\Economy\Balance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

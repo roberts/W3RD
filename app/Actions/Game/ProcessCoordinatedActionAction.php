@@ -3,8 +3,8 @@
 namespace App\Actions\Game;
 
 use App\DataTransferObjects\Game\CoordinatedActionResult;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
 
 class ProcessCoordinatedActionAction
 {

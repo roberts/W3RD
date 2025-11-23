@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\GameTitles\ConnectFour\Actions\PopOut;
 use App\GameTitles\ConnectFour\Modes\FiveMode;
 use App\GameTitles\ConnectFour\Modes\PopOutMode;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('ConnectFour Modes', function () {

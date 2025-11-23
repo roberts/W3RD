@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects\Economy;
 
-use App\Models\Balance;
+use App\Models\Economy\Balance;
 use Spatie\LaravelData\Data;
 
 class BalanceData extends Data

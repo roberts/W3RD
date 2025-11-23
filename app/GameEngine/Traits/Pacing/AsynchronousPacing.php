@@ -6,7 +6,7 @@ namespace App\GameEngine\Traits\Pacing;
 
 use App\Exceptions\Game\TurnTimerExpiredException;
 use App\Jobs\HandleTimerExpiredJob;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Asynchronous turn-based pacing.

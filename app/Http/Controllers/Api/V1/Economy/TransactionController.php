@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Economy;
 use App\DataTransferObjects\Economy\TransactionData;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
-use App\Models\Transaction;
+use App\Models\Economy\Transaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

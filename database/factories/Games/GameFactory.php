@@ -1,25 +1,25 @@
 <?php
 
-namespace Database\Factories\Game;
+namespace Database\Factories\Games;
 
 use App\Enums\GameTitle;
 use App\Models\Access\Client;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Mode;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
+use App\Models\Games\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Game>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Game>
  */
 class GameFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\App\Models\Game\Game>
+     * @var class-string<\App\Models\Games\Game>
      */
     protected $model = Game::class;
 

@@ -11,7 +11,7 @@ use App\Http\Resources\LobbyResource;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

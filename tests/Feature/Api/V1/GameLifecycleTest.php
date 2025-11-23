@@ -3,8 +3,8 @@
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use Illuminate\Support\Str;
 use Tests\Feature\Helpers\AssertionHelper;
 use Tests\Feature\Helpers\GameHelper;

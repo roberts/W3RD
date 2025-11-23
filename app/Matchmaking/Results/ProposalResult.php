@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Matchmaking\Results;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
 
 /**

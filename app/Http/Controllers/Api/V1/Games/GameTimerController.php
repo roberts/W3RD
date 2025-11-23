@@ -8,7 +8,7 @@ use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
-use App\Models\Game\Player;
+use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

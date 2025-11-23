@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Lifecycle\Progression;
 
 use App\Enums\GamePhase;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Manages phase transitions for phase-based games (e.g., Hearts, Poker).

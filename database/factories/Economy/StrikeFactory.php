@@ -1,14 +1,14 @@
 <?php
 
-namespace Database\Factories\Billing;
+namespace Database\Factories\Economy;
 
 use App\Enums\GameTitle;
 use App\Models\Auth\User;
-use App\Models\Billing\Strike;
+use App\Models\Economy\Strike;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Billing\Strike>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Economy\Strike>
  */
 class StrikeFactory extends Factory
 {

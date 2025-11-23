@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Competitions\Tournament;
+use App\Models\Games\Game;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
@@ -8,7 +11,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 // Game channels - users can subscribe to games they're participating in
 Broadcast::channel('games.{gameId}', function ($user, $gameId) {
-    $game = \App\Models\Game::find($gameId);
+    $game = Game::find($gameId);
 
     if (! $game) {
         return false;
@@ -20,7 +23,7 @@ Broadcast::channel('games.{gameId}', function ($user, $gameId) {
 
 // Lobby channels - users can subscribe to lobbies they're in
 Broadcast::channel('lobbies.{lobbyId}', function ($user, $lobbyId) {
-    $lobby = \App\Models\Lobby::find($lobbyId);
+    $lobby = Lobby::find($lobbyId);
 
     if (! $lobby) {
         return false;
@@ -32,7 +35,7 @@ Broadcast::channel('lobbies.{lobbyId}', function ($user, $lobbyId) {
 
 // Tournament channels - users can subscribe to tournaments they're in
 Broadcast::channel('tournaments.{tournamentId}', function ($user, $tournamentId) {
-    $tournament = \App\Models\Tournament::find($tournamentId);
+    $tournament = Tournament::find($tournamentId);
 
     if (! $tournament) {
         return false;

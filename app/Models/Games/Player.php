@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Game;
+namespace App\Models\Games;
 
 use App\Models\Access\Client;
 use App\Models\Auth\User;

@@ -2,8 +2,8 @@
 
 use App\Enums\GameStatus as GameStatusEnum;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\GameHelper;
 

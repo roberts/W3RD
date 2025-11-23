@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Economy;
 
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;

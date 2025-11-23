@@ -3,8 +3,8 @@
 namespace App\DataTransferObjects\Competitions;
 
 use App\Models\Auth\User;
-use App\Models\Tournament;
-use App\Models\TournamentUser;
+use App\Models\Competitions\Tournament;
+use App\Models\Competitions\TournamentUser;
 use Spatie\LaravelData\Data;
 
 class StandingData extends Data

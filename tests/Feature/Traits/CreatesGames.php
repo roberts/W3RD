@@ -4,7 +4,7 @@ namespace Tests\Feature\Traits;
 
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 trait CreatesGames
 {

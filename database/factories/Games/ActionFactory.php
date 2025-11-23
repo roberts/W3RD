@@ -1,15 +1,15 @@
 <?php
 
-namespace Database\Factories\Game;
+namespace Database\Factories\Games;
 
 use App\Enums\ActionType;
-use App\Models\Game\Action;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Action;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game\Action>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Action>
  */
 class ActionFactory extends Factory
 {

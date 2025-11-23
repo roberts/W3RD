@@ -6,8 +6,8 @@ use App\Enums\GameErrorCode;
 use App\Enums\GameStatus;
 use App\Exceptions\GameAccessDeniedException;
 use App\Exceptions\GameActionDeniedException;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 

@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 describe('Public Endpoints', function () {
     describe('System Status', function () {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Billing;
+namespace App\Models\Economy;
 
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

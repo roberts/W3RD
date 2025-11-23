@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Traits\Sequence;
 
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Sequential turn-based gameplay.

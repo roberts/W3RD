@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Game outcome resource for completed games.
- * 
+ *
  * @mixin Game
  */
 class GameOutcomeResource extends JsonResource

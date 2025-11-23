@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Matchmaking;
 
+use App\Matchmaking\Enums\LobbyPlayerSource;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
 use App\Models\Matchmaking\Lobby;
@@ -18,6 +19,7 @@ class LobbyPlayerFactory extends Factory
             'lobby_id' => Lobby::factory(),
             'user_id' => User::factory(),
             'status' => LobbyPlayerStatus::PENDING,
+            'source' => LobbyPlayerSource::INVITED,
         ];
     }
 

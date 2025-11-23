@@ -2,6 +2,7 @@
 
 namespace App\Models\Matchmaking;
 
+use App\Matchmaking\Enums\LobbyPlayerSource;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $client_id
  * @property LobbyPlayerStatus $status
+ * @property LobbyPlayerSource $source
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  */
@@ -26,10 +28,12 @@ class LobbyPlayer extends Model
         'user_id',
         'client_id',
         'status',
+        'source',
     ];
 
     protected $casts = [
         'status' => LobbyPlayerStatus::class,
+        'source' => LobbyPlayerSource::class,
     ];
 
     public function lobby(): BelongsTo

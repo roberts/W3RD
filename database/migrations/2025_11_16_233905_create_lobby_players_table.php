@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // note: not player model
             $table->foreignId('client_id')->nullable()->constrained('clients'); // record which client through which user joined lobby
             $table->string('status')->default('pending')->index();
+            $table->string('source', 20)->default('invited')->index();
             $table->timestamps();
 
             $table->unique(['lobby_id', 'user_id']);

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('mode_id')->constrained('modes');
             $table->integer('skill_rating')->nullable();
             $table->string('status')->default('active'); // active, matched, cancelled, expired
+            $table->foreignId('matched_lobby_id')->nullable()->constrained('lobbies');
             $table->json('preferences')->nullable(); // Additional matchmaking preferences
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();

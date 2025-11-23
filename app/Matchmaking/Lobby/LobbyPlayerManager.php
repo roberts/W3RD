@@ -2,6 +2,7 @@
 
 namespace App\Matchmaking\Lobby;
 
+use App\Matchmaking\Enums\LobbyPlayerSource;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Events\LobbyInvitation as LobbyInvitationEvent;
 use App\Matchmaking\Events\LobbyPlayerJoined;
@@ -23,6 +24,7 @@ class LobbyPlayerManager
             'lobby_id' => $lobby->id,
             'user_id' => $invitee->id,
             'status' => LobbyPlayerStatus::PENDING,
+            'source' => LobbyPlayerSource::INVITED,
         ]);
 
         broadcast(new LobbyInvitationEvent($invitee->id, $lobby));
@@ -44,6 +46,7 @@ class LobbyPlayerManager
                 'lobby_id' => $lobby->id,
                 'user_id' => $inviteeId,
                 'status' => LobbyPlayerStatus::PENDING,
+                'source' => LobbyPlayerSource::INVITED,
             ]);
 
             broadcast(new LobbyInvitationEvent($inviteeId, $lobby));
@@ -79,6 +82,7 @@ class LobbyPlayerManager
             'user_id' => $user->id,
             'client_id' => $clientId,
             'status' => LobbyPlayerStatus::ACCEPTED,
+            'source' => LobbyPlayerSource::PUBLIC_JOIN,
         ]);
 
         event(new LobbyPlayerJoined($lobby, $user));

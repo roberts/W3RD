@@ -3,6 +3,7 @@
 namespace App\Matchmaking\Lobby;
 
 use App\Enums\GameTitle;
+use App\Matchmaking\Enums\LobbyPlayerSource;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
@@ -42,6 +43,7 @@ class LobbyManager
             'user_id' => $host->id,
             'client_id' => $clientId,
             'status' => LobbyPlayerStatus::ACCEPTED,
+            'source' => LobbyPlayerSource::HOST,
         ]);
 
         return $lobby->fresh(['host', 'players.user']);

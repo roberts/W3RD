@@ -22,6 +22,7 @@ class QueueSlot extends Model
         'mode_id',
         'skill_rating',
         'status',
+        'matched_lobby_id',
         'preferences',
         'expires_at',
     ];
@@ -38,6 +39,14 @@ class QueueSlot extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the lobby this queue slot was matched to.
+     */
+    public function lobby(): BelongsTo
+    {
+        return $this->belongsTo(Lobby::class, 'matched_lobby_id');
     }
 
     /**

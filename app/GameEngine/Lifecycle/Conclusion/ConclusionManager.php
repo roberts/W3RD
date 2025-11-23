@@ -16,6 +16,7 @@ class ConclusionManager
     public function __construct(
         protected ModeRegistry $modeRegistry
     ) {}
+
     public function determineOutcome(Game $game): void
     {
         if ($game->status->isFinished()) {

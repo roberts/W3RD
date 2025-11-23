@@ -22,6 +22,7 @@ class GameResponseEnhancementService
     public function __construct(
         protected ModeRegistry $modeRegistry
     ) {}
+
     /**
      * Generate rich context for successful action response.
      */

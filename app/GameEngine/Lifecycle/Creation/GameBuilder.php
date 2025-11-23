@@ -21,6 +21,7 @@ class GameBuilder
     public function __construct(
         protected ModeRegistry $modeRegistry
     ) {}
+
     /**
      * Create a game from matchmaking queue.
      *

@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 /**
  * Game player authorization trait for edge cases.
- * 
+ *
  * For most authorization needs, use BaseGameRequest instead.
  * This trait is kept for special scenarios like turn validation
  * or when authorization needs to happen mid-controller logic.

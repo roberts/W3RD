@@ -57,11 +57,12 @@ describe('Game Lifecycle', function () {
                     'meta' => ['current_page', 'per_page', 'total'],
                 ]);
 
-            // Controller uses paginate(20), so all 15 games fit on page 1
+            // Controller respects per_page parameter, so only 10 games on page 1
             $data = $response->json('data');
             expect($data)->toBeArray();
-            expect(count($data))->toBe(15);
+            expect(count($data))->toBe(10);
             expect($response->json('meta.total'))->toBe(15);
+            expect($response->json('meta.per_page'))->toBe(10);
         });
 
         it('shows single game details', function () {

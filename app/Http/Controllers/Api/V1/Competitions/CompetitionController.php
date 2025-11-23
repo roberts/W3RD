@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Competitions;
 
 use App\DataTransferObjects\Competitions\CompetitionData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Competitions\ListCompetitionsRequest;
 use App\Http\Traits\ApiResponses;
 use App\Models\Competitions\Tournament;
 use Illuminate\Http\JsonResponse;
@@ -16,22 +17,26 @@ class CompetitionController extends Controller
     /**
      * List available tournaments/competitions.
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListCompetitionsRequest $request): JsonResponse
     {
-        $status = $request->query('status');
-        $gameTitle = $request->query('game_title');
+        $validated = $request->validated();
 
         $query = Tournament::query()->with('users');
 
-        if ($status) {
-            $query->where('status', $status);
+        if (isset($validated['status'])) {
+            $query->where('status', $validated['status']);
         }
 
-        if ($gameTitle) {
-            $query->where('game_title', $gameTitle);
+        if (isset($validated['game_title'])) {
+            $query->where('game_title', $validated['game_title']);
         }
 
-        $tournaments = $query->orderBy('starts_at', 'asc')->paginate(20);
+        if (isset($validated['format'])) {
+            $query->where('format', $validated['format']);
+        }
+
+        $perPage = $validated['per_page'] ?? 20;
+        $tournaments = $query->orderBy('starts_at', 'asc')->paginate($perPage);
 
         return $this->collectionResponse(
             $tournaments,

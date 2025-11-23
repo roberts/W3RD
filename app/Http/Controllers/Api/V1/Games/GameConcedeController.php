@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\V1\Games;
 
 use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Games\ConcedeGameRequest;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GameConcedeController extends Controller
 {
@@ -21,9 +21,10 @@ class GameConcedeController extends Controller
     /**
      * Concede a game (forfeit/resign).
      */
-    public function store(Request $request, string $gameUlid): JsonResponse
+    public function store(ConcedeGameRequest $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
+        $validated = $request->validated();
         $game = Game::withUlid($gameUlid, ['players'])->firstOrFail();
 
         // Verify user is a player in this game

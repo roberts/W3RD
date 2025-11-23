@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Account\ListAlertsRequest;
 use App\Http\Requests\Account\MarkAlertsAsReadRequest;
 use App\Http\Resources\AlertResource;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AlertsController extends Controller
 {
@@ -18,13 +18,36 @@ class AlertsController extends Controller
      *
      * GET /v1/account/alerts
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListAlertsRequest $request): JsonResponse
     {
         $user = $request->user();
+        $validated = $request->validated();
 
-        $alerts = $user->alerts()
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $query = $user->alerts();
+
+        // Apply filters
+        if (isset($validated['read'])) {
+            if ($validated['read']) {
+                $query->whereNotNull('read_at');
+            } else {
+                $query->whereNull('read_at');
+            }
+        }
+
+        if (isset($validated['type'])) {
+            $query->where('type', $validated['type']);
+        }
+
+        if (isset($validated['date_from'])) {
+            $query->where('created_at', '>=', $validated['date_from']);
+        }
+
+        if (isset($validated['date_to'])) {
+            $query->where('created_at', '<=', $validated['date_to']);
+        }
+
+        $perPage = $validated['per_page'] ?? 20;
+        $alerts = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return $this->collectionResponse(
             $alerts,

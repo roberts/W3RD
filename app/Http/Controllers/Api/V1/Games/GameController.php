@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Games\ListGamesRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Game;
@@ -16,14 +17,41 @@ class GameController extends Controller
     /**
      * List games for the authenticated user.
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListGamesRequest $request): JsonResponse
     {
         $user = $request->user();
+        $validated = $request->validated();
 
-        $games = Game::forUser($user->id)
-            ->with(['players.user.avatar.image', 'mode'])
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20);
+        $query = Game::forUser($user->id)
+            ->with(['players.user.avatar.image', 'mode']);
+
+        // Apply filters
+        if (isset($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (isset($validated['game_title'])) {
+            $query->whereHas('mode', function ($q) use ($validated) {
+                $q->where('title_slug', $validated['game_title']);
+            });
+        }
+
+        if (isset($validated['date_from'])) {
+            $query->where('created_at', '>=', $validated['date_from']);
+        }
+
+        if (isset($validated['date_to'])) {
+            $query->where('created_at', '<=', $validated['date_to']);
+        }
+
+        if (isset($validated['opponent_username'])) {
+            $query->whereHas('players.user', function ($q) use ($validated) {
+                $q->where('username', $validated['opponent_username']);
+            });
+        }
+
+        $perPage = $validated['per_page'] ?? 20;
+        $games = $query->orderBy('updated_at', 'desc')->paginate($perPage);
 
         return $this->collectionResponse(
             $games,

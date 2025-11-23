@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1\Competitions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Competitions\EnterTournamentRequest;
 use App\Http\Traits\ApiResponses;
 use App\Models\Competitions\Tournament;
 use App\Services\CompetitionService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class EntryController extends Controller
 {
@@ -20,10 +20,11 @@ class EntryController extends Controller
     /**
      * Enter a tournament.
      */
-    public function store(Request $request, string $tournamentUlid): JsonResponse
+    public function store(EnterTournamentRequest $request, string $tournamentUlid): JsonResponse
     {
         $tournament = Tournament::where('ulid', $tournamentUlid)->firstOrFail();
         $user = $request->user();
+        $validated = $request->validated();
 
         $result = $this->handleServiceCall(
             fn () => $this->competitionService->enterTournament($tournament, $user),

@@ -6,6 +6,7 @@ use App\Actions\Client\ResolveClientIdAction;
 use App\DataTransferObjects\Matchmaking\QueueSlotData;
 use App\Enums\GameTitle;
 use App\Exceptions\InvalidGameConfigurationException;
+use App\Http\Requests\Matchmaking\CancelQueueRequest;
 use App\Http\Requests\Matchmaking\StoreQueueRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\QueueOrchestrator;
@@ -86,13 +87,9 @@ class QueueController extends Controller
         );
     }
 
-    public function destroy(Request $request, QueueSlot $slot): JsonResponse
+    public function destroy(CancelQueueRequest $request, QueueSlot $slot): JsonResponse
     {
         $user = $request->user();
-
-        if ($slot->user_id !== $user->id) {
-            return $this->forbiddenResponse('You can only cancel your own queue slot');
-        }
 
         $result = $this->queueOrchestrator->cancelQueue($user);
 

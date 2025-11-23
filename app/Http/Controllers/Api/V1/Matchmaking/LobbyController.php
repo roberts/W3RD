@@ -6,6 +6,8 @@ use App\Http\Requests\Matchmaking\CancelLobbyRequest;
 use App\Http\Requests\Matchmaking\CreateLobbyRequest;
 use App\Http\Requests\Matchmaking\InitiateReadyCheckRequest;
 use App\Http\Requests\Matchmaking\InvitePlayerRequest;
+use App\Http\Requests\Matchmaking\KickPlayerRequest;
+use App\Http\Requests\Matchmaking\ListLobbiesRequest;
 use App\Http\Requests\Matchmaking\RespondToInvitationRequest;
 use App\Http\Resources\LobbyResource;
 use App\Http\Traits\ApiResponses;
@@ -27,13 +29,32 @@ class LobbyController extends Controller
     /**
      * List all public lobbies
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListLobbiesRequest $request): JsonResponse
     {
-        $lobbies = Lobby::with(['host.avatar.image', 'players.user.avatar.image'])
-            ->where('is_public', true)
-            ->pending()
-            ->latest()
-            ->get();
+        $validated = $request->validated();
+        
+        $query = Lobby::with(['host.avatar.image', 'players.user.avatar.image']);
+        
+        // Apply filters
+        if (isset($validated['is_public'])) {
+            $query->where('is_public', $validated['is_public']);
+        } else {
+            $query->where('is_public', true);
+        }
+        
+        if (isset($validated['game_title'])) {
+            $query->whereHas('mode', function ($q) use ($validated) {
+                $q->where('title_slug', $validated['game_title']);
+            });
+        }
+        
+        if (isset($validated['status'])) {
+            $query->where('status', $validated['status']);
+        } else {
+            $query->pending();
+        }
+        
+        $lobbies = $query->latest()->get();
 
         return $this->resourceResponse(LobbyResource::collection($lobbies));
     }
@@ -183,7 +204,7 @@ class LobbyController extends Controller
     /**
      * Kick a player from a lobby (Host only)
      */
-    public function kick(Request $request, string $lobbyUlid, string $username): JsonResponse
+    public function kick(KickPlayerRequest $request, string $lobbyUlid, string $username): JsonResponse
     {
         $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
 

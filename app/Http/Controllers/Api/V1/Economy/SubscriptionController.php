@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Economy;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Economy\CancelSubscriptionRequest;
 use App\Http\Requests\Economy\SubscribeRequest;
 use App\Http\Traits\ApiResponses;
 use App\Models\Economy\Subscription;
@@ -77,9 +78,10 @@ class SubscriptionController extends Controller
      *
      * POST /v1/economy/subscription/cancel
      */
-    public function cancel(Request $request): JsonResponse
+    public function cancel(CancelSubscriptionRequest $request): JsonResponse
     {
         $user = $request->user();
+        $validated = $request->validated();
 
         /** @var Subscription|null $subscription */
         $subscription = $user->subscriptions()->where('stripe_status', 'active')->first();
@@ -89,9 +91,20 @@ class SubscriptionController extends Controller
         }
 
         try {
-            $subscription->cancel();
+            if (isset($validated['immediately']) && $validated['immediately']) {
+                $subscription->cancelNow();
+                $message = 'Subscription cancelled immediately.';
+            } else {
+                $subscription->cancel();
+                $message = 'Subscription cancelled successfully. Access will continue until the end of the billing period.';
+            }
 
-            return $this->messageResponse('Subscription cancelled successfully. Access will continue until the end of the billing period.');
+            // Log cancellation reason and feedback if provided
+            if (isset($validated['reason']) || isset($validated['feedback'])) {
+                // TODO: Store cancellation feedback in database or analytics
+            }
+
+            return $this->messageResponse($message);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to cancel subscription: '.$e->getMessage(), 500);
         }

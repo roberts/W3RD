@@ -397,22 +397,37 @@ app/
 │   │   ├── LobbyPlayerSource.php
 │   │   ├── LobbyPlayerStatus.php
 │   │   ├── LobbyStatus.php
+│   │   ├── ProposalStatus.php
+│   │   ├── ProposalType.php
 │   │   └── QueueSlotStatus.php
 │   ├── Events/                   # Broadcast events
 │   │   ├── LobbyInvitation.php
 │   │   ├── LobbyPlayerJoined.php
-│   │   └── ProposalReceived.php
+│   │   ├── LobbyReadyCheck.php
+│   │   ├── ProposalAccepted.php
+│   │   ├── ProposalCancelled.php
+│   │   ├── ProposalCreated.php
+│   │   ├── ProposalDeclined.php
+│   │   ├── ProposalExpired.php
+│   │   └── ProposalSent.php
 │   ├── Lobby/                    # Lobby-specific logic
 │   │   ├── InvitationBroadcaster.php
 │   │   ├── LobbyGameStarter.php
 │   │   ├── LobbyManager.php
 │   │   ├── LobbyPlayerManager.php
+│   │   ├── LobbyQueueFiller.php  # NEW: Fills lobbies from queue
 │   │   └── LobbyValidator.php
 │   ├── Queue/                    # Queue-specific logic
 │   │   ├── Actions/
 │   │   │   ├── ApplyDodgePenaltyAction.php
-│   │   │   └── ValidateQueueEntryAction.php
+│   │   │   ├── JoinQueueAction.php
+│   │   │   └── LeaveQueueAction.php
+│   │   ├── AgentMatcher.php      # NEW: AI agent matching logic
+│   │   ├── MatchConfirmationHandler.php  # NEW: Match confirmation flow
+│   │   ├── MatchmakingService.php  # NEW: Core matching algorithm
+│   │   ├── OpponentFinder.php    # NEW: Human opponent finding
 │   │   ├── QueueManager.php
+│   │   ├── RecentOpponentTracker.php  # NEW: Recent opponent tracking
 │   │   └── SlotManager.php
 │   ├── Proposals/                # Challenge/rematch logic
 │   │   ├── ChallengeHandler.php
@@ -424,13 +439,24 @@ app/
 │   │   ├── LobbyOrchestrator.php
 │   │   ├── ProposalOrchestrator.php
 │   │   └── QueueOrchestrator.php
-│   └── Results/                  # Result objects
-│       └── LobbyOperationResult.php
-├── Jobs/                         # Background jobs
-│   ├── FillLobbiesFromQueue.php  # Fills lobbies from queue
-│   ├── ProcessMatchmakingQueue.php # Queue-to-queue matching
-│   ├── ProcessScheduledLobbies.php # Scheduled game starts
-│   └── ExpireProposals.php       # Cleans up old proposals
+│   ├── Results/                  # Result objects
+│   │   ├── LobbyOperationResult.php
+│   │   ├── ProposalResult.php
+│   │   └── QueueResult.php
+│   └── Shared/                   # Shared utilities
+│       └── PlayerAvailabilityChecker.php
+├── Jobs/                         # Background jobs (thin orchestrators)
+│   ├── AgentAutoAcceptRematch.php   # Agent auto-accept logic
+│   ├── CheckAndCancelPendingProposals.php  # Proposal cleanup
+│   ├── ExpireProposals.php       # Expired proposal cleanup
+│   ├── FillLobbiesFromQueue.php  # Delegates to LobbyQueueFiller
+│   ├── ProcessMatchmakingQueue.php  # Delegates to MatchmakingService
+│   └── ProcessScheduledLobbies.php  # Scheduled game starts
+├── Services/Matchmaking/         # HTTP response mapping
+│   ├── LobbyQueryService.php
+│   ├── LobbyResponseMapper.php
+│   ├── ProposalResponseMapper.php
+│   └── QueueResponseMapper.php
 └── Http/Controllers/Api/V1/Matchmaking/
     ├── LobbyController.php       # Lobby HTTP endpoints
     ├── QueueController.php       # Queue HTTP endpoints
@@ -444,37 +470,84 @@ app/
 **`LobbyOrchestrator`**: High-level lobby operations
 - `createLobby()`: Creates lobby with host and invitees
 - `cancelLobby()`: Cancels lobby and notifies players
-- `updatePlayerStatus()`: Handles accept/decline/join
+- `invitePlayer()`: Handles player invitations
+- `acceptInvitationOrJoin()`: Handles accept/decline/join
+- `kickPlayer()`: Removes players from lobby
 - Coordinates between Manager, Validator, and PlayerManager classes
 
 **`QueueOrchestrator`**: Queue entry coordination
 - `joinQueue()`: Validates and creates queue slot
-- `leaveQueue()`: Cancels queue slot
+- `cancelQueue()`: Removes user from queue
 - Integrates cooldown checks and validation
 
 **`ProposalOrchestrator`**: Proposal lifecycle management
-- `createRematch()`: Creates rematch proposal
+- `createProposal()`: Creates rematch/challenge proposal
 - `acceptProposal()`: Handles acceptance and game creation
 - `declineProposal()`: Handles rejection
+- `expireOldProposals()`: Cleans up expired proposals
 
-#### Managers (Business Logic Layer)
+#### Core Services (Business Logic Layer)
+
+**`MatchmakingService`**: Core queue processing logic
+- `processQueue()`: Main matchmaking algorithm
+- Coordinates opponent finding, AI fallback, and match confirmation
+- Parses queue data and orchestrates matching flow
+
+**`OpponentFinder`**: Human opponent matching
+- `findOpponent()`: Finds suitable human opponents
+- Applies skill range filtering (±5 levels)
+- Respects recent opponent history (last 3 games)
+- `getWaitTime()`: Calculates player queue wait time
+
+**`AgentMatcher`**: AI agent fallback matching
+- `matchWithAgent()`: Matches player with available AI agent
+- Calls `AgentSchedulingService` to find agents
+- Creates game via `GameBuilder` when agent found
+- Tracks recent agent opponents
+
+**`MatchConfirmationHandler`**: Match confirmation flow
+- `createMatchConfirmation()`: Creates confirmation for matched players
+- Broadcasts `GameFound` events to both players
+- Schedules timeout penalties for non-accepters
+- Manages 15-second confirmation window
+
+**`RecentOpponentTracker`**: Recent opponent tracking
+- `recordMatch()`: Records two players have matched
+- `getRecentOpponents()`: Retrieves last 3 opponents
+- Manages Redis lists for each player
+
+**`LobbyQueueFiller`**: Lobby filling from queue
+- `tryFillLobby()`: Attempts to fill lobby with queue players
+- Respects recent opponent rules for all lobby players
+- Only fills if enough players available (all-or-nothing)
+- Triggers auto-start for lobbies < 60 seconds old
+
+#### Managers (Entity Management Layer)
 
 **`LobbyManager`**: Core lobby operations
 - `createLobby()`: Database record creation
 - `cancelLobby()`: Status updates
 - `markLobbyReady()`: Ready state management
 - `canStartGame()`: Validates start conditions
+- `getPlayerIds()`: Returns all player IDs in lobby
 
 **`LobbyPlayerManager`**: Player-lobby relationships
 - `invitePlayer()`: Creates invitation
-- `acceptInvitation()`: Updates status
+- `inviteMultiplePlayers()`: Bulk invitations
+- `acceptInvitation()`: Updates status to accepted
+- `declineInvitation()`: Updates status to declined
 - `joinPublicLobby()`: Public lobby joining
 - `kickPlayer()`: Removes player
 
 **`QueueManager`**: Queue slot lifecycle
-- Validates entry conditions
-- Manages slot creation/cancellation
-- Tracks queue statistics
+- `joinQueue()`: Adds player to queue
+- `leaveQueue()`: Removes player from queue
+- Delegates to JoinQueueAction and LeaveQueueAction
+
+**`SlotManager`**: Queue slot database operations
+- `createSlot()`: Creates QueueSlot record
+- `cancelSlot()`: Marks slot as cancelled
+- `expireOldSlots()`: Cleans up expired slots
 
 **`LobbyGameStarter`**: Game creation from lobby
 - `startGame()`: Calls `GameBuilder` with lobby data
@@ -522,10 +595,16 @@ Schedule::job(new ExpireProposals)->everyMinute();
 ```
 
 **Job Execution Order:**
-1. `ProcessMatchmakingQueue`: Matches queue players with each other (highest priority)
-2. `FillLobbiesFromQueue`: Fills lobbies with remaining queue players
+1. `ProcessMatchmakingQueue`: Delegates to `MatchmakingService` for queue-to-queue matching (highest priority)
+2. `FillLobbiesFromQueue`: Delegates to `LobbyQueueFiller` for filling lobbies with remaining queue players
 3. `ProcessScheduledLobbies`: Starts scheduled games at their designated times
-4. `ExpireProposals`: Cleans up expired rematch/challenge proposals
+4. `ExpireProposals`: Delegates to `ProposalOrchestrator` for cleaning up expired proposals
+
+**Job Architecture Pattern:**
+- Jobs are **thin orchestrators** that handle scheduling and infrastructure concerns
+- Core business logic resides in **domain services** within `app/Matchmaking/`
+- This separation enables testing business logic without job infrastructure
+- Matches the pattern used in `app/GameEngine/` for consistency
 
 ### 6.4. Database Models
 
@@ -550,18 +629,31 @@ Schedule::job(new ExpireProposals)->everyMinute();
 
 ### 6.5. Event Flow
 
-**Queue Match Found:**
-1. `ProcessMatchmakingQueue` finds match
-2. Creates `Game` via `GameBuilder`
-3. Broadcasts `GameStarted` event
-4. Updates `recent_opponents` Redis lists
+**Queue Match Found (Human vs Human):**
+1. `MatchmakingService` delegates to `OpponentFinder` to find match
+2. `MatchConfirmationHandler` creates match confirmation
+3. Broadcasts `GameFound` event to both players (15-second window)
+4. `RecentOpponentTracker` updates recent opponent lists
+5. Players accept match via API endpoint
+6. Creates `Game` via `GameBuilder`
+7. Broadcasts `GameStarted` event
+
+**Queue Match Found (Human vs AI):**
+1. `MatchmakingService` detects 20+ second wait time
+2. `AgentMatcher` finds available AI agent
+3. Creates `Game` via `GameBuilder` immediately
+4. `RecentOpponentTracker` updates recent opponent lists
+5. Sets player activity states to `IN_GAME`
+6. Broadcasts `GameFound` event to human player
 
 **Lobby Filled from Queue:**
-1. `FillLobbiesFromQueue` assigns queue players
-2. Updates lobby status to `starting`
-3. Calls `LobbyGameStarter->startGame()`
-4. `GameBuilder` creates game from lobby
-5. Broadcasts `GameStarted` event
+1. `LobbyQueueFiller` finds eligible queue players
+2. Atomically assigns players in database transaction
+3. Updates lobby status to `starting`
+4. `RecentOpponentTracker` updates opponent lists for all players
+5. Calls `LobbyGameStarter->startGame()`
+6. `GameBuilder` creates game from lobby
+7. Broadcasts `GameStarted` event
 
 **Manual Lobby Start:**
 1. Host triggers ready check OR lobby meets auto-start conditions
@@ -569,6 +661,15 @@ Schedule::job(new ExpireProposals)->everyMinute();
 3. Calls `LobbyGameStarter->startGame()`
 4. `GameBuilder` creates game
 5. Broadcasts `GameStarted` event
+
+**Proposal (Rematch/Challenge) Flow:**
+1. User creates proposal via `ProposalOrchestrator`
+2. `RematchHandler` or `ChallengeHandler` validates and creates `Proposal` record
+3. Broadcasts `ProposalCreated` event to opponent
+4. Opponent accepts/declines via API endpoint
+5. If accepted: `GameBuilder` creates new game
+6. If declined: Broadcasts `ProposalDeclined` event
+7. If expired: `ExpireProposals` job marks expired and broadcasts `ProposalExpired` event
 
 ### 6.6. Redis Data Structures
 
@@ -578,35 +679,130 @@ Key: recent_opponents:{user_id}
 Type: List
 Value: [opponent_id_1, opponent_id_2, opponent_id_3]
 TTL: None (maintained indefinitely)
+Management: RecentOpponentTracker service
+```
+
+**Queue Tracking:**
+```
+Key: queue:{game_title}:{mode}
+Type: Sorted Set (ZSET)
+Score: Skill rating
+Value: user_id
+Management: JoinQueueAction, LeaveQueueAction
+```
+
+```
+Key: queue:timestamps
+Type: Hash
+Field: user_id
+Value: join_timestamp
+Usage: Calculate wait time for AI fallback
+```
+
+```
+Key: queue:clients
+Type: Hash
+Field: user_id
+Value: client_id
+Usage: Track client_id for game creation
+```
+
+**Match Confirmation:**
+```
+Key: queue:accept:{match_id}
+Type: Hash
+Fields: user_id_1, user_id_2
+Values: "0" (not accepted) or "1" (accepted)
+TTL: 15 seconds
+Management: MatchConfirmationHandler
+```
+
+```
+Key: queue:match:{match_id}
+Type: Hash
+Fields: game_title, game_mode, player_{user_id}_client
+TTL: 15 seconds
+Usage: Store match metadata for game creation
 ```
 
 **Cooldown Penalties:**
 ```
 Key: cooldown:queue:{user_id}
 Type: String
-Value: timestamp
+Value: "1"
 TTL: 30s - 5m (based on dodge count)
+Management: ApplyDodgePenaltyAction
+```
+
+```
+Key: queue:offenses:{user_id}
+Type: String
+Value: offense_count
+TTL: 4 hours
+Usage: Track escalating dodge penalties
+```
+
+**Agent Cooldown:**
+```
+Key: agent:{user_id}:cooldown
+Type: String
+TTL: Variable (cleared on rematch acceptance)
+Usage: Manage agent availability between games
 ```
 
 ### 6.7. Design Patterns
 
+**Thin Jobs, Rich Domain:**
+- Jobs in `app/Jobs/` are thin orchestrators (scheduling, infrastructure)
+- Core business logic in `app/Matchmaking/` domain services
+- Enables testing logic without job infrastructure
+- Matches pattern used in `app/GameEngine/`
+
 **Orchestrator Pattern:**
 - Controllers call Orchestrators
-- Orchestrators coordinate Managers, Validators, Handlers
+- Orchestrators coordinate Services, Managers, Validators, Handlers
 - Manages transactions and error handling
+- Examples: `LobbyOrchestrator`, `QueueOrchestrator`, `ProposalOrchestrator`
+
+**Service Layer:**
+- Domain services contain core algorithms and workflows
+- Examples: `MatchmakingService`, `OpponentFinder`, `AgentMatcher`
+- Focused, testable, reusable business logic
+- No direct HTTP or job knowledge
 
 **Manager Pattern:**
-- Focused business logic units
-- Single responsibility (Lobby, Player, Queue)
-- No direct HTTP or event knowledge
+- Focused entity management units
+- Single responsibility (Lobby, Player, Queue, Slot)
+- Handle database operations and state changes
+- Examples: `LobbyManager`, `QueueManager`, `SlotManager`
+
+**Handler Pattern:**
+- Specialized logic for specific proposal types
+- Implements `ProposalHandler` interface
+- Examples: `RematchHandler`, `ChallengeHandler`
+- Factory pattern via `ProposalFactory`
 
 **Result Objects:**
-- `LobbyOperationResult` encapsulates success/failure
+- `LobbyOperationResult`, `QueueResult`, `ProposalResult`
+- Encapsulate success/failure with context
 - Consistent error handling across endpoints
 - Enables testing without HTTP layer
 
+**Action Pattern:**
+- Atomic, focused operations in `Queue/Actions/`
+- Single responsibility per action
+- Examples: `JoinQueueAction`, `ApplyDodgePenaltyAction`
+- Composable and testable
+
 **Event Broadcasting:**
 - Decoupled real-time notifications
-- WebSocket/Pusher integration
+- WebSocket/Pusher integration via Laravel Broadcasting
+- Events in `app/Matchmaking/Events/`
 - Clients subscribe to lobby/user channels
+
+**Dependency Injection:**
+- Services injected via constructor
+- Enables testing with mocks
+- Laravel's service container handles resolution
+- Optional constructor parameters for job testability
 

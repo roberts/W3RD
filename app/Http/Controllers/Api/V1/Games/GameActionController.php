@@ -12,14 +12,14 @@ use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Resources\GameActionOptionsResource;
 use App\Http\Traits\ApiResponses;
-use App\Http\Traits\GamePlayerAuthorization;
+use App\Http\Traits\PlayerAuthorization;
 use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GameActionController extends Controller
 {
-    use ApiResponses, GamePlayerAuthorization;
+    use ApiResponses, PlayerAuthorization;
 
     public function __construct(
         protected GameEngine $gameEngine,

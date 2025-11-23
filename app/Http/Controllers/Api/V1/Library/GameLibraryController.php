@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Library;
 
 use App\Http\Controllers\Controller;
-use App\Services\GameLibraryService;
+use App\Services\Library\GameLibraryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

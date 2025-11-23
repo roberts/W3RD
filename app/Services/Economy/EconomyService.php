@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Economy;
 
 use App\Models\Auth\User;
 use App\Models\Economy\Balance;

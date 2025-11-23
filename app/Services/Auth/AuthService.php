@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Auth;
 
 use App\Actions\Auth\TrackAuthenticationEntryAction;
 use App\DataTransferObjects\Auth\AuthResult;

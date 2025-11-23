@@ -14,7 +14,7 @@ use Illuminate\Http\JsonResponse;
  * This trait is kept for special scenarios like turn validation
  * or when authorization needs to happen mid-controller logic.
  */
-trait GamePlayerAuthorization
+trait PlayerAuthorization
 {
     /**
      * Verify that it's the player's turn.

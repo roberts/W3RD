@@ -16,7 +16,7 @@ use App\GameEngine\Timer\TimerScheduler;
 use App\GameTitles\BaseGameTitle;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Services\GameResponseEnhancementService;
+use App\Services\Games\GameResponseEnhancementService;
 
 /**
  * GameEngine - Main orchestrator for game action processing.

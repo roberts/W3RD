@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Economy;
 
 use App\Exceptions\PaymentValidationException;
 use Google\Client as GoogleClient;

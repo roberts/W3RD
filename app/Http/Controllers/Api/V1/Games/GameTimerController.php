@@ -9,19 +9,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Resources\GameTimerResource;
 use App\Http\Traits\ApiResponses;
+use App\Http\Traits\HydratesGameState;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Services\Games\GameStateService;
 use Illuminate\Http\JsonResponse;
 
 class GameTimerController extends Controller
 {
-    use ApiResponses;
+    use ApiResponses, HydratesGameState;
 
     public function __construct(
         protected TimerInformationService $timerService,
-        protected ModeRegistry $modeRegistry,
-        protected GameStateService $gameStateService
+        protected ModeRegistry $modeRegistry
     ) {}
 
     /**
@@ -33,7 +32,8 @@ class GameTimerController extends Controller
         $player = $request->player();
 
         // Get the mode handler and hydrated state
-        [$mode, $gameState] = $this->gameStateService->hydrateState($game);
+        $mode = $this->modeRegistry->resolve($game);
+        $gameState = $this->hydrateGameState($game);
 
         // Get timer information (throws exception if no timer)
         try {

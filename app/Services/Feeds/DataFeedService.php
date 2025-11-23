@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Feeds;
 
 use App\Models\Games\Game;
 use Illuminate\Support\Facades\Redis;

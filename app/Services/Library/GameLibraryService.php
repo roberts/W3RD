@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Library;
 
 use App\Enums\GameTitle;
 use App\Exceptions\ResourceNotFoundException;

@@ -9,7 +9,7 @@ use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
-use App\Services\Games\GameHistoryService;
+use App\Services\Games\GameTimelineService;
 use Illuminate\Http\JsonResponse;
 
 class GameSyncController extends Controller
@@ -17,7 +17,7 @@ class GameSyncController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected GameHistoryService $gameHistoryService
+        protected GameTimelineService $gameTimelineService
     ) {}
 
     /**
@@ -31,7 +31,7 @@ class GameSyncController extends Controller
         // Get last N actions for context (configurable)
         $recentActionCount = (int) $request->query('recent_actions', 10);
 
-        $recentActions = $this->gameHistoryService->getRecentActions($game, $recentActionCount);
+        $recentActions = $this->gameTimelineService->getRecentActions($game, $recentActionCount);
 
         $syncData = [
             'game' => GameResource::make($game),

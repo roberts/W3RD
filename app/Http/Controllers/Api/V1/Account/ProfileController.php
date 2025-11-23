@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponses;
-use App\Services\ProfileService;
+use App\Services\Account\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

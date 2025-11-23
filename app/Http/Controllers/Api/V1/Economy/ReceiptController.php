@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Economy;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Economy\VerifyReceiptRequest;
 use App\Http\Traits\ApiResponses;
-use App\Services\ReceiptVerificationService;
+use App\Services\Economy\ReceiptVerificationService;
 use Illuminate\Http\JsonResponse;
 
 class ReceiptController extends Controller

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Competitions;
 
 use App\Events\TournamentBracketUpdated;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Auth\User;
 use App\Models\Competitions\Tournament;
+use App\Services\Economy\EconomyService;
 use Illuminate\Support\Facades\DB;
 
 class CompetitionService

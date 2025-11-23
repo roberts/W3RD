@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Competitions\EnterTournamentRequest;
 use App\Http\Traits\ApiResponses;
 use App\Models\Competitions\Tournament;
-use App\Services\CompetitionService;
+use App\Services\Competitions\CompetitionService;
 use Illuminate\Http\JsonResponse;
 
 class EntryController extends Controller

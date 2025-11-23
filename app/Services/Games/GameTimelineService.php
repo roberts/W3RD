@@ -8,7 +8,7 @@ use App\Models\Games\Action;
 use App\Models\Games\Game;
 use Illuminate\Support\Collection;
 
-class GameHistoryService
+class GameTimelineService
 {
     /**
      * Get recent actions for a game.

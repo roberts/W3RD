@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Feeds;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
-use App\Services\DataFeedService;
+use App\Services\Feeds\DataFeedService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

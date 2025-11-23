@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Services\Games;
 
 use App\GameEngine\GameOutcome;
 use App\GameEngine\ModeRegistry;

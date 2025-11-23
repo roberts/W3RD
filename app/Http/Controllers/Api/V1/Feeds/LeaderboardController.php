@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Feeds;
 use App\Enums\GameTitle;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Feeds\LeaderboardEntryResource;
 use App\Http\Traits\ApiResponses;
 use App\Services\Feeds\LeaderboardService;
 use Illuminate\Http\JsonResponse;
@@ -38,7 +39,7 @@ class LeaderboardController extends Controller
 
         return $this->dataResponse([
             'game_title' => $gameTitle,
-            'entries' => $leaderboard,
+            'entries' => LeaderboardEntryResource::collection($leaderboard),
         ]);
     }
 }

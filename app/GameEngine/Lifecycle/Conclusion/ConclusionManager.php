@@ -5,7 +5,7 @@ namespace App\GameEngine\Lifecycle\Conclusion;
 use App\Enums\GameAttributes\GameDynamic;
 use App\Enums\GameStatus;
 use App\Enums\OutcomeType;
-use App\Events\GameCompleted;
+use App\GameEngine\Events\GameCompleted;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\ModeRegistry;
 use App\Models\Games\Game;

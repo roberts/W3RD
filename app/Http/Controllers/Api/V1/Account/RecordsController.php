@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Account\RecordsResource;
 use App\Http\Traits\ApiResponses;
 use App\Services\Account\UserStatisticsService;
 use Illuminate\Http\JsonResponse;
@@ -25,12 +26,14 @@ class RecordsController extends Controller
     {
         $user = $request->user();
 
-        return $this->dataResponse([
+        $records = [
             ...$this->statisticsService->getGameStatistics($user),
             'win_rate' => $this->statisticsService->getWinRate($user),
             'total_points' => $this->statisticsService->getTotalPoints($user),
             'elo_ratings' => $this->statisticsService->getEloRatings($user),
             'global_rank' => $this->statisticsService->getGlobalRank($user),
-        ]);
+        ];
+
+        return $this->dataResponse(RecordsResource::make($records)->resolve());
     }
 }

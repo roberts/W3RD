@@ -32,7 +32,7 @@ use App\Http\Controllers\Api\V1\Games\GameOutcomeController;
 use App\Http\Controllers\Api\V1\Games\GameSyncController;
 use App\Http\Controllers\Api\V1\Games\GameTimelineController;
 use App\Http\Controllers\Api\V1\Games\GameTimerController;
-use App\Http\Controllers\Api\V1\Library\GameLibraryController;
+use App\Http\Controllers\Api\V1\Library\LibraryController;
 use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\Matchmaking\LobbyController;
 use App\Http\Controllers\Api\V1\Matchmaking\ProposalController;
@@ -65,10 +65,10 @@ Route::prefix('v1')->group(function () {
     // Library Namespace - Game Discovery & Rules
     // ========================================
     Route::prefix('library')->group(function () {
-        Route::get('/', [GameLibraryController::class, 'index']);
-        Route::get('/{gameTitle}', [GameLibraryController::class, 'show']);
+        Route::get('/', [LibraryController::class, 'index']);
+        Route::get('/{gameTitle}', [LibraryController::class, 'show']);
         Route::get('/{gameTitle}/rules', [GameRulesController::class, 'show']);
-        Route::get('/{gameTitle}/entities', [GameLibraryController::class, 'entities']);
+        Route::get('/{gameTitle}/entities', [LibraryController::class, 'entities']);
     });
 
     // ========================================

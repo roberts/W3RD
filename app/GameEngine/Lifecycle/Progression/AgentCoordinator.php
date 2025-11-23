@@ -9,7 +9,7 @@ use App\GameEngine\Interfaces\GameTitleContract;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Services\Agents\AgentService;
+use App\Agents\Orchestrators\AgentService;
 use Illuminate\Support\Facades\Log;
 
 /**

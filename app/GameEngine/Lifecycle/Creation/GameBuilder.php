@@ -5,7 +5,7 @@ namespace App\GameEngine\Lifecycle\Creation;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Events\GameStarted;
+use App\GameEngine\Events\GameStarted;
 use App\GameEngine\ModeRegistry;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Games\Game;

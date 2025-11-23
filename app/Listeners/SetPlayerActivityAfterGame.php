@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Enums\PlayerActivityState;
-use App\Events\GameCompleted;
+use App\GameEngine\Events\GameCompleted;
 use App\GameEngine\Player\PlayerActivityManager;
 
 class SetPlayerActivityAfterGame

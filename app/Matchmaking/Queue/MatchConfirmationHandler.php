@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Matchmaking\Queue;
 
 use App\Enums\GameTitle;
-use App\Events\GameFound;
+use App\Matchmaking\Events\GameFound;
 use App\Matchmaking\Queue\Actions\ApplyDodgePenaltyAction;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;

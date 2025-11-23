@@ -6,10 +6,10 @@ namespace App\Matchmaking\Queue;
 
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
-use App\Events\GameFound;
+use App\Matchmaking\Events\GameFound;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
-use App\Services\Agents\AgentSchedulingService;
+use App\Agents\Scheduling\AgentSchedulingService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 

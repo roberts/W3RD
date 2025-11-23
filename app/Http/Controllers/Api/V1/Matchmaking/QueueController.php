@@ -12,7 +12,7 @@ use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\QueueOrchestrator;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
-use App\Services\Matchmaking\QueueResponseMapper;
+use App\Http\Mappers\QueueResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 

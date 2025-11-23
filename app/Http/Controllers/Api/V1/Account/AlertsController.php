@@ -6,7 +6,7 @@ use App\Actions\Account\MarkAlertsAsReadAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\ListAlertsRequest;
 use App\Http\Requests\Account\MarkAlertsAsReadRequest;
-use App\Http\Resources\AlertResource;
+use App\Http\Resources\Account\AlertResource;
 use App\Http\Traits\ApiResponses;
 use App\Services\Account\AlertQueryService;
 use Illuminate\Http\JsonResponse;

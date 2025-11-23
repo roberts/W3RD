@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\GameEngine\Lifecycle\Progression;
 
-use App\DataTransferObjects\Game\CoordinatedActionResult;
+use App\DataTransferObjects\Games\CoordinatedActionResult;
 use App\GameEngine\Interfaces\GameActionContract;
 use App\Models\Games\Action;
 use App\Models\Games\Game;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Economy;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Economy\BalanceResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Economy\Balance;
 use Illuminate\Http\JsonResponse;
@@ -22,13 +23,9 @@ class BalanceController extends Controller
         $balances = Balance::where('user_id', $user->id)->get();
 
         $balanceData = $balances->mapWithKeys(function ($balance) {
-            return [
-                $balance->currency_type => [
-                    'total' => $balance->amount,
-                    'reserved' => $balance->reserved_amount,
-                    'available' => $balance->availableBalance,
-                ],
-            ];
+            $resource = BalanceResource::make($balance)->resolve();
+
+            return [$balance->currency_type => $resource];
         });
 
         return $this->dataResponse($balanceData->toArray());

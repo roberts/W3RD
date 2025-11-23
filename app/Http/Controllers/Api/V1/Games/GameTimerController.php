@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Exceptions\Game\TimerNotAvailableException;
 use App\GameEngine\ModeRegistry;
-use App\GameEngine\Timer\TimerInformationService;
+use App\GameEngine\Timers\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
-use App\Http\Resources\GameTimerResource;
+use App\Http\Resources\Games\GameTimerResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\HydratesGameState;
 use App\Models\Games\Game;

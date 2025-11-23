@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Account;
 
 use App\GameEngine\Player\ProgressionManager;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Account\ProgressionResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Http\JsonResponse;
@@ -41,12 +42,14 @@ class ProgressionController extends Controller
             ];
         });
 
-        return $this->dataResponse([
+        $progression = [
             'games' => $levels,
             'total_xp' => $levelCollection->sum('xp_current'),
             'average_level' => $levelCollection->avg('level'),
             // TODO: Add battle pass data
             'battle_pass' => null,
-        ]);
+        ];
+
+        return $this->dataResponse(ProgressionResource::make($progression)->resolve());
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\Events\GameActionProcessed;
+use App\GameEngine\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\Actions\ActionMapper;
 use App\GameEngine\GameEngine;
@@ -10,7 +10,7 @@ use App\GameEngine\ModeRegistry;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Requests\Games\ViewGameRequest;
-use App\Http\Resources\GameActionOptionsResource;
+use App\Http\Resources\Games\GameActionOptionsResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\PlayerAuthorization;
 use App\Models\Games\Game;

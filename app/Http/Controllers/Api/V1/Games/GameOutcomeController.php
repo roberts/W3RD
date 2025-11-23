@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
-use App\Http\Resources\GameOutcomeResource;
+use App\Http\Resources\Games\GameOutcomeResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;

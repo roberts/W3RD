@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Feeds;
 
 use App\Enums\GameTitle;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\Auth\UserResource;
 use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Support\Collection;
 

@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\GameCompleted;
+use App\GameEngine\Events\GameCompleted;
 use App\GameEngine\GameEngine;
 use App\Listeners\SendProposalAcceptedAlert;
 use App\Listeners\SendProposalCancelledAlert;

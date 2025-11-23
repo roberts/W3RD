@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
-use App\Http\Resources\ActionResource;
-use App\Http\Resources\GameResource;
+use App\Http\Resources\Games\ActionResource;
+use App\Http\Resources\Games\GameResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Action;
 use App\Models\Games\Game;

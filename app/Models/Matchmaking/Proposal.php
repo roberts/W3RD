@@ -7,6 +7,7 @@ use App\Matchmaking\Enums\ProposalType;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ProposalType $type
  * @property int|null $original_game_id
  * @property int|null $game_id
- * @property array|null $game_settings
+ * @property array<string, mixed>|null $game_settings
  * @property \Illuminate\Support\Carbon|null $responded_at
  * @property ProposalStatus $status
  * @property \Illuminate\Support\Carbon|null $expires_at
@@ -58,6 +59,8 @@ class Proposal extends Model
 
     /**
      * Ensure ULIDs are generated for the "ulid" column instead of the primary key.
+     *
+     * @return array<int, string>
      */
     public function uniqueIds(): array
     {
@@ -66,8 +69,10 @@ class Proposal extends Model
 
     /**
      * Scope to find a proposal by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -81,7 +86,7 @@ class Proposal extends Model
     /**
      * Scope to find proposals with pending status.
      */
-    public function scopePending($query)
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', ProposalStatus::PENDING);
     }
@@ -89,7 +94,7 @@ class Proposal extends Model
     /**
      * Scope to find expired proposals.
      */
-    public function scopeExpired($query)
+    public function scopeExpired(Builder $query): Builder
     {
         return $query->where('expires_at', '<=', now());
     }
@@ -97,31 +102,46 @@ class Proposal extends Model
     /**
      * Scope to find non-expired proposals.
      */
-    public function scopeNotExpired($query)
+    public function scopeNotExpired(Builder $query): Builder
     {
         return $query->where('expires_at', '>', now());
     }
 
+    /**
+     * @return BelongsTo<User, Proposal>
+     */
     public function requestingUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requesting_user_id');
     }
 
+    /**
+     * @return BelongsTo<User, Proposal>
+     */
     public function opponentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'opponent_user_id');
     }
 
+    /**
+     * @return BelongsTo<Game, Proposal>
+     */
     public function originalGame(): BelongsTo
     {
         return $this->belongsTo(Game::class, 'original_game_id');
     }
 
+    /**
+     * @return BelongsTo<Game, Proposal>
+     */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
+    /**
+     * @return BelongsTo<Mode, Proposal>
+     */
     public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);

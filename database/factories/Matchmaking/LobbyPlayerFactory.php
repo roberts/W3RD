@@ -9,6 +9,9 @@ use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<LobbyPlayer>
+ */
 class LobbyPlayerFactory extends Factory
 {
     protected $model = LobbyPlayer::class;

@@ -3,6 +3,7 @@
 namespace App\Models\Games;
 
 use App\Enums\ActionType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,9 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $player_id
  * @property int $turn_number
  * @property ActionType $action_type
- * @property array|null $action_details
+ * @property array<string, mixed>|null $action_details
  * @property string|null $status
- * @property array|null $resulting_state
+ * @property array<string, mixed>|null $resulting_state
  * @property Player $player
  * @property Game $game
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -55,6 +56,8 @@ class Action extends Model
 
     /**
      * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
      */
     public function uniqueIds(): array
     {
@@ -63,8 +66,10 @@ class Action extends Model
 
     /**
      * Scope to find an action by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -78,7 +83,7 @@ class Action extends Model
     /**
      * Scope to find actions with a specific coordination group.
      */
-    public function scopeWithCoordinationGroup($query, string $coordinationGroup)
+    public function scopeWithCoordinationGroup(Builder $query, string $coordinationGroup): Builder
     {
         return $query->where('coordination_group', $coordinationGroup);
     }
@@ -86,7 +91,7 @@ class Action extends Model
     /**
      * Scope to find actions pending coordination completion.
      */
-    public function scopePendingCoordination($query)
+    public function scopePendingCoordination(Builder $query): Builder
     {
         return $query->where('is_coordinated', true)
             ->whereNull('coordination_completed_at');
@@ -101,11 +106,17 @@ class Action extends Model
     }
 
     // Relationships
+    /**
+     * @return BelongsTo<Game, Action>
+     */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
+    /**
+     * @return BelongsTo<Player, Action>
+     */
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);

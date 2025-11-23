@@ -8,6 +8,9 @@ use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Lobby>
+ */
 class LobbyFactory extends Factory
 {
     protected $model = Lobby::class;

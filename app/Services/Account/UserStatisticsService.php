@@ -10,6 +10,9 @@ class UserStatisticsService
     /**
      * Get game statistics for a user.
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function getGameStatistics(User $user): array
     {
         $totalGames = $user->players()->count();
@@ -50,6 +53,9 @@ class UserStatisticsService
 
     /**
      * Get ELO ratings per game (placeholder for future implementation).
+     */
+    /**
+     * @return array<string, int>
      */
     public function getEloRatings(User $user): array
     {

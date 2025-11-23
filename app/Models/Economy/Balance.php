@@ -3,6 +3,7 @@
 namespace App\Models\Economy;
 
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,13 +38,15 @@ class Balance extends Model
     /**
      * Scope to filter balances by currency type.
      */
-    public function scopeForCurrency($query, string $currencyType)
+    public function scopeForCurrency(Builder $query, string $currencyType): Builder
     {
         return $query->where('currency_type', $currencyType);
     }
 
     /**
      * Get the user that owns this balance.
+     *
+     * @return BelongsTo<User, Balance>
      */
     public function user(): BelongsTo
     {

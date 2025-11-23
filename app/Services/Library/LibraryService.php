@@ -12,6 +12,9 @@ class LibraryService
     /**
      * Get list of games with optional filtering.
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getGames(?string $pacing = null, ?string $playerCount = null, ?string $category = null): array
     {
         $games = Cache::remember('game_library_all', 3600, function () {

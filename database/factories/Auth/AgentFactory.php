@@ -5,6 +5,9 @@ namespace Database\Factories\Auth;
 use App\Models\Auth\Agent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Agent>
+ */
 class AgentFactory extends Factory
 {
     protected $model = Agent::class;

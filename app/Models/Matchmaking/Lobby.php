@@ -8,6 +8,7 @@ use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -74,8 +75,10 @@ class Lobby extends Model
 
     /**
      * Scope to find a lobby by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -89,7 +92,7 @@ class Lobby extends Model
     /**
      * Scope to find lobbies with pending status.
      */
-    public function scopePending($query)
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', LobbyStatus::PENDING);
     }
@@ -97,7 +100,7 @@ class Lobby extends Model
     /**
      * Scope to find lobbies scheduled for a specific time.
      */
-    public function scopeScheduledFor($query, $dateTime)
+    public function scopeScheduledFor(Builder $query, mixed $dateTime): Builder
     {
         return $query->whereNotNull('scheduled_at')
             ->where('scheduled_at', '<=', $dateTime);
@@ -106,31 +109,46 @@ class Lobby extends Model
     /**
      * Scope to find lobbies that are not scheduled (immediate start).
      */
-    public function scopeNotScheduled($query)
+    public function scopeNotScheduled(Builder $query): Builder
     {
         return $query->whereNull('scheduled_at');
     }
 
+    /**
+     * @return BelongsTo<Mode, Lobby>
+     */
     public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);
     }
 
+    /**
+     * @return BelongsTo<User, Lobby>
+     */
     public function host(): BelongsTo
     {
         return $this->belongsTo(User::class, 'host_id');
     }
 
+    /**
+     * @return HasMany<LobbyPlayer>
+     */
     public function players(): HasMany
     {
         return $this->hasMany(LobbyPlayer::class);
     }
 
+    /**
+     * @return HasMany<LobbyPlayer>
+     */
     public function acceptedPlayers(): HasMany
     {
         return $this->players()->where('status', LobbyPlayerStatus::ACCEPTED);
     }
 
+    /**
+     * @return BelongsTo<Game, Lobby>
+     */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);

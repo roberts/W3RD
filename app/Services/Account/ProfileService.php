@@ -9,6 +9,9 @@ class ProfileService
     /**
      * Update user profile.
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function updateProfile(User $user, array $data): User
     {
         // Update only provided fields

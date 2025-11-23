@@ -3,10 +3,12 @@
 namespace App\Models\Economy;
 
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property int $id
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $description
  * @property string|null $reference_type
  * @property int|null $reference_id
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read User $user
@@ -47,6 +49,8 @@ class Transaction extends Model
 
     /**
      * Get the user that owns this transaction.
+     *
+     * @return BelongsTo<User, Transaction>
      */
     public function user(): BelongsTo
     {
@@ -55,8 +59,10 @@ class Transaction extends Model
 
     /**
      * Get the polymorphic reference (e.g., Game, Tournament).
+     *
+     * @return MorphTo<Model, Transaction>
      */
-    public function reference()
+    public function reference(): MorphTo
     {
         return $this->morphTo();
     }
@@ -68,6 +74,8 @@ class Transaction extends Model
 
     /**
      * Generate ULIDs for the explicit column instead of the primary key.
+     *
+     * @return array<int, string>
      */
     public function uniqueIds(): array
     {
@@ -76,8 +84,10 @@ class Transaction extends Model
 
     /**
      * Scope to find a transaction by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -91,7 +101,7 @@ class Transaction extends Model
     /**
      * Scope to filter transactions by currency type.
      */
-    public function scopeForCurrency($query, string $currencyType)
+    public function scopeForCurrency(Builder $query, string $currencyType): Builder
     {
         return $query->where('currency_type', $currencyType);
     }
@@ -99,7 +109,7 @@ class Transaction extends Model
     /**
      * Scope for credit transactions.
      */
-    public function scopeCredits($query)
+    public function scopeCredits(Builder $query): Builder
     {
         return $query->where('amount', '>', 0);
     }
@@ -107,7 +117,7 @@ class Transaction extends Model
     /**
      * Scope for debit transactions.
      */
-    public function scopeDebits($query)
+    public function scopeDebits(Builder $query): Builder
     {
         return $query->where('amount', '<', 0);
     }

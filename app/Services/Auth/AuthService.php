@@ -56,6 +56,8 @@ class AuthService
 
     /**
      * Complete user verification and create user account.
+     *
+     * @return array{user: User, token: string}
      */
     public function verifyRegistration(string $token): array
     {
@@ -82,6 +84,8 @@ class AuthService
 
     /**
      * Handle social authentication (find or create user and social account).
+     *
+     * @return array{user: User, token: string}
      */
     public function handleSocialLogin(
         string $provider,
@@ -115,7 +119,7 @@ class AuthService
 
         // Link user and social account if not already linked
         if ($socialAccount->user_id !== $user->id) {
-            $socialAccount->user_id = $user->id;
+            $socialAccount->user_id = (int) $user->id;
             $socialAccount->save();
         }
 

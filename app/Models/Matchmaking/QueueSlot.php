@@ -4,6 +4,7 @@ namespace App\Models\Matchmaking;
 
 use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,8 @@ class QueueSlot extends Model
 
     /**
      * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
      */
     public function uniqueIds(): array
     {
@@ -43,8 +46,10 @@ class QueueSlot extends Model
 
     /**
      * Scope to find a queue slot by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -58,7 +63,7 @@ class QueueSlot extends Model
     /**
      * Scope to find active queue slots.
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', QueueSlotStatus::ACTIVE);
     }
@@ -66,7 +71,7 @@ class QueueSlot extends Model
     /**
      * Scope to find expired queue slots.
      */
-    public function scopeExpired($query)
+    public function scopeExpired(Builder $query): Builder
     {
         return $query->where('expires_at', '<=', now());
     }
@@ -74,13 +79,15 @@ class QueueSlot extends Model
     /**
      * Scope to find non-expired queue slots.
      */
-    public function scopeNotExpired($query)
+    public function scopeNotExpired(Builder $query): Builder
     {
         return $query->where('expires_at', '>', now());
     }
 
     /**
      * Get the user who occupies this queue slot.
+     *
+     * @return BelongsTo<User, QueueSlot>
      */
     public function user(): BelongsTo
     {
@@ -89,6 +96,8 @@ class QueueSlot extends Model
 
     /**
      * Get the lobby this queue slot was matched to.
+     *
+     * @return BelongsTo<Lobby, QueueSlot>
      */
     public function lobby(): BelongsTo
     {

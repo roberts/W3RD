@@ -5,6 +5,7 @@ namespace App\Models\Gamification;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GlobalRank extends Model
 {
@@ -26,7 +27,10 @@ class GlobalRank extends Model
     ];
 
     // Relationships
-    public function user()
+    /**
+     * @return BelongsTo<User, GlobalRank>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

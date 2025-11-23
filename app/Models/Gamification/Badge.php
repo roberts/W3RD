@@ -6,6 +6,8 @@ use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Roberts\Support\Traits\HasCreator;
 
 class Badge extends Model
@@ -25,12 +27,18 @@ class Badge extends Model
     ];
 
     // Relationships
-    public function image()
+    /**
+     * @return BelongsTo<Image, Badge>
+     */
+    public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class);
     }
 
-    public function users()
+    /**
+     * @return BelongsToMany<User>
+     */
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_badge')
             ->withPivot('earned_at');

@@ -6,6 +6,7 @@ use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\OutcomeType;
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -106,8 +107,10 @@ class Game extends Model
 
     /**
      * Scope to find a game by ULID with optional eager loading.
+     *
+     * @param array<int, string> $with
      */
-    public function scopeWithUlid($query, string $ulid, array $with = [])
+    public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
         $query = $query->where('ulid', $ulid);
 
@@ -121,7 +124,7 @@ class Game extends Model
     /**
      * Scope to find games for a specific user.
      */
-    public function scopeForUser($query, int $userId)
+    public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->whereHas('players', function ($q) use ($userId) {
             $q->where('user_id', $userId);
@@ -140,7 +143,7 @@ class Game extends Model
     /**
      * Scope to find completed games.
      */
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', GameStatus::COMPLETED);
     }
@@ -148,7 +151,7 @@ class Game extends Model
     /**
      * Scope to find active games.
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', GameStatus::ACTIVE);
     }
@@ -160,26 +163,41 @@ class Game extends Model
     }
 
     // Relationships
+    /**
+     * @return BelongsTo<User, Game>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * @return BelongsTo<Mode, Game>
+     */
     public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);
     }
 
+    /**
+     * @return HasMany<Player>
+     */
     public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
+    /**
+     * @return BelongsTo<Player, Game>
+     */
     public function winner(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'winner_id');
     }
 
+    /**
+     * @return HasMany<Action>
+     */
     public function actions(): HasMany
     {
         return $this->hasMany(Action::class);

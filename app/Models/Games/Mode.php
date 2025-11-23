@@ -5,6 +5,7 @@ namespace App\Models\Games;
 use App\Enums\GameTitle;
 use App\GameEngine\ModeRegistry;
 use App\GameTitles\BaseGameTitle;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,6 +37,9 @@ class Mode extends Model
     ];
 
     // Relationships
+    /**
+     * @return HasMany<Game>
+     */
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
@@ -60,7 +64,7 @@ class Mode extends Model
     /**
      * Scope to get active modes only.
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
@@ -68,7 +72,7 @@ class Mode extends Model
     /**
      * Scope to filter by title slug.
      */
-    public function scopeForTitle($query, string $titleSlug)
+    public function scopeForTitle(Builder $query, string $titleSlug): Builder
     {
         return $query->where('title_slug', $titleSlug);
     }

@@ -5,6 +5,7 @@ namespace App\Models\Matchmaking;
 use App\Matchmaking\Enums\LobbyPlayerSource;
 use App\Matchmaking\Enums\LobbyPlayerStatus;
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,16 +40,22 @@ class LobbyPlayer extends Model
     /**
      * Scope to find accepted lobby players.
      */
-    public function scopeAccepted($query)
+    public function scopeAccepted(Builder $query): Builder
     {
         return $query->where('status', LobbyPlayerStatus::ACCEPTED);
     }
 
+    /**
+     * @return BelongsTo<Lobby, LobbyPlayer>
+     */
     public function lobby(): BelongsTo
     {
         return $this->belongsTo(Lobby::class);
     }
 
+    /**
+     * @return BelongsTo<User, LobbyPlayer>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

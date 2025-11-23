@@ -19,6 +19,9 @@ class Subscription extends CashierSubscription
         'provider', // Added for multi-platform support
     ];
 
+    /**
+     * @var array<string, string>
+     */
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'ends_at' => 'datetime',

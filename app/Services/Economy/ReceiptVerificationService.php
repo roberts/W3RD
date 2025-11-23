@@ -10,6 +10,9 @@ class ReceiptVerificationService
     /**
      * Verify receipt from various platforms.
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function verify(string $provider, string $receipt, int $userId): array
     {
         return match ($provider) {

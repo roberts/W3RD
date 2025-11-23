@@ -5,6 +5,7 @@ namespace App\Models\Economy;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Quota extends Model
 {
@@ -23,7 +24,10 @@ class Quota extends Model
     ];
 
     // Relationships
-    public function user()
+    /**
+     * @return BelongsTo<User, Quota>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

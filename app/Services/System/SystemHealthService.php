@@ -11,6 +11,9 @@ class SystemHealthService
     /**
      * Check health status of all critical services.
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function checkHealth(): array
     {
         $services = [

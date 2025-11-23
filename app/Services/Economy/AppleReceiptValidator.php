@@ -14,6 +14,8 @@ class AppleReceiptValidator
 {
     /**
      * Validate an Apple App Store receipt.
+     *
+     * @return array<string, mixed>
      */
     public function validate(string $transactionId): array
     {

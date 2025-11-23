@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Account;
+namespace App\Http\Resources\Matchmaking;
 
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Http\Request;

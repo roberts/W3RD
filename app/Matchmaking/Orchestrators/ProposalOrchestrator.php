@@ -11,7 +11,6 @@ use App\Matchmaking\Results\ProposalResult;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 /**

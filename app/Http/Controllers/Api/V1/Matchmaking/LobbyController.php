@@ -9,7 +9,6 @@ use App\Http\Requests\Lobby\InvitePlayerRequest;
 use App\Http\Requests\Lobby\RespondToInvitationRequest;
 use App\Http\Resources\LobbyResource;
 use App\Http\Traits\ApiResponses;
-use App\Matchmaking\Enums\LobbyStatus;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Lobby;

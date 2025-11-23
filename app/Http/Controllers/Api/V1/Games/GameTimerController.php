@@ -6,6 +6,7 @@ use App\Exceptions\Game\TimerNotAvailableException;
 use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
+use App\Http\Resources\GameTimerResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Player;
 use App\Providers\GameServiceProvider;
@@ -56,15 +57,11 @@ class GameTimerController extends Controller
             ->with('user:id,username')
             ->first();
 
-        return $this->dataResponse([
-            'current_player' => [
-                'ulid' => $currentPlayer?->ulid,
-                'user_id' => $currentPlayer?->user_id,
-                'username' => $currentPlayer?->user?->username,
-            ],
-            'is_your_turn' => $gameState->currentPlayerUlid === $player->ulid,
+        return $this->resourceResponse(GameTimerResource::make([
+            'currentPlayer' => $currentPlayer,
+            'isYourTurn' => $gameState->currentPlayerUlid === $player->ulid,
             'phase' => $gameState->phase ?? null,
-            'timer' => $timerInfo,
-        ]);
+            'timerInfo' => $timerInfo,
+        ]));
     }
 }

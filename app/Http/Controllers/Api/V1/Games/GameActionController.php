@@ -8,6 +8,7 @@ use App\GameEngine\GameEngine;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Requests\Games\ViewGameRequest;
+use App\Http\Resources\GameActionOptionsResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Games\Game;
@@ -118,12 +119,12 @@ class GameActionController extends Controller
         // Calculate deadline
         $deadline = $mode->getActionDeadline($gameState, $game);
 
-        return $this->dataResponse([
-            'options' => $actions,
-            'is_your_turn' => $mode->getGameState()->currentPlayerUlid === $player->ulid,
-            'phase' => $mode->getGameState()->phase->value ?? 'active',
-            'deadline' => $deadline->toIso8601String(),
-            'timelimit_seconds' => $mode->getTimelimit(),
-        ]);
+        return $this->resourceResponse(GameActionOptionsResource::make([
+            'actions' => $actions,
+            'isYourTurn' => $gameState->currentPlayerUlid === $player->ulid,
+            'phase' => $gameState->phase,
+            'deadline' => $deadline,
+            'timelimit' => $mode->getTimelimit(),
+        ]));
     }
 }

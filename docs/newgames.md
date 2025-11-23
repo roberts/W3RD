@@ -1239,6 +1239,10 @@ class StandardMode extends TicTacToeProtocol
 
 ### Step 11: Register the Game
 
+**Important**: Game modes must be registered in the `ModeRegistry` for the game engine to resolve them properly. The `ModeRegistry` is responsible for mapping game instances to their corresponding mode handler classes.
+
+#### 11.1: Add to GameTitle Enum
+
 Add to `app/Enums/GameTitle.php`:
 
 ```php
@@ -1249,17 +1253,33 @@ enum GameTitle: string
 }
 ```
 
-Add to `app/Providers/GameServiceProvider.php`:
+#### 11.2: Register in ModeRegistry
+
+Add to `app/GameEngine/ModeRegistry.php` in the `$modeMap` array:
 
 ```php
-use App\GameTitles\TicTacToe\Modes\StandardMode as TicTacToeStandardMode;
-
-protected static array $modeMap = [
+protected array $modeMap = [
     // ... existing mappings
     'tic-tac-toe' => [
         'standard' => TicTacToeStandardMode::class,
     ],
 ];
+```
+
+**Note**: The `ModeRegistry` uses the game's `title_slug` and `mode_slug` to resolve the correct mode handler class. The structure is:
+
+```php
+'game-title-slug' => [
+    'mode-slug' => ModeClassName::class,
+]
+```
+
+Each game can have multiple modes registered (e.g., `'standard'`, `'tournament'`, `'speed'`), and the registry will instantiate the appropriate mode class when requested by the game engine.
+
+Don't forget to add the import at the top of `ModeRegistry.php`:
+
+```php
+use App\GameTitles\TicTacToe\Modes\StandardMode as TicTacToeStandardMode;
 ```
 
 ### Step 12: Create Tests
@@ -1435,6 +1455,9 @@ When adding a new game, create:
 - [ ] Protocol (abstract) extending genre base
 - [ ] Mode(s) (concrete) extending protocol
 - [ ] Tests for handlers, arbiter, and integration
-- [ ] Registration in `GameTitle` enum and `GameServiceProvider`
+- [ ] Registration in `GameTitle` enum
+- [ ] **Registration in `ModeRegistry`** (add mode mapping in `$modeMap` array)
+
+**Critical**: The `ModeRegistry` is essential for the game engine to resolve mode handlers. Without registering your mode in `app/GameEngine/ModeRegistry.php`, the game will fail to load when players attempt to create or interact with it. Each game title and its modes must be explicitly mapped in the registry's `$modeMap` array.
 
 Follow this architecture for a scalable, maintainable foundation supporting unlimited game titles.

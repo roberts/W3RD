@@ -6,18 +6,21 @@ use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\Events\GameStarted;
+use App\GameEngine\ModeRegistry;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
 use App\Models\Games\Player;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
-use App\Providers\GameServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 class GameBuilder
 {
+    public function __construct(
+        protected ModeRegistry $modeRegistry
+    ) {}
     /**
      * Create a game from matchmaking queue.
      *
@@ -58,7 +61,7 @@ class GameBuilder
             }
 
             // Initialize game state using mode handler with player ULIDs
-            $handler = GameServiceProvider::getMode($game);
+            $handler = $this->modeRegistry->resolve($game);
             $playerUlids = [];
             foreach ($players as $player) {
                 /** @var Player $player */
@@ -114,7 +117,7 @@ class GameBuilder
             }
 
             // Initialize game state using mode handler with player ULIDs
-            $handler = GameServiceProvider::getMode($game);
+            $handler = $this->modeRegistry->resolve($game);
             $playerUlids = [];
             foreach ($players as $player) {
                 /** @var Player $player */

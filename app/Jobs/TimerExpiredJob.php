@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\GameEngine\ModeRegistry;
 use App\GameEngine\Timer\TimerExpiredHandler;
 use App\Models\Games\Game;
-use App\Providers\GameServiceProvider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,7 +21,7 @@ class TimerExpiredJob implements ShouldQueue
         public int $turnNumber,
     ) {}
 
-    public function handle(TimerExpiredHandler $timerHandler): void
+    public function handle(TimerExpiredHandler $timerHandler, ModeRegistry $modeRegistry): void
     {
         $game = Game::find($this->gameId);
 
@@ -31,7 +31,7 @@ class TimerExpiredJob implements ShouldQueue
 
         // Only apply timeout if the game is still on the same turn
         if (($game->game_state['turn_number'] ?? null) === $this->turnNumber) {
-            $mode = GameServiceProvider::getMode($game);
+            $mode = $modeRegistry->resolve($game);
             $stateClass = $mode->getStateClass();
             $gameState = $stateClass::fromArray($game->game_state ?? []);
 

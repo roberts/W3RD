@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\GameEngine\ModeRegistry;
 use App\GameEngine\Timer\TimerExpiredHandler;
 use App\Models\Games\Game;
-use App\Providers\GameServiceProvider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,13 +26,13 @@ class HandleTimerExpiredJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(TimerExpiredHandler $timerHandler): void
+    public function handle(TimerExpiredHandler $timerHandler, ModeRegistry $modeRegistry): void
     {
         if (! $this->game->status->isFinished()) {
             // Reload the game to get the latest state
             $this->game->refresh();
 
-            $mode = GameServiceProvider::getMode($this->game);
+            $mode = $modeRegistry->resolve($this->game);
             $stateClass = $mode->getStateClass();
             $gameState = $stateClass::fromArray($this->game->game_state ?? []);
 

@@ -7,12 +7,15 @@ use App\Enums\GameStatus;
 use App\Enums\OutcomeType;
 use App\Events\GameCompleted;
 use App\GameEngine\GameOutcome;
+use App\GameEngine\ModeRegistry;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Providers\GameServiceProvider;
 
 class ConclusionManager
 {
+    public function __construct(
+        protected ModeRegistry $modeRegistry
+    ) {}
     public function determineOutcome(Game $game): void
     {
         if ($game->status->isFinished()) {
@@ -93,7 +96,7 @@ class ConclusionManager
     private function handleRuleBased(Game $game): ?GameOutcome
     {
         // Load the game mode to get the arbiter
-        $mode = GameServiceProvider::getMode($game);
+        $mode = $this->modeRegistry->resolve($game);
 
         // Get the arbiter from the mode
         $arbiter = $mode->getArbiter();

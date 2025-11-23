@@ -14,6 +14,7 @@ use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Lobby;
+use App\Services\Matchmaking\LobbyResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -23,7 +24,8 @@ class LobbyController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected LobbyOrchestrator $lobbyOrchestrator
+        protected LobbyOrchestrator $lobbyOrchestrator,
+        protected LobbyResponseMapper $responseMapper
     ) {}
 
     /**
@@ -79,7 +81,7 @@ class LobbyController extends Controller
         );
 
         if (! $result->success) {
-            return $this->errorResponse($result->errorMessage, 422);
+            return $this->responseMapper->mapResultToResponse($result);
         }
 
         return $this->createdResourceResponse(
@@ -119,11 +121,7 @@ class LobbyController extends Controller
 
         $result = $this->lobbyOrchestrator->cancelLobby($lobby, $request->user());
 
-        if (! $result->success) {
-            return $this->errorResponse($result->errorMessage, 422);
-        }
-
-        return $this->noContentResponse();
+        return $this->responseMapper->mapResultToResponse($result, null, 204);
     }
 
     /**
@@ -136,7 +134,7 @@ class LobbyController extends Controller
         $result = $this->lobbyOrchestrator->initiateReadyCheck($lobby, $request->user());
 
         if (! $result->success) {
-            return $this->errorResponse($result->errorMessage, 422);
+            return $this->responseMapper->mapResultToResponse($result);
         }
 
         return $this->dataResponse(
@@ -157,9 +155,7 @@ class LobbyController extends Controller
         $result = $this->lobbyOrchestrator->invitePlayer($lobby, $request->user(), $validated['username']);
 
         if (! $result->success) {
-            $statusCode = str_contains($result->errorMessage, 'Only the host') ? 403 : 422;
-
-            return $this->errorResponse($result->errorMessage, $statusCode);
+            return $this->responseMapper->mapResultToResponse($result);
         }
 
         return $this->createdResponse(null, 'Player invited successfully');
@@ -179,18 +175,7 @@ class LobbyController extends Controller
             $result = $this->lobbyOrchestrator->declineInvitation($lobby, $request->user(), $username);
         }
 
-        if (! $result->success) {
-            $statusCode = $result->errorMessage === 'You are not invited to this lobby' ? 404 : 422;
-
-            // Check for "already in lobby" error which should be 409
-            if (str_contains($result->errorMessage, 'already')) {
-                $statusCode = 409;
-            }
-
-            return $this->errorResponse($result->errorMessage, $statusCode);
-        }
-
-        return $this->messageResponse($result->message ?? 'Response recorded');
+        return $this->responseMapper->mapResultToResponse($result, $result->message ?? 'Response recorded');
     }
 
     /**
@@ -210,16 +195,6 @@ class LobbyController extends Controller
 
         $result = $this->lobbyOrchestrator->kickPlayer($lobby, $request->user(), $username);
 
-        if (! $result->success) {
-            if ($result->errorMessage === 'Player not found in lobby') {
-                return $this->errorResponse($result->errorMessage, 404);
-            }
-
-            $statusCode = str_contains($result->errorMessage, 'Only the host') ? 403 : 422;
-
-            return $this->errorResponse($result->errorMessage, $statusCode);
-        }
-
-        return $this->noContentResponse();
+        return $this->responseMapper->mapResultToResponse($result, null, 204);
     }
 }

@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
+use App\Services\Account\UserStatisticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class RecordsController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(
+        protected UserStatisticsService $statisticsService
+    ) {}
 
     /**
      * Get performance records and statistics.
@@ -20,41 +25,12 @@ class RecordsController extends Controller
     {
         $user = $request->user();
 
-        // Calculate global stats
-        $totalGames = $user->players()->count();
-
-        // Count wins: games where the player's ID matches the winner_id
-        $wins = $user->players()->whereHas('game', function ($query) {
-            $query->whereColumn('winner_id', 'players.id');
-        })->count();
-
-        // Count losses: completed games where player didn't win
-        $losses = $user->players()->whereHas('game', function ($query) {
-            $query->where('status', \App\Enums\GameStatus::COMPLETED)
-                ->where(function ($q) {
-                    $q->whereColumn('winner_id', '!=', 'players.id')
-                        ->orWhereNull('winner_id');
-                });
-        })->count();
-
-        // Sum total points from the points ledger (using 'change' column)
-        $totalPoints = $user->points()->sum('change');
-
-        // TODO: Implement ELO ratings per game
-        $eloRatings = [];
-
-        // TODO: Implement global rank calculation
-        $globalRank = null;
-
         return $this->dataResponse([
-            'total_games' => $totalGames,
-            'wins' => $wins,
-            'losses' => $losses,
-            'draws' => $totalGames - $wins - $losses,
-            'win_rate' => $totalGames > 0 ? round(($wins / $totalGames) * 100, 2) : 0,
-            'total_points' => $totalPoints,
-            'elo_ratings' => $eloRatings,
-            'global_rank' => $globalRank,
+            ...$this->statisticsService->getGameStatistics($user),
+            'win_rate' => $this->statisticsService->getWinRate($user),
+            'total_points' => $this->statisticsService->getTotalPoints($user),
+            'elo_ratings' => $this->statisticsService->getEloRatings($user),
+            'global_rank' => $this->statisticsService->getGlobalRank($user),
         ]);
     }
 }

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\GameEngine\GameOutcome;
+use App\GameEngine\ModeRegistry;
 use App\GameTitles\BaseGameTitle;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
-use App\Providers\GameServiceProvider;
 
 /**
  * Service to enhance game responses with rich context.
@@ -19,6 +19,9 @@ use App\Providers\GameServiceProvider;
  */
 class GameResponseEnhancementService
 {
+    public function __construct(
+        protected ModeRegistry $modeRegistry
+    ) {}
     /**
      * Generate rich context for successful action response.
      */
@@ -70,7 +73,7 @@ class GameResponseEnhancementService
      */
     public function generateOutcomeDetails(Game $game, GameOutcome $outcome, object $gameState): array
     {
-        $mode = GameServiceProvider::getMode($game);
+        $mode = $this->modeRegistry->resolve($game);
 
         $details = [
             'outcome_type' => $outcome->type?->value,

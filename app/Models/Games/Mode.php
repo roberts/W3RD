@@ -3,8 +3,8 @@
 namespace App\Models\Games;
 
 use App\Enums\GameTitle;
+use App\GameEngine\ModeRegistry;
 use App\GameTitles\BaseGameTitle;
-use App\Providers\GameServiceProvider;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,7 +54,7 @@ class Mode extends Model
      */
     public function getHandler(Game $game): BaseGameTitle
     {
-        return GameServiceProvider::getMode($game);
+        return app(ModeRegistry::class)->resolve($game);
     }
 
     /**

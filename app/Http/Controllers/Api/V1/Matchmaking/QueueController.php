@@ -12,6 +12,7 @@ use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\QueueOrchestrator;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
+use App\Services\Matchmaking\QueueResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
@@ -21,7 +22,8 @@ class QueueController extends Controller
 
     public function __construct(
         protected ResolveClientIdAction $resolveClientId,
-        protected QueueOrchestrator $queueOrchestrator
+        protected QueueOrchestrator $queueOrchestrator,
+        protected QueueResponseMapper $responseMapper
     ) {
         $this->middleware('auth:sanctum');
     }
@@ -58,26 +60,7 @@ class QueueController extends Controller
         );
 
         if (! $result->success) {
-            $statusCode = $result->cooldownRemaining !== null ? 429 : 422;
-            $errors = $result->context;
-
-            // Add retry_after for cooldowns
-            if ($result->cooldownRemaining !== null) {
-                $errors['retry_after'] = $result->cooldownRemaining;
-            }
-
-            $response = $this->errorResponse(
-                $result->errorMessage,
-                $statusCode,
-                null,
-                $errors
-            );
-
-            if ($result->cooldownRemaining !== null) {
-                $response->header('Retry-After', (string) $result->cooldownRemaining);
-            }
-
-            return $response;
+            return $this->responseMapper->mapJoinResult($result);
         }
 
         return $this->createdResponse(
@@ -93,12 +76,7 @@ class QueueController extends Controller
         $result = $this->queueOrchestrator->cancelQueue($user);
 
         if (! $result->success) {
-            return $this->errorResponse(
-                $result->errorMessage,
-                422,
-                null,
-                $result->context
-            );
+            return $this->responseMapper->mapCancelResult($result);
         }
 
         return $this->dataResponse(

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Matchmaking;
 
 use App\DataTransferObjects\Matchmaking\ProposalData;
+use App\DataTransferObjects\Matchmaking\ProposalResponseData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Matchmaking\AcceptProposalRequest;
 use App\Http\Requests\Matchmaking\DeclineProposalRequest;
@@ -69,12 +70,10 @@ class ProposalController extends Controller
             return $this->errorResponse($result->errorMessage, 422, null, $result->context);
         }
 
-        $resourceData = ProposalData::fromModel($result->proposal)->toArray();
-        if ($result->game) {
-            $resourceData['new_game_ulid'] = $result->game->ulid;
-        }
-
-        return $this->dataResponse($resourceData, 'Proposal accepted. New game created.');
+        return $this->dataResponse(
+            ProposalResponseData::fromResult($result),
+            'Proposal accepted. New game created.'
+        );
     }
 
     /**

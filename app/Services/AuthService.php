@@ -2,14 +2,45 @@
 
 namespace App\Services;
 
+use App\Actions\Auth\TrackAuthenticationEntryAction;
+use App\DataTransferObjects\Auth\AuthResult;
 use App\Models\Auth\Registration;
 use App\Models\Auth\SocialAccount;
 use App\Models\Auth\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AuthService
 {
+    public function __construct(
+        protected TrackAuthenticationEntryAction $trackEntry
+    ) {}
+
+    /**
+     * Authenticate a user with email and password.
+     */
+    public function authenticateUser(string $email, string $password, Request $request): AuthResult
+    {
+        if (! Auth::attempt(['email' => $email, 'password' => $password])) {
+            return AuthResult::failed('The provided credentials are incorrect');
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken($request->ip() ?? 'api-token');
+
+        $this->trackEntry->execute(
+            $user,
+            $token,
+            $request->header('X-Client-Key'),
+            $request->ip(),
+            $request->userAgent()
+        );
+
+        return AuthResult::success($token->plainTextToken, $user);
+    }
+
     /**
      * Create a new registration pending email verification.
      */

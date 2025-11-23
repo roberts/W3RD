@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Exceptions\Game\TimerNotAvailableException;
+use App\GameEngine\ModeRegistry;
 use App\GameEngine\Timer\TimerInformationService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Resources\GameTimerResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Player;
-use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
 
 class GameTimerController extends Controller
@@ -17,7 +17,8 @@ class GameTimerController extends Controller
     use ApiResponses;
 
     public function __construct(
-        protected TimerInformationService $timerService
+        protected TimerInformationService $timerService,
+        protected ModeRegistry $modeRegistry
     ) {}
 
     /**
@@ -29,15 +30,7 @@ class GameTimerController extends Controller
         $player = $request->player();
 
         // Get the mode handler
-        $mode = $this->handleServiceCall(
-            fn () => GameServiceProvider::getMode($game),
-            'Unable to load game mode handler',
-            500
-        );
-
-        if ($mode instanceof JsonResponse) {
-            return $mode;
-        }
+        $mode = $this->modeRegistry->resolve($game);
 
         // Get state class and restore state
         $stateClass = $mode->getStateClass();

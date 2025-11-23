@@ -5,7 +5,9 @@ use App\Exceptions\BusinessRuleException;
 use App\Exceptions\CooldownActiveException;
 use App\Exceptions\GameAccessDeniedException;
 use App\Exceptions\GameActionDeniedException;
+use App\Exceptions\GameModeNotFoundException;
 use App\Exceptions\InvalidActionDataException;
+use App\Exceptions\InvalidGameActionException;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyInvitationException;
 use App\Exceptions\LobbyStateException;
@@ -268,5 +270,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 'retryable' => $e->isRetryable(),
                 'errors' => $e->context,
             ], 422);
+        });
+
+        $exceptions->render(function (GameModeNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'game_title' => $e->gameTitle->value,
+            ], 500);
+        });
+
+        $exceptions->render(function (InvalidGameActionException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'action_type' => $e->actionType,
+                'errors' => $e->actionDetails,
+            ], 400);
         });
     })->create();

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1\Games;
 
 use App\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
+use App\GameEngine\Actions\ActionMapper;
 use App\GameEngine\GameEngine;
+use App\GameEngine\ModeRegistry;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Requests\Games\ViewGameRequest;
@@ -12,7 +14,6 @@ use App\Http\Resources\GameActionOptionsResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Games\Game;
-use App\Providers\GameServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,7 +22,9 @@ class GameActionController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected GameEngine $gameEngine
+        protected GameEngine $gameEngine,
+        protected ModeRegistry $modeRegistry,
+        protected ActionMapper $actionMapper
     ) {}
 
     /**
@@ -34,33 +37,17 @@ class GameActionController extends Controller
         $player = $request->player();
 
         // Get the mode handler
-        $mode = $this->handleServiceCall(
-            fn () => GameServiceProvider::getMode($game),
-            'Unable to load game mode handler',
-            500
-        );
-
-        if ($mode instanceof JsonResponse) {
-            return $mode;
-        }
+        $mode = $this->modeRegistry->resolve($game);
 
         // Validate request - basic validation, game-specific validation happens in the action factory
         $validated = $request->validated();
 
-        // Get the action factory for this game and create the action DTO
-        $actionFactoryClass = $mode->getActionMapper();
-        $action = $this->handleServiceCall(
-            fn () => $actionFactoryClass::create(
-                $validated['action_type'],
-                $validated['action_details']
-            ),
-            'Invalid action',
-            400
+        // Map the action using the centralized ActionMapper
+        $action = $this->actionMapper->mapToAction(
+            $mode,
+            $validated['action_type'],
+            $validated['action_details']
         );
-
-        if ($action instanceof JsonResponse) {
-            return $action;
-        }
 
         // Process the action through the GameEngine (handles all orchestration)
         $result = $this->gameEngine->processPlayerAction($game, $player, $mode, $action);
@@ -100,15 +87,7 @@ class GameActionController extends Controller
         $player = $request->player();
 
         // Get the mode handler
-        $mode = $this->handleServiceCall(
-            fn () => GameServiceProvider::getMode($game),
-            'Unable to load game mode handler',
-            500
-        );
-
-        if ($mode instanceof JsonResponse) {
-            return $mode;
-        }
+        $mode = $this->modeRegistry->resolve($game);
 
         // Get the current game state
         $gameState = $mode->getGameState();

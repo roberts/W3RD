@@ -7,12 +7,17 @@ use App\Http\Requests\Games\ListGamesRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Games\Game;
+use App\Services\Games\GameQueryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(
+        protected GameQueryService $gameQueryService
+    ) {}
 
     /**
      * List games for the authenticated user.
@@ -22,36 +27,10 @@ class GameController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        $query = Game::forUser($user->id)
-            ->with(['players.user.avatar.image', 'mode']);
-
-        // Apply filters
-        if (isset($validated['status'])) {
-            $query->where('status', $validated['status']);
-        }
-
-        if (isset($validated['game_title'])) {
-            $query->whereHas('mode', function ($q) use ($validated) {
-                $q->where('title_slug', $validated['game_title']);
-            });
-        }
-
-        if (isset($validated['date_from'])) {
-            $query->where('created_at', '>=', $validated['date_from']);
-        }
-
-        if (isset($validated['date_to'])) {
-            $query->where('created_at', '<=', $validated['date_to']);
-        }
-
-        if (isset($validated['opponent_username'])) {
-            $query->whereHas('players.user', function ($q) use ($validated) {
-                $q->where('username', $validated['opponent_username']);
-            });
-        }
-
         $perPage = $validated['per_page'] ?? 20;
-        $games = $query->orderBy('updated_at', 'desc')->paginate($perPage);
+        $games = $this->gameQueryService
+            ->buildUserGamesQuery($user, $validated)
+            ->paginate($perPage);
 
         return $this->collectionResponse(
             $games,

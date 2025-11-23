@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers\Api\V1\Account;
 
+use App\Actions\Account\MarkAlertsAsReadAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\ListAlertsRequest;
 use App\Http\Requests\Account\MarkAlertsAsReadRequest;
 use App\Http\Resources\AlertResource;
 use App\Http\Traits\ApiResponses;
+use App\Services\Account\AlertQueryService;
 use Illuminate\Http\JsonResponse;
 
 class AlertsController extends Controller
 {
     use ApiResponses;
+
+    public function __construct(
+        protected AlertQueryService $alertQueryService,
+        protected MarkAlertsAsReadAction $markAlertsAction
+    ) {}
 
     /**
      * Get list of alerts for the authenticated user.
@@ -23,31 +30,10 @@ class AlertsController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        $query = $user->alerts();
-
-        // Apply filters
-        if (isset($validated['read'])) {
-            if ($validated['read']) {
-                $query->whereNotNull('read_at');
-            } else {
-                $query->whereNull('read_at');
-            }
-        }
-
-        if (isset($validated['type'])) {
-            $query->where('type', $validated['type']);
-        }
-
-        if (isset($validated['date_from'])) {
-            $query->where('created_at', '>=', $validated['date_from']);
-        }
-
-        if (isset($validated['date_to'])) {
-            $query->where('created_at', '<=', $validated['date_to']);
-        }
-
         $perPage = $validated['per_page'] ?? 20;
-        $alerts = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $alerts = $this->alertQueryService
+            ->buildUserAlertsQuery($user, $validated)
+            ->paginate($perPage);
 
         return $this->collectionResponse(
             $alerts,
@@ -63,22 +49,13 @@ class AlertsController extends Controller
     public function markAsRead(MarkAlertsAsReadRequest $request): JsonResponse
     {
         $user = $request->user();
-
         $validated = $request->validated();
 
-        // If specific alert ULIDs provided, mark those
-        if (isset($validated['alert_ulids'])) {
-            $user->alerts()
-                ->whereIn('ulid', $validated['alert_ulids'])
-                ->whereNull('read_at')
-                ->update(['read_at' => now()]);
-        } else {
-            // Otherwise mark all unread alerts
-            $user->alerts()
-                ->whereNull('read_at')
-                ->update(['read_at' => now()]);
-        }
+        $count = $this->markAlertsAction->execute(
+            $user,
+            $validated['alert_ulids'] ?? null
+        );
 
-        return $this->messageResponse('Alerts marked as read.');
+        return $this->messageResponse("$count alerts marked as read.");
     }
 }

@@ -13,7 +13,7 @@ class KickPlayerRequest extends FormRequest
 
         if (is_string($lobbyUlid)) {
             $lobby = Lobby::withUlid($lobbyUlid)->firstOrFail();
-            
+
             // Only the lobby host can kick players
             return $lobby->host_id === $this->user()->id;
         }

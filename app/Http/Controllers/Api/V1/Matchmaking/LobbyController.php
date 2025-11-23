@@ -32,28 +32,28 @@ class LobbyController extends Controller
     public function index(ListLobbiesRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $query = Lobby::with(['host.avatar.image', 'players.user.avatar.image']);
-        
+
         // Apply filters
         if (isset($validated['is_public'])) {
             $query->where('is_public', $validated['is_public']);
         } else {
             $query->where('is_public', true);
         }
-        
+
         if (isset($validated['game_title'])) {
             $query->whereHas('mode', function ($q) use ($validated) {
                 $q->where('title_slug', $validated['game_title']);
             });
         }
-        
+
         if (isset($validated['status'])) {
             $query->where('status', $validated['status']);
         } else {
             $query->pending();
         }
-        
+
         $lobbies = $query->latest()->get();
 
         return $this->resourceResponse(LobbyResource::collection($lobbies));

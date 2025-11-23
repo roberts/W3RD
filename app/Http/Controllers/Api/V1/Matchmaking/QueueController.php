@@ -13,7 +13,6 @@ use App\Matchmaking\Orchestrators\QueueOrchestrator;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class QueueController extends Controller

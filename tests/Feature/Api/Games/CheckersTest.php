@@ -32,7 +32,7 @@ describe('Checkers Game API', function () {
             $users = User::factory()->count(2)->create();
 
             // Create a mode for checkers
-            $mode = \App\Models\Games\Mode::factory()->create([
+            $mode = Mode::factory()->create([
                 'title_slug' => 'checkers',
                 'slug' => 'standard',
             ]);

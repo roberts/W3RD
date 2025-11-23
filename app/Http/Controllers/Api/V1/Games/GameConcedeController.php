@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\Actions\Game\FindGameByUlidAction;
 use App\GameEngine\Lifecycle\Conclusion\PlayerInitiatedConclusion;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,6 @@ class GameConcedeController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected FindGameByUlidAction $findGame,
         protected PlayerInitiatedConclusion $conclusionService
     ) {}
 
@@ -25,7 +24,7 @@ class GameConcedeController extends Controller
     public function store(Request $request, string $gameUlid): JsonResponse
     {
         $user = $request->user();
-        $game = $this->findGame->execute($gameUlid, ['players']);
+        $game = Game::withUlid($gameUlid, ['players'])->firstOrFail();
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);

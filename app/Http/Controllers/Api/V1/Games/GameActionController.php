@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\Actions\Game\FindGameByUlidAction;
 use App\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\GameEngine;
@@ -22,8 +21,7 @@ class GameActionController extends Controller
     use ApiResponses, GamePlayerAuthorization;
 
     public function __construct(
-        protected GameEngine $gameEngine,
-        protected FindGameByUlidAction $findGame,
+        protected GameEngine $gameEngine
     ) {}
 
     /**
@@ -32,7 +30,7 @@ class GameActionController extends Controller
     public function store(ProcessGameActionRequest $request, string $gameUlid): JsonResponse
     {
         // Find the game by ULID and load the mode relationship
-        $game = $this->findGame->execute($gameUlid, ['mode']);
+        $game = Game::withUlid($gameUlid, ['mode'])->firstOrFail();
 
         // Get the mode handler
         $mode = $this->handleServiceCall(
@@ -106,7 +104,7 @@ class GameActionController extends Controller
     public function options(string $gameUlid): JsonResponse
     {
         // Find the game by ULID
-        $game = $this->findGame->execute($gameUlid);
+        $game = Game::withUlid($gameUlid)->firstOrFail();
 
         // Get the mode handler
         $mode = $this->handleServiceCall(

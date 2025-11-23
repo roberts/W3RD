@@ -92,6 +92,20 @@ class Tournament extends Model
     }
 
     /**
+     * Scope to find a tournament by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
+    /**
      * Check if tournament is accepting registrations.
      */
     public function isRegistrationOpen(): bool

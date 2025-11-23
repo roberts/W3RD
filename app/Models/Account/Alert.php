@@ -44,6 +44,20 @@ class Alert extends Model
         return ['ulid'];
     }
 
+    /**
+     * Scope to find an alert by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
     public function getRouteKeyName(): string
     {
         return 'ulid';

@@ -104,6 +104,20 @@ class Game extends Model
         return ['ulid'];
     }
 
+    /**
+     * Scope to find a game by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
     // Use ULID for route model binding
     public function getRouteKeyName()
     {

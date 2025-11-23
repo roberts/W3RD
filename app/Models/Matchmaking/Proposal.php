@@ -64,6 +64,20 @@ class Proposal extends Model
         return ['ulid'];
     }
 
+    /**
+     * Scope to find a proposal by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
     public function requestingUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requesting_user_id');

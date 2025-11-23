@@ -45,7 +45,7 @@ describe('Client Tracking', function () {
         $response->assertOk();
 
         // Verify new game players have same client_id as original game
-        $newGame = Game::where('ulid', $response->json('data.new_game_ulid'))->first();
+        $newGame = Game::withUlid($response->json('data.new_game_ulid'))->first();
         $players = $newGame->players;
 
         expect($players)->toHaveCount(2);
@@ -129,7 +129,7 @@ describe('Client Tracking', function () {
         $response->assertOk();
 
         // Verify players have default client_id (original client_id from first game)
-        $newGame = Game::where('ulid', $response->json('data.new_game_ulid'))->first();
+        $newGame = Game::withUlid($response->json('data.new_game_ulid'))->first();
         $players = $newGame->players;
 
         expect($players)->toHaveCount(2);

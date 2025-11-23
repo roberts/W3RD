@@ -19,8 +19,7 @@ class StandingsController extends Controller
      */
     public function show(Request $request, string $tournamentUlid): JsonResponse
     {
-        $tournament = Tournament::where('ulid', $tournamentUlid)
-            ->with(['users.avatar.image'])
+        $tournament = Tournament::withUlid($tournamentUlid, ['users.avatar.image'])
             ->firstOrFail();
 
         /** @var \Illuminate\Database\Eloquent\Collection<int, User> $users */

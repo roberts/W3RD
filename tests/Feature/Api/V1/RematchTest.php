@@ -101,7 +101,7 @@ describe('Rematch Management', function () {
                 ]);
 
             // Verify new game was created
-            $newGame = Game::where('ulid', $response->json('data.new_game_ulid'))->first();
+            $newGame = Game::withUlid($response->json('data.new_game_ulid'))->first();
             expect($newGame)->not->toBeNull();
 
             // Verify positions are swapped
@@ -230,7 +230,7 @@ describe('Rematch Management', function () {
             $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Manually set expiration to past (simulating time passing)
-            $rematch = Proposal::where('ulid', $rematchUlid)->first();
+            $rematch = Proposal::withUlid($rematchUlid)->first();
             $rematch->update(['expires_at' => now()->subMinutes(5)]);
 
             // Try to accept expired rematch
@@ -264,7 +264,7 @@ describe('Rematch Management', function () {
             ]);
 
             // Rematch should be auto-cancelled
-            $rematch = Proposal::where('ulid', $rematchUlid)->first();
+            $rematch = Proposal::withUlid($rematchUlid)->first();
             expect($rematch->status)->toBeIn([ProposalStatus::CANCELLED, ProposalStatus::PENDING]); // May be cancelled automatically
         });
 
@@ -335,7 +335,7 @@ describe('Rematch Management', function () {
             $rematchUlid = $rematchResponse->json('data.ulid');
 
             // Simulate network timeout by setting very short expiration
-            $rematch = Proposal::where('ulid', $rematchUlid)->first();
+            $rematch = Proposal::withUlid($rematchUlid)->first();
             $rematch->update(['expires_at' => now()->addSecond()]);
 
             // Wait for expiration

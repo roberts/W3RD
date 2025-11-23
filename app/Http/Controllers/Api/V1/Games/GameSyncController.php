@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\Actions\Game\FindGameByUlidAction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ActionResource;
 use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Games\Action;
+use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -16,17 +16,13 @@ class GameSyncController extends Controller
 {
     use ApiResponses, GamePlayerAuthorization;
 
-    public function __construct(
-        protected FindGameByUlidAction $findGame
-    ) {}
-
     /**
      * Get full game state for reconnection/sync after disconnection.
      * Returns complete current state plus recent action history.
      */
     public function show(Request $request, string $gameUlid): JsonResponse
     {
-        $game = $this->findGame->execute($gameUlid, ['players.user.avatar.image', 'mode']);
+        $game = Game::withUlid($gameUlid, ['players.user.avatar.image', 'mode'])->firstOrFail();
 
         // Verify user is a player in this game
         $player = $this->authorizeGamePlayer($game);

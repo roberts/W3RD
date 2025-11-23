@@ -52,6 +52,20 @@ class Player extends Model
         return ['ulid'];
     }
 
+    /**
+     * Scope to find a player by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
     // Boot method for model events
     protected static function boot()
     {

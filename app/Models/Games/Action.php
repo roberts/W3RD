@@ -62,6 +62,20 @@ class Action extends Model
     }
 
     /**
+     * Scope to find an action by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
+    /**
      * Get the route key name for Laravel route model binding.
      */
     public function getRouteKeyName(): string

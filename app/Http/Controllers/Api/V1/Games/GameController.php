@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Games;
 
-use App\Actions\Game\FindGameByUlidAction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GameResource;
 use App\Http\Traits\ApiResponses;
@@ -13,10 +12,6 @@ use Illuminate\Http\Request;
 class GameController extends Controller
 {
     use ApiResponses;
-
-    public function __construct(
-        protected FindGameByUlidAction $findGame
-    ) {}
 
     /**
      * List games for the authenticated user.
@@ -45,7 +40,7 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $game = $this->findGame->execute($gameUlid, ['players.user.avatar.image', 'mode']);
+        $game = Game::withUlid($gameUlid, ['players.user.avatar.image', 'mode'])->firstOrFail()->firstOrFail();
 
         // Verify user is a player in this game
         $isPlayer = $game->players()->where('user_id', $user->id)->exists();

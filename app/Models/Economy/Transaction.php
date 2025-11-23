@@ -75,6 +75,20 @@ class Transaction extends Model
     }
 
     /**
+     * Scope to find a transaction by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
+    /**
      * Scope for credit transactions.
      */
     public function scopeCredits($query)

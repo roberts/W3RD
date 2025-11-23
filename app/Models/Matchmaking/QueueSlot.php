@@ -34,6 +34,28 @@ class QueueSlot extends Model
     ];
 
     /**
+     * Get the columns that should receive a unique identifier.
+     */
+    public function uniqueIds(): array
+    {
+        return ['ulid'];
+    }
+
+    /**
+     * Scope to find a queue slot by ULID with optional eager loading.
+     */
+    public function scopeWithUlid($query, string $ulid, array $with = [])
+    {
+        $query = $query->where('ulid', $ulid);
+
+        if (! empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
+    /**
      * Get the user who occupies this queue slot.
      */
     public function user(): BelongsTo
@@ -69,13 +91,5 @@ class QueueSlot extends Model
     public function getRouteKeyName(): string
     {
         return 'ulid';
-    }
-
-    /**
-     * Generate ULIDs for the explicit column instead of the primary key.
-     */
-    public function uniqueIds(): array
-    {
-        return ['ulid'];
     }
 }

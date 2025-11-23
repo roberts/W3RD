@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\GameStatus;
 use App\Matchmaking\Enums\ProposalStatus;
 use App\Models\Account\Alert;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
 use App\Models\Matchmaking\Proposal;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 use Tests\Feature\Helpers\GameHelper;
 
@@ -21,6 +23,8 @@ describe('Rematch Management', function () {
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
         Redis::shouldReceive('zadd')->andReturn(true)->byDefault();
         Redis::shouldReceive('hset')->andReturn(true)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     describe('Rematch Request', function () {
@@ -46,7 +50,7 @@ describe('Rematch Management', function () {
             $player2 = User::factory()->create();
             $game = GameHelper::createGame([
                 'creator_id' => $player1->id,
-                'status' => \App\Enums\GameStatus::ACTIVE,
+                'status' => GameStatus::ACTIVE,
             ], [
                 ['user' => $player1, 'position_id' => 1],
                 ['user' => $player2, 'position_id' => 2],

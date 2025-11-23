@@ -5,6 +5,7 @@ use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
 use App\Models\Games\Player;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 describe('Client Tracking', function () {
@@ -17,6 +18,8 @@ describe('Client Tracking', function () {
         Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     it('tracks client_id when game is created through rematch', function () {
@@ -56,11 +59,7 @@ describe('Client Tracking', function () {
         $host = User::factory()->create();
         $player2 = User::factory()->create();
         $client = Client::factory()->withTrademarks()->create(['api_key' => 'test-client-key-lobby']);
-
-        $mode = Mode::factory()->create([
-            'title_slug' => 'connect-four',
-            'slug' => 'standard',
-        ]);
+        $mode = Mode::connectFour();
 
         // Create lobby with min_players = 2
         $lobbyResponse = $this->actingAs($host)

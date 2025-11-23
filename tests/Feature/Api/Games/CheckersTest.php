@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Auth\User;
 use App\Models\Games\Mode;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -17,6 +18,9 @@ use Illuminate\Support\Facades\Redis;
  */
 describe('Checkers Game API', function () {
     beforeEach(function () {
+        // Seed modes
+        $this->seed(ModeSeeder::class);
+
         // Mock Redis for PlayerActivityService
         Redis::shouldReceive('setex')->andReturn(true)->byDefault();
         Redis::shouldReceive('get')->andReturn('idle')->byDefault();
@@ -30,12 +34,7 @@ describe('Checkers Game API', function () {
     describe('Game Creation', function () {
         test('can create checkers game through lobby and play moves', function () {
             $users = User::factory()->count(2)->create();
-
-            // Create a mode for checkers
-            $mode = Mode::factory()->create([
-                'title_slug' => 'checkers',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::checkers();
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
@@ -84,12 +83,7 @@ describe('Checkers Game API', function () {
     describe('Game Actions', function () {
         test('can make a move in checkers game', function () {
             $users = User::factory()->count(2)->create();
-
-            // Create a mode for checkers
-            $mode = Mode::factory()->create([
-                'title_slug' => 'checkers',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::checkers();
 
             // Create and start game through lobby
             $lobbyResponse = $this->actingAs($users[0])

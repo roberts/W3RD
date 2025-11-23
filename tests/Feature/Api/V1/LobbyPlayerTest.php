@@ -5,6 +5,7 @@ use App\Models\Auth\User;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 describe('Lobby Player Management', function () {
@@ -17,6 +18,8 @@ describe('Lobby Player Management', function () {
         Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     describe('Player Invitations', function () {
@@ -282,11 +285,7 @@ describe('Lobby Player Management', function () {
     describe('Player Limits & Validation', function () {
         it('enforces game-specific player limits for connect-four', function () {
             $host = User::factory()->create();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
@@ -315,11 +314,7 @@ describe('Lobby Player Management', function () {
 
         it('enforces game-specific player limits for hearts', function () {
             $host = User::factory()->create();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'hearts',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::hearts();
 
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,

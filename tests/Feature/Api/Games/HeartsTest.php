@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Auth\User;
 use App\Models\Games\Mode;
 use App\Models\Games\Player;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -26,17 +27,14 @@ describe('Hearts Game API', function () {
         Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     describe('Game Creation', function () {
         test('can create hearts game through lobby', function () {
             $users = User::factory()->count(4)->create();
-
-            // Create a mode for hearts
-            $mode = Mode::factory()->create([
-                'title_slug' => 'hearts',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::hearts();
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
@@ -85,12 +83,7 @@ describe('Hearts Game API', function () {
 
         test('hearts game requires exactly 4 players', function () {
             $users = User::factory()->count(3)->create();
-
-            // Create a mode for hearts
-            $mode = Mode::factory()->create([
-                'title_slug' => 'hearts',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::hearts();
 
             // Create lobby with 4 max players
             $lobbyResponse = $this->actingAs($users[0])
@@ -128,12 +121,7 @@ describe('Hearts Game API', function () {
         describe('Pass Cards Phase', function () {
             test('can pass cards in hearts game', function () {
                 $users = User::factory()->count(4)->create();
-
-                // Create a mode for hearts
-                $mode = Mode::factory()->create([
-                    'title_slug' => 'hearts',
-                    'slug' => 'standard',
-                ]);
+                $mode = Mode::hearts();
 
                 // Create lobby and start game
                 $lobbyResponse = $this->actingAs($users[0])
@@ -206,12 +194,7 @@ describe('Hearts Game API', function () {
         describe('Playing Cards', function () {
             test('can play card in hearts game', function () {
                 $users = User::factory()->count(4)->create();
-
-                // Create a mode for hearts
-                $mode = Mode::factory()->create([
-                    'title_slug' => 'hearts',
-                    'slug' => 'standard',
-                ]);
+                $mode = Mode::hearts();
 
                 // Create and start game
                 $lobbyResponse = $this->actingAs($users[0])

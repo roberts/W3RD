@@ -14,7 +14,8 @@ class LobbyFactory extends Factory
 
     public function definition(): array
     {
-        $mode = Mode::factory()->create();
+        // Use seeded mode - assumes ModeSeeder has been run
+        $mode = Mode::connectFour();
 
         return [
             'title_slug' => $mode->title_slug,

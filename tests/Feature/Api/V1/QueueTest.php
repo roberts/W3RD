@@ -6,6 +6,7 @@ use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\QueueSlot;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Redis;
 
@@ -24,6 +25,8 @@ describe('Matchmaking Queue API', function () {
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
         Redis::shouldReceive('zadd')->andReturn(1)->byDefault();
         Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     it('requires authentication to join queue', function () {
@@ -36,11 +39,7 @@ describe('Matchmaking Queue API', function () {
 
     it('creates a queue slot with default mode', function () {
         $user = User::factory()->create();
-
-        $mode = Mode::factory()->create([
-            'title_slug' => GameTitle::CONNECT_FOUR,
-            'slug' => 'standard',
-        ]);
+        $mode = Mode::connectFour();
 
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,
@@ -58,11 +57,7 @@ describe('Matchmaking Queue API', function () {
 
     it('stores preferences and skill rating when provided', function () {
         $user = User::factory()->create();
-
-        $mode = Mode::factory()->create([
-            'title_slug' => GameTitle::CHECKERS,
-            'slug' => 'blitz',
-        ]);
+        $mode = Mode::checkers();
 
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CHECKERS->value,
@@ -76,7 +71,7 @@ describe('Matchmaking Queue API', function () {
 
         $response->assertCreated()
             ->assertJsonPath('data.skill_rating', 1850)
-            ->assertJsonPath('data.game_mode', 'blitz')
+            ->assertJsonPath('data.game_mode', 'standard')
             ->assertJsonPath('data.preferences.region', 'na-east')
             ->assertJsonPath('data.preferences.ready_check', true);
     });
@@ -102,10 +97,7 @@ describe('Matchmaking Queue API', function () {
             ->with($cooldownKey)
             ->andReturn(180);
 
-        $mode = Mode::factory()->create([
-            'title_slug' => GameTitle::CONNECT_FOUR,
-            'slug' => 'standard',
-        ]);
+        $mode = Mode::connectFour();
 
         $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/queue', [
             'game_title' => GameTitle::CONNECT_FOUR->value,

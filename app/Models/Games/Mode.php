@@ -82,4 +82,51 @@ class Mode extends Model
             ->where('slug', $modeSlug)
             ->first();
     }
+
+    /**
+     * Get seeded mode by title and slug.
+     * Use this in tests after running ModeSeeder.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public static function seeded(string|GameTitle $titleSlug, string $slug = 'standard'): self
+    {
+        if ($titleSlug instanceof GameTitle) {
+            $titleSlug = $titleSlug->value;
+        }
+
+        return self::where('title_slug', $titleSlug)
+            ->where('slug', $slug)
+            ->firstOrFail();
+    }
+
+    /**
+     * Get seeded Connect Four mode.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public static function connectFour(string $slug = 'standard'): self
+    {
+        return self::seeded('connect-four', $slug);
+    }
+
+    /**
+     * Get seeded Checkers mode.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public static function checkers(string $slug = 'standard'): self
+    {
+        return self::seeded('checkers', $slug);
+    }
+
+    /**
+     * Get seeded Hearts mode.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public static function hearts(string $slug = 'standard'): self
+    {
+        return self::seeded('hearts', $slug);
+    }
 }

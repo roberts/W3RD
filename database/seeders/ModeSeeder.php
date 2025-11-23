@@ -13,7 +13,7 @@ class ModeSeeder extends Seeder
     public function run(): void
     {
         $modes = [
-            // Validate Four modes
+            // Connect Four modes
             [
                 'title_slug' => 'connect-four',
                 'slug' => 'standard',
@@ -42,6 +42,22 @@ class ModeSeeder extends Seeder
                 'title_slug' => 'connect-four',
                 'slug' => 'five',
                 'name' => 'Connect Five',
+                'is_active' => true,
+            ],
+
+            // Checkers modes
+            [
+                'title_slug' => 'checkers',
+                'slug' => 'standard',
+                'name' => 'Standard Mode',
+                'is_active' => true,
+            ],
+
+            // Hearts modes
+            [
+                'title_slug' => 'hearts',
+                'slug' => 'standard',
+                'name' => 'Standard Mode',
                 'is_active' => true,
             ],
         ];

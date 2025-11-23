@@ -6,6 +6,7 @@ use App\Models\Auth\User;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use App\Models\Matchmaking\LobbyPlayer;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 describe('Lobby Management', function () {
@@ -15,16 +16,14 @@ describe('Lobby Management', function () {
         Redis::shouldReceive('get')->andReturn('idle')->byDefault();
         Redis::shouldReceive('del')->andReturn(true)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     describe('Lobby Creation', function () {
         it('authenticated user can create a private lobby', function () {
             $host = User::factory()->create();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
@@ -49,11 +48,7 @@ describe('Lobby Management', function () {
 
         it('authenticated user can create a public lobby', function () {
             $host = User::factory()->create();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
@@ -74,11 +69,7 @@ describe('Lobby Management', function () {
             $host = User::factory()->create();
             $invitee1 = User::factory()->create();
             $invitee2 = User::factory()->create();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
@@ -110,11 +101,7 @@ describe('Lobby Management', function () {
         it('user can create scheduled lobby', function () {
             $host = User::factory()->create();
             $scheduledTime = now()->addHours(2)->toIso8601String();
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($host)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
@@ -368,11 +355,7 @@ describe('Lobby Management', function () {
             $user = User::factory()->create();
 
             $scheduledTime = now()->addHours(2);
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',
@@ -389,11 +372,7 @@ describe('Lobby Management', function () {
             $user = User::factory()->create();
 
             $pastTime = now()->subHours(1);
-
-            $mode = Mode::factory()->create([
-                'title_slug' => 'connect-four',
-                'slug' => 'standard',
-            ]);
+            $mode = Mode::connectFour();
 
             $response = $this->actingAs($user)->postJson('/api/v1/matchmaking/lobbies', [
                 'game_title' => 'connect-four',

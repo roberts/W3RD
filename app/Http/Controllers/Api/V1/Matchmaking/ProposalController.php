@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\V1\Matchmaking;
 
 use App\DataTransferObjects\Matchmaking\ProposalData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Proposal\AcceptProposalRequest;
-use App\Http\Requests\Proposal\DeclineProposalRequest;
-use App\Http\Requests\Proposal\StoreProposalRequest;
+use App\Http\Requests\Matchmaking\AcceptProposalRequest;
+use App\Http\Requests\Matchmaking\DeclineProposalRequest;
+use App\Http\Requests\Matchmaking\StoreProposalRequest;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\ProposalOrchestrator;
 use App\Models\Auth\User;

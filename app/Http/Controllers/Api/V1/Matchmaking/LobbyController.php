@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Matchmaking;
 
-use App\Http\Requests\Lobby\CancelLobbyRequest;
-use App\Http\Requests\Lobby\CreateLobbyRequest;
-use App\Http\Requests\Lobby\InitiateReadyCheckRequest;
-use App\Http\Requests\Lobby\InvitePlayerRequest;
-use App\Http\Requests\Lobby\RespondToInvitationRequest;
+use App\Http\Requests\Matchmaking\CancelLobbyRequest;
+use App\Http\Requests\Matchmaking\CreateLobbyRequest;
+use App\Http\Requests\Matchmaking\InitiateReadyCheckRequest;
+use App\Http\Requests\Matchmaking\InvitePlayerRequest;
+use App\Http\Requests\Matchmaking\RespondToInvitationRequest;
 use App\Http\Resources\LobbyResource;
 use App\Http\Traits\ApiResponses;
 use App\Matchmaking\Orchestrators\LobbyOrchestrator;

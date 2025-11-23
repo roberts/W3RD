@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Lobby;
+namespace App\Http\Requests\Matchmaking;
 
 use Illuminate\Foundation\Http\FormRequest;
 

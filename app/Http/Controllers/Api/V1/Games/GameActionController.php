@@ -6,7 +6,7 @@ use App\Events\GameActionProcessed;
 use App\Exceptions\GameActionDeniedException;
 use App\GameEngine\GameEngine;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Game\ProcessGameActionRequest;
+use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\GamePlayerAuthorization;
 use App\Models\Games\Action;

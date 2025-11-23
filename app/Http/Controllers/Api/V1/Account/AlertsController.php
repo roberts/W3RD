@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Account;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Alert\MarkAlertsAsReadRequest;
+use App\Http\Requests\Account\MarkAlertsAsReadRequest;
 use App\Http\Resources\AlertResource;
 use App\Http\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;

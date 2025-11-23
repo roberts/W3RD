@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Proposal;
+namespace App\Http\Requests\Matchmaking;
 
 use App\Models\Matchmaking\Proposal;
 use Illuminate\Foundation\Http\FormRequest;

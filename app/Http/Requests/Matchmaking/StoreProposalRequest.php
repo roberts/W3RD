@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Proposal;
+namespace App\Http\Requests\Matchmaking;
 
 use App\Enums\GameStatus;
 use App\Models\Games\Game;

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Lobby;
+namespace App\Http\Requests\Matchmaking;
 
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Http\FormRequest;
 
-class InitiateReadyCheckRequest extends FormRequest
+class CancelLobbyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -27,7 +27,7 @@ class TransactionController extends Controller
             ->orderBy('created_at', 'desc');
 
         if ($currencyType) {
-            $query->where('currency_type', $currencyType);
+            $query->forCurrency($currencyType);
         }
 
         if ($transactionType) {

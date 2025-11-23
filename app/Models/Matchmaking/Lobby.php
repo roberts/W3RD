@@ -78,6 +78,31 @@ class Lobby extends Model
         return $query;
     }
 
+    /**
+     * Scope to find lobbies with pending status.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', LobbyStatus::PENDING);
+    }
+
+    /**
+     * Scope to find lobbies scheduled for a specific time.
+     */
+    public function scopeScheduledFor($query, $dateTime)
+    {
+        return $query->whereNotNull('scheduled_at')
+            ->where('scheduled_at', '<=', $dateTime);
+    }
+
+    /**
+     * Scope to find lobbies that are not scheduled (immediate start).
+     */
+    public function scopeNotScheduled($query)
+    {
+        return $query->whereNull('scheduled_at');
+    }
+
     public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);

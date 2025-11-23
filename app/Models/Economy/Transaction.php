@@ -89,6 +89,14 @@ class Transaction extends Model
     }
 
     /**
+     * Scope to filter transactions by currency type.
+     */
+    public function scopeForCurrency($query, string $currencyType)
+    {
+        return $query->where('currency_type', $currencyType);
+    }
+
+    /**
      * Scope for credit transactions.
      */
     public function scopeCredits($query)

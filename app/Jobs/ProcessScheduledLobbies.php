@@ -18,9 +18,8 @@ class ProcessScheduledLobbies implements ShouldQueue
     public function handle(GameBuilder $gameBuilder): void
     {
         // Find all scheduled lobbies that are due to start
-        $dueLobbies = Lobby::where('status', LobbyStatus::PENDING)
-            ->whereNotNull('scheduled_at')
-            ->where('scheduled_at', '<=', now())
+        $dueLobbies = Lobby::pending()
+            ->scheduledFor(now())
             ->get();
 
         foreach ($dueLobbies as $lobby) {

@@ -30,7 +30,7 @@ class GameOutcomeController extends Controller
         }
 
         /** @var Player|null $winner */
-        $winner = $game->players()->where('user_id', $game->winner_id)->first();
+        $winner = $game->winner;
 
         $outcomeData = [
             'game_ulid' => $game->ulid,

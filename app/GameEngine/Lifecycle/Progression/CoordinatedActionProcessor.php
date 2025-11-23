@@ -88,7 +88,7 @@ class CoordinatedActionProcessor
     protected function getSequenceNumber(Game $game, string $coordinationGroup): int
     {
         return Action::where('game_id', $game->id)
-            ->where('coordination_group', $coordinationGroup)
+            ->withCoordinationGroup($coordinationGroup)
             ->count() + 1;
     }
 
@@ -110,8 +110,8 @@ class CoordinatedActionProcessor
     protected function getCompletedCount(Game $game, string $coordinationGroup): int
     {
         return Action::where('game_id', $game->id)
-            ->where('coordination_group', $coordinationGroup)
-            ->whereNull('coordination_completed_at')
+            ->withCoordinationGroup($coordinationGroup)
+            ->pendingCoordination()
             ->count();
     }
 
@@ -127,8 +127,8 @@ class CoordinatedActionProcessor
     ): CoordinatedActionResult {
         // Retrieve all coordinated actions
         $coordinatedActions = Action::where('game_id', $game->id)
-            ->where('coordination_group', $coordinationGroup)
-            ->whereNull('coordination_completed_at')
+            ->withCoordinationGroup($coordinationGroup)
+            ->pendingCoordination()
             ->with('player')
             ->get();
 
@@ -137,8 +137,8 @@ class CoordinatedActionProcessor
 
         // Mark all actions as completed
         Action::where('game_id', $game->id)
-            ->where('coordination_group', $coordinationGroup)
-            ->whereNull('coordination_completed_at')
+            ->withCoordinationGroup($coordinationGroup)
+            ->pendingCoordination()
             ->update(['coordination_completed_at' => now()]);
 
         return CoordinatedActionResult::coordinated(

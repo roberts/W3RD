@@ -75,7 +75,7 @@ class FillLobbiesFromQueue implements ShouldQueue
         // Find eligible queue players
         $eligibleQueuePlayers = QueueSlot::where('title_slug', $lobby->title_slug->value)
             ->where('mode_id', $lobby->mode_id)
-            ->where('status', QueueSlotStatus::ACTIVE)
+            ->active()
             ->whereNotIn('user_id', $excludedUserIds)
             ->limit($slotsNeeded)
             ->get();
@@ -91,7 +91,7 @@ class FillLobbiesFromQueue implements ShouldQueue
                 foreach ($eligibleQueuePlayers as $queueSlot) {
                     // Lock the queue slot to prevent race conditions
                     $slot = QueueSlot::where('id', $queueSlot->id)
-                        ->where('status', QueueSlotStatus::ACTIVE)
+                        ->active()
                         ->lockForUpdate()
                         ->first();
 

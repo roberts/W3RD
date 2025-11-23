@@ -35,6 +35,14 @@ class Balance extends Model
     ];
 
     /**
+     * Scope to filter balances by currency type.
+     */
+    public function scopeForCurrency($query, string $currencyType)
+    {
+        return $query->where('currency_type', $currencyType);
+    }
+
+    /**
      * Get the user that owns this balance.
      */
     public function user(): BelongsTo

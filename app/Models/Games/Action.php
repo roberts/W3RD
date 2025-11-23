@@ -76,6 +76,23 @@ class Action extends Model
     }
 
     /**
+     * Scope to find actions with a specific coordination group.
+     */
+    public function scopeWithCoordinationGroup($query, string $coordinationGroup)
+    {
+        return $query->where('coordination_group', $coordinationGroup);
+    }
+
+    /**
+     * Scope to find actions pending coordination completion.
+     */
+    public function scopePendingCoordination($query)
+    {
+        return $query->where('is_coordinated', true)
+            ->whereNull('coordination_completed_at');
+    }
+
+    /**
      * Get the route key name for Laravel route model binding.
      */
     public function getRouteKeyName(): string

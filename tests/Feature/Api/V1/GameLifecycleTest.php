@@ -577,7 +577,7 @@ describe('Game Lifecycle', function () {
                 ['user' => $user2, 'position_id' => 2],
             ]);
 
-            $player = $game->players()->where('user_id', $user->id)->first();
+            $player = $game->getPlayerForUser($user->id);
             $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
             $game->update([
@@ -615,8 +615,8 @@ describe('Game Lifecycle', function () {
                 ['user' => $user2, 'position_id' => 2],
             ]);
 
-            $player1 = $game->players()->where('user_id', $user1->id)->first();
-            $player2 = $game->players()->where('user_id', $user2->id)->first();
+            $player1 = $game->getPlayerForUser($user1->id);
+            $player2 = $game->getPlayerForUser($user2->id);
 
             $game->update([
                 'game_state' => $createGameState([$player1, $player2], $player1->ulid),
@@ -645,7 +645,7 @@ describe('Game Lifecycle', function () {
                 ['user' => $user2, 'position_id' => 2],
             ]);
 
-            $player = $game->players()->where('user_id', $user->id)->first();
+            $player = $game->getPlayerForUser($user->id);
             $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
             $game->update([
@@ -680,7 +680,7 @@ describe('Game Lifecycle', function () {
                 ['user' => $user2, 'position_id' => 2],
             ]);
 
-            $player = $game->players()->where('user_id', $user->id)->first();
+            $player = $game->getPlayerForUser($user->id);
             $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
             $game->update([
@@ -720,7 +720,7 @@ describe('Game Lifecycle', function () {
                 ['user' => $user2, 'position_id' => 2],
             ]);
 
-            $player = $game->players()->where('user_id', $user->id)->first();
+            $player = $game->getPlayerForUser($user->id);
 
             $game->update([
                 'game_state' => [

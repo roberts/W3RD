@@ -56,7 +56,7 @@ class SlotManager
     public function cancelSlot(User $user): ?QueueSlot
     {
         $slot = QueueSlot::where('user_id', $user->id)
-            ->where('status', QueueSlotStatus::ACTIVE)
+            ->active()
             ->first();
 
         if (! $slot) {

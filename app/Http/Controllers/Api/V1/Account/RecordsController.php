@@ -30,7 +30,7 @@ class RecordsController extends Controller
 
         // Count losses: completed games where player didn't win
         $losses = $user->players()->whereHas('game', function ($query) {
-            $query->where('status', 'completed')
+            $query->where('status', \App\Enums\GameStatus::COMPLETED)
                 ->where(function ($q) {
                     $q->whereColumn('winner_id', '!=', 'players.id')
                         ->orWhereNull('winner_id');

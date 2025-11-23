@@ -43,7 +43,7 @@ class CashierController extends Controller
             [
                 'transaction_ulid' => $transaction->ulid,
                 'new_balance' => $transaction->user->balances()
-                    ->where('currency_type', $validated['currency_type'])
+                    ->forCurrency($validated['currency_type'])
                     ->first()->amount ?? 0,
             ],
             'Balance adjusted successfully'

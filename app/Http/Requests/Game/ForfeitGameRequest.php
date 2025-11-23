@@ -21,7 +21,7 @@ class ForfeitGameRequest extends FormRequest
         }
 
         // User must be a player in the game
-        $isPlayer = $game->players()->where('user_id', $this->user()->id)->exists();
+        $isPlayer = $game->getPlayerForUser($this->user()->id) !== null;
 
         if (! $isPlayer) {
             return false;

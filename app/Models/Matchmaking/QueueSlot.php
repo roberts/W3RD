@@ -56,6 +56,30 @@ class QueueSlot extends Model
     }
 
     /**
+     * Scope to find active queue slots.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', QueueSlotStatus::ACTIVE);
+    }
+
+    /**
+     * Scope to find expired queue slots.
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('expires_at', '<=', now());
+    }
+
+    /**
+     * Scope to find non-expired queue slots.
+     */
+    public function scopeNotExpired($query)
+    {
+        return $query->where('expires_at', '>', now());
+    }
+
+    /**
      * Get the user who occupies this queue slot.
      */
     public function user(): BelongsTo

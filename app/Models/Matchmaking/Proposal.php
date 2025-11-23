@@ -78,6 +78,30 @@ class Proposal extends Model
         return $query;
     }
 
+    /**
+     * Scope to find proposals with pending status.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', ProposalStatus::PENDING);
+    }
+
+    /**
+     * Scope to find expired proposals.
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('expires_at', '<=', now());
+    }
+
+    /**
+     * Scope to find non-expired proposals.
+     */
+    public function scopeNotExpired($query)
+    {
+        return $query->where('expires_at', '>', now());
+    }
+
     public function requestingUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requesting_user_id');

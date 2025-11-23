@@ -118,6 +118,41 @@ class Game extends Model
         return $query;
     }
 
+    /**
+     * Scope to find games for a specific user.
+     */
+    public function scopeForUser($query, int $userId)
+    {
+        return $query->whereHas('players', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        });
+    }
+
+    /**
+     * Get the player in this game for a specific user.
+     */
+    public function getPlayerForUser(int $userId): ?Player
+    {
+        /** @var Player|null */
+        return $this->players()->where('user_id', $userId)->first();
+    }
+
+    /**
+     * Scope to find completed games.
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', GameStatus::COMPLETED);
+    }
+
+    /**
+     * Scope to find active games.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', GameStatus::ACTIVE);
+    }
+
     // Use ULID for route model binding
     public function getRouteKeyName()
     {

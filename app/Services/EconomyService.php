@@ -63,7 +63,7 @@ class EconomyService
     public function getBalance(int $userId, string $currencyType): int
     {
         $balance = Balance::where('user_id', $userId)
-            ->where('currency_type', $currencyType)
+            ->forCurrency($currencyType)
             ->first();
 
         return $balance->amount ?? 0;
@@ -75,7 +75,7 @@ class EconomyService
     public function reserveBalance(int $userId, string $currencyType, int $amount): bool
     {
         $balance = Balance::where('user_id', $userId)
-            ->where('currency_type', $currencyType)
+            ->forCurrency($currencyType)
             ->first();
 
         if (! $balance) {
@@ -91,7 +91,7 @@ class EconomyService
     public function releaseReserved(int $userId, string $currencyType, int $amount): void
     {
         $balance = Balance::where('user_id', $userId)
-            ->where('currency_type', $currencyType)
+            ->forCurrency($currencyType)
             ->first();
 
         if ($balance) {
@@ -106,7 +106,7 @@ class EconomyService
     {
         return DB::transaction(function () use ($userId, $currencyType, $amount, $description) {
             $balance = Balance::where('user_id', $userId)
-                ->where('currency_type', $currencyType)
+                ->forCurrency($currencyType)
                 ->firstOrFail();
 
             // Deduct from both total and reserved

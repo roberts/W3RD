@@ -32,7 +32,7 @@ class LobbyController extends Controller
     {
         $lobbies = Lobby::with(['host.avatar.image', 'players.user.avatar.image'])
             ->where('is_public', true)
-            ->where('status', LobbyStatus::PENDING)
+            ->pending()
             ->latest()
             ->get();
 

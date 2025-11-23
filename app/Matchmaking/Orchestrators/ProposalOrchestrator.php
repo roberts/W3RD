@@ -112,8 +112,8 @@ class ProposalOrchestrator
      */
     public function expireOldProposals(): int
     {
-        $expired = Proposal::where('status', ProposalStatus::PENDING)
-            ->where('expires_at', '<=', Carbon::now())
+        $expired = Proposal::pending()
+            ->expired()
             ->get();
 
         foreach ($expired as $proposal) {

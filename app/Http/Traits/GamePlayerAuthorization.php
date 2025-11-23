@@ -19,7 +19,7 @@ trait GamePlayerAuthorization
     protected function authorizeGamePlayer(Game $game): Player
     {
         /** @var Player|null $player */
-        $player = $game->players()->where('user_id', Auth::id())->first();
+        $player = $game->getPlayerForUser(Auth::id());
 
         if (! $player) {
             throw new GameAccessDeniedException(

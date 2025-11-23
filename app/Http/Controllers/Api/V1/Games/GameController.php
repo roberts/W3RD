@@ -20,9 +20,7 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        $games = Game::whereHas('players', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
+        $games = Game::forUser($user->id)
             ->with(['players.user.avatar.image', 'mode'])
             ->orderBy('updated_at', 'desc')
             ->paginate(20);
@@ -43,7 +41,7 @@ class GameController extends Controller
         $game = Game::withUlid($gameUlid, ['players.user.avatar.image', 'mode'])->firstOrFail()->firstOrFail();
 
         // Verify user is a player in this game
-        $isPlayer = $game->players()->where('user_id', $user->id)->exists();
+        $isPlayer = $game->getPlayerForUser($user->id) !== null;
 
         if (! $isPlayer) {
             return $this->forbiddenResponse('You are not a player in this game');

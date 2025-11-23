@@ -36,6 +36,14 @@ class LobbyPlayer extends Model
         'source' => LobbyPlayerSource::class,
     ];
 
+    /**
+     * Scope to find accepted lobby players.
+     */
+    public function scopeAccepted($query)
+    {
+        return $query->where('status', LobbyPlayerStatus::ACCEPTED);
+    }
+
     public function lobby(): BelongsTo
     {
         return $this->belongsTo(Lobby::class);

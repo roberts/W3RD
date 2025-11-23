@@ -97,8 +97,8 @@ describe('Concurrent Game Actions', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player1 = $game->players()->where('user_id', $user1->id)->first();
-        $player2 = $game->players()->where('user_id', $user2->id)->first();
+        $player1 = $game->getPlayerForUser($user1->id);
+        $player2 = $game->getPlayerForUser($user2->id);
 
         $game->update([
             'game_state' => $createGameState([$player1, $player2], $player1->ulid),
@@ -134,7 +134,7 @@ describe('Concurrent Game Actions', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -172,7 +172,7 @@ describe('Concurrent Game Actions', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $originalBoard = array_fill(0, 6, array_fill(0, 7, null));
@@ -210,7 +210,7 @@ describe('Concurrent Game Actions', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -277,7 +277,7 @@ describe('Database Transaction Safety', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -311,7 +311,7 @@ describe('Database Transaction Safety', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -345,7 +345,7 @@ describe('Database Transaction Safety', function () {
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player1 = $game->players()->where('user_id', $user1->id)->first();
+        $player1 = $game->getPlayerForUser($user1->id);
         $player2 = $game->players()->where('user_id', '!=', $user1->id)->first();
 
         // Set up board almost full with winning condition possible

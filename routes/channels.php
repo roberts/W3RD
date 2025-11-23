@@ -18,7 +18,7 @@ Broadcast::channel('games.{gameId}', function ($user, $gameId) {
     }
 
     // Check if user is a participant
-    return $game->gamePlayers()->where('user_id', $user->id)->exists();
+    return $game->getPlayerForUser($user->id) !== null;
 });
 
 // Lobby channels - users can subscribe to lobbies they're in

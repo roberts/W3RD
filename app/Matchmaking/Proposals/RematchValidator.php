@@ -36,7 +36,7 @@ class RematchValidator
         }
 
         // Validate requesting user was a player
-        $player = $game->players()->where('user_id', $requestingUser->id)->first();
+        $player = $game->getPlayerForUser($requestingUser->id);
         if (! $player) {
             throw new RematchNotAvailableException('User was not a player in this game.');
         }

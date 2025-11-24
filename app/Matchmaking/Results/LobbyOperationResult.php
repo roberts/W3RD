@@ -38,6 +38,9 @@ readonly class LobbyOperationResult
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         if (! $this->success) {

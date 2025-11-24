@@ -13,6 +13,7 @@ class RecordsData extends Data
         public int $draws,
         public float $win_rate,
         public int $total_points,
+        /** @var array<string, int> */
         public array $elo_ratings,
         public ?int $global_rank,
     ) {}

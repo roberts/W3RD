@@ -21,7 +21,7 @@ class LobbyPlayerResource extends JsonResource
         return [
             'username' => $this->user->username,
             'name' => $this->user->name,
-            'avatar' => $this->user->avatar?->image?->url, // @phpstan-ignore-line
+            'avatar' => $this->user->avatar?->image?->url,
             'status' => $this->status,
             'invited_at' => $this->invited_at?->toIso8601String(), // @phpstan-ignore-line
             'joined_at' => $this->joined_at?->toIso8601String(), // @phpstan-ignore-line

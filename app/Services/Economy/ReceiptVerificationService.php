@@ -25,6 +25,8 @@ class ReceiptVerificationService
 
     /**
      * Verify Apple App Store receipt.
+     *
+     * @return array<string, mixed>
      */
     protected function verifyAppleReceipt(string $receipt, int $userId): array
     {
@@ -64,6 +66,8 @@ class ReceiptVerificationService
 
     /**
      * Verify Google Play receipt.
+     *
+     * @return array<string, mixed>
      */
     protected function verifyGoogleReceipt(string $receipt, int $userId): array
     {
@@ -81,6 +85,8 @@ class ReceiptVerificationService
 
     /**
      * Verify Telegram Stars payment.
+     *
+     * @return array<string, mixed>
      */
     protected function verifyTelegramReceipt(string $receipt, int $userId): array
     {

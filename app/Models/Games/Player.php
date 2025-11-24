@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Player extends Model
 {
+    /** @use HasFactory<\Database\Factories\Games\PlayerFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [
@@ -56,7 +57,9 @@ class Player extends Model
     /**
      * Scope to find a player by ULID with optional eager loading.
      *
+     * @param  Builder<Player>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Player>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {

@@ -3,6 +3,7 @@
 namespace App\Models\Account;
 
 use App\Models\Auth\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $id
  * @property int $user_id
  * @property string $type
- * @property array $data
+ * @property array<string, mixed> $data
  * @property \Illuminate\Support\Carbon|null $read_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Alert extends Model
 {
+    /** @use HasFactory<\Database\Factories\Account\AlertFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [
@@ -46,6 +48,10 @@ class Alert extends Model
 
     /**
      * Scope to find an alert by ULID with optional eager loading.
+     *
+     * @param  Builder<Alert>  $query
+     * @param  array<int, string>  $with
+     * @return Builder<Alert>
      */
     public function scopeWithUlid($query, string $ulid, array $with = [])
     {
@@ -63,6 +69,9 @@ class Alert extends Model
         return 'ulid';
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

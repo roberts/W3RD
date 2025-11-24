@@ -12,7 +12,9 @@ class LobbyData extends Data
         public string $ulid,
         public string $game_title,
         public ?string $game_mode,
+        /** @var array<string, mixed> */
         public array $host,
+        /** @var array<int, mixed> */
         public array $players,
         public string $status,
         public bool $is_public,

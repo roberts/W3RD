@@ -27,6 +27,9 @@ class StandardMode extends ConnectFourProtocol
         return new ConnectFourReporter;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

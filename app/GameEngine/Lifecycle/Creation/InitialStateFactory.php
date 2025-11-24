@@ -46,7 +46,7 @@ class InitialStateFactory
      *
      * @param  GameTitleContract  $title  The game title protocol
      * @param  string  ...$playerUlids  Player ULIDs in order
-     * @return array The serialized game state
+     * @return array<string, mixed> The serialized game state
      */
     public function createSerialized(GameTitleContract $title, string ...$playerUlids): array
     {

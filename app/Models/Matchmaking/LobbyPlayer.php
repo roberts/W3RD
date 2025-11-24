@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LobbyPlayer extends Model
 {
+    /** @use HasFactory<\Database\Factories\Matchmaking\LobbyPlayerFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -39,6 +40,9 @@ class LobbyPlayer extends Model
 
     /**
      * Scope to find accepted lobby players.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeAccepted(Builder $query): Builder
     {

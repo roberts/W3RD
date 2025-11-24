@@ -11,6 +11,9 @@ use Illuminate\Validation\Rules\Enum;
 
 class FeedbackController extends Controller
 {
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function __invoke(Request $request)
     {
         $validated = $request->validate([

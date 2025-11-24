@@ -8,6 +8,8 @@ class ProposalResponseData
 {
     /**
      * Create response data from a proposal result.
+     *
+     * @return array<string, mixed>
      */
     public static function fromResult(ProposalResult $result): array
     {

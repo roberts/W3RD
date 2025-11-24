@@ -12,6 +12,9 @@ class GameFound implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * @param array<string, mixed> $matchData
+     */
     public function __construct(
         public int $userId,
         public string $matchId,
@@ -25,6 +28,9 @@ class GameFound implements ShouldBroadcast
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

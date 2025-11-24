@@ -11,6 +11,9 @@ use App\Models\Games\Game;
 
 class CheckersReporter implements GameReporterContract
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function getPublicStatus(object $gameState): array
     {
         if (! ($gameState instanceof CheckersBoard)) {
@@ -26,6 +29,9 @@ class CheckersReporter implements GameReporterContract
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function describeStateChanges(Game $game, Action $action, object $gameState): array
     {
         // Basic implementation - can be expanded

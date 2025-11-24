@@ -23,6 +23,9 @@ class LobbyPlayerJoined implements ShouldBroadcast
         return new PresenceChannel("lobby.{$this->lobby->ulid}");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

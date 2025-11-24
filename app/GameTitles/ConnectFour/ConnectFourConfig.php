@@ -10,11 +10,18 @@ use App\GameEngine\Interfaces\GameConfigContract;
 
 class ConnectFourConfig implements GameConfigContract
 {
+    /**
+     * @param array<class-string, array<string, mixed>> $additionalActions
+     * @param array<string, mixed> $stateConfig
+     */
     public function __construct(
         protected array $additionalActions = [],
         protected array $stateConfig = ['columns' => 7, 'rows' => 6, 'connectCount' => 4]
     ) {}
 
+    /**
+     * @return array<class-string, array<string, mixed>>
+     */
     public function getActionRegistry(): array
     {
         return array_merge([
@@ -26,6 +33,9 @@ class ConnectFourConfig implements GameConfigContract
         ], $this->additionalActions);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getInitialStateConfig(): array
     {
         return $this->stateConfig;

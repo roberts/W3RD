@@ -11,9 +11,12 @@ class UpdateProfileRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
-        $rules = [
+        return [
             'name' => 'sometimes|string|min:3|max:255',
             'bio' => 'sometimes|nullable|string|max:500',
             'social_links' => 'sometimes|nullable|array',
@@ -21,16 +24,19 @@ class UpdateProfileRequest extends FormRequest
             'social_links.website' => 'sometimes|nullable|url|max:255',
             'social_links.discord' => 'sometimes|nullable|string|max:255',
             'social_links.twitch' => 'sometimes|nullable|url|max:255',
+            'username' => [
+                'sometimes',
+                'string',
+                'min:3',
+                'max:50',
+                'unique:users,username,'.$this->user()->id,
+            ],
         ];
-
-        // Only include username validation rules if username is being sent
-        if ($this->has('username')) {
-            $rules['username'] = 'sometimes|string|min:3|max:50|unique:users,username,'.$this->user()->id;
-        }
-
-        return $rules;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -53,6 +59,9 @@ class UpdateProfileRequest extends FormRequest
 
     /**
      * Configure the validator instance to check username permission AFTER validation passes.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
      */
     public function withValidator($validator)
     {

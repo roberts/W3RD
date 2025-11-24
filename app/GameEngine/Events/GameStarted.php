@@ -34,6 +34,9 @@ class GameStarted implements ShouldBroadcast
         return 'game.started';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

@@ -10,7 +10,7 @@ class MarkAlertsAsReadAction
      * Mark alerts as read for a user.
      *
      * @param  User  $user  The user whose alerts to mark
-     * @param  array|null  $alertUlids  Specific alert ULIDs to mark, or null for all unread
+     * @param  array<int, string>|null  $alertUlids  Specific alert ULIDs to mark, or null for all unread
      * @return int The number of alerts marked as read
      */
     public function execute(User $user, ?array $alertUlids = null): int

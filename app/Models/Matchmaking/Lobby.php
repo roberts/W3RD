@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Lobby extends Model
 {
+    /** @use HasFactory<\Database\Factories\Matchmaking\LobbyFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [
@@ -76,7 +77,9 @@ class Lobby extends Model
     /**
      * Scope to find a lobby by ULID with optional eager loading.
      *
+     * @param  Builder<Lobby>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Lobby>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -91,6 +94,9 @@ class Lobby extends Model
 
     /**
      * Scope to find lobbies with pending status.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopePending(Builder $query): Builder
     {
@@ -99,6 +105,9 @@ class Lobby extends Model
 
     /**
      * Scope to find lobbies scheduled for a specific time.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeScheduledFor(Builder $query, mixed $dateTime): Builder
     {
@@ -108,6 +117,9 @@ class Lobby extends Model
 
     /**
      * Scope to find lobbies that are not scheduled (immediate start).
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeNotScheduled(Builder $query): Builder
     {

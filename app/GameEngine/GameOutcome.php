@@ -47,7 +47,7 @@ class GameOutcome extends Data
      * @param  string|null  $winnerUlid  ULID of the winning player, or null if no winner yet
      * @param  int|null  $winnerPosition  Position of the winning player (1-based)
      * @param  OutcomeType|null  $type  The type of outcome (win, draw, etc.)
-     * @param  array  $details  Flexible game-specific details (reason, scores, rankings, etc.)
+     * @param  array<string, mixed>  $details  Flexible game-specific details (reason, scores, rankings, etc.)
      */
     public function __construct(
         public bool $isFinished,
@@ -80,7 +80,7 @@ class GameOutcome extends Data
      * @param  string  $winnerUlid  ULID of the winning player
      * @param  int|null  $winnerPosition  Position of the winning player
      * @param  string|null  $reason  Machine-readable reason for the win
-     * @param  array  $additionalDetails  Additional details to merge into the details array
+     * @param  array<string, mixed>  $additionalDetails  Additional details to merge into the details array
      */
     public static function win(string $winnerUlid, ?int $winnerPosition = null, ?string $reason = null, array $additionalDetails = []): self
     {
@@ -102,7 +102,7 @@ class GameOutcome extends Data
      * Create an outcome for a draw.
      *
      * @param  string|null  $reason  Machine-readable reason for the draw
-     * @param  array  $additionalDetails  Additional details to merge into the details array
+     * @param  array<string, mixed>  $additionalDetails  Additional details to merge into the details array
      */
     public static function draw(?string $reason = null, array $additionalDetails = []): self
     {

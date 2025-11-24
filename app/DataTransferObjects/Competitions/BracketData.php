@@ -10,6 +10,7 @@ class BracketData extends Data
     public function __construct(
         public string $tournament_ulid,
         public string $format,
+        /** @var array<int, mixed> */
         public array $rounds,
         public int $current_round,
     ) {}

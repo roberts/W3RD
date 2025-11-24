@@ -9,6 +9,7 @@ use App\GameEngine\Interfaces\GameActionContract;
 class PassCards implements GameActionContract
 {
     public function __construct(
+        /** @var array<int, string> */
         public readonly array $cards,
     ) {}
 

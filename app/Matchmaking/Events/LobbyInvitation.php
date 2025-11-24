@@ -26,6 +26,9 @@ class LobbyInvitation implements ShouldBroadcast
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         /** @var User $host */

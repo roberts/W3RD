@@ -13,6 +13,9 @@ class ViewGameRequest extends BaseGameRequest
         return $this->authorizeGameAccess();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

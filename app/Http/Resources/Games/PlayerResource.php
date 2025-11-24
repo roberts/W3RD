@@ -23,7 +23,7 @@ class PlayerResource extends JsonResource
             'name' => $this->user->name,
             'position_id' => $this->position_id,
             'color' => $this->color,
-            'avatar' => $this->user->avatar?->image?->url, // @phpstan-ignore-line
+            'avatar' => $this->user->avatar?->image?->url,
         ];
     }
 }

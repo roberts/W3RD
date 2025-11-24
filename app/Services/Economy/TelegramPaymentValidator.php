@@ -37,6 +37,9 @@ class TelegramPaymentValidator
 
     /**
      * Extract payment details from validated data.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     public function extractPaymentDetails(array $data): array
     {

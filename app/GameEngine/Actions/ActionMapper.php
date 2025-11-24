@@ -20,7 +20,7 @@ class ActionMapper
      *
      * @param  BaseGameTitle  $mode  The game mode handler
      * @param  string  $actionType  The action type identifier
-     * @param  array  $actionDetails  Raw action data
+     * @param  array<string, mixed>  $actionDetails  Raw action data
      * @return object The validated action DTO
      *
      * @throws InvalidGameActionException

@@ -11,6 +11,9 @@ use App\Models\Games\Game;
 
 class ConnectFourReporter implements GameReporterContract
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function getPublicStatus(object $gameState): array
     {
         return [
@@ -19,6 +22,9 @@ class ConnectFourReporter implements GameReporterContract
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function describeStateChanges(Game $game, Action $action, object $gameState): array
     {
         $changes = [];
@@ -107,6 +113,9 @@ class ConnectFourReporter implements GameReporterContract
         return $available;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     protected function findWinningSequence(object $gameState): ?array
     {
         // Placeholder - could duplicate logic from WinEvaluator or share it

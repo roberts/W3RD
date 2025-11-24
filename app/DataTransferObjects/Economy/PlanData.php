@@ -12,6 +12,7 @@ class PlanData extends Data
         public int $price,
         public string $currency,
         public string $interval,
+        /** @var array<string, mixed> */
         public array $features,
     ) {}
 }

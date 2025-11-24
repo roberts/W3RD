@@ -18,6 +18,9 @@ class CancelQueueRequest extends FormRequest
         return false;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -25,6 +28,9 @@ class CancelQueueRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

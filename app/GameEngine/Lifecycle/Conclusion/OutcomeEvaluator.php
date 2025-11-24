@@ -18,7 +18,7 @@ class OutcomeEvaluator
      *
      * @param  Game  $game  The completed game
      * @param  GameOutcome  $outcome  The outcome from the arbiter
-     * @return array Detailed outcome information
+     * @return array<string, mixed> Detailed outcome information
      */
     public function evaluate(Game $game, GameOutcome $outcome): array
     {
@@ -36,9 +36,9 @@ class OutcomeEvaluator
     /**
      * Calculate game statistics.
      *
-     * @param  Game  $game  The game instance
+     * @param  Game  $game  The completed game
      * @param  GameOutcome  $outcome  The game outcome
-     * @return array Statistical data
+     * @return array<string, mixed> Statistical data
      */
     protected function calculateStatistics(Game $game, GameOutcome $outcome): array
     {

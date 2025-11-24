@@ -10,6 +10,9 @@ class GameQueryService
 {
     /**
      * Build a query for user games with filters applied.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Game>
      */
     public function buildUserGamesQuery(User $user, array $filters): Builder
     {

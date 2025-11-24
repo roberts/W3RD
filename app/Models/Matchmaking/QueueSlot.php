@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QueueSlot extends Model
 {
+    /** @use HasFactory<\Database\Factories\Matchmaking\QueueSlotFactory> */
     use HasFactory, HasUlids;
 
     protected $table = 'queue_slots';
@@ -47,7 +48,9 @@ class QueueSlot extends Model
     /**
      * Scope to find a queue slot by ULID with optional eager loading.
      *
+     * @param  Builder<QueueSlot>  $query
      * @param  array<int, string>  $with
+     * @return Builder<QueueSlot>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -62,6 +65,9 @@ class QueueSlot extends Model
 
     /**
      * Scope to find active queue slots.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -70,6 +76,9 @@ class QueueSlot extends Model
 
     /**
      * Scope to find expired queue slots.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeExpired(Builder $query): Builder
     {
@@ -78,6 +87,9 @@ class QueueSlot extends Model
 
     /**
      * Scope to find non-expired queue slots.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeNotExpired(Builder $query): Builder
     {

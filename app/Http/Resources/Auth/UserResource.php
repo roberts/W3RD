@@ -21,7 +21,7 @@ class UserResource extends JsonResource
         return [
             'username' => $this->username,
             'name' => $this->name,
-            'avatar' => $this->avatar?->image?->url, // @phpstan-ignore-line
+            'avatar' => $this->avatar?->image?->url,
             'bio' => $this->when($this->bio !== null, $this->bio),
             'social_links' => $this->when($this->social_links !== null, $this->social_links),
         ];

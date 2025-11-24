@@ -13,6 +13,8 @@ class LeaderboardService
 {
     /**
      * Get top players for a specific game title.
+     *
+     * @return Collection<int, mixed>
      */
     public function getTopPlayersForTitle(GameTitle $title, int $limit = 100): Collection
     {

@@ -71,6 +71,8 @@ class LobbyManager
 
     /**
      * Get all player IDs in a lobby
+     *
+     * @return array<int>
      */
     public function getPlayerIds(Lobby $lobby): array
     {

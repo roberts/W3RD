@@ -75,6 +75,8 @@ class DataFeedService
 
     /**
      * Publish event to feed channel.
+     *
+     * @param  array<string, mixed>  $data
      */
     public function publishEvent(string $channel, array $data): void
     {

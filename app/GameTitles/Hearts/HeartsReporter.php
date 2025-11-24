@@ -12,6 +12,9 @@ use App\Models\Games\Game;
 
 class HeartsReporter extends BaseGameReporter implements GameReporterContract
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function getPublicStatus(object $gameState): array
     {
         return [
@@ -21,6 +24,9 @@ class HeartsReporter extends BaseGameReporter implements GameReporterContract
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function describeStateChanges(Game $game, Action $action, object $gameState): array
     {
         $changes = parent::describeStateChanges($game, $action, $gameState);
@@ -88,6 +94,9 @@ class HeartsReporter extends BaseGameReporter implements GameReporterContract
 
     // Helpers
 
+    /**
+     * @return array<string, int>
+     */
     protected function getScores(object $gameState): array
     {
         $scores = [];

@@ -18,6 +18,7 @@ class TimerInformationService
     /**
      * Get comprehensive timer information for the current turn.
      *
+     * @return array<string, mixed>
      * @throws TimerNotAvailableException if the game does not use a timer
      */
     public function getTimerInfo(Game $game, GameTitleContract $mode, object $gameState): array
@@ -61,6 +62,7 @@ class TimerInformationService
     /**
      * Get basic timer configuration without state-dependent information.
      *
+     * @return array<string, mixed>
      * @throws TimerNotAvailableException if the game does not use a timer
      */
     public function getTimerConfig(GameTitleContract $mode): array

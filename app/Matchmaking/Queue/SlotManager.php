@@ -17,6 +17,8 @@ class SlotManager
 {
     /**
      * Create or update a queue slot for a user.
+     *
+     * @param  array<string, mixed>  $preferences
      */
     public function createSlot(
         User $user,

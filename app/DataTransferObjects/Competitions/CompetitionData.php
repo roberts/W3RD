@@ -18,6 +18,7 @@ class CompetitionData extends Data
         public int $buy_in_amount,
         public string $buy_in_currency,
         public int $prize_pool,
+        /** @var array<string, mixed>|null */
         public ?array $rules,
         public ?string $starts_at,
         public ?string $ends_at,

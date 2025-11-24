@@ -10,15 +10,25 @@ class GameOutcomeData extends Data
         public string $game_ulid,
         public string $status,
         public ?string $outcome_type,
+        /** @var array<string, mixed>|null */
         public ?array $winner,
         public bool $is_draw,
         public ?string $completed_at,
         public ?int $duration_seconds,
+        /** @var array<string, int> */
         public array $final_scores,
+        /** @var array<string, int> */
         public array $xp_awarded,
+        /** @var array<string, mixed> */
         public array $rewards,
     ) {}
 
+    /**
+     * @param array<string, mixed>|null $winner
+     * @param array<string, int> $finalScores
+     * @param array<string, int> $xpAwarded
+     * @param array<string, mixed> $rewards
+     */
     public static function create(
         string $gameUlid,
         string $status,

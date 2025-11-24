@@ -7,5 +7,8 @@ use App\Models\Games\Game;
 
 interface GameRedactor
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function redact(Game $game, ?User $user): array;
 }

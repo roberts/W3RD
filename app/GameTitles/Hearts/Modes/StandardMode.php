@@ -31,6 +31,9 @@ class StandardMode extends HeartsProtocol
         return new HeartsReporter;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

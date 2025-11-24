@@ -34,6 +34,8 @@ class LobbyPlayerManager
 
     /**
      * Invite multiple players to a lobby
+     *
+     * @param  array<int>  $inviteeIds
      */
     public function inviteMultiplePlayers(Lobby $lobby, array $inviteeIds, int $hostId): void
     {

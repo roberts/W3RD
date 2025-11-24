@@ -25,6 +25,8 @@ class GameResponseEnhancementService
 
     /**
      * Generate rich context for successful action response.
+     *
+     * @return array<string, mixed>
      */
     public function generateActionContext(Game $game, object $gameState, BaseGameTitle $mode, Action $actionRecord): array
     {
@@ -71,6 +73,8 @@ class GameResponseEnhancementService
 
     /**
      * Generate detailed outcome information when game ends.
+     *
+     * @return array<string, mixed>
      */
     public function generateOutcomeDetails(Game $game, GameOutcome $outcome, object $gameState): array
     {
@@ -105,6 +109,8 @@ class GameResponseEnhancementService
 
     /**
      * Calculate game statistics.
+     *
+     * @return array<string, mixed>
      */
     protected function calculateGameStats(Game $game): array
     {
@@ -130,6 +136,9 @@ class GameResponseEnhancementService
         return $stats;
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Action>  $actions
+     */
     protected function calculateAverageActionTime($actions): float
     {
         if ($actions->isEmpty()) {
@@ -149,6 +158,9 @@ class GameResponseEnhancementService
         return empty($times) ? 0 : array_sum($times) / count($times);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Action>  $actions
+     */
     protected function calculateAverageResponseTime($actions): float
     {
         return $this->calculateAverageActionTime($actions);

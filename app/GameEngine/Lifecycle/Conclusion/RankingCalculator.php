@@ -16,8 +16,8 @@ class RankingCalculator
      * Calculate rankings for a completed game.
      *
      * @param  Game  $game  The completed game
-     * @param  array  $scores  Player scores indexed by ULID
-     * @return array Rankings with player ULIDs and positions
+     * @param  array<string, int>  $scores  Player scores indexed by ULID
+     * @return list<array{player_ulid: string, position: int, score: int}> Rankings with player ULIDs and positions
      */
     public function calculate(Game $game, array $scores): array
     {
@@ -54,9 +54,9 @@ class RankingCalculator
      * Calculate rankings based on custom comparison logic.
      *
      * @param  Game  $game  The game instance
-     * @param  array  $players  Array of player data
+     * @param  array<int, mixed>  $players  Array of player data
      * @param  callable  $comparator  Function to compare two players
-     * @return array Rankings
+     * @return array<int, array<string, mixed>> Rankings
      */
     public function calculateCustom(Game $game, array $players, callable $comparator): array
     {
@@ -77,7 +77,7 @@ class RankingCalculator
     /**
      * Get the winner from rankings.
      *
-     * @param  array  $rankings  Rankings array
+     * @param  array<int, array<string, mixed>>  $rankings  Rankings array
      * @return string|null Winner's ULID or null if draw
      */
     public function getWinner(array $rankings): ?string

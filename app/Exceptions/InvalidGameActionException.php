@@ -6,6 +6,9 @@ use Exception;
 
 class InvalidGameActionException extends Exception
 {
+    /**
+     * @param array<string, mixed> $actionDetails
+     */
     public function __construct(
         string $message,
         public readonly string $actionType,

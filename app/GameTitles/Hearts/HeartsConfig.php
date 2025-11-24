@@ -16,6 +16,9 @@ use App\GameTitles\Hearts\Handlers\PlayCardHandler;
 
 class HeartsConfig implements GameConfigContract
 {
+    /**
+     * @return array<class-string, array<string, mixed>>
+     */
     public function getActionRegistry(): array
     {
         return [

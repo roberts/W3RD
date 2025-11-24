@@ -16,6 +16,9 @@ use App\GameTitles\Checkers\Handlers\TripleJumpPieceHandler;
 
 class CheckersConfig implements GameConfigContract
 {
+    /**
+     * @return array<class-string, array<string, mixed>>
+     */
     public function getActionRegistry(): array
     {
         return [
@@ -43,6 +46,9 @@ class CheckersConfig implements GameConfigContract
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRulesDescription(): array
     {
         return [

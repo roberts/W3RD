@@ -25,17 +25,22 @@ readonly class ActionProcessingResult
         public object $gameState,
         public ?Action $actionRecord,
         public ?GameOutcome $outcome,
+        /** @var array<string, mixed> */
         public array $stateChanges,
+        /** @var array<string, mixed> */
         public array $availableActions,
         public ?Carbon $nextActionDeadline,
         public ?string $actionSummary,
         public ?ValidationResult $validationError,
+        /** @var array<string, mixed> */
         public array $context,
         public ?GameTitleContract $mode = null,
     ) {}
 
     /**
      * Create a successful result after action processing.
+     *
+     * @param array<string, mixed> $context
      */
     public static function success(
         Game $game,
@@ -105,6 +110,8 @@ readonly class ActionProcessingResult
 
     /**
      * Convert to array format suitable for JSON response.
+     *
+     * @return array<string, mixed>
      */
     public function toResponseArray(): array
     {

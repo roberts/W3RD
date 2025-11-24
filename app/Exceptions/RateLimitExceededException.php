@@ -15,6 +15,9 @@ use Exception;
  */
 class RateLimitExceededException extends Exception
 {
+    /**
+     * @param array<string, mixed>|null $context
+     */
     public function __construct(
         string $message = 'Rate limit exceeded',
         public readonly ?int $retryAfter = null,

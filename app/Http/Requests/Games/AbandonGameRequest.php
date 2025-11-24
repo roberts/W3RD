@@ -9,6 +9,9 @@ class AbandonGameRequest extends BaseGameRequest
         return $this->authorizeGameAccess() && $this->authorizeActiveGame();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

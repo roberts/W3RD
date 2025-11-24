@@ -21,6 +21,9 @@ class TournamentBracketUpdated implements ShouldBroadcast
         return new Channel("tournaments.{$this->tournament->ulid}");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

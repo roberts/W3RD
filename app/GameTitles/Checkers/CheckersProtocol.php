@@ -25,6 +25,9 @@ abstract class CheckersProtocol extends BaseBoardGameTitle implements GameTitleC
         return GameDynamic::ONE_VS_ONE;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getAdditionalAttributes(): array
     {
         return [

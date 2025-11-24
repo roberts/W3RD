@@ -19,6 +19,9 @@ class AcceptProposalRequest extends FormRequest
         return $proposal->opponent_user_id === $this->user()->id;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [];

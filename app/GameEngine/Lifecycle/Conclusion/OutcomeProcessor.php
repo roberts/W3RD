@@ -64,6 +64,8 @@ class OutcomeProcessor
 
     /**
      * Get player statistics for a completed game.
+     *
+     * @return array<string, mixed>
      */
     public function getPlayerStats(Game $game, Player $player): array
     {

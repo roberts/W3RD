@@ -27,26 +27,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $winner_id
  * @property int|null $winner_position
  * @property int|null $turn_number
- * @property array|null $game_state
- * @property array|null $game_settings
+ * @property array<string, mixed>|null $game_state
+ * @property array<string, mixed>|null $game_settings
  * @property \Illuminate\Support\Carbon|null $started_at
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property OutcomeType|null $outcome_type
- * @property array|null $outcome_details
+ * @property array<string, mixed>|null $outcome_details
  * @property GameTitle $title_slug
  * @property string $game_title
  * @property int|null $max_players
  * @property \Illuminate\Support\Carbon|null $turn_ends_at
  * @property int|null $current_player_id
- * @property array|null $final_scores
- * @property array|null $xp_awarded
- * @property array|null $rewards
+ * @property array<string, mixed>|null $final_scores
+ * @property array<string, mixed>|null $xp_awarded
+ * @property array<string, mixed>|null $rewards
  */
 class Game extends Model
 {
+    /** @use HasFactory<\Database\Factories\Games\GameFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
@@ -108,7 +109,9 @@ class Game extends Model
     /**
      * Scope to find a game by ULID with optional eager loading.
      *
+     * @param  Builder<Game>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Game>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -123,6 +126,9 @@ class Game extends Model
 
     /**
      * Scope to find games for a specific user.
+     *
+     * @param  Builder<Game>  $query
+     * @return Builder<Game>
      */
     public function scopeForUser(Builder $query, int $userId): Builder
     {
@@ -142,6 +148,9 @@ class Game extends Model
 
     /**
      * Scope to find completed games.
+     *
+     * @param  Builder<Game>  $query
+     * @return Builder<Game>
      */
     public function scopeCompleted(Builder $query): Builder
     {
@@ -150,6 +159,9 @@ class Game extends Model
 
     /**
      * Scope to find active games.
+     *
+     * @param  Builder<Game>  $query
+     * @return Builder<Game>
      */
     public function scopeActive(Builder $query): Builder
     {

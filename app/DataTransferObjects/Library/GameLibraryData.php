@@ -14,6 +14,7 @@ class GameLibraryData extends Data
         public int $max_players,
         public string $pacing,
         public string $complexity,
+        /** @var array<int, string> */
         public array $categories,
     ) {}
 }

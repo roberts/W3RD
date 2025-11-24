@@ -21,6 +21,9 @@ class GameStatusChanged implements ShouldBroadcast
         return new Channel("games.{$this->game->ulid}");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

@@ -151,6 +151,8 @@ class CoordinatedActionProcessor
 
     /**
      * Process the coordinated actions through the appropriate game mode handler.
+     *
+     * @param iterable<int, mixed> $coordinatedActions
      */
     protected function processCoordinatedActions(mixed $mode, object $gameState, $coordinatedActions): object
     {

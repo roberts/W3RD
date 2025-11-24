@@ -25,7 +25,7 @@ class GameBuilder
     /**
      * Create a game from matchmaking queue.
      *
-     * @param  array  $playerData  Array of ['user_id' => int, 'client_id' => int]
+     * @param  array<int, array{user_id: int, client_id: int}>  $playerData  Array of ['user_id' => int, 'client_id' => int]
      */
     public function createFromQueue(array $playerData, GameTitle $gameTitle, string $gameMode = 'standard'): Game
     {
@@ -153,6 +153,8 @@ class GameBuilder
 
     /**
      * Create a game from a queue match by match ID.
+     *
+     * @param array<int, int> $playerIds
      */
     public function createFromQueueMatch(array $playerIds, string $matchId): Game
     {
@@ -188,8 +190,8 @@ class GameBuilder
 
         // Remove players from queue and client tracking
         foreach ($playerIds as $playerId) {
-            Redis::hdel('queue:timestamps', $playerId);
-            Redis::hdel('queue:clients', $playerId);
+            Redis::hdel('queue:timestamps', (string) $playerId);
+            Redis::hdel('queue:clients', (string) $playerId);
         }
 
         return $game;

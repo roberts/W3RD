@@ -4,8 +4,8 @@ namespace App\Models\Competitions;
 
 use App\Models\Auth\User;
 use App\Models\Games\Game;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $buy_in_amount
  * @property string|null $buy_in_currency
  * @property int|null $prize_pool
- * @property array|null $bracket_data
- * @property array|null $rules
+ * @property array<string, mixed>|null $bracket_data
+ * @property array<string, mixed>|null $rules
  * @property \Illuminate\Support\Carbon|null $starts_at
  * @property \Illuminate\Support\Carbon|null $ends_at
  * @property \Illuminate\Support\Carbon $created_at
@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Tournament extends Model
 {
-    use HasFactory, HasUlids;
+    use HasUlids;
 
     protected $fillable = [
         'ulid',
@@ -69,6 +69,8 @@ class Tournament extends Model
 
     /**
      * Get the users participating in this tournament.
+     *
+     * @return BelongsToMany<User, $this, TournamentUser>
      */
     public function users(): BelongsToMany
     {
@@ -80,6 +82,8 @@ class Tournament extends Model
 
     /**
      * Get games associated with this tournament.
+     *
+     * @return HasMany<Game, $this>
      */
     public function games(): HasMany
     {
@@ -88,6 +92,8 @@ class Tournament extends Model
 
     /**
      * Generate ULIDs for the explicit column instead of the primary key.
+     *
+     * @return array<int, string>
      */
     public function uniqueIds(): array
     {
@@ -96,6 +102,10 @@ class Tournament extends Model
 
     /**
      * Scope to find a tournament by ULID with optional eager loading.
+     *
+     * @param  Builder<Tournament>  $query
+     * @param  array<int, string>  $with
+     * @return Builder<Tournament>
      */
     public function scopeWithUlid($query, string $ulid, array $with = [])
     {

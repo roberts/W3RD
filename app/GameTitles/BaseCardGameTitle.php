@@ -193,6 +193,8 @@ abstract class BaseCardGameTitle extends BaseGameTitle
 
     /**
      * Returns the base rules for card games.
+     *
+     * @return array<string, mixed>
      */
     public static function getRules(): array
     {

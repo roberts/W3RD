@@ -44,6 +44,8 @@ class LibraryService
 
     /**
      * Get detailed metadata for a specific game.
+     *
+     * @return array<string, mixed>
      */
     public function getGameDetails(string $key): array
     {
@@ -63,6 +65,8 @@ class LibraryService
 
     /**
      * Get entity definitions for a game (cards, units, boards).
+     *
+     * @return array<string, mixed>
      */
     public function getGameEntities(string $key): array
     {
@@ -82,6 +86,8 @@ class LibraryService
 
     /**
      * Format game summary data.
+     *
+     * @return array<string, mixed>
      */
     private function formatGameSummary(GameTitle $title): array
     {
@@ -156,6 +162,8 @@ class LibraryService
 
     /**
      * Get game categories.
+     *
+     * @return array<int, string>
      */
     private function getCategories(GameTitle $title): array
     {
@@ -169,6 +177,8 @@ class LibraryService
 
     /**
      * Get available game modes.
+     *
+     * @return array<int, array<string, string>>
      */
     private function getGameModes(GameTitle $title): array
     {

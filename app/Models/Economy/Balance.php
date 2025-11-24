@@ -4,7 +4,6 @@ namespace App\Models\Economy;
 
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,8 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Balance extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'currency_type',
@@ -37,6 +34,9 @@ class Balance extends Model
 
     /**
      * Scope to filter balances by currency type.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeForCurrency(Builder $query, string $currencyType): Builder
     {

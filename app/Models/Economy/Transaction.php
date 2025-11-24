@@ -5,7 +5,6 @@ namespace App\Models\Economy;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -28,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Transaction extends Model
 {
-    use HasFactory, HasUlids;
+    use HasUlids;
 
     protected $fillable = [
         'ulid',
@@ -85,7 +84,9 @@ class Transaction extends Model
     /**
      * Scope to find a transaction by ULID with optional eager loading.
      *
+     * @param  Builder<Transaction>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Transaction>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -100,6 +101,9 @@ class Transaction extends Model
 
     /**
      * Scope to filter transactions by currency type.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeForCurrency(Builder $query, string $currencyType): Builder
     {
@@ -108,6 +112,9 @@ class Transaction extends Model
 
     /**
      * Scope for credit transactions.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeCredits(Builder $query): Builder
     {
@@ -116,6 +123,9 @@ class Transaction extends Model
 
     /**
      * Scope for debit transactions.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeDebits(Builder $query): Builder
     {

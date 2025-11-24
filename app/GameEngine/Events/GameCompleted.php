@@ -17,6 +17,7 @@ class GameCompleted implements ShouldBroadcast
         public Game $game,
         public ?string $winnerUlid = null,
         public bool $isDraw = false,
+        /** @var array<string, mixed> */
         public array $outcomeDetails = []
     ) {}
 
@@ -45,6 +46,8 @@ class GameCompleted implements ShouldBroadcast
 
     /**
      * The data to broadcast.
+     *
+     * @return array<string, mixed>
      */
     public function broadcastWith(): array
     {

@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Proposal extends Model
 {
+    /** @use HasFactory<\Database\Factories\Matchmaking\ProposalFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [
@@ -70,7 +71,9 @@ class Proposal extends Model
     /**
      * Scope to find a proposal by ULID with optional eager loading.
      *
+     * @param  Builder<Proposal>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Proposal>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -85,6 +88,9 @@ class Proposal extends Model
 
     /**
      * Scope to find proposals with pending status.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopePending(Builder $query): Builder
     {
@@ -93,6 +99,9 @@ class Proposal extends Model
 
     /**
      * Scope to find expired proposals.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeExpired(Builder $query): Builder
     {
@@ -101,6 +110,9 @@ class Proposal extends Model
 
     /**
      * Scope to find non-expired proposals.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeNotExpired(Builder $query): Builder
     {

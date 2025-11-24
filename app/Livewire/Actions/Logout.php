@@ -10,7 +10,7 @@ class Logout
     /**
      * Log the current user out of the application.
      */
-    public function __invoke()
+    public function __invoke(): mixed
     {
         Auth::guard('web')->logout();
 

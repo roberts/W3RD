@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Point extends Model
 {
+    /** @use HasFactory<\Database\Factories\Gamification\PointFactory> */
     use HasFactory;
 
     protected $table = 'points';

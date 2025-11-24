@@ -17,6 +17,8 @@ class ModeRegistry
 {
     /**
      * Map of game titles to their available modes.
+     *
+     * @var array<string, array<string, class-string>>
      */
     private array $modes = [
         'checkers' => [

@@ -37,6 +37,9 @@ class StandardMode extends CheckersProtocol
         return new CheckersReporter;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getRules(): array
     {
         $baseRules = parent::getRules();

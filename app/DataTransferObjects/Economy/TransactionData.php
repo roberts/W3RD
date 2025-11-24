@@ -16,6 +16,7 @@ class TransactionData extends Data
         public string $description,
         public ?string $reference_type,
         public ?int $reference_id,
+        /** @var array<string, mixed>|null */
         public ?array $metadata,
         public string $created_at,
     ) {}

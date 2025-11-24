@@ -12,6 +12,7 @@ use Roberts\Support\Traits\HasCreator;
 
 class Badge extends Model
 {
+    /** @use HasFactory<\Database\Factories\Gamification\BadgeFactory> */
     use HasCreator, HasFactory;
 
     protected $fillable = [

@@ -12,6 +12,9 @@ use App\Models\Matchmaking\Proposal;
  */
 readonly class ProposalResult
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     private function __construct(
         public bool $success,
         public ?Proposal $proposal,
@@ -20,6 +23,9 @@ readonly class ProposalResult
         public array $context,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function success(?Proposal $proposal, ?Game $game = null, array $context = []): self
     {
         return new self(
@@ -31,6 +37,9 @@ readonly class ProposalResult
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function failed(string $message, array $context = []): self
     {
         return new self(
@@ -42,6 +51,9 @@ readonly class ProposalResult
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         if (! $this->success) {

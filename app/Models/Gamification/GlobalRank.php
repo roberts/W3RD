@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GlobalRank extends Model
 {
+    /** @use HasFactory<\Database\Factories\Gamification\GlobalRankFactory> */
     use HasFactory;
 
     protected $primaryKey = 'user_id';

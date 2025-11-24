@@ -26,13 +26,15 @@ class QueueOrchestrator
     ) {}
 
     /**
-     * Process a user joining the matchmaking queue.
+     * Join the matchmaking queue.
      *
      * Workflow:
      * 1. Attempt to join the queue (checks cooldown)
      * 2. Create queue slot
      * 3. Update player state to IN_QUEUE
      * 4. Return success result with slot
+     *
+     * @param  array<string, mixed>  $preferences
      */
     public function joinQueue(
         User $user,

@@ -15,6 +15,7 @@ class QueueSlotData extends Data
         public ?string $game_mode,
         public ?int $skill_rating,
         public string $status,
+        /** @var array<string, mixed> */
         public array $preferences,
         public ?string $expires_at,
         public string $created_at,

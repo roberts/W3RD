@@ -11,6 +11,8 @@ class EconomyService
 {
     /**
      * Adjust user balance and record transaction.
+     *
+     * @param  array<string, mixed>  $metadata
      */
     public function adjustBalance(
         int $userId,

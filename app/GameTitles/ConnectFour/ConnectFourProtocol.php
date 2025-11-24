@@ -24,6 +24,9 @@ abstract class ConnectFourProtocol extends BaseBoardGameTitle
         return GameTimer::FORFEIT;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getAdditionalAttributes(): array
     {
         return [

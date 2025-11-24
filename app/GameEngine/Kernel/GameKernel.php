@@ -101,6 +101,9 @@ class GameKernel
         return $handler->apply($state, $action);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAvailableActions(object $state, string $playerUlid): array
     {
         $options = [];

@@ -11,6 +11,9 @@ use App\Models\Matchmaking\QueueSlot;
  */
 readonly class QueueResult
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     private function __construct(
         public bool $success,
         public ?QueueSlot $slot,
@@ -19,6 +22,9 @@ readonly class QueueResult
         public array $context,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function success(?QueueSlot $slot, array $context = []): self
     {
         return new self(
@@ -41,6 +47,9 @@ readonly class QueueResult
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function failed(string $message, array $context = []): self
     {
         return new self(
@@ -52,6 +61,9 @@ readonly class QueueResult
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         if (! $this->success) {

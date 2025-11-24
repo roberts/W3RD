@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Mode extends Model
 {
+    /** @use HasFactory<\Database\Factories\Games\ModeFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -63,6 +64,9 @@ class Mode extends Model
 
     /**
      * Scope to get active modes only.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -71,6 +75,9 @@ class Mode extends Model
 
     /**
      * Scope to filter by title slug.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeForTitle(Builder $query, string $titleSlug): Builder
     {

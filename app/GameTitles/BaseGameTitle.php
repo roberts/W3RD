@@ -114,6 +114,8 @@ abstract class BaseGameTitle implements GameReporterContract, GameTitleContract
 
     /**
      * Returns the structured rules for this game title.
+     *
+     * @return array<string, mixed>
      */
     public static function getRules(): array
     {

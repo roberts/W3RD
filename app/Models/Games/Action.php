@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Action extends Model
 {
+    /** @use HasFactory<\Database\Factories\Games\ActionFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
@@ -67,7 +68,9 @@ class Action extends Model
     /**
      * Scope to find an action by ULID with optional eager loading.
      *
+     * @param  Builder<Action>  $query
      * @param  array<int, string>  $with
+     * @return Builder<Action>
      */
     public function scopeWithUlid(Builder $query, string $ulid, array $with = []): Builder
     {
@@ -82,6 +85,9 @@ class Action extends Model
 
     /**
      * Scope to find actions with a specific coordination group.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeWithCoordinationGroup(Builder $query, string $coordinationGroup): Builder
     {
@@ -90,6 +96,9 @@ class Action extends Model
 
     /**
      * Scope to find actions pending coordination completion.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopePendingCoordination(Builder $query): Builder
     {

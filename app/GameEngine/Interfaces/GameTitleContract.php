@@ -151,6 +151,8 @@ interface GameTitleContract
      *
      * Returns a structured array containing the title, description, and
      * sections of rules, which can be formatted with Markdown.
+     *
+     * @return array<string, mixed>
      */
     public static function getRules(): array;
 

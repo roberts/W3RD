@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Quota extends Model
 {
+    /** @use HasFactory<\Database\Factories\Economy\QuotaFactory> */
     use HasFactory;
 
     protected $fillable = [

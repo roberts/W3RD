@@ -9,6 +9,9 @@ class ConcedeGameRequest extends BaseGameRequest
         return $this->authorizeGameAccess() && $this->authorizeActiveGame();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -17,6 +20,9 @@ class ConcedeGameRequest extends BaseGameRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

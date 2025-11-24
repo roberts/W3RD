@@ -8,6 +8,9 @@ use App\Models\Games\Game;
 
 class HeartsRedactor implements GameRedactor
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function redact(Game $game, ?User $user): array
     {
         $state = $game->game_state ?? [];

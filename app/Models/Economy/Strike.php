@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Strike extends Model
 {
+    /** @use HasFactory<\Database\Factories\Economy\StrikeFactory> */
     use HasFactory;
 
     protected $fillable = [

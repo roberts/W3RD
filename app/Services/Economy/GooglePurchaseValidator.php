@@ -23,6 +23,8 @@ class GooglePurchaseValidator
 
     /**
      * Validate a Google Play purchase.
+     *
+     * @return array<string, mixed>
      */
     public function validate(string $productId, string $token): array
     {
@@ -55,6 +57,8 @@ class GooglePurchaseValidator
 
     /**
      * Validate a Google Play subscription.
+     *
+     * @return array<string, mixed>
      */
     public function validateSubscription(string $subscriptionId, string $token): array
     {

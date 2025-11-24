@@ -11,11 +11,17 @@ use App\Models\Games\Game;
 
 abstract class BaseGameReporter implements GameReporterContract
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function getPublicStatus(object $gameState): array
     {
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function describeStateChanges(Game $game, Action $action, object $gameState): array
     {
         return [];

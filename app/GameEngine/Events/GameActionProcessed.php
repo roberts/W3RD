@@ -21,10 +21,13 @@ class GameActionProcessed implements ShouldBroadcast
     public function __construct(
         public readonly Game $game,
         public readonly string $actionType,
+        /** @var array<string, mixed> */
         public readonly array $actionDetails,
         public readonly string $playerUlid,
         public readonly string $actionUlid,
+        /** @var array<string, mixed> */
         public readonly array $actionContext = [],
+        /** @var array<string, mixed>|null */
         public readonly ?array $outcomeDetails = null,
     ) {}
 
@@ -94,6 +97,8 @@ class GameActionProcessed implements ShouldBroadcast
 
     /**
      * Generate animation hints for client UI.
+     *
+     * @return array<int, array<string, mixed>>
      */
     protected function generateAnimationHints(): array
     {
@@ -170,6 +175,8 @@ class GameActionProcessed implements ShouldBroadcast
 
     /**
      * Generate sound effect suggestions for client.
+     *
+     * @return array<int, string>
      */
     protected function generateSoundEffects(): array
     {

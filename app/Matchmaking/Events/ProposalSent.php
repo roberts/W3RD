@@ -21,6 +21,9 @@ class ProposalSent implements ShouldBroadcast
         return new PrivateChannel("users.{$this->proposal->opponent_user_id}");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [

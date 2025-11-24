@@ -83,6 +83,9 @@ class CompetitionService
 
     /**
      * Generate tournament bracket.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, User>  $participants
+     * @return array<string, mixed>
      */
     protected function generateBracket(Tournament $tournament, $participants): array
     {

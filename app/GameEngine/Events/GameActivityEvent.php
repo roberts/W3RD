@@ -13,6 +13,7 @@ class GameActivityEvent
     public function __construct(
         public Game $game,
         public string $activityType,
+        /** @var array<string, mixed> */
         public array $data = []
     ) {}
 }

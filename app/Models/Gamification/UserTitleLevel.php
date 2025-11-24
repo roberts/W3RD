@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserTitleLevel extends Model
 {
+    /** @use HasFactory<\Database\Factories\Gamification\UserTitleLevelFactory> */
     use HasFactory;
 
     protected $fillable = [

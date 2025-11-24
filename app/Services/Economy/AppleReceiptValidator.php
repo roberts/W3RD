@@ -73,6 +73,8 @@ class AppleReceiptValidator
 
     /**
      * Call Apple's App Store Server API.
+     *
+     * @return array<string, mixed>
      */
     private function callAppleAPI(string $jwt, string $transactionId): array
     {

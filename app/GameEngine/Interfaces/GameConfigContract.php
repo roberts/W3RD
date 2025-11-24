@@ -14,7 +14,7 @@ interface GameConfigContract
      * - 'label': A human-readable label for the action (e.g., "Drop Disc")
      * - 'rules': (Optional) Additional configuration for the handler
      *
-     * @return array<class-string, array{handler: class-string, label: string, rules?: array}>
+     * @return array<class-string, array<string, mixed>>
      */
     public function getActionRegistry(): array;
 

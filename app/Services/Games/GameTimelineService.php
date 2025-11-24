@@ -12,6 +12,8 @@ class GameTimelineService
 {
     /**
      * Get recent actions for a game.
+     *
+     * @return Collection<int, Action>
      */
     public function getRecentActions(Game $game, int $count): Collection
     {

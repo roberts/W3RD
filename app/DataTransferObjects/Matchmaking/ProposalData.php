@@ -14,6 +14,7 @@ class ProposalData extends Data
         public string $type,
         public ?string $title_slug,
         public ?int $mode_id,
+        /** @var array<string, mixed>|null */
         public ?array $game_settings,
         public string $status,
         public ?string $responded_at,

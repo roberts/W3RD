@@ -34,6 +34,8 @@ class LobbyOrchestrator
 
     /**
      * Create a new lobby
+     *
+     * @param  array<int>  $inviteeIds
      */
     public function createLobby(
         User $host,

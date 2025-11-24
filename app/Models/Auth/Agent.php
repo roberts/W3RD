@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Agent extends Model
 {
+    /** @use HasFactory<\Database\Factories\Auth\AgentFactory> */
     use HasFactory;
 
     protected $fillable = [

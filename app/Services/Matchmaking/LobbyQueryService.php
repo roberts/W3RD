@@ -11,6 +11,9 @@ class LobbyQueryService
 {
     /**
      * Build a query for lobbies with filters applied.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Lobby>
      */
     public function buildLobbyQuery(array $filters): Builder
     {

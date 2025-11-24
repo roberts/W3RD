@@ -214,6 +214,9 @@ final class HeartsTable
         );
     }
 
+    /**
+     * @return array<int, string>
+     */
     private static function createDeck(): array
     {
         $suits = ['H', 'D', 'C', 'S'];

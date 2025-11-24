@@ -34,6 +34,8 @@ class SystemHealthService
 
     /**
      * Check database connectivity.
+     *
+     * @return array<string, mixed>
      */
     private function checkDatabase(): array
     {
@@ -55,6 +57,8 @@ class SystemHealthService
 
     /**
      * Check cache (Redis) connectivity.
+     *
+     * @return array<string, mixed>
      */
     private function checkCache(): array
     {
@@ -80,6 +84,8 @@ class SystemHealthService
 
     /**
      * Check queue connectivity.
+     *
+     * @return array<string, mixed>
      */
     private function checkQueue(): array
     {
@@ -100,6 +106,8 @@ class SystemHealthService
 
     /**
      * Check game engine availability.
+     *
+     * @return array<string, mixed>
      */
     private function checkGameEngine(): array
     {

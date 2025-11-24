@@ -156,6 +156,8 @@ class RematchHandler implements ProposalHandler
 
     /**
      * Initialize game state for a rematch with swapped positions.
+     *
+     * @return array<string, mixed>
      */
     private function initializeGameState(Game $originalGame): array
     {

@@ -11,6 +11,9 @@ class TournamentQueryService
 {
     /**
      * Build a query for tournaments with filters applied.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Tournament>
      */
     public function buildTournamentQuery(array $filters): Builder
     {

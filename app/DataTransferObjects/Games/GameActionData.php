@@ -10,10 +10,12 @@ class GameActionData extends Data
     public function __construct(
         public int $id,
         public string $action_type,
+        /** @var array<string, mixed> */
         public array $action_details,
         public string $player_ulid,
         public ?string $username,
         public int $turn_number,
+        /** @var array<string, mixed>|null */
         public ?array $resulting_state,
         public string $created_at,
     ) {}

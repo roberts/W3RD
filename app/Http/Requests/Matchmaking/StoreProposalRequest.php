@@ -45,6 +45,9 @@ class StoreProposalRequest extends FormRequest
             ->exists();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

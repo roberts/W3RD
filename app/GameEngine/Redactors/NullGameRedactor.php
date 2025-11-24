@@ -8,6 +8,9 @@ use App\Models\Games\Game;
 
 class NullGameRedactor implements GameRedactor
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function redact(Game $game, ?User $user): array
     {
         return $game->game_state ?? [];

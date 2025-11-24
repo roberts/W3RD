@@ -12,12 +12,17 @@ class GameData extends Data
         public string $game_title,
         public ?string $game_mode,
         public string $status,
+        /** @var array<int, mixed> */
         public array $players,
         public ?int $winner_id,
         public ?string $outcome_type,
+        /** @var array<string, mixed>|null */
         public ?array $game_state,
+        /** @var array<string, int>|null */
         public ?array $final_scores,
+        /** @var array<string, int>|null */
         public ?array $xp_awarded,
+        /** @var array<string, mixed>|null */
         public ?array $rewards,
         public ?string $started_at,
         public ?string $completed_at,

@@ -16,6 +16,7 @@ use App\GameEngine\Traits\Sequence\PhaseBasedTurns;
 use App\GameTitles\BaseCardGameTitle;
 use App\GameTitles\Hearts\Actions\HeartsActionMapper;
 use App\Models\Auth\User;
+use App\Models\Games\Action;
 use App\Models\Games\Game;
 
 /**
@@ -60,6 +61,9 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
         return GameTimer::FORFEIT;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getAdditionalAttributes(): array
     {
         return [
@@ -157,6 +161,9 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
         ];
     }
 
+    /**
+     * @param array<int, Action> $passActions
+     */
     public function processPassCards(HeartsTable $gameState, $passActions): HeartsTable
     {
         // Extract card passes from action_details
@@ -233,6 +240,9 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
         };
     }
 
+    /**
+     * @param array<string, string> $trick
+     */
     protected function determineTrickWinner(array $trick, string $leadPlayerUlid): string
     {
         $leadCard = $trick[$leadPlayerUlid];
@@ -269,6 +279,9 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
         return $value1 - $value2;
     }
 
+    /**
+     * @param array<string, string> $trick
+     */
     protected function calculateTrickPoints(array $trick): int
     {
         $points = 0;

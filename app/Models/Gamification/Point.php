@@ -48,7 +48,7 @@ class Point extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, Point>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -56,7 +56,7 @@ class Point extends Model
     }
 
     /**
-     * @return MorphTo<Model, Point>
+     * @return MorphTo<Model, $this>
      */
     public function source(): MorphTo
     {

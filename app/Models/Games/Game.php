@@ -164,7 +164,7 @@ class Game extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, Game>
+     * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
     {
@@ -172,7 +172,7 @@ class Game extends Model
     }
 
     /**
-     * @return BelongsTo<Mode, Game>
+     * @return BelongsTo<Mode, $this>
      */
     public function mode(): BelongsTo
     {
@@ -180,7 +180,7 @@ class Game extends Model
     }
 
     /**
-     * @return HasMany<Player>
+     * @return HasMany<Player, $this>
      */
     public function players(): HasMany
     {
@@ -188,7 +188,7 @@ class Game extends Model
     }
 
     /**
-     * @return BelongsTo<Player, Game>
+     * @return BelongsTo<Player, $this>
      */
     public function winner(): BelongsTo
     {
@@ -196,7 +196,7 @@ class Game extends Model
     }
 
     /**
-     * @return HasMany<Action>
+     * @return HasMany<Action, $this>
      */
     public function actions(): HasMany
     {

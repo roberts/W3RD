@@ -108,7 +108,7 @@ class Proposal extends Model
     }
 
     /**
-     * @return BelongsTo<User, Proposal>
+     * @return BelongsTo<User, $this>
      */
     public function requestingUser(): BelongsTo
     {
@@ -116,7 +116,7 @@ class Proposal extends Model
     }
 
     /**
-     * @return BelongsTo<User, Proposal>
+     * @return BelongsTo<User, $this>
      */
     public function opponentUser(): BelongsTo
     {
@@ -124,7 +124,7 @@ class Proposal extends Model
     }
 
     /**
-     * @return BelongsTo<Game, Proposal>
+     * @return BelongsTo<Game, $this>
      */
     public function originalGame(): BelongsTo
     {
@@ -132,7 +132,7 @@ class Proposal extends Model
     }
 
     /**
-     * @return BelongsTo<Game, Proposal>
+     * @return BelongsTo<Game, $this>
      */
     public function game(): BelongsTo
     {
@@ -140,7 +140,7 @@ class Proposal extends Model
     }
 
     /**
-     * @return BelongsTo<Mode, Proposal>
+     * @return BelongsTo<Mode, $this>
      */
     public function mode(): BelongsTo
     {

@@ -84,20 +84,20 @@ class QueueSlot extends Model
         return $query->where('expires_at', '>', now());
     }
 
-    /**
-     * Get the user who occupies this queue slot.
+        /**
+     * Get the user in this slot.
      *
-     * @return BelongsTo<User, QueueSlot>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the lobby this queue slot was matched to.
+        /**
+     * Get the lobby associated with this slot (if any).
      *
-     * @return BelongsTo<Lobby, QueueSlot>
+     * @return BelongsTo<Lobby, $this>
      */
     public function lobby(): BelongsTo
     {

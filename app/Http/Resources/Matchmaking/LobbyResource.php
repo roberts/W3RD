@@ -22,7 +22,7 @@ class LobbyResource extends JsonResource
         return [
             'ulid' => $this->ulid,
             'game_title' => $this->title_slug->value,
-            'game_mode' => $this->mode?->slug, // @phpstan-ignore-line
+            'game_mode' => $this->mode?->slug,
             'host' => UserResource::make($this->host),
             'min_players' => $this->min_players,
             'current_players' => $this->whenLoaded('players', fn () => $this->acceptedPlayers()->count()),

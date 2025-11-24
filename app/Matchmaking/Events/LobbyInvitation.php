@@ -35,7 +35,7 @@ class LobbyInvitation implements ShouldBroadcast
             'lobby' => [
                 'ulid' => $this->lobby->ulid,
                 'game_title' => $this->lobby->title_slug->value,
-                'game_mode' => $this->lobby->mode?->slug, // @phpstan-ignore-line
+                'game_mode' => $this->lobby->mode?->slug,
                 'host' => [
                     'id' => $host->id,
                     'name' => $host->name,

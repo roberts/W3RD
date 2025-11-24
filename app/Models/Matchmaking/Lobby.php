@@ -117,13 +117,16 @@ class Lobby extends Model
     /**
      * @return BelongsTo<Mode, Lobby>
      */
+    /**
+     * @return BelongsTo<Mode, $this>
+     */
     public function mode(): BelongsTo
     {
         return $this->belongsTo(Mode::class);
     }
 
     /**
-     * @return BelongsTo<User, Lobby>
+     * @return BelongsTo<User, $this>
      */
     public function host(): BelongsTo
     {
@@ -131,7 +134,7 @@ class Lobby extends Model
     }
 
     /**
-     * @return HasMany<LobbyPlayer>
+     * @return HasMany<LobbyPlayer, $this>
      */
     public function players(): HasMany
     {
@@ -139,7 +142,7 @@ class Lobby extends Model
     }
 
     /**
-     * @return HasMany<LobbyPlayer>
+     * @return HasMany<LobbyPlayer, $this>
      */
     public function acceptedPlayers(): HasMany
     {
@@ -147,7 +150,7 @@ class Lobby extends Model
     }
 
     /**
-     * @return BelongsTo<Game, Lobby>
+     * @return BelongsTo<Game, $this>
      */
     public function game(): BelongsTo
     {

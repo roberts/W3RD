@@ -47,7 +47,7 @@ class UserTitleLevel extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, UserTitleLevel>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

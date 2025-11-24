@@ -28,7 +28,7 @@ class Badge extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<Image, Badge>
+     * @return BelongsTo<Image, $this>
      */
     public function image(): BelongsTo
     {
@@ -36,7 +36,7 @@ class Badge extends Model
     }
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany
     {

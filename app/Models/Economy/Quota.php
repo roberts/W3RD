@@ -25,7 +25,7 @@ class Quota extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, Quota>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

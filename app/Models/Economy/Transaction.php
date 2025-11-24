@@ -50,7 +50,7 @@ class Transaction extends Model
     /**
      * Get the user that owns this transaction.
      *
-     * @return BelongsTo<User, Transaction>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -58,9 +58,9 @@ class Transaction extends Model
     }
 
     /**
-     * Get the polymorphic reference (e.g., Game, Tournament).
+     * Get the related model (e.g., Game, Subscription).
      *
-     * @return MorphTo<Model, Transaction>
+     * @return MorphTo<Model, $this>
      */
     public function reference(): MorphTo
     {

@@ -52,7 +52,7 @@ readonly class LobbyOperationResult
             'lobby' => [
                 'ulid' => $this->lobby->ulid,
                 'game_title' => $this->lobby->title_slug->value,
-                'game_mode' => $this->lobby->mode?->slug, // @phpstan-ignore-line
+                'game_mode' => $this->lobby->mode?->slug,
                 'status' => $this->lobby->status->value,
                 'is_public' => $this->lobby->is_public,
                 'host_id' => $this->lobby->host_id,

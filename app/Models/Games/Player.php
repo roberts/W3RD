@@ -90,7 +90,7 @@ class Player extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<Game, Player>
+     * @return BelongsTo<Game, $this>
      */
     public function game(): BelongsTo
     {
@@ -98,7 +98,7 @@ class Player extends Model
     }
 
     /**
-     * @return BelongsTo<User, Player>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -106,7 +106,7 @@ class Player extends Model
     }
 
     /**
-     * @return BelongsTo<Client, Player>
+     * @return BelongsTo<Client, $this>
      */
     public function client(): BelongsTo
     {
@@ -114,7 +114,7 @@ class Player extends Model
     }
 
     /**
-     * @return HasMany<Action>
+     * @return HasMany<Action, $this>
      */
     public function actions(): HasMany
     {

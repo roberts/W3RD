@@ -25,7 +25,7 @@ class Strike extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, Strike>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

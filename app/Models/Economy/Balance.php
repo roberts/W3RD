@@ -46,7 +46,7 @@ class Balance extends Model
     /**
      * Get the user that owns this balance.
      *
-     * @return BelongsTo<User, Balance>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

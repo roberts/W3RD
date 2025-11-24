@@ -28,7 +28,7 @@ class GlobalRank extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<User, GlobalRank>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

@@ -27,7 +27,7 @@ class LobbyData extends Data
         return new self(
             ulid: $lobby->ulid,
             game_title: $lobby->title_slug->value,
-            game_mode: $lobby->mode?->slug, // @phpstan-ignore-line
+            game_mode: $lobby->mode?->slug,
             host: [
                 'id' => $lobby->host_id,
                 'username' => optional($lobby->host)->username,

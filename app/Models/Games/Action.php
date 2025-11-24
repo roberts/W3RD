@@ -107,7 +107,7 @@ class Action extends Model
 
     // Relationships
     /**
-     * @return BelongsTo<Game, Action>
+     * @return BelongsTo<Game, $this>
      */
     public function game(): BelongsTo
     {
@@ -115,7 +115,7 @@ class Action extends Model
     }
 
     /**
-     * @return BelongsTo<Player, Action>
+     * @return BelongsTo<Player, $this>
      */
     public function player(): BelongsTo
     {

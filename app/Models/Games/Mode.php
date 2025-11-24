@@ -38,7 +38,7 @@ class Mode extends Model
 
     // Relationships
     /**
-     * @return HasMany<Game>
+     * @return HasMany<Game, $this>
      */
     public function games(): HasMany
     {

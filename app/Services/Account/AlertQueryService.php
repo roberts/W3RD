@@ -2,7 +2,7 @@
 
 namespace App\Services\Account;
 
-use App\Models\Alert\Alert;
+use App\Models\Account\Alert;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -12,7 +12,7 @@ class AlertQueryService
      * Build a query for user alerts with filters applied.
      *
      * @param  array<string, mixed>  $filters
-     * @return HasMany<Alert>
+     * @return HasMany<Alert, User>
      */
     public function buildUserAlertsQuery(User $user, array $filters): HasMany
     {

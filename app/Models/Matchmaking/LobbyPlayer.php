@@ -48,13 +48,16 @@ class LobbyPlayer extends Model
     /**
      * @return BelongsTo<Lobby, LobbyPlayer>
      */
+    /**
+     * @return BelongsTo<Lobby, $this>
+     */
     public function lobby(): BelongsTo
     {
         return $this->belongsTo(Lobby::class);
     }
 
     /**
-     * @return BelongsTo<User, LobbyPlayer>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

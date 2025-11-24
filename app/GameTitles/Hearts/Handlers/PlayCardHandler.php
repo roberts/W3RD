@@ -193,7 +193,7 @@ class PlayCardHandler implements GameActionHandlerInterface
     }
 
     /**
-     * @param array<string, string> $trick
+     * @param  array<string, string>  $trick
      */
     private function determineTrickWinner(array $trick, string $leadPlayerUlid): string
     {
@@ -219,7 +219,7 @@ class PlayCardHandler implements GameActionHandlerInterface
     }
 
     /**
-     * @param array<string, string> $trick
+     * @param  array<string, string>  $trick
      */
     private function calculateTrickPoints(array $trick): int
     {

@@ -24,10 +24,10 @@ class GameOutcomeData extends Data
     ) {}
 
     /**
-     * @param array<string, mixed>|null $winner
-     * @param array<string, int> $finalScores
-     * @param array<string, int> $xpAwarded
-     * @param array<string, mixed> $rewards
+     * @param  array<string, mixed>|null  $winner
+     * @param  array<string, int>  $finalScores
+     * @param  array<string, int>  $xpAwarded
+     * @param  array<string, mixed>  $rewards
      */
     public static function create(
         string $gameUlid,

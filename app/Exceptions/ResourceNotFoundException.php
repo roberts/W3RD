@@ -7,7 +7,7 @@ use Exception;
 class ResourceNotFoundException extends Exception
 {
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public function __construct(
         string $message = 'Resource not found',

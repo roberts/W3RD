@@ -458,7 +458,7 @@ final class ConnectFourBoard extends BaseGameState
     /**
      * Create a new state with a completely new board.
      *
-     * @param array<int, array<int, string|null>> $newBoard
+     * @param  array<int, array<int, string|null>>  $newBoard
      */
     public function withBoard(array $newBoard): self
     {

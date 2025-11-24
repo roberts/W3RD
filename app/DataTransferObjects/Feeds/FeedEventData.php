@@ -14,7 +14,7 @@ class FeedEventData extends Data
     ) {}
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function create(string $type, array $data): self
     {

@@ -11,8 +11,8 @@ use App\GameEngine\Interfaces\GameConfigContract;
 class ConnectFourConfig implements GameConfigContract
 {
     /**
-     * @param array<class-string, array<string, mixed>> $additionalActions
-     * @param array<string, mixed> $stateConfig
+     * @param  array<class-string, array<string, mixed>>  $additionalActions
+     * @param  array<string, mixed>  $stateConfig
      */
     public function __construct(
         protected array $additionalActions = [],

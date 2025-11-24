@@ -13,7 +13,7 @@ class PlacePieceHandler implements GameActionHandlerInterface
     protected bool $gravity;
 
     /**
-     * @param array<string, mixed> $rules
+     * @param  array<string, mixed>  $rules
      */
     public function __construct(array $rules = [])
     {

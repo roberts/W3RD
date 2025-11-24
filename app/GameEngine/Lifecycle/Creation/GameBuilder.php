@@ -154,7 +154,7 @@ class GameBuilder
     /**
      * Create a game from a queue match by match ID.
      *
-     * @param array<int, int> $playerIds
+     * @param  array<int, int>  $playerIds
      */
     public function createFromQueueMatch(array $playerIds, string $matchId): Game
     {

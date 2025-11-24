@@ -62,6 +62,7 @@ trait ApiResponses
      *
      * @template TKey of int|string
      * @template TValue
+     *
      * @param  LengthAwarePaginator<TKey, TValue>  $paginator
      */
     protected function collectionResponse(

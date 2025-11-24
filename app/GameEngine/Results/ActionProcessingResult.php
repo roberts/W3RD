@@ -40,7 +40,7 @@ readonly class ActionProcessingResult
     /**
      * Create a successful result after action processing.
      *
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public static function success(
         Game $game,

@@ -17,8 +17,8 @@ class GameTimerData extends Data
     ) {}
 
     /**
-     * @param array<string, mixed> $currentPlayer
-     * @param array<string, mixed>|null $timeout
+     * @param  array<string, mixed>  $currentPlayer
+     * @param  array<string, mixed>|null  $timeout
      */
     public static function create(
         int $turnNumber,

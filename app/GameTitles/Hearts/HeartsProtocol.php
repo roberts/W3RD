@@ -162,7 +162,7 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
     }
 
     /**
-     * @param array<int, Action> $passActions
+     * @param  array<int, Action>  $passActions
      */
     public function processPassCards(HeartsTable $gameState, $passActions): HeartsTable
     {
@@ -241,7 +241,7 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
     }
 
     /**
-     * @param array<string, string> $trick
+     * @param  array<string, string>  $trick
      */
     protected function determineTrickWinner(array $trick, string $leadPlayerUlid): string
     {
@@ -280,7 +280,7 @@ abstract class HeartsProtocol extends BaseCardGameTitle implements GameTitleCont
     }
 
     /**
-     * @param array<string, string> $trick
+     * @param  array<string, string>  $trick
      */
     protected function calculateTrickPoints(array $trick): int
     {

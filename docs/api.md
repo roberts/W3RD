@@ -101,6 +101,7 @@ Health monitoring and external service webhooks.
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/system/health` | API health check with database connectivity | Public |
+| `POST` | `/system/feedback` | Submit feedback, bug reports, or support requests | Public/Auth |
 | `POST` | `/webhooks/stripe` | Stripe subscription event handler | Vendor Signature |
 | `POST` | `/webhooks/apple` | Apple App Store notification handler | Vendor Signature |
 | `POST` | `/webhooks/google` | Google Play notification handler | Vendor Signature |
@@ -119,6 +120,46 @@ Response:
   "version": "1.0.0",
   "database": "connected",
   "timestamp": "2025-11-20T12:00:00Z"
+}
+```
+
+**Example: Submit Feedback**
+
+```http
+POST /v1/system/feedback
+X-Client-Key: your-client-key
+Authorization: Bearer 1|abc123... (Optional)
+Content-Type: application/json
+
+{
+  "type": "bug",
+  "content": "The game freezes when I play a red chip on column 3.",
+  "email": "player@example.com", // Required if not authenticated
+  "metadata": {
+    "url": "https://app.example.com/games/connect-four",
+    "user_agent": "Mozilla/5.0...",
+    "app_version": "1.2.0"
+  }
+}
+```
+
+Response:
+```json
+{
+  "id": 42,
+  "client_id": 5,
+  "user_id": 123,
+  "email": "player@example.com",
+  "type": "bug",
+  "content": "The game freezes when I play a red chip on column 3.",
+  "status": "pending",
+  "metadata": {
+    "url": "https://app.example.com/games/connect-four",
+    "user_agent": "Mozilla/5.0...",
+    "app_version": "1.2.0"
+  },
+  "created_at": "2025-11-23T14:30:00Z",
+  "updated_at": "2025-11-23T14:30:00Z"
 }
 ```
 

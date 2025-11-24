@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\V1\Matchmaking\LobbyController;
 use App\Http\Controllers\Api\V1\Matchmaking\ProposalController;
 use App\Http\Controllers\Api\V1\Matchmaking\QueueController;
 use App\Http\Controllers\Api\V1\System\ConfigController;
+use App\Http\Controllers\Api\V1\System\FeedbackController;
 use App\Http\Controllers\Api\V1\System\HealthController;
 use App\Http\Controllers\Api\V1\System\TimeController;
 use App\Http\Controllers\Api\V1\Webhooks\WebhookController;
@@ -52,6 +53,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/health', HealthController::class);
         Route::get('/time', TimeController::class);
         Route::get('/config', ConfigController::class);
+        Route::post('/feedback', FeedbackController::class);
     });
 
     // ========================================

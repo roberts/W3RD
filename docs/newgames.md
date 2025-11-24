@@ -1461,3 +1461,86 @@ When adding a new game, create:
 **Critical**: The `ModeRegistry` is essential for the game engine to resolve mode handlers. Without registering your mode in `app/GameEngine/ModeRegistry.php`, the game will fail to load when players attempt to create or interact with it. Each game title and its modes must be explicitly mapped in the registry's `$modeMap` array.
 
 Follow this architecture for a scalable, maintainable foundation supporting unlimited game titles.
+
+## Game Documentation Standard
+
+Every game title must include a comprehensive documentation file named `{gametitle}.md` (lowercase) located in its root directory (e.g., `app/GameTitles/TicTacToe/tictactoe.md`). This document serves as the source of truth for frontend developers and AI agents.
+
+### Required Structure
+
+#### 1. Header & Description
+Start with the game title and a high-level description of the game.
+
+```markdown
+# Tic-Tac-Toe API Documentation
+
+## Game Description
+A two-player turn-based game...
+```
+
+#### 2. Rules
+List the core rules clearly.
+
+```markdown
+## Rules
+1. **Players**: 2 players (X vs O).
+2. **Objective**: Get 3 in a row...
+```
+
+#### 3. Game Modes
+Describe each available mode, its specific win conditions, and valid actions.
+
+```markdown
+## Game Modes
+
+### Standard Mode
+- **Grid**: 3x3.
+- **Win Condition**: 3 in a row.
+- **Actions**: `place_mark`.
+```
+
+#### 4. API Endpoints
+This is the most critical section. You must document the specific JSON payloads for every action type supported by the game.
+
+**Required Sub-sections:**
+- **Submit Game Action (`POST`)**: List every `action_type` with its required `action_details` JSON structure.
+- **Get Game Details (`GET`)**: Show a full example of the response, including the `game_state`.
+- **List Games (`GET`)**: Standard list response.
+- **Get Available Actions (`GET`)**: Show how the `options` endpoint returns valid moves for the current state.
+
+**Example Action Documentation:**
+```markdown
+### 1. Submit Game Action
+**Endpoint**: `POST /api/v1/games/{game_id}/action`
+
+#### Request Body
+
+**Action: Place Mark**
+```json
+{
+    "action_type": "place_mark",
+    "action_details": {
+        "row": 1,
+        "col": 1
+    }
+}
+```
+```
+
+#### 5. Game State JSON Specification
+Provide a table detailing every field in the `game_state` object. This is essential for frontend rendering.
+
+```markdown
+## Game State JSON Specification
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `board` | `Array<Array<string\|null>>` | 3x3 Grid... |
+| `currentPlayerUlid` | `string` | ... |
+```
+
+### Best Practices
+- **Be Verbose**: Include full JSON examples.
+- **Spec-Driven**: Write for developers who have never seen the code.
+- **Update Frequently**: If you add an action or change the state structure, update this doc immediately.
+

@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserTitleLevel extends Model
 {
+    /** @use HasFactory<\Database\Factories\Gamification\UserTitleLevelFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -46,6 +47,9 @@ class UserTitleLevel extends Model
     public $incrementing = false;
 
     // Relationships
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

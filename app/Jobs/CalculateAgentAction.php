@@ -2,10 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Agents\Orchestrators\AgentService;
+use App\Agents\Scheduling\AgentSchedulingService;
+use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Services\Agents\AgentSchedulingService;
-use App\Services\Agents\AgentService;
+use App\Models\Games\Game;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -72,7 +73,7 @@ class CalculateAgentAction implements ShouldQueue
                 return;
             }
 
-            /** @var \App\Models\Auth\Agent $agent */
+            /** @var Agent $agent */
             $agent = $this->user->agent;
 
             // Get the AI logic instance
@@ -120,7 +121,7 @@ class CalculateAgentAction implements ShouldQueue
 
             // Reset error count on successful action
             if ($this->user->isAgent() && $this->user->agent) {
-                /** @var \App\Models\Auth\Agent $agentModel */
+                /** @var Agent $agentModel */
                 $agentModel = $this->user->agent;
                 $agentModel->resetErrorCount();
             }
@@ -135,7 +136,7 @@ class CalculateAgentAction implements ShouldQueue
 
             // Increment error count for the agent
             if ($this->user->isAgent() && $this->user->agent) {
-                /** @var \App\Models\Auth\Agent $agentModel */
+                /** @var Agent $agentModel */
                 $agentModel = $this->user->agent;
                 $agentModel->incrementErrorCount();
             }

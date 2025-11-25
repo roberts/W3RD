@@ -1,7 +1,8 @@
 <?php
 
 use App\Models\Auth\User;
-use App\Models\Game\Lobby;
+use App\Models\Matchmaking\Lobby;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 beforeEach(function () {
@@ -13,6 +14,8 @@ beforeEach(function () {
     Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
     Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
     Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+
+    $this->seed(ModeSeeder::class);
 });
 
 describe('Boundary Value Testing', function () {

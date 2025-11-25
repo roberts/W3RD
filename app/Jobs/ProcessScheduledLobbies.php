@@ -2,9 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Enums\LobbyStatus;
-use App\Models\Game\Lobby;
-use App\Services\GameCreationService;
+use App\GameEngine\Lifecycle\Creation\GameBuilder;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,25 +14,24 @@ class ProcessScheduledLobbies implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function handle(GameCreationService $gameCreationService): void
+    public function handle(GameBuilder $gameBuilder): void
     {
         // Find all scheduled lobbies that are due to start
-        $dueLobbies = Lobby::where('status', LobbyStatus::PENDING)
-            ->whereNotNull('scheduled_at')
-            ->where('scheduled_at', '<=', now())
+        $dueLobbies = Lobby::pending()
+            ->scheduledFor(now())
             ->get();
 
         foreach ($dueLobbies as $lobby) {
-            $this->processScheduledLobby($lobby, $gameCreationService);
+            $this->processScheduledLobby($lobby, $gameBuilder);
         }
     }
 
-    private function processScheduledLobby(Lobby $lobby, GameCreationService $gameCreationService): void
+    private function processScheduledLobby(Lobby $lobby, GameBuilder $gameBuilder): void
     {
         // Check if minimum players requirement is met
         if ($lobby->hasMinimumPlayers()) {
             // Start the game
-            $this->startGame($lobby, $gameCreationService);
+            $this->startGame($lobby, $gameBuilder);
         } else {
             // Cancel the lobby - not enough players
             $lobby->markAsCancelled();
@@ -43,13 +41,8 @@ class ProcessScheduledLobbies implements ShouldQueue
         }
     }
 
-    private function startGame(Lobby $lobby, GameCreationService $gameCreationService): void
+    private function startGame(Lobby $lobby, GameBuilder $gameBuilder): void
     {
-        $lobby->markAsReady();
-
-        // Each player's client_id is already stored in their lobby_player record
-        $gameCreationService->createFromLobby($lobby);
-
-        \Log::info("Started scheduled game for lobby {$lobby->ulid}");
+        $gameBuilder->createFromLobby($lobby);
     }
 }

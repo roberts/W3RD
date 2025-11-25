@@ -3,15 +3,18 @@
 namespace App\Models\Auth;
 
 use App\Models\Access\Client;
-use App\Models\Alert;
-use App\Models\Billing\Quota;
-use App\Models\Billing\Strike;
+use App\Models\Account\Alert;
+use App\Models\Competitions\Tournament;
+use App\Models\Competitions\TournamentUser;
 use App\Models\Content\Avatar;
-use App\Models\Game\Player;
+use App\Models\Economy\Quota;
+use App\Models\Economy\Strike;
+use App\Models\Games\Player;
 use App\Models\Gamification\Badge;
 use App\Models\Gamification\GlobalRank;
 use App\Models\Gamification\Point;
 use App\Models\Gamification\UserTitleLevel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,6 +30,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\Auth\UserFactory> */
     use Billable, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected $fillable = [
@@ -96,68 +100,129 @@ class User extends Authenticatable
         return 'player'.$paddedNumber;
     }
 
+    /**
+     * Scope to find a user by username (case-insensitive).
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeWithUsername($query, string $username)
+    {
+        return $query->where('username', strtolower($username));
+    }
+
     // Relationships
+    /**
+     * @return BelongsTo<Avatar, $this>
+     */
     public function avatar(): BelongsTo
     {
         return $this->belongsTo(Avatar::class);
     }
 
+    /**
+     * @return BelongsTo<Agent, $this>
+     */
     public function agent(): BelongsTo
     {
         return $this->belongsTo(Agent::class);
     }
 
+    /**
+     * @return HasMany<Entry, $this>
+     */
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
     }
 
+    /**
+     * @return HasMany<Player, $this>
+     */
     public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
+    /**
+     * @return HasMany<Strike, $this>
+     */
     public function strikes(): HasMany
     {
         return $this->hasMany(Strike::class);
     }
 
+    /**
+     * @return HasMany<Quota, $this>
+     */
     public function quotas(): HasMany
     {
         return $this->hasMany(Quota::class);
     }
 
+    /**
+     * @return HasMany<Point, $this>
+     */
     public function points(): HasMany
     {
         return $this->hasMany(Point::class);
     }
 
+    /**
+     * @return HasOne<GlobalRank, $this>
+     */
     public function globalRank(): HasOne
     {
         return $this->hasOne(GlobalRank::class);
     }
 
+    /**
+     * @return BelongsToMany<Badge, $this>
+     */
     public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class, 'user_badge')
             ->withPivot('earned_at');
     }
 
+    /**
+     * @return HasMany<UserTitleLevel, $this>
+     */
     public function titleLevels(): HasMany
     {
         return $this->hasMany(UserTitleLevel::class);
     }
 
+    /**
+     * @return BelongsToMany<Tournament, $this, TournamentUser>
+     */
+    public function tournaments(): BelongsToMany
+    {
+        return $this->belongsToMany(Tournament::class, 'tournament_user')
+            ->using(TournamentUser::class)
+            ->withPivot(['status', 'seed', 'placement', 'earnings'])
+            ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<SocialAccount, $this>
+     */
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
     }
 
+    /**
+     * @return HasMany<Alert, $this>
+     */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
     }
 
+    /**
+     * @return BelongsTo<Client, $this>
+     */
     public function registrationClient(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'registration_client_id');

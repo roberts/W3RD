@@ -7,17 +7,35 @@ namespace App\GameEngine\Kernel;
 use App\Enums\GameErrorCode;
 use App\GameEngine\Interfaces\GameActionHandlerInterface;
 use App\GameEngine\Interfaces\GameConfigContract;
+use App\GameEngine\Results\ActionKernelResult;
 use App\GameEngine\ValidationResult;
+use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 
+/**
+ * GameKernel: Lean action handler registry for managing game actions.
+ *
+ * Responsibilities:
+ * - Initialize and manage action handlers from config
+ * - Validate actions using appropriate handlers
+ * - Apply actions to game state
+ * - Aggregate available actions across all handlers
+ *
+ * Does NOT handle:
+ * - Validation orchestration (pacing/sequence checks) - BaseGameTitle does this
+ * - Turn advancement - TurnManager handles this
+ * - State redaction - BaseGameTitle delegates to traits
+ */
 class GameKernel
 {
     /** @var array<string, GameActionHandlerInterface> */
     protected array $handlers = [];
 
     public function __construct(
-        protected GameConfigContract $config
+        private GameConfigContract $config,
+        private ?Container $container = null,
     ) {
+        $this->container = $container ?? app();
         $this->initializeHandlers();
     }
 
@@ -28,9 +46,32 @@ class GameKernel
             if (! class_exists($handlerClass)) {
                 throw new InvalidArgumentException("Handler class {$handlerClass} not found.");
             }
-            // In a real app, we might use the container to resolve this to allow dependency injection
-            $this->handlers[$actionClass] = new $handlerClass($config['rules'] ?? []);
+
+            // Use container to resolve handlers, allowing dependency injection
+            $rules = $config['rules'] ?? [];
+            $this->handlers[$actionClass] = $this->container->makeWith($handlerClass, ['rules' => $rules]);
         }
+    }
+
+    /**
+     * Process an action (validate + apply).
+     *
+     * This is the primary entry point for the kernel. It validates the action
+     * and applies it if valid, returning a result that indicates success or failure.
+     *
+     * This method keeps the kernel pure - no side effects, just validation and application.
+     */
+    public function processAction(object $state, object $action): ActionKernelResult
+    {
+        $validationResult = $this->validateAction($state, $action);
+
+        if (! $validationResult->isValid) {
+            return ActionKernelResult::invalid($validationResult);
+        }
+
+        $newState = $this->applyAction($state, $action);
+
+        return ActionKernelResult::valid($newState);
     }
 
     public function validateAction(object $state, object $action): ValidationResult
@@ -60,6 +101,9 @@ class GameKernel
         return $handler->apply($state, $action);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAvailableActions(object $state, string $playerUlid): array
     {
         $options = [];
@@ -69,9 +113,6 @@ class GameKernel
             $actionOptions = $handler->getAvailableOptions($state, $playerUlid);
 
             if (! empty($actionOptions)) {
-                // We use the class name (or a slug if we had one) as the key
-                // For the API, we might want to map this to a cleaner string key
-                // But for now, let's use the class basename or a key from config if we add it
                 $key = $this->getActionKey($actionClass);
                 $options[$key] = $actionOptions;
             }

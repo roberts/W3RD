@@ -7,10 +7,13 @@ use App\Models\Auth\User;
 use DrewRoberts\Media\Models\Image;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Roberts\Support\Traits\HasCreator;
 
 class Avatar extends Model
 {
+    /** @use HasFactory<\Database\Factories\Content\AvatarFactory> */
     use HasCreator, HasFactory;
 
     protected $fillable = [
@@ -25,12 +28,18 @@ class Avatar extends Model
     ];
 
     // Relationships
-    public function image()
+    /**
+     * @return BelongsTo<Image, $this>
+     */
+    public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class);
     }
 
-    public function users()
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }

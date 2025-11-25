@@ -11,7 +11,7 @@ enum GameLifecycle: string
 {
     /**
      * The game is independent. Players/Host control the start.
-     * Examples: Quickplay Match, Private Lobby, Solo Game
+     * Examples: Queue Match, Private Lobby, Solo Game
      */
     case STANDALONE = 'standalone';
 

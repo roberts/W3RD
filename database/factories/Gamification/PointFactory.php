@@ -3,7 +3,7 @@
 namespace Database\Factories\Gamification;
 
 use App\Models\Auth\User;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use App\Models\Gamification\Point;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

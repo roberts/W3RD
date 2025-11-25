@@ -110,7 +110,26 @@ Already have a few tables & need to rethink the best way to manage this data. Wi
 - Blocked Users - for user moderation
 - Reported Content - for community management
 
-## 6\. `create_clans_table` (Social Structure)
+## 6. Real-Time Data Feeds (SSE Streams)
+
+### Global Chat Feed
+
+*   **Concept:** Provide a Server-Sent Events (SSE) stream for global platform chat, enabling real-time community interaction visible to all users.
+*   **Endpoint:** `GET /v1/feeds/chat/global`
+*   **Technology:** Native PHP SSE implementation (consistent with other feed endpoints)
+*   **Implementation:**
+    1.  **Chat Message Storage:** Create a `chat_messages` table: `id`, `user_id`, `message`, `channel` (e.g., 'global', 'game-{ulid}'), `created_at`.
+    2.  **Broadcast Logic:** When a chat message is posted via `POST /v1/chat/global`, store it in the database and push to all connected SSE clients.
+    3.  **SSE Stream:** The endpoint would stream new messages as they arrive, including user details (username, avatar) and timestamp.
+    4.  **Moderation:** Implement rate limiting and profanity filtering. Consider storing `is_deleted` flag for moderation.
+*   **Use Cases:**
+    *   Platform-wide announcements and community engagement
+    *   Players discovering others to challenge or befriend
+    *   Social atmosphere for spectators and waiting players
+*   **Future Enhancement:** Could expand to support multiple channels (`/feeds/chat/{channel}`) for game-specific or topic-based chat rooms.
+*   **Note:** This is planned for v2 as it requires additional moderation infrastructure and may have higher scaling considerations than other feeds.
+
+## 7\. `create_clans_table` (Social Structure)
 
 Defines persistent groups for collaboration and competition.
 
@@ -455,7 +474,7 @@ When actions are invalid, provide actionable suggestions showing users what they
 ### Implementation
 
 #### Expand ValidationResult Class
-**File:** `app/Games/ValidationResult.php`
+**File:** `app/GameTitles/ValidationResult.php`
 
 ```php
 class ValidationResult
@@ -714,7 +733,7 @@ function showActionSuggestions(suggestions, hints) {
 Add to base game classes:
 
 ```php
-// app/Games/ConnectFour/BaseConnectFour.php
+// app/GameTitles/ConnectFour/BaseConnectFour.php
 protected function getAvailableColumnsWithContext(GameState $gameState): array
 {
     $columns = [];
@@ -732,7 +751,7 @@ protected function getAvailableColumnsWithContext(GameState $gameState): array
     return $columns;
 }
 
-// app/Games/Checkers/BaseCheckers.php
+// app/GameTitles/Checkers/BaseCheckers.php
 protected function findAvailableJumps(GameState $gameState, string $playerUlid): array
 {
     $jumps = [];

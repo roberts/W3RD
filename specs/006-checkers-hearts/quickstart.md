@@ -10,23 +10,23 @@ This guide provides instructions for adding a new game to the platform, using th
 Create a new directory for your game inside `app/Games`.
 
 ```bash
-mkdir app/Games/TicTacToe
-mkdir app/Games/TicTacToe/Modes
+mkdir app/GameTitles/TicTacToe
+mkdir app/GameTitles/TicTacToe/Modes
 ```
 
 ### Step 2: Create the `GameTitle` Class
 
 This class is the main entry point for your game.
 
-**File**: `app/Games/TicTacToe/TicTacToeTitle.php`
+**File**: `app/GameTitles/TicTacToe/TicTacToeTitle.php`
 
 ```php
 <?php
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
-use App\Games\BaseBoardGameTitle;
-use App\Games\Contracts\GameTitleContract;
+use App\GameTitles\BaseBoardGameTitle;
+use App\GameTitles\Contracts\GameTitleContract;
 
 class TicTacToeTitle extends BaseBoardGameTitle implements GameTitleContract
 {
@@ -58,16 +58,16 @@ class TicTacToeTitle extends BaseBoardGameTitle implements GameTitleContract
 
 This class contains the specific rules for the "Standard" mode of your game.
 
-**File**: `app/Games/TicTacToe/Modes/Standard.php`
+**File**: `app/GameTitles/TicTacToe/Modes/Standard.php`
 
 ```php
 <?php
 
-namespace App\Games\TicTacToe\Modes;
+namespace App\GameTitles\TicTacToe\Modes;
 
-use App\Games\Contracts\GameModeContract;
-use App\Games\Contracts\ActionContract;
-use App\Games\TicTacToe\GameState;
+use App\GameTitles\Contracts\GameModeContract;
+use App\GameTitles\Contracts\ActionContract;
+use App\GameTitles\TicTacToe\GameState;
 
 class Standard implements GameModeContract
 {
@@ -97,13 +97,13 @@ class Standard implements GameModeContract
 
 These are simple data objects.
 
-**File**: `app/Games/TicTacToe/GameState.php`
+**File**: `app/GameTitles/TicTacToe/GameState.php`
 ```php
 <?php
 
-namespace App\Games\TicTacToe;
+namespace App\GameTitles\TicTacToe;
 
-use App\Games\BaseGameState;
+use App\GameTitles\BaseGameState;
 
 final class GameState extends BaseGameState
 {

@@ -49,6 +49,7 @@ class AgentSeeder extends Seeder
      * Create an agent with a corresponding user.
      *
      * @param  string  $logicClass  Short class name (e.g., 'RandomLogic')
+     * @param  array<int, string>|string  $supportedGames
      */
     protected function createAgent(
         string $name,

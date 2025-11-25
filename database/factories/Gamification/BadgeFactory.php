@@ -21,7 +21,7 @@ class BadgeFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->words(2, true);
+        $name = implode(' ', fake()->words(2));
 
         return [
             'slug' => Str::slug($name),

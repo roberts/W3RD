@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Matchmaking\Queue\Actions;
+
+use App\DataTransferObjects\Matchmaking\QueueJoinResult;
+use App\Enums\GameTitle;
+use App\Enums\PlayerActivityState;
+use App\GameEngine\Player\PlayerActivityManager;
+use App\Models\Auth\User;
+use Illuminate\Support\Facades\Redis;
+
+class JoinQueueAction
+{
+    public function __construct(private PlayerActivityManager $playerActivityManager) {}
+
+    /**
+     * Add a user to the matchmaking queue.
+     */
+    public function execute(User $user, GameTitle $gameTitle, string $gameMode, int $clientId): QueueJoinResult
+    {
+        // Check for cooldown
+        $cooldownKey = "cooldown:queue:{$user->id}";
+        if (Redis::exists($cooldownKey)) {
+            $ttl = Redis::ttl($cooldownKey);
+
+            return QueueJoinResult::cooldown($ttl);
+        }
+
+        // Add to queue (sorted set by skill level)
+        $queueKey = "queue:{$gameTitle->value}:{$gameMode}";
+        $skillLevel = $this->getUserSkillLevel($user, $gameTitle);
+
+        Redis::zadd($queueKey, $skillLevel, (string) $user->id);
+
+        // Store join timestamp
+        Redis::hset('queue:timestamps', (string) $user->id, now()->timestamp);
+
+        // Store client_id for this player
+        Redis::hset('queue:clients', (string) $user->id, (string) $clientId);
+
+        // Set player activity state to IN_QUEUE
+        $this->playerActivityManager->setState($user->id, PlayerActivityState::IN_QUEUE);
+
+        return QueueJoinResult::success($gameTitle->value, $gameMode);
+    }
+
+    /**
+     * Get user skill level for a game title
+     */
+    private function getUserSkillLevel(User $user, GameTitle $gameTitle): int
+    {
+        // Get user's skill level from their title level
+        $titleLevel = $user->titleLevels()
+            ->where('game_title', $gameTitle->value)
+            ->first();
+
+        return $titleLevel->level ?? 1;
+    }
+}

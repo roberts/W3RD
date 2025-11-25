@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Auth\User;
 
 describe('Dashboard', function () {
     describe('Guest Access', function () {

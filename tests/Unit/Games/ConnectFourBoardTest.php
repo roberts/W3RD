@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
-use App\Games\ConnectFour\ConnectFourBoard;
+use App\GameTitles\ConnectFour\ConnectFourBoard;
 use Illuminate\Support\Str;
 
 describe('ConnectFour ConnectFourBoard', function () {

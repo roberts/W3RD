@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Requests\Economy;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class VerifyGoogleReceiptRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'product_id' => 'required|string',
+            'token' => 'required|string',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'product_id.required' => 'Product ID is required',
+            'product_id.string' => 'Product ID must be a string',
+            'token.required' => 'Token is required',
+            'token.string' => 'Token must be a string',
+        ];
+    }
+}

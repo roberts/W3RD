@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SocialAccount extends Model
 {
+    /** @use HasFactory<\Database\Factories\Auth\SocialAccountFactory> */
     use HasFactory;
 
     /**
@@ -25,6 +26,8 @@ class SocialAccount extends Model
 
     /**
      * Get the user that owns the social account.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

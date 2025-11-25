@@ -2,9 +2,11 @@
 
 use App\Enums\GameStatus as GameStatusEnum;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 use Tests\Feature\Helpers\GameHelper;
 
 describe('Concurrent Game Actions', function () {
@@ -13,6 +15,8 @@ describe('Concurrent Game Actions', function () {
         Redis::shouldReceive('get')->andReturn(null)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
         Redis::shouldReceive('del')->andReturn(true)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     // Helper function to create proper game_state structure
@@ -64,19 +68,23 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // Player 1 makes valid move
-        $response1 = $this->actingAs($user1)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 0],
-        ]);
+        $response1 = $this->actingAs($user1)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 0],
+            ]);
 
         // Player 2 tries to make move simultaneously (should be rejected)
         // Note: In tests, these run sequentially, so after player1's move completes,
         // it IS now player2's turn. To test true concurrency, this would need
         // async processing. For now, expect player 2 to succeed since it's their turn.
-        $response2 = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 1],
-        ]);
+        $response2 = $this->actingAs($user2)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 1],
+            ]);
 
         expect($response1->status())->toBe(200);
         expect($response2->status())->toBe(200); // Succeeds because tests are sequential
@@ -87,14 +95,14 @@ describe('Concurrent Game Actions', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user1, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player1 = $game->players()->where('user_id', $user1->id)->first();
-        $player2 = $game->players()->where('user_id', $user2->id)->first();
+        $player1 = $game->getPlayerForUser($user1->id);
+        $player2 = $game->getPlayerForUser($user2->id);
 
         $game->update([
             'game_state' => $createGameState([$player1, $player2], $player1->ulid),
@@ -103,10 +111,12 @@ describe('Concurrent Game Actions', function () {
         // Make 5 rapid moves
         for ($i = 0; $i < 5; $i++) {
             $currentUser = $i % 2 === 0 ? $user1 : $user2;
-            $response = $this->actingAs($currentUser)->postJson("/api/v1/games/{$game->ulid}/action", [
-                'action_type' => 'drop_piece',
-                'action_details' => ['column' => $i % 7],
-            ]);
+            $response = $this->actingAs($currentUser)
+                ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                    'action_type' => 'drop_piece',
+                    'action_details' => ['column' => $i % 7],
+                ]);
 
             expect($response->status())->toBe(200);
 
@@ -122,13 +132,13 @@ describe('Concurrent Game Actions', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -136,15 +146,19 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // Submit same action twice rapidly
-        $response1 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 3],
-        ]);
+        $response1 = $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
 
-        $response2 = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 3],
-        ]);
+        $response2 = $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
 
         // First should succeed, second should fail (not player's turn anymore)
         expect($response1->status())->toBe(200);
@@ -156,13 +170,13 @@ describe('Concurrent Game Actions', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $originalBoard = array_fill(0, 6, array_fill(0, 7, null));
@@ -173,10 +187,12 @@ describe('Concurrent Game Actions', function () {
         $originalTurn = $game->turn_number;
 
         // Submit invalid action
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 99], // Invalid column
-        ]);
+        $response = $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 99], // Invalid column
+            ]);
 
         expect($response->status())->toBe(422); // Game rule violation: invalid column
 
@@ -192,13 +208,13 @@ describe('Concurrent Game Actions', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -206,10 +222,12 @@ describe('Concurrent Game Actions', function () {
         ]);
 
         // This tests that the action is atomic - either fully completes or fully rolls back
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 3],
-        ]);
+        $response = $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
 
         // Should complete successfully
         expect($response->status())->toBe(200);
@@ -227,6 +245,8 @@ describe('Database Transaction Safety', function () {
         Redis::shouldReceive('get')->andReturn(null)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
         Redis::shouldReceive('del')->andReturn(true)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     // Reuse helper function from parent scope
@@ -257,13 +277,13 @@ describe('Database Transaction Safety', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -273,10 +293,12 @@ describe('Database Transaction Safety', function () {
         $originalState = $game->game_state;
 
         // Invalid action should not persist any changes
-        $response = $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => -1], // Invalid
-        ]);
+        $response = $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => -1], // Invalid
+            ]);
 
         $game->refresh();
 
@@ -289,13 +311,13 @@ describe('Database Transaction Safety', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player = $game->players()->where('user_id', $user->id)->first();
+        $player = $game->getPlayerForUser($user->id);
         $player2 = $game->players()->where('user_id', '!=', $user->id)->first();
 
         $game->update([
@@ -303,10 +325,12 @@ describe('Database Transaction Safety', function () {
         ]);
 
         // Submit invalid action
-        $this->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 999],
-        ]);
+        $this->actingAs($user)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 999],
+            ]);
 
         $game->refresh();
 
@@ -321,13 +345,13 @@ describe('Database Transaction Safety', function () {
         $user2 = User::factory()->create();
 
         $game = GameHelper::createGame([
-            'status' => \App\Enums\GameStatus::ACTIVE,
+            'status' => GameStatusEnum::ACTIVE,
         ], [
             ['user' => $user1, 'position_id' => 1],
             ['user' => $user2, 'position_id' => 2],
         ]);
 
-        $player1 = $game->players()->where('user_id', $user1->id)->first();
+        $player1 = $game->getPlayerForUser($user1->id);
         $player2 = $game->players()->where('user_id', '!=', $user1->id)->first();
 
         // Set up board almost full with winning condition possible
@@ -341,10 +365,12 @@ describe('Database Transaction Safety', function () {
         ]);
 
         // Make winning move
-        $response = $this->actingAs($user1)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 3],
-        ]);
+        $response = $this->actingAs($user1)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 3],
+            ]);
 
         $game->refresh();
 
@@ -352,10 +378,12 @@ describe('Database Transaction Safety', function () {
         expect($game->status)->toBe(GameStatusEnum::COMPLETED);
 
         // Try to make another move (should fail - game completed)
-        $response2 = $this->actingAs($user2)->postJson("/api/v1/games/{$game->ulid}/action", [
-            'action_type' => 'drop_piece',
-            'action_details' => ['column' => 4],
-        ]);
+        $response2 = $this->actingAs($user2)
+            ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
+            ->postJson("/api/v1/games/{$game->ulid}/action", [
+                'action_type' => 'drop_piece',
+                'action_details' => ['column' => 4],
+            ]);
 
         expect($response2->status())->toBe(422); // Game rule violation: game completed
     });

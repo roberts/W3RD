@@ -3,7 +3,7 @@
 namespace App\Agents\Logic;
 
 use App\Interfaces\AgentContract;
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 use Illuminate\Support\Facades\Log;
 
 /**

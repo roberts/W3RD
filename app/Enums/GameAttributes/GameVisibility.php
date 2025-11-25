@@ -15,7 +15,7 @@ enum GameVisibility: string
      * Everyone sees everything. No data is sanitized.
      * Examples: Chess, Checkers, Go
      */
-    case PERFECT_INFORMATION = 'perfect_information';
+    case FULL_INFORMATION = 'full_information';
 
     /**
      * Players have private data (hands/inventories) hidden from others.

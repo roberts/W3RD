@@ -261,18 +261,18 @@ This document defines the test data structures and relationships needed for comp
 - `requester_id`: foreign key (references users)
 - `opponent_id`: foreign key (references users)
 - `status`: enum (pending, accepted, declined, expired)
-- `new_game_id`: foreign key (nullable)
+- `game_id`: foreign key (nullable)
 - `expires_at`: timestamp
 - `responded_at`: timestamp (nullable)
 - `created_at`, `updated_at`: timestamps
 
 **Test Variations**:
 - Pending request (status = pending)
-- Accepted request (status = accepted, new_game_id set)
+- Accepted request (status = accepted, game_id set)
 - Declined request (status = declined)
 - Expired request (status = expired)
 
-**Factory State Methods**: Already exists in `database/factories/Game/RematchRequestFactory.php`
+**Factory State Methods**: Already exists in `database/factories/Game/ProposalFactory.php`
 
 ## Test Data Relationships
 
@@ -320,7 +320,7 @@ invited → joined → ready
 
 ### RematchRequest Status Flow
 ```text
-pending → accepted (new_game_id set)
+pending → accepted (game_id set)
         ├→ declined
         └→ expired (after expires_at)
 ```

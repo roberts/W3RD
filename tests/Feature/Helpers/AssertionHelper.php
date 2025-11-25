@@ -19,8 +19,13 @@ class AssertionHelper
      */
     public static function assertValidationError(TestResponse $response, string $field, ?string $message = null): void
     {
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors($field);
+        $response->assertStatus(422);
+
+        // Check custom error format with errors array
+        $errors = $response->json('errors');
+        $hasFieldError = collect($errors)->contains('field', $field);
+
+        expect($hasFieldError)->toBeTrue("Expected validation error for field '{$field}' but it was not found.");
 
         if ($message) {
             $response->assertJsonFragment(['message' => $message]);

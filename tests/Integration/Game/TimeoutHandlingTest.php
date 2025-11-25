@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\GameStatusEnum;
-use App\Games\Hearts\Handlers\ForfeitHandler;
-use App\Games\Hearts\Handlers\NoneHandler;
-use App\Games\Hearts\Handlers\PassHandler;
-use App\Models\Game\Game;
-use App\Models\Game\Player;
+use App\GameTitles\Hearts\Handlers\ForfeitHandler;
+use App\GameTitles\Hearts\Handlers\NoneHandler;
+use App\GameTitles\Hearts\Handlers\PassHandler;
+use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 describe('Timeout Handling Across Game States', function () {
     describe('Timeout During Card Passing Phase', function () {

@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
-use App\Models\Game\Player;
+use App\Models\Games\Mode;
+use App\Models\Games\Player;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -25,17 +27,20 @@ describe('Hearts Game API', function () {
         Redis::shouldReceive('hmset')->andReturn(true)->byDefault();
         Redis::shouldReceive('hgetall')->andReturn([])->byDefault();
         Redis::shouldReceive('exists')->andReturn(false)->byDefault();
+
+        $this->seed(ModeSeeder::class);
     });
 
     describe('Game Creation', function () {
         test('can create hearts game through lobby', function () {
             $users = User::factory()->count(4)->create();
+            $mode = Mode::hearts();
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'hearts',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'max_players' => 4,
                     'is_public' => true,
                 ]);
@@ -46,7 +51,7 @@ describe('Hearts Game API', function () {
             // Other players join
             foreach ([$users[1], $users[2], $users[3]] as $user) {
                 $this->actingAs($user)
-                    ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$user->username}", [
                         'status' => 'accepted',
                     ])
                     ->assertStatus(200);
@@ -54,7 +59,7 @@ describe('Hearts Game API', function () {
 
             // Check if game was auto-started
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -78,12 +83,13 @@ describe('Hearts Game API', function () {
 
         test('hearts game requires exactly 4 players', function () {
             $users = User::factory()->count(3)->create();
+            $mode = Mode::hearts();
 
             // Create lobby with 4 max players
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'hearts',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'min_players' => 4,
                     'max_players' => 4,
                     'is_public' => true,
@@ -95,7 +101,7 @@ describe('Hearts Game API', function () {
             // Only 2 other players join (3 total, need 4)
             foreach ([$users[1], $users[2]] as $user) {
                 $this->actingAs($user)
-                    ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                    ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$user->username}", [
                         'status' => 'accepted',
                     ])
                     ->assertStatus(200);
@@ -103,7 +109,7 @@ describe('Hearts Game API', function () {
 
             // Try to start game with only 3 players - should fail
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
             // Game should not be created (game.ulid should be null)
             expect($lobbyCheck->json('data.lobby.status'))->toBe('pending')
@@ -115,12 +121,13 @@ describe('Hearts Game API', function () {
         describe('Pass Cards Phase', function () {
             test('can pass cards in hearts game', function () {
                 $users = User::factory()->count(4)->create();
+                $mode = Mode::hearts();
 
-                // Create and start game
+                // Create lobby and start game
                 $lobbyResponse = $this->actingAs($users[0])
-                    ->postJson('/api/v1/games/lobbies', [
+                    ->postJson('/api/v1/matchmaking/lobbies', [
                         'game_title' => 'hearts',
-                        'game_mode' => 'standard',
+                        'mode_id' => $mode->id,
                         'max_players' => 4,
                         'is_public' => true,
                     ]);
@@ -129,13 +136,13 @@ describe('Hearts Game API', function () {
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
                     $this->actingAs($user)
-                        ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                        ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }
 
                 $lobbyCheck = $this->actingAs($users[0])
-                    ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                    ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -155,7 +162,7 @@ describe('Hearts Game API', function () {
                 $currentPlayerUlid = $gameState['currentPlayerUlid'];
 
                 // Find the user object for current player
-                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $player = Player::withUlid($currentPlayerUlid)->first();
                 $currentUser = $player->user;
 
                 // Pass cards (using current player to pass authorization)
@@ -187,12 +194,13 @@ describe('Hearts Game API', function () {
         describe('Playing Cards', function () {
             test('can play card in hearts game', function () {
                 $users = User::factory()->count(4)->create();
+                $mode = Mode::hearts();
 
                 // Create and start game
                 $lobbyResponse = $this->actingAs($users[0])
-                    ->postJson('/api/v1/games/lobbies', [
+                    ->postJson('/api/v1/matchmaking/lobbies', [
                         'game_title' => 'hearts',
-                        'game_mode' => 'standard',
+                        'mode_id' => $mode->id,
                         'max_players' => 4,
                         'is_public' => true,
                     ]);
@@ -201,13 +209,13 @@ describe('Hearts Game API', function () {
 
                 foreach ([$users[1], $users[2], $users[3]] as $user) {
                     $this->actingAs($user)
-                        ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$user->username}", [
+                        ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$user->username}", [
                             'status' => 'accepted',
                         ]);
                 }
 
                 $lobbyCheck = $this->actingAs($users[0])
-                    ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                    ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
                 $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -227,7 +235,7 @@ describe('Hearts Game API', function () {
                 $currentPlayerUlid = $gameState['currentPlayerUlid'];
 
                 // Find the user object for current player
-                $player = \App\Models\Game\Player::where('ulid', $currentPlayerUlid)->first();
+                $player = Player::withUlid($currentPlayerUlid)->first();
                 $currentUser = $player->user;
 
                 // Play a card (C2 is required to start)

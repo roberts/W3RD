@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Games\ConnectFour\Actions\PopOut;
-use App\Games\ConnectFour\Modes\FiveMode;
-use App\Games\ConnectFour\Modes\PopOutMode;
-use App\Models\Game\Game;
+use App\GameTitles\ConnectFour\Actions\PopOut;
+use App\GameTitles\ConnectFour\Modes\FiveMode;
+use App\GameTitles\ConnectFour\Modes\PopOutMode;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('ConnectFour Modes', function () {
@@ -19,7 +19,6 @@ describe('ConnectFour Modes', function () {
         $config = $method->invoke($mode);
 
         $actions = $config->getActionRegistry();
-
         expect($actions)->toHaveKey(PopOut::class);
     });
 

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\ConnectFour\ConnectFourBoard;
-use App\Games\ConnectFour\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\GameTitles\ConnectFour\ConnectFourBoard;
+use App\GameTitles\ConnectFour\Modes\StandardMode;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('ConnectFour Game Logic', function () {

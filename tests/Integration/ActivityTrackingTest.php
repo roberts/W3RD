@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\Quickplay\JoinQuickplayQueueAction;
-use App\Actions\Quickplay\LeaveQuickplayQueueAction;
+use App\Actions\Queue\JoinQueueAction;
+use App\Actions\Queue\LeaveQueueAction;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
-use App\Enums\LobbyStatus;
 use App\Enums\PlayerActivityState;
+use App\GameEngine\Lifecycle\Creation\GameBuilder;
+use App\GameEngine\Player\PlayerActivityManager;
+use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Lobby;
-use App\Services\GameCreationService;
-use App\Services\PlayerActivityService;
+use App\Models\Games\Game;
+use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 
@@ -49,43 +49,43 @@ describe('Activity Tracking in Game Creation', function () {
         Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
 
-        $this->activityService = app(PlayerActivityService::class);
-        $this->gameCreationService = app(GameCreationService::class);
+        $this->activityManager = app(PlayerActivityManager::class);
+        $this->gameBuilder = app(GameBuilder::class);
     });
 
-    describe('quickplay queue', function () {
-        it('sets IN_QUEUE when joining quickplay', function () {
+    describe('matchmaking queue', function () {
+        it('sets IN_QUEUE when joining queue', function () {
             $user = User::factory()->create();
-            $joinAction = new JoinQuickplayQueueAction;
+            $joinAction = new JoinQueueAction;
 
             $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IN_QUEUE);
         });
 
-        it('sets IDLE when leaving quickplay queue', function () {
+        it('sets IDLE when leaving queue', function () {
             $user = User::factory()->create();
 
             // Join queue first
-            $joinAction = new JoinQuickplayQueueAction;
+            $joinAction = new JoinQueueAction;
             $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
 
             // Then leave
-            $leaveAction = new LeaveQuickplayQueueAction;
-            $leaveAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard');
+            $leaveAction = new LeaveQueueAction;
+            $leaveAction->execute($user);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IDLE);
         });
     });
 
-    describe('game creation from quickplay', function () {
-        it('sets IN_GAME for both players when creating from quickplay match', function () {
+    describe('game creation from queue', function () {
+        it('sets IN_GAME for both players when creating from queue match', function () {
             $user1 = User::factory()->create();
             $user2 = User::factory()->create();
 
-            // Simulate quickplay match data in Redis
+            // Simulate queue match data in Redis
             $matchId = 'test-match-123';
-            $matchKey = "quickplay:match:{$matchId}";
+            $matchKey = "queue:match:{$matchId}";
             Redis::hmset($matchKey, [
                 'game_title' => 'connect-four',
                 'game_mode' => 'standard',
@@ -93,7 +93,7 @@ describe('Activity Tracking in Game Creation', function () {
                 'player_'.$user2->id.'_client' => '1',
             ]);
 
-            $game = $this->gameCreationService->createFromQuickplayMatch(
+            $game = $this->gameBuilder->createFromQueueMatch(
                 [$user1->id, $user2->id],
                 $matchId
             );
@@ -143,7 +143,7 @@ describe('Activity Tracking in Game Creation', function () {
                 'status' => 'accepted',
             ]);
 
-            $game = $this->gameCreationService->createFromLobby($lobby);
+            $game = $this->gameBuilder->createFromLobby($lobby);
 
             expect($game->status)->toBe(GameStatus::ACTIVE)
                 ->and($this->activityService->getState($host->id))->toBe(PlayerActivityState::IN_GAME)
@@ -190,8 +190,8 @@ describe('Activity Tracking in Game Creation', function () {
             $user2 = User::factory()->create();
 
             // Set both in game
-            $this->activityService->setState($user1->id, PlayerActivityState::IN_GAME);
-            $this->activityService->setState($user2->id, PlayerActivityState::IN_GAME);
+            $this->activityManager->setState($user1->id, PlayerActivityState::IN_GAME);
+            $this->activityManager->setState($user2->id, PlayerActivityState::IN_GAME);
 
             // Simulate game completion (done via GameCompleted event listener)
             $this->activityService->setState($user1->id, PlayerActivityState::IDLE);

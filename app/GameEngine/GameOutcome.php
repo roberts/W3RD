@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\GameEngine;
 
 use App\Enums\OutcomeType;
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
 /**
  * Result of checking game end conditions.
@@ -19,22 +22,23 @@ use App\Enums\OutcomeType;
  * Example usage:
  * ```php
  * // Simple win
- * return new GameOutcome(
- *     isFinished: true,
- *     winnerUlid: $playerUlid,
- *     type: OutcomeType::WIN,
- *     details: ['reason' => 'four_in_a_row']
- * );
+ * GameOutcome::from([
+ *     'isFinished' => true,
+ *     'winnerUlid' => $playerUlid,
+ *     'type' => OutcomeType::WIN,
+ *     'details' => ['reason' => 'four_in_a_row']
+ * ]);
  *
  * // Draw
- * return new GameOutcome(
- *     isFinished: true,
- *     type: OutcomeType::DRAW,
- *     details: ['reason' => 'board_full']
- * );
+ * GameOutcome::from([
+ *     'isFinished' => true,
+ *     'type' => OutcomeType::DRAW,
+ *     'details' => ['reason' => 'board_full']
+ * ]);
  * ```
  */
-class GameOutcome
+#[MapName(SnakeCaseMapper::class)]
+class GameOutcome extends Data
 {
     /**
      * Create a new game outcome.
@@ -43,22 +47,31 @@ class GameOutcome
      * @param  string|null  $winnerUlid  ULID of the winning player, or null if no winner yet
      * @param  int|null  $winnerPosition  Position of the winning player (1-based)
      * @param  OutcomeType|null  $type  The type of outcome (win, draw, etc.)
-     * @param  array  $details  Flexible game-specific details (reason, scores, rankings, etc.)
+     * @param  array<string, mixed>  $details  Flexible game-specific details (reason, scores, rankings, etc.)
      */
     public function __construct(
-        public readonly bool $isFinished,
-        public readonly ?string $winnerUlid = null,
-        public readonly ?int $winnerPosition = null,
-        public readonly ?OutcomeType $type = null,
-        public readonly array $details = [],
+        public bool $isFinished,
+        public ?string $winnerUlid = null,
+        public ?int $winnerPosition = null,
+        public ?OutcomeType $type = null,
+        public array $details = [],
+        public mixed $gameState = null,
     ) {}
 
     /**
      * Create an outcome for a game still in progress.
      */
-    public static function inProgress(): self
+    public static function inProgress(mixed $gameState = null): self
     {
-        return new self(isFinished: false);
+        return new self(isFinished: false, gameState: $gameState);
+    }
+
+    /**
+     * Get the game state.
+     */
+    public function getGameState(): mixed
+    {
+        return $this->gameState;
     }
 
     /**
@@ -67,7 +80,7 @@ class GameOutcome
      * @param  string  $winnerUlid  ULID of the winning player
      * @param  int|null  $winnerPosition  Position of the winning player
      * @param  string|null  $reason  Machine-readable reason for the win
-     * @param  array  $additionalDetails  Additional details to merge into the details array
+     * @param  array<string, mixed>  $additionalDetails  Additional details to merge into the details array
      */
     public static function win(string $winnerUlid, ?int $winnerPosition = null, ?string $reason = null, array $additionalDetails = []): self
     {
@@ -89,7 +102,7 @@ class GameOutcome
      * Create an outcome for a draw.
      *
      * @param  string|null  $reason  Machine-readable reason for the draw
-     * @param  array  $additionalDetails  Additional details to merge into the details array
+     * @param  array<string, mixed>  $additionalDetails  Additional details to merge into the details array
      */
     public static function draw(?string $reason = null, array $additionalDetails = []): self
     {
@@ -103,21 +116,5 @@ class GameOutcome
             type: OutcomeType::DRAW,
             details: $details
         );
-    }
-
-    /**
-     * Convert to array for API responses and storage.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'is_finished' => $this->isFinished,
-            'winner_ulid' => $this->winnerUlid,
-            'winner_position' => $this->winnerPosition,
-            'type' => $this->type?->value,
-            'details' => $this->details,
-        ];
     }
 }

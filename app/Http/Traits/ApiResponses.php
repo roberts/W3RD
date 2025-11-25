@@ -13,6 +13,8 @@ trait ApiResponses
      * Return a standardized error response.
      *
      * Format: {"message": "...", "error_code": "...", "errors": {...}}
+     *
+     * @param  array<string, mixed>|null  $errors
      */
     protected function errorResponse(
         string $message,
@@ -57,6 +59,11 @@ trait ApiResponses
      * Return a paginated collection with data, links, and meta.
      *
      * Format: {"data": [...], "links": {...}, "meta": {...}}
+     *
+     * @template TKey of int|string
+     * @template TValue
+     *
+     * @param  LengthAwarePaginator<TKey, TValue>  $paginator
      */
     protected function collectionResponse(
         LengthAwarePaginator $paginator,
@@ -162,6 +169,8 @@ trait ApiResponses
 
     /**
      * Return a standardized 422 validation error response.
+     *
+     * @param  array<string, mixed>  $errors
      */
     protected function validationErrorResponse(string $message, array $errors): JsonResponse
     {

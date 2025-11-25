@@ -7,10 +7,12 @@ use App\Models\Auth\Entry;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Roberts\Support\Traits\HasCreator;
 
 class Client extends Model
 {
+    /** @use HasFactory<\Database\Factories\Access\ClientFactory> */
     use HasCreator, HasFactory;
 
     protected $fillable = [
@@ -39,12 +41,18 @@ class Client extends Model
     }
 
     // Relationships
-    public function entries()
+    /**
+     * @return HasMany<Entry, $this>
+     */
+    public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
     }
 
-    public function registeredUsers()
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function registeredUsers(): HasMany
     {
         return $this->hasMany(User::class, 'registration_client_id');
     }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Games\ConnectFour\ConnectFourArbiter;
-use App\Games\ConnectFour\ConnectFourBoard;
-use App\Models\Game\Game;
+use App\GameTitles\ConnectFour\ConnectFourArbiter;
+use App\GameTitles\ConnectFour\ConnectFourBoard;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('ConnectFour Win Conditions', function () {

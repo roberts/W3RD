@@ -5,9 +5,11 @@ namespace App\Models\Auth;
 use App\Models\Access\Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Entry extends Model
 {
+    /** @use HasFactory<\Database\Factories\Auth\EntryFactory> */
     use HasFactory;
 
     public $timestamps = false;
@@ -28,12 +30,18 @@ class Entry extends Model
     ];
 
     // Relationships
-    public function user()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function client()
+    /**
+     * @return BelongsTo<Client, $this>
+     */
+    public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }

@@ -2,19 +2,20 @@
 
 namespace App\Providers;
 
-use App\Events\GameCompleted;
-use App\Events\RematchAccepted;
-use App\Events\RematchCancelled;
-use App\Events\RematchDeclined;
-use App\Events\RematchExpired;
-use App\Events\RematchRequested;
-use App\Listeners\SendRematchAcceptedAlert;
-use App\Listeners\SendRematchCancelledAlert;
-use App\Listeners\SendRematchDeclinedAlert;
-use App\Listeners\SendRematchExpiredAlert;
-use App\Listeners\SendRematchRequestAlert;
+use App\GameEngine\Events\GameCompleted;
+use App\GameEngine\GameEngine;
+use App\Listeners\SendProposalAcceptedAlert;
+use App\Listeners\SendProposalCancelledAlert;
+use App\Listeners\SendProposalCreatedAlert;
+use App\Listeners\SendProposalDeclinedAlert;
+use App\Listeners\SendProposalExpiredAlert;
 use App\Listeners\SetAgentCooldownAfterGame;
 use App\Listeners\SetPlayerActivityAfterGame;
+use App\Matchmaking\Events\ProposalAccepted;
+use App\Matchmaking\Events\ProposalCancelled;
+use App\Matchmaking\Events\ProposalCreated;
+use App\Matchmaking\Events\ProposalDeclined;
+use App\Matchmaking\Events\ProposalExpired;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(GameEngine::class);
     }
 
     /**
@@ -34,11 +35,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register rematch event listeners
-        Event::listen(RematchRequested::class, SendRematchRequestAlert::class);
-        Event::listen(RematchAccepted::class, SendRematchAcceptedAlert::class);
-        Event::listen(RematchDeclined::class, SendRematchDeclinedAlert::class);
-        Event::listen(RematchExpired::class, SendRematchExpiredAlert::class);
-        Event::listen(RematchCancelled::class, SendRematchCancelledAlert::class);
+        Event::listen(ProposalCreated::class, SendProposalCreatedAlert::class);
+        Event::listen(ProposalAccepted::class, SendProposalAcceptedAlert::class);
+        Event::listen(ProposalDeclined::class, SendProposalDeclinedAlert::class);
+        Event::listen(ProposalExpired::class, SendProposalExpiredAlert::class);
+        Event::listen(ProposalCancelled::class, SendProposalCancelledAlert::class);
 
         // Register game completion listeners
         Event::listen(GameCompleted::class, SetAgentCooldownAfterGame::class);

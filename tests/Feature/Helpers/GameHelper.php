@@ -4,8 +4,9 @@ namespace Tests\Feature\Helpers;
 
 use App\Enums\GameStatus;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Models\Game\Mode;
+use App\Models\Games\Game;
+use App\Models\Games\Mode;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 class GameHelper
@@ -16,9 +17,7 @@ class GameHelper
     public static function createGame(array $attributes = [], array $players = []): Game
     {
         // Always use ConnectFour Standard mode for consistent test behavior
-        $mode = Mode::where('title_slug', 'connect-four')
-            ->where('slug', 'standard')
-            ->first() ?? Mode::factory()->connectFourStandard()->create();
+        $mode = Mode::connectFour();
 
         $baseAttributes = array_merge([
             'mode_id' => $mode->id,
@@ -48,9 +47,13 @@ class GameHelper
     /**
      * Submit a game action.
      */
-    public static function submitAction(Game $game, User $user, array $actionData): TestResponse
+    public static function submitAction(Game $game, User $user, array $actionData, ?string $idempotencyKey = null): TestResponse
     {
-        return test()->actingAs($user)->postJson("/api/v1/games/{$game->ulid}/action", $actionData);
+        $idempotencyKey = $idempotencyKey ?? Str::uuid()->toString();
+
+        return test()->actingAs($user)
+            ->withHeader('X-Idempotency-Key', $idempotencyKey)
+            ->postJson("/api/v1/games/{$game->ulid}/action", $actionData);
     }
 
     /**

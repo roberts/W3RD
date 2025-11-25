@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('lobbies', function (Blueprint $table) {
             $table->id();
             $table->char('ulid', 26)->unique()->index();
-            $table->string('game_title')->index();
-            $table->string('game_mode')->nullable();
+            $table->string('title_slug', 50)->index();
+            $table->foreignId('mode_id')->nullable()->constrained('modes');
             $table->foreignId('host_id')->constrained('users')->onDelete('cascade');
             $table->boolean('is_public')->default(false)->index();
             $table->unsignedTinyInteger('min_players')->default(2);
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('game_id')->nullable()->constrained('games');
             $table->timestamps();
 
-            $table->index(['game_title', 'is_public', 'status']);
+            $table->index(['title_slug', 'is_public', 'status']);
         });
     }
 };

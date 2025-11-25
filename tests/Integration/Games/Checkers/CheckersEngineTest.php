@@ -2,9 +2,9 @@
 
 use App\GameEngine\Actions\JumpPiece;
 use App\GameEngine\Actions\MovePiece;
-use App\Games\Checkers\CheckersBoard;
-use App\Games\Checkers\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\GameTitles\Checkers\CheckersBoard;
+use App\GameTitles\Checkers\Modes\StandardMode;
+use App\Models\Games\Game;
 
 test('checkers engine validates and applies move piece', function () {
     $game = new Game(['game_state' => []]);

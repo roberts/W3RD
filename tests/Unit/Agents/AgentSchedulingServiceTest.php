@@ -1,9 +1,9 @@
 <?php
 
+use App\Agents\Scheduling\AgentSchedulingService;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
-use App\Models\Game\Game;
-use App\Services\Agents\AgentSchedulingService;
+use App\Models\Games\Game;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Redis;

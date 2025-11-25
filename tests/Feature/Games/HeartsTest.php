@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\Exceptions\InvalidGameConfigurationException;
-use App\Games\Hearts\HeartsPlayer;
-use App\Games\Hearts\HeartsTable;
-use App\Games\Hearts\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\GameTitles\Hearts\HeartsPlayer;
+use App\GameTitles\Hearts\HeartsTable;
+use App\GameTitles\Hearts\Modes\StandardMode;
+use App\Models\Games\Game;
 use Illuminate\Support\Str;
 
 describe('Hearts Game Logic', function () {

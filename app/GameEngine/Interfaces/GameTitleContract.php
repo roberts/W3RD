@@ -10,9 +10,13 @@ use App\Enums\GameAttributes\GameEntryPolicy;
 use App\Enums\GameAttributes\GameLifecycle;
 use App\Enums\GameAttributes\GamePacing;
 use App\Enums\GameAttributes\GameSequence;
+use App\Enums\GameAttributes\GameTimer;
 use App\Enums\GameAttributes\GameVisibility;
+use App\Exceptions\Game\TurnTimerExpiredException;
+use App\GameEngine\GameOutcome;
 use App\GameEngine\ValidationResult;
-use App\Models\Game\Game;
+use App\Models\Auth\User;
+use App\Models\Games\Game;
 use Carbon\Carbon;
 
 /**
@@ -57,6 +61,8 @@ interface GameTitleContract
 {
     // Engine-Critical Attributes
     public static function getPacing(): GamePacing;
+
+    public static function getTimer(): GameTimer;
 
     public static function getSequence(): GameSequence;
 
@@ -145,6 +151,8 @@ interface GameTitleContract
      *
      * Returns a structured array containing the title, description, and
      * sections of rules, which can be formatted with Markdown.
+     *
+     * @return array<string, mixed>
      */
     public static function getRules(): array;
 
@@ -213,6 +221,17 @@ interface GameTitleContract
     public function getTimelimit(): int;
 
     /**
+     * Get the redactor for this game title.
+     *
+     * Returns the appropriate redactor based on the game's visibility attribute.
+     * Full information games return NullGameRedactor, while hidden information games
+     * return game-specific redactors that hide private information from opponents.
+     *
+     * @return GameRedactor The redactor instance for this game
+     */
+    public function getRedactor(): GameRedactor;
+
+    /**
      * Get the deadline timestamp for the current action.
      *
      * Calculates when the current player's turn expires, including any grace periods.
@@ -236,4 +255,113 @@ interface GameTitleContract
      * @return string Penalty type: 'none', 'pass', or 'forfeit'
      */
     public function getTimeoutPenalty(): string;
+
+    /**
+     * Check if it's the specified player's turn to act.
+     *
+     * Determines whether the given player is allowed to take an action in the
+     * current game state. Used by GameKernel to validate player actions.
+     *
+     * Implementations are typically provided by sequence traits:
+     * - SequentialTurns: Checks current_player_id
+     * - SimultaneousTurns: Always returns true
+     * - PhaseBasedTurns: Checks phase-specific logic
+     * - InterleavedTurns: Checks team-based turns
+     *
+     * @param  Game  $game  The game instance
+     * @param  User  $player  The player attempting to act
+     * @return bool True if it's the player's turn
+     */
+    public function isPlayerTurn(Game $game, User $player): bool;
+
+    /**
+     * Advance the game to the next turn or phase.
+     *
+     * Updates the game state to reflect the next player's turn or advance
+     * to the next phase. Used by GameKernel after actions are processed.
+     *
+     * Implementations are typically provided by sequence traits:
+     * - SequentialTurns: Rotates to next player
+     * - SimultaneousTurns: No-op or phase transition
+     * - PhaseBasedTurns: Advances phase or player within phase
+     * - InterleavedTurns: Alternates between teams
+     *
+     * @param  Game  $game  The game instance
+     * @return Game The updated game instance
+     */
+    public function advanceTurn(Game $game): Game;
+
+    /**
+     * Start the timer for the current turn.
+     *
+     * Initializes timing for the current player's turn, typically by setting
+     * turn_ends_at and dispatching timer expiration jobs. Used by GameKernel
+     * after turn advancement.
+     *
+     * Implementations are typically provided by pacing traits:
+     * - SynchronousPacing: Sets short timer (seconds to minutes)
+     * - AsynchronousPacing: Sets long timer (hours to days)
+     * - RealtimePacing: Continuous timer
+     * - TickBasedPacing: Discrete time units
+     *
+     * @param  Game  $game  The game instance
+     */
+    public function startTurnTimer(Game $game): void;
+
+    /**
+     * Validate that the action is being taken within the allowed time.
+     *
+     * Checks if the current action is being made before the turn timer expires.
+     * Throws exception if the timer has expired. Used by GameKernel before
+     * validating player actions.
+     *
+     * Implementations are typically provided by pacing traits:
+     * - SynchronousPacing: Validates against turn_ends_at
+     * - AsynchronousPacing: Validates with long timeout
+     * - RealtimePacing: Validates continuous time
+     * - TickBasedPacing: Validates tick-based time
+     *
+     * @param  Game  $game  The game instance
+     *
+     * @throws TurnTimerExpiredException If time has expired
+     */
+    public function validateActionTime(Game $game): void;
+
+    /**
+     * Redact sensitive information from game state for a specific player.
+     *
+     * Returns a version of the game state with hidden information removed
+     * or obscured based on what the player should be able to see. Used by
+     * GameKernel when returning state to clients.
+     *
+     * Implementations are typically provided by visibility traits:
+     * - FullInformation: Returns state unchanged
+     * - HiddenInformation: Redacts opponent's private data
+     * - FogOfWar: Redacts based on visibility range
+     * - AsymmetricInformation: Role-based redaction
+     *
+     * @param  object  $gameState  The complete game state
+     * @param  User  $player  The player viewing the state
+     * @return object The redacted game state for this player
+     */
+    public function redact(object $gameState, User $player): object;
+
+    /**
+     * Handle timer expiration for a player.
+     *
+     * Determines the outcome when a player's turn timer expires. The action taken
+     * depends on the game's timer penalty configuration. Used by TimerExpiredHandler
+     * when processing expired turn timers.
+     *
+     * Implementations are typically provided by timer expired traits:
+     * - ForfeitOnTimerExpired: Player loses immediately
+     * - PassOnTimerExpired: Turn is skipped, game continues
+     * - NoTimerExpiredPenalty: No action taken
+     *
+     * @param  Game  $game  The game instance
+     * @param  object  $gameState  The current game state
+     * @param  string  $playerUlid  The ULID of the player whose timer expired
+     * @return GameOutcome The outcome of the timer expiration
+     */
+    public function handleTimerExpired(Game $game, object $gameState, string $playerUlid): GameOutcome;
 }

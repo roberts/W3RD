@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Auth\User;
-use App\Models\Billing\Subscription;
+use App\Models\Economy\Subscription;
 use Illuminate\Support\Facades\Event;
 
 describe('Stripe Webhook Processing', function () {

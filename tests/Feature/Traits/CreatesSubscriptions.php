@@ -3,7 +3,7 @@
 namespace Tests\Feature\Traits;
 
 use App\Models\Auth\User;
-use App\Models\Billing\Subscription;
+use App\Models\Economy\Subscription;
 
 trait CreatesSubscriptions
 {

@@ -1,9 +1,9 @@
 <?php
 
 use App\GameEngine\Actions\PlayCard;
-use App\Games\Hearts\HeartsTable;
-use App\Games\Hearts\Modes\StandardMode;
-use App\Models\Game\Game;
+use App\GameTitles\Hearts\HeartsTable;
+use App\GameTitles\Hearts\Modes\StandardMode;
+use App\Models\Games\Game;
 
 test('hearts engine validates and applies play card', function () {
     $game = new Game(['game_state' => []]);

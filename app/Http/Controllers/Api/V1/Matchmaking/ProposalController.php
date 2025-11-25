@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Matchmaking;
+
+use App\DataTransferObjects\Matchmaking\ProposalData;
+use App\DataTransferObjects\Matchmaking\ProposalResponseData;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Matchmaking\AcceptProposalRequest;
+use App\Http\Requests\Matchmaking\DeclineProposalRequest;
+use App\Http\Requests\Matchmaking\StoreProposalRequest;
+use App\Http\Traits\ApiResponses;
+use App\Matchmaking\Orchestrators\ProposalOrchestrator;
+use App\Models\Auth\User;
+use App\Models\Games\Game;
+use App\Models\Matchmaking\Proposal;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
+
+class ProposalController extends Controller
+{
+    use ApiResponses;
+
+    public function __construct(
+        protected ProposalOrchestrator $proposalOrchestrator
+    ) {}
+
+    /**
+     * Create a new proposal (rematch/challenge).
+     */
+    public function store(StoreProposalRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $type = Arr::get($validated, 'type', 'rematch');
+
+        $game = Game::where('ulid', $validated['original_game_ulid'])->firstOrFail();
+
+        $opponent = null;
+        if (! empty($validated['opponent_username'])) {
+            $opponent = User::withUsername($validated['opponent_username'])->firstOrFail();
+        }
+
+        $result = $this->proposalOrchestrator->createProposal(
+            $type,
+            $game,
+            $request->user(),
+            $opponent
+        );
+
+        if (! $result->success) {
+            return $this->errorResponse($result->errorMessage, 422, null, $result->context);
+        }
+
+        return $this->createdResponse(
+            ProposalData::fromModel($result->proposal),
+            'Proposal sent successfully'
+        );
+    }
+
+    /**
+     * Accept a proposal.
+     */
+    public function accept(AcceptProposalRequest $request, Proposal $proposal): JsonResponse
+    {
+        $result = $this->proposalOrchestrator->acceptProposal(
+            $proposal,
+            $request->user()
+        );
+
+        if (! $result->success) {
+            return $this->errorResponse($result->errorMessage, 422, null, $result->context);
+        }
+
+        return $this->dataResponse(
+            ProposalResponseData::fromResult($result),
+            'Proposal accepted. New game created.'
+        );
+    }
+
+    /**
+     * Decline a proposal.
+     */
+    public function decline(DeclineProposalRequest $request, Proposal $proposal): JsonResponse
+    {
+        $result = $this->proposalOrchestrator->declineProposal(
+            $proposal,
+            $request->user()
+        );
+
+        if (! $result->success) {
+            return $this->errorResponse($result->errorMessage, 403, null, $result->context);
+        }
+
+        return $this->dataResponse(
+            ProposalData::fromModel($result->proposal),
+            'Rematch request declined'
+        );
+    }
+}

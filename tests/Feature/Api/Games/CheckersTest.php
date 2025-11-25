@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Auth\User;
+use App\Models\Games\Mode;
+use Database\Seeders\ModeSeeder;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -16,6 +18,9 @@ use Illuminate\Support\Facades\Redis;
  */
 describe('Checkers Game API', function () {
     beforeEach(function () {
+        // Seed modes
+        $this->seed(ModeSeeder::class);
+
         // Mock Redis for PlayerActivityService
         Redis::shouldReceive('setex')->andReturn(true)->byDefault();
         Redis::shouldReceive('get')->andReturn('idle')->byDefault();
@@ -29,12 +34,13 @@ describe('Checkers Game API', function () {
     describe('Game Creation', function () {
         test('can create checkers game through lobby and play moves', function () {
             $users = User::factory()->count(2)->create();
+            $mode = Mode::checkers();
 
             // Create lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'checkers',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'max_players' => 2,
                     'is_public' => true,
                 ]);
@@ -44,14 +50,14 @@ describe('Checkers Game API', function () {
 
             // Second player joins by accepting
             $this->actingAs($users[1])
-                ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
+                ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
                     'status' => 'accepted',
                 ])
                 ->assertStatus(200);
 
             // Check if game was auto-started
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 
@@ -77,12 +83,13 @@ describe('Checkers Game API', function () {
     describe('Game Actions', function () {
         test('can make a move in checkers game', function () {
             $users = User::factory()->count(2)->create();
+            $mode = Mode::checkers();
 
             // Create and start game through lobby
             $lobbyResponse = $this->actingAs($users[0])
-                ->postJson('/api/v1/games/lobbies', [
+                ->postJson('/api/v1/matchmaking/lobbies', [
                     'game_title' => 'checkers',
-                    'game_mode' => 'standard',
+                    'mode_id' => $mode->id,
                     'max_players' => 2,
                     'is_public' => true,
                 ]);
@@ -90,12 +97,12 @@ describe('Checkers Game API', function () {
             $lobbyUlid = $lobbyResponse->json('data.ulid');
 
             $this->actingAs($users[1])
-                ->putJson("/api/v1/games/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
+                ->putJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}/players/{$users[1]->username}", [
                     'status' => 'accepted',
                 ]);
 
             $lobbyCheck = $this->actingAs($users[0])
-                ->getJson("/api/v1/games/lobbies/{$lobbyUlid}");
+                ->getJson("/api/v1/matchmaking/lobbies/{$lobbyUlid}");
 
             $gameUlid = $lobbyCheck->json('data.game.ulid');
 

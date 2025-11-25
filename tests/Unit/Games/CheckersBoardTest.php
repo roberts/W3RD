@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
-use App\Games\Checkers\CheckersBoard;
+use App\GameTitles\Checkers\CheckersBoard;
 use Illuminate\Support\Str;
 
 describe('Checkers Board', function () {

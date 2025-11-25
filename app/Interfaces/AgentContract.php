@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-use App\Models\Game\Game;
+use App\Models\Games\Game;
 
 /**
  * Interface for all AI agent logic implementations.

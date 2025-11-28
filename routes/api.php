@@ -30,7 +30,6 @@ use App\Http\Controllers\Api\V1\Games\GameConcedeController;
 use App\Http\Controllers\Api\V1\Games\GameController;
 use App\Http\Controllers\Api\V1\Games\GameOutcomeController;
 use App\Http\Controllers\Api\V1\Games\GameSyncController;
-use App\Http\Controllers\Api\V1\Games\GameTimelineController;
 use App\Http\Controllers\Api\V1\Games\GameTimerController;
 use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\Library\LibraryController;
@@ -136,11 +135,11 @@ Route::prefix('v1')->group(function () {
         // Action submission with idempotency
         Route::post('/{game:ulid}/actions', [ActionsController::class, 'store'])
             ->middleware('idempotency');
+        Route::get('/{game:ulid}/actions', [ActionsController::class, 'show']);
         Route::get('/{game:ulid}/options', [ActionsController::class, 'options']);
 
         // Timer and timeline information
         Route::get('/{game:ulid}/timer', [GameTimerController::class, 'show']);
-        Route::get('/{game:ulid}/timeline', [GameTimelineController::class, 'show']);
 
         // Game exit options
         Route::post('/{game:ulid}/concede', [GameConcedeController::class, 'store']);

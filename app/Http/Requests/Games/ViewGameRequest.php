@@ -6,7 +6,7 @@ class ViewGameRequest extends BaseGameRequest
 {
     /**
      * Authorize that the user is a player in the game.
-     * This is used for read-only game endpoints (timeline, sync, outcome, timer).
+     * This is used for read-only game endpoints (actions, sync, outcome, timer).
      */
     public function authorize(): bool
     {

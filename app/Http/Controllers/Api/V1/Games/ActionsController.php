@@ -11,6 +11,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Games\ProcessGameActionRequest;
 use App\Http\Requests\Games\ViewGameRequest;
 use App\Http\Resources\Games\GameActionOptionsResource;
+use App\Http\Resources\Games\ActionResource;
+use App\Models\Games\Action;
 use App\Http\Traits\ApiResponses;
 use App\Http\Traits\PlayerAuthorization;
 use App\Models\Games\Game;
@@ -26,6 +28,22 @@ class ActionsController extends Controller
         protected ModeRegistry $modeRegistry,
         protected ActionMapper $actionMapper
     ) {}
+
+    /**
+     * Get chronological action timeline for a game.
+     */
+    public function show(ViewGameRequest $request, Game $game): JsonResponse
+    {
+        $game = $request->game();
+
+        $actions = Action::where('game_id', $game->id)
+            ->with('player.user:id,name,username')
+            ->orderBy('turn_number', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return $this->resourceResponse(ActionResource::collection($actions));
+    }
 
     /**
      * Process a player's action in a game.

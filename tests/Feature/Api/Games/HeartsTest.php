@@ -148,7 +148,7 @@ describe('Hearts Game API', function () {
 
                 // Deal cards
                 $this->actingAs($users[0])
-                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                    ->postJson("/api/v1/games/{$gameUlid}/actions", [
                         'action_type' => 'deal_cards',
                         'action_details' => ['confirm' => true],
                     ])->assertStatus(200);
@@ -167,7 +167,7 @@ describe('Hearts Game API', function () {
 
                 // Pass cards (using current player to pass authorization)
                 $response = $this->actingAs($currentUser)
-                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                    ->postJson("/api/v1/games/{$gameUlid}/actions", [
                         'action_type' => 'pass_cards',
                         'action_details' => [
                             'cards' => ['H2', 'H3', 'H4'],
@@ -221,7 +221,7 @@ describe('Hearts Game API', function () {
 
                 // Deal cards
                 $this->actingAs($users[0])
-                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                    ->postJson("/api/v1/games/{$gameUlid}/actions", [
                         'action_type' => 'deal_cards',
                         'action_details' => ['confirm' => true],
                     ])->assertStatus(200);
@@ -240,7 +240,7 @@ describe('Hearts Game API', function () {
 
                 // Play a card (C2 is required to start)
                 $response = $this->actingAs($currentUser)
-                    ->postJson("/api/v1/games/{$gameUlid}/action", [
+                    ->postJson("/api/v1/games/{$gameUlid}/actions", [
                         'action_type' => 'play_card',
                         'action_details' => [
                             'card' => 'C2',

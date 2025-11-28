@@ -1511,7 +1511,7 @@ This is the most critical section. You must document the specific JSON payloads 
 **Example Action Documentation:**
 ```markdown
 ### 1. Submit Game Action
-**Endpoint**: `POST /api/v1/games/{game_id}/action`
+**Endpoint**: `POST /api/v1/games/{game_id}/actions`
 
 #### Request Body
 

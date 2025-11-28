@@ -108,7 +108,7 @@ describe('Checkers Game API', function () {
 
             // Make a move
             $response = $this->actingAs($users[0])
-                ->postJson("/api/v1/games/{$gameUlid}/action", [
+                ->postJson("/api/v1/games/{$gameUlid}/actions", [
                     'action_type' => 'move_piece',
                     'action_details' => [
                         'from_row' => 5,

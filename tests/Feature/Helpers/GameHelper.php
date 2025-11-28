@@ -53,7 +53,7 @@ class GameHelper
 
         return test()->actingAs($user)
             ->withHeader('X-Idempotency-Key', $idempotencyKey)
-            ->postJson("/api/v1/games/{$game->ulid}/action", $actionData);
+            ->postJson("/api/v1/games/{$game->ulid}/actions", $actionData);
     }
 
     /**

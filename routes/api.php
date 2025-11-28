@@ -134,7 +134,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/{game:ulid}', [GameController::class, 'show']);
 
         // Action submission with idempotency
-        Route::post('/{game:ulid}/action', [GameActionController::class, 'store'])
+        Route::post('/{game:ulid}/actions', [GameActionController::class, 'store'])
             ->middleware('idempotency');
         Route::get('/{game:ulid}/options', [GameActionController::class, 'options']);
 

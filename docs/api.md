@@ -566,7 +566,7 @@ Game state, action submission, and game lifecycle management.
 |--------|----------|---------|------|
 | `GET` | `/games` | List user's active and recent games | Bearer + Client Key |
 | `GET` | `/games/{ulid}` | Get current game state | Bearer + Client Key |
-| `POST` | `/games/{ulid}/action` | Submit game action (idempotent) | Bearer + Client Key |
+| `POST` | `/games/{ulid}/actions` | Submit game action (idempotent) | Bearer + Client Key |
 | `GET` | `/games/{ulid}/timeline` | Get complete action history | Bearer + Client Key |
 | `GET` | `/games/{ulid}/options` | Get valid actions for current turn | Bearer + Client Key |
 | `POST` | `/games/{ulid}/concede` | Concede game | Bearer + Client Key |
@@ -666,7 +666,7 @@ Response:
 
 **Submit Action:**
 ```http
-POST /v1/games/01J3GAME.../action
+POST /v1/games/01J3GAME.../actions
 Authorization: Bearer 1|abc123...
 X-Client-Key: your-client-key
 Content-Type: application/json

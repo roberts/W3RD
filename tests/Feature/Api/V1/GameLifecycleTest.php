@@ -19,7 +19,7 @@ describe('Game Lifecycle', function () {
     $postGameAction = function (User $user, string $gameUlid, array $actionData) {
         return test()->actingAs($user)
             ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-            ->postJson("/api/v1/games/{$gameUlid}/action", $actionData);
+            ->postJson("/api/v1/games/{$gameUlid}/actions", $actionData);
     };
 
     // Helper function to create proper game_state structure
@@ -142,7 +142,7 @@ describe('Game Lifecycle', function () {
 
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -196,7 +196,7 @@ describe('Game Lifecycle', function () {
 
             $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -227,7 +227,7 @@ describe('Game Lifecycle', function () {
 
             $this->actingAs($player1)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -258,7 +258,7 @@ describe('Game Lifecycle', function () {
 
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -312,7 +312,7 @@ describe('Game Lifecycle', function () {
             // Player2 tries to move when it's player1's turn
             $response = $this->actingAs($player2)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -360,7 +360,7 @@ describe('Game Lifecycle', function () {
 
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 99],
                 ]);
@@ -387,7 +387,7 @@ describe('Game Lifecycle', function () {
 
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -409,7 +409,7 @@ describe('Game Lifecycle', function () {
 
             $response = $this->actingAs($nonPlayer)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -537,7 +537,7 @@ describe('Game Lifecycle', function () {
             // Try to submit action with player 2 (not their turn)
             $response = $this->actingAs($user2)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -555,7 +555,7 @@ describe('Game Lifecycle', function () {
             // Using call() to send raw invalid JSON string
             $response = $this->actingAs($user)->call(
                 'POST',
-                "/api/v1/games/{$game->ulid}/action",
+                "/api/v1/games/{$game->ulid}/actions",
                 [],
                 [],
                 [],
@@ -593,14 +593,14 @@ describe('Game Lifecycle', function () {
             // Submit same action twice
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
 
             $response2 = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -631,7 +631,7 @@ describe('Game Lifecycle', function () {
             // Player 2 tries to make move during Player 1's turn
             $response = $this->actingAs($user2)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 0],
                 ]);
@@ -661,7 +661,7 @@ describe('Game Lifecycle', function () {
             // Submit action with excessively large payload
             $response = $this->actingAs($user)
                 ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => [
                         'column' => 3,
@@ -696,7 +696,7 @@ describe('Game Lifecycle', function () {
             // Submit from "mobile" device
             $response1 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '2') // Mobile client
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 3],
                 ]);
@@ -704,7 +704,7 @@ describe('Game Lifecycle', function () {
             // Try to submit from "web" device (should fail - not their turn anymore)
             $response2 = $this->actingAs($user)
                 ->withHeader('X-Client-Key', '1') // Web client
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'drop_piece',
                     'action_details' => ['column' => 4],
                 ]);
@@ -742,7 +742,7 @@ describe('Game Lifecycle', function () {
             for ($i = 0; $i < 10; $i++) {
                 $responses[] = $this->actingAs($user)
                     ->withHeader('X-Idempotency-Key', Str::uuid()->toString())
-                    ->postJson("/api/v1/games/{$game->ulid}/action", [
+                    ->postJson("/api/v1/games/{$game->ulid}/actions", [
                         'action_type' => 'drop_piece',
                         'action_details' => ['column' => 3],
                     ]);

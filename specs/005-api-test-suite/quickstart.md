@@ -194,7 +194,7 @@ it('broadcasts game update event', function () {
     $game = createActiveGame($user);
     
     actingAs($user)
-        ->postJson("/api/v1/games/{$game->ulid}/action", [
+        ->postJson("/api/v1/games/{$game->ulid}/actions", [
             'action_type' => 'DROP_PIECE',
             'column' => 3,
         ])
@@ -374,7 +374,7 @@ describe('Game Actions', function () {
             $game->players()->attach($user->id, ['player_number' => 1]);
             
             $response = actingAs($user)
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'DROP_PIECE',
                     'column' => 3,
                 ]);
@@ -396,7 +396,7 @@ describe('Game Actions', function () {
             $game->players()->attach($user->id, ['player_number' => 1]);
             
             actingAs($user)
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'DROP_PIECE',
                     'column' => 99, // Invalid
                 ])
@@ -413,7 +413,7 @@ describe('Game Actions', function () {
             
             // User2 tries to move on User1's turn
             actingAs($user2)
-                ->postJson("/api/v1/games/{$game->ulid}/action", [
+                ->postJson("/api/v1/games/{$game->ulid}/actions", [
                     'action_type' => 'DROP_PIECE',
                     'column' => 3,
                 ])

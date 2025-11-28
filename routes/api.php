@@ -21,16 +21,17 @@ use App\Http\Controllers\Api\V1\Economy\PlanController;
 use App\Http\Controllers\Api\V1\Economy\ReceiptController;
 use App\Http\Controllers\Api\V1\Economy\SubscriptionController;
 use App\Http\Controllers\Api\V1\Economy\TransactionController;
-use App\Http\Controllers\Api\V1\Feeds\CasinoFloorController;
+use App\Http\Controllers\Api\V1\Feeds\AchievementFeedController;
+use App\Http\Controllers\Api\V1\Feeds\ChallengeFeedController;
 use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
 use App\Http\Controllers\Api\V1\Feeds\LiveScoresController;
+use App\Http\Controllers\Api\V1\Feeds\TournamentFeedController;
+use App\Http\Controllers\Api\V1\Games\ActionController;
 use App\Http\Controllers\Api\V1\Games\GameAbandonController;
-use App\Http\Controllers\Api\V1\Games\GameActionController;
 use App\Http\Controllers\Api\V1\Games\GameConcedeController;
 use App\Http\Controllers\Api\V1\Games\GameController;
 use App\Http\Controllers\Api\V1\Games\GameOutcomeController;
 use App\Http\Controllers\Api\V1\Games\GameSyncController;
-use App\Http\Controllers\Api\V1\Games\GameTimelineController;
 use App\Http\Controllers\Api\V1\Games\GameTimerController;
 use App\Http\Controllers\Api\V1\Library\GameRulesController;
 use App\Http\Controllers\Api\V1\Library\LibraryController;
@@ -134,13 +135,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/{game:ulid}', [GameController::class, 'show']);
 
         // Action submission with idempotency
-        Route::post('/{game:ulid}/action', [GameActionController::class, 'store'])
+        Route::post('/{game:ulid}/actions', [ActionController::class, 'store'])
             ->middleware('idempotency');
-        Route::get('/{game:ulid}/options', [GameActionController::class, 'options']);
+        Route::get('/{game:ulid}/actions', [ActionController::class, 'show']);
+        Route::get('/{game:ulid}/options', [ActionController::class, 'options']);
 
         // Timer and timeline information
         Route::get('/{game:ulid}/timer', [GameTimerController::class, 'show']);
-        Route::get('/{game:ulid}/timeline', [GameTimelineController::class, 'show']);
 
         // Game exit options
         Route::post('/{game:ulid}/concede', [GameConcedeController::class, 'store']);
@@ -179,9 +180,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/games', [LiveScoresController::class, 'games']);
         Route::get('/wins', [LiveScoresController::class, 'wins']);
         Route::get('/leaderboards/{gameTitle}', [LeaderboardController::class, 'show']);
-        Route::get('/tournaments', [CasinoFloorController::class, 'tournaments']);
-        Route::get('/challenges', [CasinoFloorController::class, 'challenges']);
-        Route::get('/achievements', [CasinoFloorController::class, 'achievements']);
+        Route::get('/tournaments', [TournamentFeedController::class, 'show']);
+        Route::get('/challenges', [ChallengeFeedController::class, 'show']);
+        Route::get('/achievements', [AchievementFeedController::class, 'show']);
     });
 
     // ========================================

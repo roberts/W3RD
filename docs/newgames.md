@@ -1352,7 +1352,7 @@ This system is the key to rapidly developing hundreds of titles without rewritin
 
 ### How It Works
 
-The `GameTitleContract` requires each game to implement a set of `get...()` methods that return a specific `GameAttribute` enum. The `ActionsController` (our "Game Kernel") reads these attributes and alters its behavior accordingly.
+The `GameTitleContract` requires each game to implement a set of `get...()` methods that return a specific `GameAttribute` enum. The `ActionController` (our "Game Kernel") reads these attributes and alters its behavior accordingly.
 
 ### The Four Core Engine Components
 
@@ -1371,7 +1371,7 @@ The attribute system currently drives four major, scalable components within the
 
 *   **Attribute**: `getPacing(): GamePacing`
 *   **Values**: `NONE`, `RELAXED`, `STANDARD`, `BLITZ`
-*   **Engine Logic**: After a player's turn, the `ActionsController` checks this attribute.
+*   **Engine Logic**: After a player's turn, the `ActionController` checks this attribute.
     *   It dispatches a `TimerExpiredJob` with a delay corresponding to the pacing value (e.g., 15 seconds for `BLITZ`, 5 minutes for `RELAXED`).
     *   If the pacing is `NONE`, no job is dispatched.
 *   **Scalability**: Adding new time controls (e.g., a `TOURNAMENT` pace) is as simple as adding a case to the enum and a corresponding delay in the controller's `dispatchTimerExpiredJob` method.
@@ -1380,7 +1380,7 @@ The attribute system currently drives four major, scalable components within the
 
 *   **Attribute**: `getSequence(): GameSequence`
 *   **Values**: `TURN_BASED`, `REAL_TIME`, `PHASE_BASED`
-*   **Engine Logic**: The `ActionsController` calls an `advanceTurn()` method after each action.
+*   **Engine Logic**: The `ActionController` calls an `advanceTurn()` method after each action.
     *   If `TURN_BASED`, it increments the game's `turn_number`.
     *   If `REAL_TIME`, it does nothing, as turns are not sequential.
     *   If `PHASE_BASED`, it can delegate to a more complex state machine to determine the next phase or player.
@@ -1390,7 +1390,7 @@ The attribute system currently drives four major, scalable components within the
 
 *   **Attribute**: `getDynamic(): GameDynamic`
 *   **Values**: `ONE_VS_ONE`, `LAST_MAN_STANDING`, `SCORE_BASED`, `FREE_FOR_ALL`
-*   **Engine Logic**: The `checkEndCondition` method has been **removed** from individual game protocols. Instead, the `ActionsController` calls the `ConclusionManager` after every move.
+*   **Engine Logic**: The `checkEndCondition` method has been **removed** from individual game protocols. Instead, the `ActionController` calls the `ConclusionManager` after every move.
     *   This service checks the game's `getDynamic()` attribute.
     *   It then applies the correct logic to determine a winner (e.g., checking for one active player for `LAST_MAN_STANDING`, or comparing scores for `SCORE_BASED`).
 *   **Scalability**: To add a new win condition (e.g., `CAPTURE_THE_FLAG`), you add a case to the `GameDynamic` enum and implement the corresponding logic within a new private method in the `ConclusionManager`. No changes are needed in the game protocols themselves.

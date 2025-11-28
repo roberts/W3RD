@@ -19,7 +19,7 @@ use App\Models\Games\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ActionsController extends Controller
+class ActionController extends Controller
 {
     use ApiResponses, PlayerAuthorization;
 

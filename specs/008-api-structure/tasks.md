@@ -201,7 +201,7 @@ All paths assume Laravel project structure at repository root:
 #### Controllers
 
 - [x] T072 [P] [US5] Refactor GameController to simplify to listing and state retrieval in app/Http/Controllers/Api/V1/Games/GameController.php
-- [x] T073 [P] [US5] Move GameActionController to namespace in app/Http/Controllers/Api/V1/Games/GameActionController.php
+- [x] T073 [P] [US5] Move GameActionController to namespace in app/Http/Controllers/Api/V1/Games/ActionsController.php
 - [x] T074 [P] [US5] Create GameTurnController in app/Http/Controllers/Api/V1/Games/GameTurnController.php
 - [x] T075 [P] [US5] Create GameTimelineController in app/Http/Controllers/Api/V1/Games/GameTimelineController.php
 - [x] T076 [P] [US5] Create GameConcedeController in app/Http/Controllers/Api/V1/Games/GameConcedeController.php

@@ -24,8 +24,8 @@ use App\Http\Controllers\Api\V1\Economy\TransactionController;
 use App\Http\Controllers\Api\V1\Feeds\CasinoFloorController;
 use App\Http\Controllers\Api\V1\Feeds\LeaderboardController;
 use App\Http\Controllers\Api\V1\Feeds\LiveScoresController;
+use App\Http\Controllers\Api\V1\Games\ActionsController;
 use App\Http\Controllers\Api\V1\Games\GameAbandonController;
-use App\Http\Controllers\Api\V1\Games\GameActionController;
 use App\Http\Controllers\Api\V1\Games\GameConcedeController;
 use App\Http\Controllers\Api\V1\Games\GameController;
 use App\Http\Controllers\Api\V1\Games\GameOutcomeController;
@@ -134,9 +134,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/{game:ulid}', [GameController::class, 'show']);
 
         // Action submission with idempotency
-        Route::post('/{game:ulid}/actions', [GameActionController::class, 'store'])
+        Route::post('/{game:ulid}/actions', [ActionsController::class, 'store'])
             ->middleware('idempotency');
-        Route::get('/{game:ulid}/options', [GameActionController::class, 'options']);
+        Route::get('/{game:ulid}/options', [ActionsController::class, 'options']);
 
         // Timer and timeline information
         Route::get('/{game:ulid}/timer', [GameTimerController::class, 'show']);

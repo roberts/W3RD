@@ -1411,22 +1411,22 @@ parameters:
 			path: app/Http/Controllers/Api/V1/Games/GameAbandonController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\GameActionController\:\:collectionResponse\(\) has parameter \$paginator with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\ActionsController\:\:collectionResponse\(\) has parameter \$paginator with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Http/Controllers/Api/V1/Games/GameActionController.php
+			path: app/Http/Controllers/Api/V1/Games/ActionsController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\GameActionController\:\:errorResponse\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\ActionsController\:\:errorResponse\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/Http/Controllers/Api/V1/Games/GameActionController.php
+			path: app/Http/Controllers/Api/V1/Games/ActionsController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\GameActionController\:\:validationErrorResponse\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\ActionsController\:\:validationErrorResponse\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/Http/Controllers/Api/V1/Games/GameActionController.php
+			path: app/Http/Controllers/Api/V1/Games/ActionsController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Games\\GameConcedeController\:\:collectionResponse\(\) has parameter \$paginator with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'

@@ -2937,16 +2937,16 @@
         },
         {
             "name": "laravel/cashier",
-            "version": "v16.0.5",
+            "version": "v16.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/cashier-stripe.git",
-                "reference": "9a43e809bd0729c98398672eb872f8cc2c42e2de"
+                "reference": "28b2a0f5ab85bcfc3926d6349bda61a49b390d9c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/cashier-stripe/zipball/9a43e809bd0729c98398672eb872f8cc2c42e2de",
-                "reference": "9a43e809bd0729c98398672eb872f8cc2c42e2de",
+                "url": "https://api.github.com/repos/laravel/cashier-stripe/zipball/28b2a0f5ab85bcfc3926d6349bda61a49b390d9c",
+                "reference": "28b2a0f5ab85bcfc3926d6349bda61a49b390d9c",
                 "shasum": ""
             },
             "require": {
@@ -2972,11 +2972,8 @@
             },
             "require-dev": {
                 "dompdf/dompdf": "^2.0|^3.0",
-                "mockery/mockery": "^1.0",
-                "orchestra/testbench": "^8.18|^9.0|^10.0",
-                "orchestra/workbench": "^8.0|^9.0|^10.0",
+                "orchestra/testbench": "^8.36|^9.15|^10.8",
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^10.4|^11.5",
                 "spatie/laravel-ray": "^1.40"
             },
             "suggest": {
@@ -3024,7 +3021,7 @@
                 "issues": "https://github.com/laravel/cashier/issues",
                 "source": "https://github.com/laravel/cashier"
             },
-            "time": "2025-11-12T16:57:52+00:00"
+            "time": "2025-11-25T15:12:34+00:00"
         },
         {
             "name": "laravel/fortify",

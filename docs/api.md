@@ -123,6 +123,54 @@ Response:
 }
 ```
 
+**Example: Get Time**
+
+```http
+GET /v1/system/time
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "timestamp": 1763640000,
+  "iso8601": "2025-11-20T12:00:00+00:00",
+  "timezone": "UTC"
+}
+```
+
+**Example: Get Config**
+
+```http
+GET /v1/system/config
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "api_version": "v1",
+  "platform_name": "GamerProtocol",
+  "features": {
+    "authentication_providers": ["email", "google", "apple", "social"],
+    "real_time_games": true,
+    "turn_based_games": true
+  },
+  "supported_games": [
+    {
+      "key": "chess",
+      "name": "Chess",
+      "min_players": 2,
+      "max_players": 2
+    }
+  ],
+  "limits": {
+    "max_concurrent_games": 10,
+    "action_timeout_seconds": 300
+  }
+}
+```
+
 **Example: Submit Feedback**
 
 ```http
@@ -132,6 +180,7 @@ Authorization: Bearer 1|abc123... (Optional)
 Content-Type: application/json
 
 {
+  "client_id": 5,
   "type": "bug",
   "content": "The game freezes when I play a red chip on column 3.",
   "email": "player@example.com", // Required if not authenticated
@@ -160,6 +209,29 @@ Response:
   },
   "created_at": "2025-11-23T14:30:00Z",
   "updated_at": "2025-11-23T14:30:00Z"
+}
+```
+
+**Example: Webhook (Stripe)**
+
+```http
+POST /v1/webhooks/stripe
+Stripe-Signature: t=1492774577,v1=5257a869e7ecebeda32...
+Content-Type: application/json
+
+{
+  "id": "evt_123",
+  "object": "event",
+  "type": "payment_intent.succeeded",
+  "data": { ... }
+}
+```
+
+Response:
+```json
+{
+  "received": true,
+  "provider": "stripe"
 }
 ```
 
@@ -207,7 +279,8 @@ Response:
       "complexity": 2,
       "thumbnail": "https://cdn.gamerprotocol.io/games/connect-four/thumb.jpg"
     }
-  ]
+  ],
+  "total": 2
 }
 ```
 
@@ -242,6 +315,31 @@ Response:
 }
 ```
 
+**Example: Get Entities**
+
+```http
+GET /v1/library/chess/entities
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "pieces": [
+      {"id": "pawn", "name": "Pawn", "value": 1},
+      {"id": "knight", "name": "Knight", "value": 3},
+      {"id": "bishop", "name": "Bishop", "value": 3},
+      {"id": "rook", "name": "Rook", "value": 5},
+      {"id": "queen", "name": "Queen", "value": 9},
+      {"id": "king", "name": "King", "value": 0}
+    ]
+  },
+  "cacheable": true,
+  "cache_duration_seconds": 3600
+}
+```
+
 ---
 
 ### 3. Authentication
@@ -268,7 +366,8 @@ Content-Type: application/json
   "email": "player@example.com",
   "username": "coolplayer",
   "password": "SecurePass123!",
-  "password_confirmation": "SecurePass123!"
+  "password_confirmation": "SecurePass123!",
+  "client_id": 5
 }
 ```
 
@@ -277,6 +376,36 @@ Response:
 {
   "message": "Registration successful. Please check your email to verify your account.",
   "registration_id": "01J3ABC..."
+}
+```
+
+**Example: Verify Email**
+
+```http
+POST /v1/auth/verify
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "token": "verification-token-123",
+  "name": "Cool Player"
+}
+```
+
+Response:
+```json
+{
+  "token": "1|abc123xyz789...",
+  "token_type": "Bearer",
+  "expires_in": 31536000,
+  "user": {
+    "username": "coolplayer",
+    "email": "player@example.com",
+    "avatar": null,
+    "level": 1,
+    "xp": 0,
+    "created_at": "2025-11-20T12:00:00Z"
+  }
 }
 ```
 
@@ -297,6 +426,28 @@ Response:
 ```json
 {
   "token": "1|abc123xyz789...",
+  "user": {
+    "username": "coolplayer",
+    "name": "Cool Player",
+    "avatar": "https://cdn.gamerprotocol.io/avatars/default.jpg",
+    "bio": "Competitive gamer",
+    "social_links": null
+  }
+}
+```
+
+**Example: Refresh Token**
+
+```http
+POST /v1/auth/refresh
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "token": "2|def456uvw...",
   "token_type": "Bearer",
   "expires_in": 31536000,
   "user": {
@@ -304,8 +455,7 @@ Response:
     "email": "player@example.com",
     "avatar": "https://cdn.gamerprotocol.io/avatars/default.jpg",
     "level": 1,
-    "xp": 0,
-    "created_at": "2025-11-20T12:00:00Z"
+    "xp": 0
   }
 }
 ```
@@ -1439,5 +1589,5 @@ The platform uses **Laravel Broadcasting** with **Pusher-compatible channels** f
 
 ---
 
-**Last Updated**: November 20, 2025  
+**Last Updated**: December 1, 2025  
 **API Version**: v1.0.0

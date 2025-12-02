@@ -928,6 +928,7 @@ Response:
       "winner_id": null,
       "players": [
         {
+          "ulid": "01J3PLY1...",
           "username": "coolplayer",
           "name": "Cool Player",
           "position_id": 0,
@@ -935,6 +936,7 @@ Response:
           "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg"
         },
         {
+          "ulid": "01J3PLY2...",
           "username": "opponent",
           "name": "Opponent Player",
           "position_id": 1,
@@ -976,6 +978,7 @@ Response:
     "winner_id": null,
     "players": [
       {
+        "ulid": "01J3PLY1...",
         "username": "coolplayer",
         "name": "Cool Player",
         "position_id": 0,
@@ -983,6 +986,7 @@ Response:
         "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg"
       },
       {
+        "ulid": "01J3PLY2...",
         "username": "opponent",
         "name": "Opponent Player",
         "position_id": 1,
@@ -1098,6 +1102,7 @@ Response:
       "action_type": "DROP_PIECE",
       "action_details": {"column": 3},
       "player": {
+        "ulid": "01J3PLY1...",
         "username": "coolplayer",
         "name": "Cool Player",
         "position_id": 0,

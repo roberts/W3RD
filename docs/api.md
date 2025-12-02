@@ -96,15 +96,15 @@ Identifies the client application (web, iOS, Android, Telegram bot). Required fo
 
 ### 1. System & Webhooks
 
-Health monitoring and external service webhooks.
+Health monitoring, configuration, and external service webhooks.
 
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/system/health` | API health check with database connectivity | Public |
+| `GET` | `/system/time` | Get authoritative server time | Public |
+| `GET` | `/system/config` | Get global platform configuration | Public |
 | `POST` | `/system/feedback` | Submit feedback, bug reports, or support requests | Public/Auth |
-| `POST` | `/webhooks/stripe` | Stripe subscription event handler | Vendor Signature |
-| `POST` | `/webhooks/apple` | Apple App Store notification handler | Vendor Signature |
-| `POST` | `/webhooks/google` | Google Play notification handler | Vendor Signature |
+| `POST` | `/webhooks/{provider}` | External provider event handler (stripe, apple, google) | Vendor Signature |
 
 **Example: Health Check**
 
@@ -172,8 +172,9 @@ Public catalog of available games, rules, and leaderboards.
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/library` | List all available game titles | Public |
-| `GET` | `/library/{titleKey}` | Get detailed game information | Public |
-| `GET` | `/library/{titleKey}/rules` | Get complete rule documentation | Public |
+| `GET` | `/library/{gameTitle}` | Get detailed game information | Public |
+| `GET` | `/library/{gameTitle}/rules` | Get complete rule documentation | Public |
+| `GET` | `/library/{gameTitle}/entities` | Get game entities (cards, units, etc.) | Public |
 
 **Example: List Games**
 
@@ -324,8 +325,7 @@ User profile, statistics, alerts, and transaction history.
 | `GET` | `/account/alerts` | Get user notifications (paginated) | Bearer + Client Key |
 | `POST` | `/account/alerts/read` | Mark alerts as read | Bearer + Client Key |
 
-**Example: Get Profile**
-
+**Get Profile:**
 ```http
 GET /v1/account/profile
 Authorization: Bearer 1|abc123...
@@ -337,18 +337,150 @@ Response:
 {
   "data": {
     "username": "coolplayer",
-    "email": "player@example.com",
     "name": "Cool Player",
     "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg",
     "bio": "Competitive gamer and chess enthusiast",
     "social_links": {
       "twitter": "https://twitter.com/coolplayer",
       "twitch": "https://twitch.tv/coolplayer"
-    },
-    "level": 15,
-    "total_xp": 4500,
-    "member_since": "2025-01-15T10:00:00Z"
+    }
   }
+}
+```
+
+**Update Profile:**
+```http
+PATCH /v1/account/profile
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "name": "Cool Player Updated",
+  "username": "new_username",
+  "bio": "New bio text",
+  "social_links": {
+    "twitter": "https://twitter.com/newhandle"
+  }
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "username": "new_username",
+    "name": "Cool Player Updated",
+    "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg",
+    "bio": "New bio text",
+    "social_links": {
+      "twitter": "https://twitter.com/newhandle",
+      "twitch": "https://twitch.tv/coolplayer"
+    }
+  },
+  "message": "Profile updated successfully"
+}
+```
+
+**Get Progression:**
+```http
+GET /v1/account/progression
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "level": 1,
+    "experience_points": 0,
+    "next_level_xp": null,
+    "progress_to_next_level": 0,
+    "titles": [],
+    "active_title": null,
+    "badges": [],
+    "achievements": [],
+    "milestones": []
+  }
+}
+```
+
+**Get Records:**
+```http
+GET /v1/account/records
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": {
+    "total_games": 150,
+    "games_won": 85,
+    "games_lost": 60,
+    "games_drawn": 5,
+    "win_rate": 0.56,
+    "current_streak": 3,
+    "longest_win_streak": 12,
+    "total_points": 12500,
+    "elo_ratings": {
+      "chess": 1450,
+      "connect-four": 1200
+    },
+    "global_rank": 452,
+    "games_by_title": [],
+    "favorite_game": null
+  }
+}
+```
+
+**Get Alerts:**
+```http
+GET /v1/account/alerts?page=1&per_page=20
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "ulid": "01J3ALT...",
+      "type": "game_invite",
+      "data": {
+        "lobby_id": "01J3LOB..."
+      },
+      "read_at": null,
+      "created_at": "2025-11-22T15:30:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 20,
+    "total": 1
+  }
+}
+```
+
+**Mark Alerts as Read:**
+```http
+POST /v1/account/alerts/read
+Authorization: Bearer 1|abc123...
+X-Client-Key: your-client-key
+Content-Type: application/json
+
+{
+  "alert_ulids": ["01J3ALT..."]
+}
+```
+
+Response:
+```json
+{
+  "message": "1 alert marked as read."
 }
 ```
 
@@ -363,7 +495,7 @@ Matchmaking system including queue, lobbies, and proposals (challenges/rematches
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `POST` | `/matchmaking/queue` | Join matchmaking queue | Bearer + Client Key |
-| `DELETE` | `/matchmaking/queue/{ulid}` | Leave queue | Bearer + Client Key |
+| `DELETE` | `/matchmaking/queue/{slot:ulid}` | Leave queue | Bearer + Client Key |
 
 **Join Queue:**
 ```http
@@ -406,13 +538,13 @@ X-Client-Key: your-client-key
 |--------|----------|---------|------|
 | `GET` | `/matchmaking/lobbies` | List public lobbies | Bearer + Client Key |
 | `POST` | `/matchmaking/lobbies` | Create new lobby | Bearer + Client Key |
-| `GET` | `/matchmaking/lobbies/{ulid}` | Get lobby details | Bearer + Client Key |
-| `DELETE` | `/matchmaking/lobbies/{ulid}` | Cancel lobby (host only) | Bearer + Client Key |
-| `POST` | `/matchmaking/lobbies/{ulid}/ready-check` | Initiate ready check (host only) | Bearer + Client Key |
-| `POST` | `/matchmaking/lobbies/{ulid}/seat` | Seat players (host only) | Bearer + Client Key |
-| `POST` | `/matchmaking/lobbies/{ulid}/players` | Invite players (host only) | Bearer + Client Key |
-| `PUT` | `/matchmaking/lobbies/{ulid}/players/{username}` | Accept/join lobby | Bearer + Client Key |
-| `DELETE` | `/matchmaking/lobbies/{ulid}/players/{username}` | Kick player (host only) | Bearer + Client Key |
+| `GET` | `/matchmaking/lobbies/{lobby:ulid}` | Get lobby details | Bearer + Client Key |
+| `DELETE` | `/matchmaking/lobbies/{lobby:ulid}` | Cancel lobby (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{lobby:ulid}/ready-check` | Initiate ready check (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{lobby:ulid}/seat` | Seat players (host only) | Bearer + Client Key |
+| `POST` | `/matchmaking/lobbies/{lobby:ulid}/players` | Invite players (host only) | Bearer + Client Key |
+| `PUT` | `/matchmaking/lobbies/{lobby:ulid}/players/{username}` | Accept/join lobby | Bearer + Client Key |
+| `DELETE` | `/matchmaking/lobbies/{lobby:ulid}/players/{username}` | Kick player (host only) | Bearer + Client Key |
 
 **Create Lobby:**
 ```http
@@ -493,8 +625,8 @@ Content-Type: application/json
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `POST` | `/matchmaking/proposals` | Create rematch or challenge | Bearer + Client Key |
-| `POST` | `/matchmaking/proposals/{ulid}/accept` | Accept proposal | Bearer + Client Key |
-| `POST` | `/matchmaking/proposals/{ulid}/decline` | Decline proposal | Bearer + Client Key |
+| `POST` | `/matchmaking/proposals/{proposal:ulid}/accept` | Accept proposal | Bearer + Client Key |
+| `POST` | `/matchmaking/proposals/{proposal:ulid}/decline` | Decline proposal | Bearer + Client Key |
 
 **Request Rematch:**
 ```http
@@ -565,14 +697,15 @@ Game state, action submission, and game lifecycle management.
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/games` | List user's active and recent games | Bearer + Client Key |
-| `GET` | `/games/{ulid}` | Get current game state | Bearer + Client Key |
-| `POST` | `/games/{ulid}/actions` | Submit game action (idempotent) | Bearer + Client Key |
-| `GET` | `/games/{ulid}/actions` | Get complete action history | Bearer + Client Key |
-| `GET` | `/games/{ulid}/options` | Get valid actions for current turn | Bearer + Client Key |
-| `POST` | `/games/{ulid}/concede` | Concede game | Bearer + Client Key |
-| `POST` | `/games/{ulid}/abandon` | Abandon game (higher penalty) | Bearer + Client Key |
-| `GET` | `/games/{ulid}/outcome` | Get game outcome and results | Bearer + Client Key |
-| `POST` | `/games/{ulid}/sync` | Sync game state (recovery) | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}` | Get current game state | Bearer + Client Key |
+| `POST` | `/games/{game:ulid}/actions` | Submit game action (idempotent) | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}/actions` | Get complete action history | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}/options` | Get valid actions for current turn | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}/timer` | Get current timer information | Bearer + Client Key |
+| `POST` | `/games/{game:ulid}/concede` | Concede game | Bearer + Client Key |
+| `POST` | `/games/{game:ulid}/abandon` | Abandon game (higher penalty) | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}/outcome` | Get game outcome and results | Bearer + Client Key |
+| `GET` | `/games/{game:ulid}/sync` | Sync game state (recovery) | Bearer + Client Key |
 
 **List Games:**
 ```http
@@ -972,7 +1105,7 @@ Real-time Server-Sent Events (SSE) streams for live platform activity.
 |--------|----------|---------|------|
 | `GET` | `/feeds/games` | Stream public game activity | Bearer + Client Key |
 | `GET` | `/feeds/wins` | Stream win announcements | Bearer + Client Key |
-| `GET` | `/feeds/leaderboards` | Stream leaderboard updates | Bearer + Client Key |
+| `GET` | `/feeds/leaderboards/{gameTitle}` | Stream leaderboard updates | Bearer + Client Key |
 | `GET` | `/feeds/tournaments` | Stream tournament progress | Bearer + Client Key |
 | `GET` | `/feeds/challenges` | Stream challenge activity | Bearer + Client Key |
 | `GET` | `/feeds/achievements` | Stream achievement unlocks | Bearer + Client Key |
@@ -1007,11 +1140,11 @@ Tournament management, brackets, and standings.
 | Method | Endpoint | Purpose | Auth |
 |--------|----------|---------|------|
 | `GET` | `/competitions` | List active tournaments | Bearer + Client Key |
-| `GET` | `/competitions/{ulid}` | Get tournament details | Bearer + Client Key |
-| `POST` | `/competitions/{ulid}/enter` | Register for tournament | Bearer + Client Key |
-| `GET` | `/competitions/{ulid}/structure` | Get tournament format rules | Bearer + Client Key |
-| `GET` | `/competitions/{ulid}/bracket` | Get tournament bracket | Bearer + Client Key |
-| `GET` | `/competitions/{ulid}/standings` | Get current standings | Bearer + Client Key |
+| `GET` | `/competitions/{tournament:ulid}` | Get tournament details | Bearer + Client Key |
+| `POST` | `/competitions/{tournament:ulid}/enter` | Register for tournament | Bearer + Client Key |
+| `GET` | `/competitions/{tournament:ulid}/structure` | Get tournament format rules | Bearer + Client Key |
+| `GET` | `/competitions/{tournament:ulid}/bracket` | Get tournament bracket | Bearer + Client Key |
+| `GET` | `/competitions/{tournament:ulid}/standings` | Get current standings | Bearer + Client Key |
 
 ---
 

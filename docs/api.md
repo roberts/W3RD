@@ -94,7 +94,14 @@ Identifies the client application (web, iOS, Android, Telegram bot). Required fo
 
 ## API Namespaces
 
-### 1. System & Webhooks
+### 1. System & Webhooks  "data": {
+    "game_ulid": "01J3GAME...",
+    "status": "completed",
+    "outcome_type": "win",
+    "winner": {
+      "ulid": "01J3PLY1...",
+      "username": "coolplayer"
+    },
 
 Health monitoring, configuration, and external service webhooks.
 
@@ -197,7 +204,6 @@ Response:
 {
   "id": 42,
   "client_id": 5,
-  "user_id": 123,
   "email": "player@example.com",
   "type": "bug",
   "content": "The game freezes when I play a red chip on column 3.",
@@ -669,7 +675,7 @@ Response:
 {
   "data": {
     "ulid": "01J3ABC...",
-    "user_id": 123,
+    "username": "coolplayer",
     "title_slug": "connect-four",
     "mode_id": 1,
     "game_mode": "blitz",
@@ -697,7 +703,7 @@ Response:
 {
   "data": {
     "ulid": "01J3ABC...",
-    "user_id": 123,
+    "username": "coolplayer",
     "title_slug": "connect-four",
     "mode_id": 1,
     "game_mode": "blitz",
@@ -839,8 +845,8 @@ Response:
 {
   "data": {
     "ulid": "01J3PROP...",
-    "requesting_user_id": 123,
-    "opponent_user_id": 456,
+    "requesting_username": "coolplayer",
+    "opponent_username": "player2",
     "type": "casual",
     "title_slug": "checkers",
     "mode_id": 3,
@@ -867,8 +873,8 @@ Response:
 {
   "data": {
     "ulid": "01J3PROP...",
-    "requesting_user_id": 123,
-    "opponent_user_id": 456,
+    "requesting_username": "coolplayer",
+    "opponent_username": "player2",
     "type": "casual",
     "title_slug": "checkers",
     "mode_id": 3,
@@ -922,14 +928,18 @@ Response:
       "winner_id": null,
       "players": [
         {
-          "ulid": "01J3PLY1...",
           "username": "coolplayer",
-          "is_current_turn": true
+          "name": "Cool Player",
+          "position_id": 0,
+          "color": "red",
+          "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg"
         },
         {
-          "ulid": "01J3PLY2...",
           "username": "opponent",
-          "is_current_turn": false
+          "name": "Opponent Player",
+          "position_id": 1,
+          "color": "yellow",
+          "avatar": "https://cdn.gamerprotocol.io/avatars/user456.jpg"
         }
       ],
       "game_state": {
@@ -966,20 +976,18 @@ Response:
     "winner_id": null,
     "players": [
       {
-        "ulid": "01J3PLY1...",
-        "user_id": 123,
         "username": "coolplayer",
+        "name": "Cool Player",
+        "position_id": 0,
         "color": "red",
-        "is_current_turn": true,
-        "is_winner": false
+        "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg"
       },
       {
-        "ulid": "01J3PLY2...",
-        "user_id": 456,
         "username": "opponent",
+        "name": "Opponent Player",
+        "position_id": 1,
         "color": "yellow",
-        "is_current_turn": false,
-        "is_winner": false
+        "avatar": "https://cdn.gamerprotocol.io/avatars/user456.jpg"
       }
     ],
     "game_state": {
@@ -1017,15 +1025,30 @@ Response:
 ```json
 {
   "data": {
-    "action_id": "01J3ACT...",
-    "game_ulid": "01J3GAME...",
-    "player_ulid": "01J3PLY1...",
-    "action": "DROP_PIECE",
-    "parameters": {
-      "column": 3
+    "success": true,
+    "action": {
+      "ulid": "01J3ACT...",
+      "summary": "Player dropped piece in column 3"
     },
-    "status": "processed",
-    "created_at": "2025-11-22T12:05:30Z"
+    "game": {
+      "ulid": "01J3GAME...",
+      "status": "active",
+      "game_state": {
+        "board": [[null, null, null, null, null, null, null], ...],
+        "move_count": 6
+      },
+      "winner_ulid": null,
+      "is_draw": false,
+      "outcome_type": null,
+      "outcome_details": null
+    },
+    "context": {
+      "state_changes": [],
+      "available_actions": []
+    },
+    "outcome": null,
+    "next_action_deadline": "2025-11-22T12:06:30Z",
+    "timeout": null
   },
   "message": "Action applied successfully"
 }
@@ -1075,8 +1098,11 @@ Response:
       "action_type": "DROP_PIECE",
       "action_details": {"column": 3},
       "player": {
-        "ulid": "01J3PLY1...",
-        "username": "coolplayer"
+        "username": "coolplayer",
+        "name": "Cool Player",
+        "position_id": 0,
+        "color": "red",
+        "avatar": "https://cdn.gamerprotocol.io/avatars/user123.jpg"
       },
       "status": "processed",
       "created_at": "2025-11-22T12:01:00Z"
@@ -1095,21 +1121,7 @@ X-Client-Key: your-client-key
 Response:
 ```json
 {
-  "data": {
-    "game_ulid": "01J3GAME...",
-    "status": "completed",
-    "outcome_type": "resignation",
-    "winner": {
-      "ulid": "01J3PLY2...",
-      "username": "opponent"
-    },
-    "is_draw": false,
-    "completed_at": "2025-11-22T12:10:00Z",
-    "duration_seconds": 300,
-    "final_scores": [],
-    "xp_awarded": [],
-    "rewards": []
-  }
+  "message": "Game conceded successfully"
 }
 ```
 

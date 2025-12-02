@@ -20,6 +20,7 @@ class QueueSlotResource extends JsonResource
     {
         return [
             'ulid' => $this->ulid,
+            'username' => $this->user->username,
             'game_title' => $this->mode->title_slug->value ?? null,
             'mode_id' => $this->mode_id,
             'mode_name' => $this->mode->name ?? null,

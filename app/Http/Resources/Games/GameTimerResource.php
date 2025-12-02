@@ -20,7 +20,6 @@ class GameTimerResource extends JsonResource
         return [
             'current_player' => [
                 'ulid' => $this->resource['currentPlayer']?->ulid,
-                'user_id' => $this->resource['currentPlayer']?->user_id,
                 'username' => $this->resource['currentPlayer']?->user?->username,
             ],
             'is_your_turn' => $this->resource['isYourTurn'],

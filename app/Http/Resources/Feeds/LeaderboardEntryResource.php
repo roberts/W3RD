@@ -16,7 +16,6 @@ class LeaderboardEntryResource extends JsonResource
     {
         return [
             'rank' => $this->resource['rank'] ?? null,
-            'user_id' => $this->resource['user_id'] ?? null,
             'username' => $this->resource['username'] ?? null,
             'display_name' => $this->resource['display_name'] ?? null,
             'avatar_url' => $this->resource['avatar_url'] ?? null,

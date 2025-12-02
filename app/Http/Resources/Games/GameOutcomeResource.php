@@ -28,7 +28,6 @@ class GameOutcomeResource extends JsonResource
             'outcome_type' => $this->outcome_type?->value,
             'winner' => $winner ? [
                 'ulid' => $winner->ulid,
-                'user_id' => $winner->user_id,
                 'username' => $winner->user->username,
             ] : null,
             'is_draw' => $this->winner_id === null && $this->outcome_type?->value === 'draw',

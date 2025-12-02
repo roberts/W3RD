@@ -35,8 +35,17 @@ class ProposalResource extends JsonResource
 
         return [
             'ulid' => $this->ulid,
+            'requesting_username' => $this->requestingUser->username,
+            'opponent_username' => $this->opponentUser->username,
+            'type' => $this->type,
+            'title_slug' => $this->title_slug,
+            'mode_id' => $this->mode_id,
+            'game_settings' => $this->game_settings,
             'status' => $this->status,
+            'responded_at' => $this->responded_at,
             'expires_at' => $this->expires_at,
+            'original_game_ulid' => $this->originalGame?->ulid,
+            'game_ulid' => $this->game?->ulid,
             'auto_accept_expected' => $autoAcceptExpected,
         ];
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\System;
 
 use App\Enums\FeedbackType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\System\FeedbackResource;
 use App\Models\System\Feedback;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -40,6 +41,6 @@ class FeedbackController extends Controller
             'metadata' => $validated['metadata'] ?? null,
         ]);
 
-        return response()->json($feedback, 201);
+        return response()->json(FeedbackResource::make($feedback), 201);
     }
 }

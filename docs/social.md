@@ -62,6 +62,12 @@ Message Creation Request Body (JSON/Multipart):
 | content | string | YES/NO | Text content (required if no file). |  
 | file | file | NO | Rec #3 (Media). Max 10MB (image/zip/pdf). Handled via Multipart Form Data. |
 
+### **4.3. Chat Commands (AI Agents)**
+
+| HTTP Method | Endpoint | Action | Logic / Validation Notes |
+| :---- | :---- | :---- | :---- |
+| **POST** | /social/chats/{chat}/commands | Trigger an Agent action. | **Rec #11 (Agents).** Executes a preset command or template. Agent replies via standard Message stream. |
+
 ## **5. Posts & Feed (/social/posts & /social/feed)**
 
 The social media-style public posting feature.
@@ -82,19 +88,19 @@ Post Creation Request Body (Multipart/JSON):
 | link_url | url | NO | Optional link (e.g., YouTube video, GitHub repo). Must be a valid URL. |  
 | image | file | NO | Optional image upload. |
 
-## **6. AI & Utility Endpoints**
-
-### **6.1. AI Agent Interaction**
-
-| HTTP Method | Endpoint | Action | Logic / Validation Notes |
-| :---- | :---- | :---- | :---- |
-| **POST** | /social/prompts | Send a new prompt to an AI agent. | **Request Body:** {"chat_id": 456, "prompt_text": "..."}. Creates a Prompt record and dispatches a Job to the AI processing queue. |
-| **GET** | /social/responses | List responses for a chat. | Requires chat_id filter. Responses are added asynchronously by the AI processing Job. |
-| **POST** | /social/ai-templates | Share/Save AI Prompt Templates. | **Rec #7 (Template Sharing).** Allows users to save complex prompts for reuse (potential future monetization). |
-
-### **6.2. Economy-Tied Social Features**
+## **6. Economy-Tied Social Features**
 
 | HTTP Method | Endpoint | Action | Logic / Validation Notes |
 | :---- | :---- | :---- | :---- |
 | **POST** | /economy/transfers | Send Connects/Crypto to a user. | **Rec #8 (Gifting).** **Request Body:** `{"recipient_id": 123, "amount": 100, "currency": "connects" |
+
+## **7. Account Management (Social Extensions)**
+
+These endpoints belong to the Account namespace but support social features.
+
+| HTTP Method | Endpoint | Action | Logic / Validation Notes |
+| :---- | :---- | :---- | :---- |
+| **GET** | /account/templates | List saved command templates. | **Rec #7 (Templates).** User's saved presets for AI commands. |
+| **POST** | /account/templates | Create a new template. | Save a complex prompt/command configuration for reuse. |
+| **PATCH** | /account/status | Update user presence. | **Rec #4 (Rich Presence).** Set status (online/away) and activity (looking_for_match). |
 

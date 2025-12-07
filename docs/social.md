@@ -10,7 +10,7 @@ Authentication: All endpoints require user authentication (auth:sanctum), unless
 | **GET** | /social/users/{username} | View a user's public profile. | **PUBLIC.** Returns UserResource (BHS score, public stats, badges). |
 | **POST** | /social/users/{username}/block | Block/Mute another user. | **Rec #4 (Safety).** Adds user_id to the authenticated user's block list. Blocks future DMs/friend requests/clan invitations. |
 | **GET** | /social/users/{id}/audit | Public audit log. | **Rec #9 (Trust).** Lists verifiable activity: successful Bounty PR merges, disputes opened/resolved, total earnings/spend. |
-| **PATCH** | /social/me/status | Update user presence (online/away). | Updates the user's real-time presence status (Rec #6). |
+| **POST** | /social/users/{user}/vouch | Vouch for a user. | **Rec #8 (Trust).** Endorse a user after a match/transaction (e.g., "Good Teammate"). |
 
 ## **2. Friends Management (/social/friends)**
 
@@ -22,6 +22,7 @@ This system implements the X-like "Friends" and "Requests" tabs to control inbox
 | **POST** | /social/friends | Send a friend request. | **Request Body:** {"recipient\_id": 123}. Creates a FriendRequest model. |
 | **PATCH** | /social/friends/{request_id} | Accept or reject a request. | **Request Body:** \`{"action": "accept" |
 | **DELETE** | /social/friends/{id} | Remove a friend. | Removes both directions of the friendship link. |
+| **PATCH** | /social/friends/{friend} | Set alias/note. | **Rec #10 (UX).** Set a private note/alias for a friend (e.g., "Mike from Discord"). |
 
 ## **3. Clan Management (/social/clans)**
 
@@ -34,7 +35,7 @@ This establishes the team structure for bounty hunting groups.
 | **GET** | /social/clans/{id} | View clan details & members. | Includes leader, member list, and clan stats (leaderboard data, average BHS). |
 | **POST** | /social/clans/{id}/join | Join a clan (based on type). | **Logic:** If public, joins directly. If application_driven, creates a ClanApplication. If invite_only, fails unless invited. |
 | **DELETE** | /social/clans/{id}/leave | Leave a clan. | Clan Leader cannot leave until ownership is transferred. |
-| **POST** | /social/clans/{id}/invite | Invite user to an invite-only clan. | **Request Body:** {"user_id": 123}. Creates a pending invitation. |
+| **POST** | /social/clans/{id}/invite | Invite user to an invite-only clan. | **Request Body:** {"user_id": 123}. **Rec #6 (Roles):** Officers and Leaders can invite/kick. |
 
 ## **4. Messaging & Chat (/social/chats)**
 
@@ -45,7 +46,7 @@ This system handles both structured chats (linked to bounties) and direct/group 
 | HTTP Method | Endpoint | Action | Logic / Validation Notes |
 | :---- | :---- | :---- | :---- |
 | **GET** | /social/chats | List user's active chats. | **Filter:** Use `?status=open |
-| **POST** | /social/chats | Create a new Chat. | **Request Body:** {"participant_ids": [1, 2, ...], "bid_id": 456 (optional)}. Creates a Group Chat. |
+| **POST** | /social/chats | Create a new Chat. | **Rec #7 (Lifecycle):** DMs are persistent. Lobby/Match chats are ephemeral (auto-delete after 1h). |
 | **GET** | /social/chats/{id}/members | List chat participants. | Useful for displaying member count/names in a group/bounty chat. |
 
 ### **4.2. Message Endpoints**
@@ -67,11 +68,12 @@ The social media-style public posting feature.
 
 | HTTP Method | Endpoint | Action | Logic / Validation Notes |
 | :---- | :---- | :---- | :---- |
-| **GET** | /social/feed | Global timeline feed. | **PUBLIC.** Accepts pagination and filtering (e.g., ?by_clan=123). |
+| **GET** | /social/feed | Global timeline feed. | **Rec #2 (Engagement).** Includes user posts AND system events (e.g., "User X won Tournament Y"). |
 | **POST** | /social/posts | Create a new public post. | **Request Body:** (See below). |
-| **GET** | /social/posts/{post} | View a single post. | **PUBLIC.** Returns PostResource with comments/likes count. |
-| **POST** | /social/posts/{post}/likes | Like/Unlike a post. | Toggle action. |
+| **GET** | /social/posts/{post} | View a single post. | **PUBLIC.** Returns PostResource with comments/reactions count. |
+| **POST** | /social/posts/{post}/reactions | React to a post. | **Rec #9 (Fun).** Toggle reaction (🔥, 👏, 😂, 💸). Replaces binary "Like". |
 | **POST** | /social/posts/{post}/comments | Comment on a post. | Creates a nested Comment resource. |
+| **POST** | /social/reports | Report content/user. | **Rec #3 (Safety).** Report User, Post, or Chat. Body: `target_type`, `target_id`, `reason`. |
 
 Post Creation Request Body (Multipart/JSON):  
 | Field | Type | Required | Validation Notes |  

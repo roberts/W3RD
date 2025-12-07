@@ -1,6 +1,6 @@
-# GamerProtocol.io API Overview
+# SwampProtocol.io API Overview
 
-This repository contains the Laravel 12 API backend for the multi-platform game hub, powering all frontend brands (e.g., TokenGames.io, Cabin Games). It serves as the single source of truth for **user authentication**, **game state management**, **real-time updates**, and **subscription/billing logic**.
+This repository contains the Laravel 12 API backend for the multi-platform protocol with multitenancy (SwampProtocol.io, W3RD.io, GamerProtocol.io) powering all frontend brands (TokenGames.io, DrewRoberts.com, Web3Journey.org). It serves as the single source of truth for **user authentication**, **real-time updates**, and **subscription/billing logic** and even the **game state management**.
 
 ## Core Technology Stack
 

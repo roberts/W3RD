@@ -68,6 +68,28 @@ Message Creation Request Body (JSON/Multipart):
 | :---- | :---- | :---- | :---- |
 | **POST** | /social/chats/{chat}/commands | Trigger an Agent action. | **Rec #11 (Agents).** Executes a preset command or template. Agent replies via standard Message stream. |
 
+### **4.4. Chat Types & Context**
+
+To support diverse interactions (DMs, Game Lobbies, Article Breakouts), the Chat model includes `type` and polymorphic `context` fields.
+
+#### **4.4.1. Chat Types (Enum)**
+
+| Type | Description | Membership Logic |
+| :--- | :--- | :--- |
+| **`direct`** | 1-on-1 private conversation. | Max 2 members. |
+| **`group`** | Standard multi-user chat. | Invite-only. |
+| **`match`** | Ephemeral game lobby. | System-managed (Matchmaking). Auto-deletes. |
+| **`breakout`** | Discussion spawned from content. | System-created from Side Conversations. |
+
+#### **4.4.2. Contextual Chat Logic**
+
+Chats can be linked to a source object (e.g., an Article, a Game, or a Bounty) via polymorphic relations (`context_type`, `context_id`).
+
+*   **Breakout Chats:** Created automatically when a Side Conversation (see `clientcontent.md`) is promoted.
+    *   **Title:** Auto-generated from the source (e.g., "Discussion: [Article Title]").
+    *   **Initial Members:** All participants from the original thread.
+    *   **System Message:** The first message is a system-generated link back to the source content.
+
 ## **5. Posts & Feed (/social/posts & /social/feed)**
 
 The social media-style public posting feature.

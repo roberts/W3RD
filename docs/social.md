@@ -85,11 +85,14 @@ Message Creation Request Body (JSON/Multipart):
 | file | file | NO | Rec #3 (Media). Max 10MB (image/zip/pdf). Handled via Multipart Form Data. |
 | mentions | array<ulid> | NO | List of User ULIDs to tag. Triggers high-priority notification. Validates block status. |
 
-### **4.3. Chat Commands (AI Agents)**
+### **4.3. Chat Commands & Agent Skills**
+
+Agents can advertise dynamic "Skills" (commands) that client apps can render as UI elements (Slash Menus, Buttons).
 
 | HTTP Method | Endpoint | Action | Logic / Validation Notes |
 | :---- | :---- | :---- | :---- |
-| **POST** | /social/chats/{chat}/commands | Trigger an Agent action. | **Rec #11 (Agents).** Executes a preset command or template. Agent replies via standard Message stream. |
+| **GET** | /social/agents/{agent}/skills | List Agent Skills. | Returns JSON schema of available commands (e.g., `summarize`, `bet`). Used to build dynamic UI. |
+| **POST** | /social/chats/{chat}/commands | Trigger an Agent action. | **Rec #11 (Agents).** Executes a preset command. Agent replies via standard Message stream. |
 
 ### **4.4. Chat Types & Context**
 
@@ -108,6 +111,9 @@ To support diverse interactions (DMs, Game Lobbies, Article Breakouts), the Chat
 
 Chats can be linked to a source object (e.g., an Article, a Game, or a Bounty) via polymorphic relations (`context_type`, `context_id`).
 
+*   **Factory Endpoint:** `POST /social/chats/context`
+    *   **Body:** `{ "type": "gig", "id": 500 }`
+    *   **Logic:** Finds existing chat for this object OR creates a new one.
 *   **Breakout Chats:** Created automatically when a Side Conversation (see `clientcontent.md`) is promoted.
     *   **Title:** Auto-generated from the source (e.g., "Discussion: [Article Title]").
     *   **Initial Members:** All participants from the original thread.
@@ -142,6 +148,18 @@ Post Creation Request Body (Multipart/JSON):
 ## **7. Account Management (Social Extensions)**
 
 These endpoints belong to the Account namespace but support social features.
+
+### **7.1. Unified Inbox (Notifications)**
+
+A single stream for all user alerts, aggregating social, game, and system events.
+
+| HTTP Method | Endpoint | Action | Logic / Validation Notes |
+| :---- | :---- | :---- | :---- |
+| **GET** | /account/inbox | List notifications. | Polymorphic response. Types: `friend_request`, `chat_mention`, `gig_invite`, `system_alert`. |
+| **PATCH** | /account/inbox/{id}/read | Mark as read. | Clears the "unread" state. |
+| **POST** | /account/inbox/read-all | Mark all as read. | Bulk action for "Clear All". |
+
+```
 
 | HTTP Method | Endpoint | Action | Logic / Validation Notes |
 | :---- | :---- | :---- | :---- |

@@ -34,27 +34,100 @@ The API endpoint for managing newsletter subscriptions must be protected by a mi
 
 | Endpoint | Logic | Outcome |
 | :--- | :--- | :--- |
-| **`POST /api/subscriptions/newsletter`** | **Requires:** Authenticated user **AND** `user.is_paid_subscriber = TRUE`. | If true, proceed to subscribe. If false, return **HTTP 403 Forbidden**. |
+| **`POST /api/subscriptions/newsletter`** | **Requires:** Authenticated user **AND** `User::hasActiveSubscription('laity_premium')`. | If true, proceed to subscribe. If false, return **HTTP 403 Forbidden**. |
 
 ---
 
-## 3. Message Visibility Logic (Core Social Graph Enforcement)
+## 3. Hybrid Interaction Model: Side Conversations & Breakout Chats
 
-The most complex logic is defining who can view a **`message`** based on its `visibility` setting and the current user's relationships (`friends`, `clans`). This must be implemented via a robust **`MessagePolicy@view`** or a query scope on the `Message` model.
+This system implements a dual-layer interaction architecture designed to keep main content clean while enabling deep, scoped discussions.
+
+### 3.1. Nomenclature & Definitions
+
+*   **Public Square (Comments)**: Top-level, public remarks on an Article. Visible to everyone (Brand-scoped).
+*   **Side Conversations (Threads)**: Contextual message threads spawned from a specific Comment. These are "Side Conversations" because they are visible only to specific groups (Friends, Clan) or the public, depending on the initiator's choice.
+*   **Breakout Chats**: The mechanism of promoting a high-activity Side Conversation into a permanent, standalone **Social Chat** (see `social.md`) to preserve history and unlock full chat features (media, invites).
+
+### 3.2. Data Structure & Polymorphism
+
+| Level | Component | Model | Polymorphic Relation | Visibility |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **Comment** | `Comment` | `commentable_type = 'App\Models\Article'` | **Public** (Brand Scoped). |
+| **2** | **Side Conversation** | `Message` | `context_type = 'App\Models\Comment'` | **Scoped** (Public, Friends, Clan). |
+| **3** | **Breakout Chat** | `Chat` | *Converted from Side Conversation* | **Private/Group** (Invite only). |
+
+### 3.3. Side Conversation Logic (Message Visibility)
+
+The core logic defines who can view a **Side Conversation** based on the `visibility` setting of the *first message* (the thread starter) and the viewer's relationship to the starter.
+
+#### 3.3.1. Visibility Rules
 
 | `visibility` Value | Logic (Criteria for Allowing View) | Database Checks Required |
 | :--- | :--- | :--- |
-| **`public`** | Always allow viewing by any authenticated user. | None (Default behavior) |
-| **`private`** | Allow viewing if the current user is the **sender** or a designated **agent/author** of the article. | `(message.user_id = auth_user.id)` **OR** `(auth_user.role = 'agent' AND article_id is NOT NULL)` |
-| **`friends`** | Allow viewing if the current user is the **sender** or has an **accepted friendship** with the sender. | `(message.user_id = auth_user.id)` **OR** `EXISTS (SELECT * FROM friendships WHERE status='accepted' AND sender/recipient IDs match)` |
-| **`clan`** | Allow viewing if the current user is the **sender** or shares at least one **Clan** with the sender. | `(message.user_id = auth_user.id)` **OR** `EXISTS (SELECT * FROM clan_members cm1, clan_members cm2 WHERE cm1.clan_id = cm2.clan_id AND cm1.user_id = auth_user.id AND cm2.user_id = message.user_id)` |
-| **Global Rule** | **Block Check:** If the current user has explicitly **blocked** the message sender, the message must **never** be returned, regardless of the visibility setting. | `NOT EXISTS (SELECT * FROM friendships WHERE status='blocked' AND sender_id = auth_user.id AND recipient_id = message.user_id)` |
+| **`public`** | Visible to everyone. | None. |
+| **`friends`** | Visible to the **sender** and their **accepted friends**. | `(message.user_id = auth_user.id)` **OR** `EXISTS (SELECT * FROM friendships WHERE status='accepted' ...)` |
+| **`clan`** | Visible to the **sender** and members of their **Clans**. | `(message.user_id = auth_user.id)` **OR** `EXISTS (SELECT * FROM clan_members ...)` |
+| **`private`** | Visible only to **sender** and **Article Author/Agent**. | `(message.user_id = auth_user.id)` **OR** `(auth_user.role = 'agent')` |
 
+#### 3.3.2. Performance Optimization (Caching)
 
+To prevent N+1 query issues when loading Side Conversations:
+
+1.  **Eager Loading:** Always eager load `sender` relationships.
+2.  **Relationship Caching:** Fetch the authenticated user's `friend_ids` and `clan_ids` **once** at the start of the request.
+3.  **In-Memory Filtering:** Use the cached ID lists to filter the message collection in memory.
+
+### 3.4. Breakout Chat Implementation
+
+When a Side Conversation becomes too active or requires privacy, participants can "Breakout" into a standalone Chat.
+
+#### 3.4.1. Breakout Logic (`POST /comments/{id}/breakout`)
+
+1.  **Trigger**: User clicks "Continue in Chat".
+2.  **Action**:
+    *   Create a new `Chat` (type: `group`).
+    *   Add all unique participants from the Side Conversation as `ChatMember`s.
+    *   (Optional) Copy the last N messages to the new Chat to preserve context.
+    *   Post a system message in the Side Conversation: *"This conversation has moved to a [Chat](link)."*
+3.  **Result**: The Side Conversation is locked (read-only), and activity moves to the new Chat resource.
+
+### 3.5. Interaction Endpoints
+
+| Endpoint | Method | Purpose | Logic |
+| :--- | :--- | :--- | :--- |
+| **`/articles/{id}/comments`** | `GET` | List top-level comments. | Public visibility. |
+| **`/articles/{id}/comments`** | `POST` | Post a Comment. | Public. |
+| **`/comments/{id}/messages`** | `GET` | View a Side Conversation. | Filtered by `MessagePolicy`. |
+| **`/comments/{id}/messages`** | `POST` | Reply to Side Conversation. | Inherits visibility of thread. |
+| **`/comments/{id}/breakout`** | `POST` | **Breakout** to Social Chat. | Creates `Chat`, migrates users. |
 
 ---
 
-## 4. AI Content Regeneration Logic (Rank 8)
+## 4. Brand Context Middleware
+
+To ensure strict data separation between brands (Laity vs. W3RD) without repetitive controller code:
+
+| Component | Logic |
+| :--- | :--- |
+| **Middleware** | `SetBrandContext` runs on every API request. |
+| **Input** | Inspects the `X-Client-Key` header to identify the calling client application. |
+| **Action** | 1. Resolves the `Client` model. <br> 2. Sets a singleton `Context::brand()` (e.g., 'laity'). <br> 3. Applies a **Global Scope** to `Article` and `Message` models to automatically filter by `brand = 'laity'`. |
+
+---
+
+## 5. Polymorphic Reactions
+
+Reactions (Likes, Emojis) must be implemented polymorphically to support Articles, Messages, and Feed Posts uniformly.
+
+| Model | Logic |
+| :--- | :--- |
+| **`Reaction`** | Uses `reactable_id` and `reactable_type` to link to any content type. |
+| **Endpoints** | `POST /api/articles/{id}/reactions` <br> `POST /api/messages/{id}/reactions` |
+| **Validation** | Ensures the user hasn't already reacted with the same type (if unique) or toggles the reaction. |
+
+---
+
+## 6. AI Content Regeneration Logic (Rank 8)
 
 This is a privileged operation for content maintenance.
 

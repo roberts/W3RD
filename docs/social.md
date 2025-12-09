@@ -24,6 +24,18 @@ This system implements the X-like "Friends" and "Requests" tabs to control inbox
 | **DELETE** | /social/friends/{id} | Remove a friend. | Removes both directions of the friendship link. |
 | **PATCH** | /social/friends/{friend} | Set alias/note. | **Rec #10 (UX).** Set a private note/alias for a friend (e.g., "Mike from Discord"). |
 
+### **2.1. Friend Circles**
+
+Circles are private, user-defined lists for organizing friends (e.g., "Ranked Squad", "IRL"). IDs are ULIDs.
+
+| HTTP Method | Endpoint | Action | Logic / Validation Notes |
+| :---- | :---- | :---- | :---- |
+| **GET** | /social/circles | List my circles. | Returns circle metadata (id, name, member_count). |
+| **POST** | /social/circles | Create a circle. | **Request Body:** `{"name": "Ranked Squad"}`. |
+| **POST** | /social/circles/{circle}/members | Add friend to circle. | **Request Body:** `{"user_id": "01ARZ..."}`. Validates user is a friend. |
+| **DELETE** | /social/circles/{circle}/members/{user} | Remove from circle. | Removes user from the list. |
+| **DELETE** | /social/circles/{circle} | Delete a circle. | Deletes the list (does not unfriend users). |
+
 ## **3. Clan Management (/social/clans)**
 
 This establishes the team structure for bounty hunting groups.
@@ -36,6 +48,16 @@ This establishes the team structure for bounty hunting groups.
 | **POST** | /social/clans/{id}/join | Join a clan (based on type). | **Logic:** If public, joins directly. If application_driven, creates a ClanApplication. If invite_only, fails unless invited. |
 | **DELETE** | /social/clans/{id}/leave | Leave a clan. | Clan Leader cannot leave until ownership is transferred. |
 | **POST** | /social/clans/{id}/invite | Invite user to an invite-only clan. | **Request Body:** {"user_id": 123}. **Rec #6 (Roles):** Officers and Leaders can invite/kick. |
+
+### **3.1. Clan Communication (Announcements & Pins)**
+
+Tools for leaders to manage signal-to-noise in clan chats.
+
+| HTTP Method | Endpoint | Action | Logic / Validation Notes |
+| :---- | :---- | :---- | :---- |
+| **POST** | /social/clans/{clan}/announcements | Send Announcement. | **Leader/Officer Only.** Bypasses mute settings. Triggers push notification. Distinct UI style. |
+| **POST** | /social/chats/{chat}/messages/{message}/pin | Pin a message. | **Leader/Officer Only.** Pins message to top of chat view. Max 5 pins per chat. |
+| **DELETE** | /social/chats/{chat}/messages/{message}/pin | Unpin a message. | **Leader/Officer Only.** Removes message from pinned list. |
 
 ## **4. Messaging & Chat (/social/chats)**
 
@@ -61,6 +83,7 @@ Message Creation Request Body (JSON/Multipart):
 | :--- | :--- | :--- | :--- |  
 | content | string | YES/NO | Text content (required if no file). |  
 | file | file | NO | Rec #3 (Media). Max 10MB (image/zip/pdf). Handled via Multipart Form Data. |
+| mentions | array<ulid> | NO | List of User ULIDs to tag. Triggers high-priority notification. Validates block status. |
 
 ### **4.3. Chat Commands (AI Agents)**
 

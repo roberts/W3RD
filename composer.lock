@@ -4666,16 +4666,16 @@
         },
         {
             "name": "livewire/volt",
-            "version": "v1.10.1",
+            "version": "v1.10.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/volt.git",
-                "reference": "48cff133990c6261c63ee279fc091af6f6c6654e"
+                "reference": "4aa52b9adbdcb0f58af9cdb1ebabfbcbee32fac9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/volt/zipball/48cff133990c6261c63ee279fc091af6f6c6654e",
-                "reference": "48cff133990c6261c63ee279fc091af6f6c6654e",
+                "url": "https://api.github.com/repos/livewire/volt/zipball/4aa52b9adbdcb0f58af9cdb1ebabfbcbee32fac9",
+                "reference": "4aa52b9adbdcb0f58af9cdb1ebabfbcbee32fac9",
                 "shasum": ""
             },
             "require": {
@@ -4733,7 +4733,7 @@
                 "issues": "https://github.com/livewire/volt/issues",
                 "source": "https://github.com/livewire/volt"
             },
-            "time": "2025-11-25T16:19:15+00:00"
+            "time": "2026-01-28T03:03:30+00:00"
         },
         {
             "name": "masterminds/html5",

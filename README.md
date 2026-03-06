@@ -1,6 +1,6 @@
-# SwampProtocol.io API Overview
+# W3RD backend protocol
 
-This repository contains the LAMP stack (Laravel 12) API backend for the multi-platform protocol with multitenancy (SwampProtocol.io, W3RD.io, GamerProtocol.io) powering all frontend brands (TokenGames.io, DrewRoberts.com, Web3Journey.org). It serves as the single source of truth for **user authentication**, **real-time updates**, and **subscription/billing logic** and even the **game state management**.
+This repository contains the LAMP stack (Laravel 12) API backend for the multi-platform protocol with multitenancy (W3RD.io, SwampProtocol.io GamerProtocol.io) powering all frontend brands (TokenGames.io, DrewRoberts.com, Web3Journey.org). It serves as the single source of truth for **user authentication**, **real-time updates**, and **subscription/billing logic** and even the **game state management**.
 
 ## Core Technology Stack
 

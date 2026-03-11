@@ -8,8 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Redis;
 
-uses(RefreshDatabase::class);
-
 beforeEach(function () {
     $this->service = app(AgentSchedulingService::class);
 

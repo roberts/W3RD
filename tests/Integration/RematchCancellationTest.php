@@ -12,8 +12,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
 
-uses(RefreshDatabase::class);
-
 describe('Automatic Rematch Cancellation', function () {
     beforeEach(function () {
         Event::fake();

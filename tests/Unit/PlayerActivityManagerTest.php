@@ -7,8 +7,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
 
-uses(RefreshDatabase::class);
-
 describe('PlayerActivityManager', function () {
     beforeEach(function () {
         Queue::fake();

@@ -6,8 +6,6 @@ use App\Models\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 
-uses(RefreshDatabase::class);
-
 beforeEach(function () {
     // Mock Redis for PlayerActivityService
     Redis::shouldReceive('setex')->andReturn(true)->byDefault();

@@ -14,8 +14,6 @@ use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 
-uses(RefreshDatabase::class);
-
 describe('Activity Tracking in Game Creation', function () {
     beforeEach(function () {
         $this->states = [];

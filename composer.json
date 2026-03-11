@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "w3rd/protocol",
+    "name": "roberts/w3rd",
     "type": "project",
     "description": "Backend API & real-time game engine protocol for W3RD multi-platform ecosystem.",
     "keywords": [

@@ -7,7 +7,7 @@ use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Account\Alert>
+ * @extends Factory<Alert>
  */
 class AlertFactory extends Factory
 {

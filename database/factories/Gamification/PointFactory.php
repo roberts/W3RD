@@ -8,7 +8,7 @@ use App\Models\Gamification\Point;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gamification\Point>
+ * @extends Factory<Point>
  */
 class PointFactory extends Factory
 {

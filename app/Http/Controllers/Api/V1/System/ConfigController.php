@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\System;
 
+use App\Enums\GameTitle;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -24,7 +25,7 @@ class ConfigController extends Controller
                 'leaderboards' => true,
                 'sse_feeds' => true,
             ],
-            'supported_games' => collect(\App\Enums\GameTitle::cases())->map(fn ($title) => [
+            'supported_games' => collect(GameTitle::cases())->map(fn ($title) => [
                 'key' => $title->value,
                 'name' => $title->label(),
                 'min_players' => $title->minPlayers(),

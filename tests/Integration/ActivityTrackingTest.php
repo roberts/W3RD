@@ -1,18 +1,17 @@
 <?php
 
-use App\Matchmaking\Queue\Actions\JoinQueueAction;
-use App\Matchmaking\Queue\Actions\LeaveQueueAction;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Lifecycle\Creation\GameBuilder;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Matchmaking\Enums\LobbyStatus;
+use App\Matchmaking\Queue\Actions\JoinQueueAction;
+use App\Matchmaking\Queue\Actions\LeaveQueueAction;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
 
 describe('Activity Tracking in Game Creation', function () {
@@ -21,7 +20,7 @@ describe('Activity Tracking in Game Creation', function () {
 
         // Mock Redis to track state changes in memory
         Redis::shouldReceive('setex')
-            ->with(\Mockery::pattern('/player:\d+:activity/'), 1800, \Mockery::any())
+            ->with(Mockery::pattern('/player:\d+:activity/'), 1800, Mockery::any())
             ->andReturnUsing(function ($key, $ttl, $value) {
                 $this->states[$key] = $value;
 
@@ -30,7 +29,7 @@ describe('Activity Tracking in Game Creation', function () {
             ->byDefault();
 
         Redis::shouldReceive('get')
-            ->with(\Mockery::pattern('/player:\d+:activity/'))
+            ->with(Mockery::pattern('/player:\d+:activity/'))
             ->andReturnUsing(function ($key) {
                 return $this->states[$key] ?? null;
             })

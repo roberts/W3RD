@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Auth\User;
 use App\Models\Workflow;
-use Illuminate\Auth\Access\Response;
 
 class WorkflowPolicy
 {

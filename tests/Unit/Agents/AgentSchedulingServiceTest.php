@@ -4,7 +4,6 @@ use App\Agents\Scheduling\AgentSchedulingService;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Redis;
 

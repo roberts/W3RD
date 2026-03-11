@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<\App\Models\Matchmaking\QueueSlot>
+ * @extends Factory<QueueSlot>
  */
 class QueueSlotFactory extends Factory
 {

@@ -7,7 +7,7 @@ use App\Models\Gamification\GlobalRank;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gamification\GlobalRank>
+ * @extends Factory<GlobalRank>
  */
 class GlobalRankFactory extends Factory
 {

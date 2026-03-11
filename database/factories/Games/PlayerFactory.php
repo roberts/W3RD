@@ -9,14 +9,14 @@ use App\Models\Games\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Player>
+ * @extends Factory<Player>
  */
 class PlayerFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\App\Models\Games\Player>
+     * @var class-string<Player>
      */
     protected $model = Player::class;
 

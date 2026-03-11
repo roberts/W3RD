@@ -3,13 +3,14 @@
 namespace App\Models\Gamification;
 
 use App\Models\Auth\User;
+use Database\Factories\Gamification\GlobalRankFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GlobalRank extends Model
 {
-    /** @use HasFactory<\Database\Factories\Gamification\GlobalRankFactory> */
+    /** @use HasFactory<GlobalRankFactory> */
     use HasFactory;
 
     protected $primaryKey = 'user_id';

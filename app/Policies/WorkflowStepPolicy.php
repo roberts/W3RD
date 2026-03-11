@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Auth\User;
 use App\Models\WorkflowStep;
-use Illuminate\Auth\Access\Response;
 
 class WorkflowStepPolicy
 {

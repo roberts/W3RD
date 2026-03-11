@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Application;
 use App\Models\Auth\User;
-use Illuminate\Auth\Access\Response;
 
 class ApplicationPolicy
 {

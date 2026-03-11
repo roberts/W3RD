@@ -10,7 +10,6 @@ use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
 
@@ -25,7 +24,7 @@ describe('AgentAutoAcceptRematch Job', function () {
 
         // Mock Redis to track state changes in memory
         Redis::shouldReceive('setex')
-            ->with(\Mockery::pattern('/player:\d+:activity/'), 1800, \Mockery::any())
+            ->with(Mockery::pattern('/player:\d+:activity/'), 1800, Mockery::any())
             ->andReturnUsing(function ($key, $ttl, $value) {
                 $this->states[$key] = $value;
 
@@ -34,7 +33,7 @@ describe('AgentAutoAcceptRematch Job', function () {
             ->byDefault();
 
         Redis::shouldReceive('get')
-            ->with(\Mockery::pattern('/player:\d+:activity/'))
+            ->with(Mockery::pattern('/player:\d+:activity/'))
             ->andReturnUsing(function ($key) {
                 return $this->states[$key] ?? 'idle'; // Default to idle for these tests
             })

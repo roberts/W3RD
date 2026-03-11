@@ -146,12 +146,12 @@ class CoordinatedActionProcessor
             ->get();
 
         // Add the current action to the list (as a transient Action model)
-        $currentActionModel = new Action();
+        $currentActionModel = new Action;
         // Since we can't easily hydrate it completely without saving, we'll set what's needed for coordination
         $currentActionModel->setRelation('player', $player);
         $currentActionModel->action_details = $action->toArray();
         $currentActionModel->action_type = ActionType::from($action->getType());
-        
+
         $coordinatedActions->push($currentActionModel);
 
         // Process the coordinated actions through the game mode
@@ -162,7 +162,7 @@ class CoordinatedActionProcessor
             ->withCoordinationGroup($coordinationGroup)
             ->pendingCoordination()
             ->update(['coordination_completed_at' => now()]);
-            
+
         // Note: The current action is not yet in the DB, so it won't be updated here.
         // The calling component is responsible for saving the current action with proper status.
 

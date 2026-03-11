@@ -9,7 +9,7 @@ use App\Models\Games\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Action>
+ * @extends Factory<Action>
  */
 class ActionFactory extends Factory
 {

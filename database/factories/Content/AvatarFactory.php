@@ -8,7 +8,7 @@ use App\Models\Content\Avatar;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Content\Avatar>
+ * @extends Factory<Avatar>
  */
 class AvatarFactory extends Factory
 {

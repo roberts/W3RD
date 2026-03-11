@@ -8,7 +8,6 @@ use App\Matchmaking\Events\ProposalCancelled;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
 

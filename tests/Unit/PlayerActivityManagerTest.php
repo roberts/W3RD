@@ -3,7 +3,6 @@
 use App\Enums\PlayerActivityState;
 use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\CheckAndCancelPendingProposals;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
 

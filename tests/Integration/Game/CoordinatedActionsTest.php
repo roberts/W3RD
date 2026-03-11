@@ -20,7 +20,7 @@ describe('Coordinated Actions Integration', function () {
             // Create game with 4 players
             $game = Game::factory()->create([
                 'title_slug' => 'hearts',
-                'status' => GameStatus::ACTIVE
+                'status' => GameStatus::ACTIVE,
             ]);
             $players = collect([]);
             for ($i = 1; $i <= 4; $i++) {
@@ -29,19 +29,19 @@ describe('Coordinated Actions Integration', function () {
 
             $processor = new CoordinatedActionProcessor;
             $mode = new StandardMode($game);
-            
+
             // Initialize game state (using Hearts internal logic)
             $gameState = HeartsTable::createNew(...$players->pluck('ulid')->all());
 
             // Submit actions for first 3 players
             foreach ($players->take(3) as $player) {
                 $action = new PassCards(['2H', '3H', '4H']);
-                
+
                 $result = $processor->process($game, $action, $mode, $gameState, $player);
-                
+
                 // Assert not complete
                 expect($result->coordinationComplete)->toBeFalse();
-                
+
                 // Manually record the action (simulating GameEngine side effect)
                 Action::create([
                     'game_id' => $game->id,
@@ -59,13 +59,13 @@ describe('Coordinated Actions Integration', function () {
             // Submit final player's action
             $lastPlayer = $players->last();
             $action = new PassCards(['2D', '3D', '4D']);
-            
+
             $result = $processor->process($game, $action, $mode, $gameState, $lastPlayer);
 
             // Assert complete
             expect($result->coordinationComplete)->toBeTrue()
                 ->and($result->updatedGameState)->toBeInstanceOf(HeartsTable::class);
-                
+
             $finalState = $result->updatedGameState;
             expect($finalState->phase)->toBe(GamePhase::ACTIVE);
         });

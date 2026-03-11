@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Account;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -60,7 +62,7 @@ class UpdateProfileRequest extends FormRequest
     /**
      * Configure the validator instance to check username permission AFTER validation passes.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param  Validator  $validator
      * @return void
      */
     public function withValidator($validator)
@@ -83,7 +85,7 @@ class UpdateProfileRequest extends FormRequest
     {
         // If username permission check failed, return 403 instead of 422
         if ($validator->errors()->has('_permission_denied')) {
-            throw new \Illuminate\Validation\ValidationException(
+            throw new ValidationException(
                 $validator,
                 response()->json([
                     'message' => 'You do not have permission to update your username.',

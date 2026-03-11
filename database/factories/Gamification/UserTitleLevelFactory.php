@@ -8,7 +8,7 @@ use App\Models\Gamification\UserTitleLevel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gamification\UserTitleLevel>
+ * @extends Factory<UserTitleLevel>
  */
 class UserTitleLevelFactory extends Factory
 {

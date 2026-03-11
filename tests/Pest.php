@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 |
 */
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature', 'Integration', 'Unit');
 
@@ -73,6 +73,7 @@ expect()->extend('toBeSuccessfulApiResponse', function () {
 
 use App\Models\Auth\User;
 use Illuminate\Testing\TestResponse;
+use Tests\TestCase;
 
 /**
  * Create and authenticate a user for API requests

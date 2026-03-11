@@ -15,6 +15,8 @@ The system utilizes a **"Deferred Identity"** pattern. No `User` record is creat
 
 ## 2. Database Schema (MySQL)
 
+**Versioning Strategy:** Workflows are immutable once active. To change a workflow, create a new `workflow` record (v2) and update the `client` configuration to point to the new ID. Existing registrations continue on their original `workflow_id`.
+
 ### 2.1 `workflows`
 The high-level blueprint for a specific process (e.g., User Onboarding, Vendor Application).
 
@@ -45,6 +47,11 @@ The atomic units of the workflow. Each represents a unique Blade fragment.
 ### 2.3 `registrations`
 The state-machine table for in-progress applications.
 
+**Indexing Strategy:**
+*   **Compound Index:** `[client_id, email]` (Uniqueness check)
+*   **Compound Index:** `[uuid, expires_at]` (Cleanup jobs)
+*   **Index:** `parent_registration_uuid` (Team lookups)
+
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `uuid` | UUID (PK) | W3RD Context ID (Used in all HTMX requests) |
@@ -72,7 +79,28 @@ All hypermedia requests follow this pattern:
 *   **GET**: Fetches the fragment for the specific step. Requires `X-W3RD-Context` (Registration UUID).
 *   **POST**: Submits data for the current step. Laravel processes data, updates `form_data` JSON, logs timing, and determines the next `step_slug`.
 
-### 3.2 W3RD Header Requirements
+### 3.2 Happy Path Trace (Example)
+
+**1. Start Registration (GET /init)**
+```http
+GET /htmx/v1/registration/init
+Header: X-W3RD-Client: <uuid>
+Response: 200 OK
+New-Context-ID: <new-uuid>
+HTML: <form hx-post="personal-info">...</form>
+```
+
+**2. Submit Info (POST /personal-info)**
+```http
+POST /htmx/v1/registration/personal-info
+Header: X-W3RD-Context: <uuid>
+Body: email=bob@example.com&name=Bob
+Response: 200 OK
+HX-Push-Url: /register/team-invite
+HTML: <form hx-post="team-invite">...</form>
+```
+
+### 3.3 W3RD Header Requirements
 
 | Header | Requirement | Purpose |
 | :--- | :--- | :--- |
@@ -84,6 +112,19 @@ All hypermedia requests follow this pattern:
 ---
 
 ## 4. Functional Logic Specifications
+
+### 4.0 Lifecycle State Machine
+
+```mermaid
+graph TD
+    A[Draft] -->|Submit Step| A
+    A -->|Requires Approval| B[Pending Review]
+    B -->|Admin Approve| C[Approved]
+    B -->|Admin Reject| A
+    A -->|All Steps Complete| C
+    C -->|Graduation Event| D[Graduated]
+    D -->|User Created| E[User Active]
+```
 
 ### 4.1 Feature #1 & #7: Conditional & Risk-Based Logic
 Before serving a fragment, the `WorkflowEngine` evaluates both `logic_rule` and `risk_rule`.
@@ -140,7 +181,11 @@ The Workflow Engine emits events to the Client's configured Webhook URL:
 ### 5.5 Feature #10: Gamified Interactive Steps
 *   **Step Type**: `game`
 *   **Behavior**: Returns a fragment containing an Alpine.js game component (e.g., "Select Avatar").
-*   **Validation**: Completion of the game triggers an `hx-post` with the result (e.g., `avatar_id`), which is validated just like a standard form input.
+*   **Interface Contract**: The game component MUST mimic a form submission.
+    1.  User plays game (e.g., selects avatar).
+    2.  Game updates a hidden input `<input type="hidden" name="game_result" value="{id: 5}">`.
+    3.  Game triggers `htmx.trigger('#game-form', 'submit')`.
+    4.  Backend validates the `game_result` payload.
 
 ---
 
@@ -154,14 +199,95 @@ The "Promotion" is an atomic transaction:
 4.  Delete or Archive the `Registration` record (or mark as `graduated`).
 
 ### 6.2 W3RD Handover
-Post-graduation, the backend returns a final fragment containing a **one-time-use Handover Token**. The AHA frontend uses this token to establish the first authenticated session on the Client's specific domain.
+Post-graduation, the backend returns a final fragment containing a **one-time-use Handover Token**.
+*   **Mechanism**: Signed JWT (short-lived, 5 mins).
+*   **Frontend Action**: Javascript detects token, POSTs to `/api/login/handover`.
+*   **Result**: Backend exchanges token for long-lived Session/Auth Token.
 
 ---
 
 ## 7. Error Handling
 
-### 7.1 Validation Errors
-Return `422 Unprocessable Entity`. The body must be the same form fragment with `$errors` populated.
+### 7.1 Error Response Codes
 
-### 7.2 Expired Context
-If `X-W3RD-Context` is expired or invalid, return `403 Forbidden` with a `HX-Trigger: registration-expired` header to force a restart on the AHA site.
+| Code | Reason | Frontend Action |
+| :--- | :--- | :--- |
+| **422** | Validation Error | Render HTML fragment with error messages inline. |
+| **403** | Expired Context | Trigger `registration-expired` event (Restart flow). |
+| **409** | Conflict | Step already completed or out of sequence. Reload current step. |
+| **500** | System Error | Show "Try again later" toast. |
+
+### 7.2 Custom Headers
+*   `X-W3RD-Error: logic-rule-mismatch` - Debug info for why a step was skipped.
+
+---
+
+## 8. Consumer Integration
+
+To integrate the W3RD consumer on an Astro/Static site:
+
+```html
+<div id="w3rd-registration-container" 
+     hx-get="https://api.w3rd.tech/htmx/v1/registration/init" 
+     hx-trigger="load"
+     hx-headers='{"X-W3RD-Client": "YOUR_CLIENT_UUID"}'>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        // Automatically attach Context UUID if exists
+        const context = localStorage.getItem('w3rd_context');
+        if (context) {
+            evt.detail.headers['X-W3RD-Context'] = context;
+        }
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        // Save new Context UUID from response
+        const newContext = evt.detail.xhr.getResponseHeader('New-Context-ID');
+        if (newContext) localStorage.setItem('w3rd_context', newContext);
+    });
+</script>
+```
+
+---
+
+## 9. Development & Testing
+
+*   **Testing Strategy**: Use `Symfony\Component\DomCrawler\Crawler` in PHPUnit features tests to assert that specific input fields are present in the returned HTML. Do not just assert 200 OK.
+*   **Mocking**: In local dev, mock the Enrichment and Risk providers to always return "Safe" / "Enriched" data.
+
+---
+
+## 10. Appendix: JSON Configuration Examples
+
+**A. Logic Rule (Conditional Skip)**
+```json
+[
+  {
+    "field": "intended_role",
+    "operator": "in",
+    "value": ["vendor", "partner"]
+  }
+]
+```
+
+**B. Risk Rule (Verification Injection)**
+```json
+{
+  "provider": "maxmind",
+  "score_threshold": 75,
+  "action": "inject_step",
+  "step_slug": "identify-verification"
+}
+```
+
+**C. Traffic Split (A/B Testing)**
+```json
+{
+  "variants": [
+    { "workflow_id": 12, "weight": 50 },
+    { "workflow_id": 15, "weight": 50 }
+  ]
+}
+```

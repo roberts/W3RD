@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('registrations', function (Blueprint $table) {
-            $table->uuid('id')->primary(); // W3RD Context ID
+            $table->uuid('uuid')->primary(); // W3RD Context ID
             $table->foreignId('client_id')->constrained('clients');
-            $table->foreignId('workflow_id')->constrained('workflows');
+            $table->foreignId('workflow_id')->nullable()->constrained('workflows');
             $table->foreignId('current_step_id')->nullable()->constrained('workflow_steps')->nullOnDelete();
             $table->string('email')->index();
+            $table->string('verification_token')->nullable()->index(); // For email verification
             $table->json('form_data')->nullable(); // Encrypted blob of all step inputs
             $table->json('step_timings')->nullable(); // Analytics: Time spent per step
             $table->string('status')->default('draft'); // draft, pending_review, approved, graduated

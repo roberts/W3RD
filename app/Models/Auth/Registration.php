@@ -4,6 +4,7 @@ namespace App\Models\Auth;
 
 use App\Models\Access\Client;
 use Database\Factories\Auth\RegistrationFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Registration extends Model
 {
     /** @use HasFactory<RegistrationFactory> */
-    use HasFactory;
+    use HasFactory, HasUuids;
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'uuid';
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +36,8 @@ class Registration extends Model
         'workflow_id',
         'current_step_id',
         'email',
+        'password',
+        'verification_token',
         'form_data',
         'step_timings',
         'status',
@@ -43,6 +53,8 @@ class Registration extends Model
      * @var list<string>
      */
     protected $hidden = [
+        'password',
+        'verification_token',
         'form_data',
     ];
 
@@ -72,24 +84,6 @@ class Registration extends Model
     {
         $data = $this->form_data ?? [];
         $data['password'] = $value;
-        $this->form_data = $data;
-    }
-
-    /**
-     * Virtual attribute for backward compatibility.
-     */
-    public function getVerificationTokenAttribute(): ?string
-    {
-        return $this->form_data['verification_token'] ?? null;
-    }
-
-    /**
-     * Virtual attribute for backward compatibility.
-     */
-    public function setVerificationTokenAttribute(string $value): void
-    {
-        $data = $this->form_data ?? [];
-        $data['verification_token'] = $value;
         $this->form_data = $data;
     }
 

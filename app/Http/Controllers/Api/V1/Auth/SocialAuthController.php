@@ -24,9 +24,10 @@ class SocialAuthController extends Controller
     {
         try {
             // Verify token with provider
-            /** @phpstan-ignore-next-line */
-            $providerUser = Socialite::driver($request->provider)
-                ->userFromToken($request->access_token);
+            $driver = Socialite::driver($request->provider);
+            
+            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+            $providerUser = $driver->userFromToken($request->access_token);
 
             // Find or create user and social account
             $result = $this->authService->handleSocialLogin(

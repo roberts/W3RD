@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\GameEngine\Lifecycle\Progression;
 
 use App\DataTransferObjects\Games\CoordinatedActionResult;
+use App\Enums\ActionType;
 use App\GameEngine\Interfaces\GameActionContract;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
@@ -149,7 +150,7 @@ class CoordinatedActionProcessor
         // Since we can't easily hydrate it completely without saving, we'll set what's needed for coordination
         $currentActionModel->setRelation('player', $player);
         $currentActionModel->action_details = $action->toArray();
-        $currentActionModel->action_type = $action->getType();
+        $currentActionModel->action_type = ActionType::from($action->getType());
         
         $coordinatedActions->push($currentActionModel);
 

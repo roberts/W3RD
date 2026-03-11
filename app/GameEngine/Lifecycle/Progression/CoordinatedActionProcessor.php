@@ -8,6 +8,7 @@ use App\DataTransferObjects\Games\CoordinatedActionResult;
 use App\GameEngine\Interfaces\GameActionContract;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
+use App\Models\Games\Player;
 
 /**
  * Handles coordinated actions where multiple players must submit actions
@@ -22,9 +23,10 @@ class CoordinatedActionProcessor
      * @param  GameActionContract  $action  The action being processed
      * @param  mixed  $mode  The game mode handler
      * @param  object  $gameState  The current game state
+     * @param  Player  $player  The current player
      * @return CoordinatedActionResult Result indicating if coordination is needed and status
      */
-    public function process(Game $game, GameActionContract $action, mixed $mode, object $gameState): CoordinatedActionResult
+    public function process(Game $game, GameActionContract $action, mixed $mode, object $gameState, Player $player): CoordinatedActionResult
     {
         // Check if this action requires coordination
         if (! $this->isCoordinatedAction($action)) {
@@ -35,11 +37,19 @@ class CoordinatedActionProcessor
         $coordinationSequence = $this->getSequenceNumber($game, $coordinationGroup);
         $requiredCount = $this->getRequiredPlayerCount($game, $action, $gameState);
 
-        // Check if coordination is complete
+        // Check if coordination is complete (counting existing actions + current action)
         $completedCount = $this->getCompletedCount($game, $coordinationGroup);
 
-        if ($completedCount >= $requiredCount) {
-            return $this->completeCoordination($game, $mode, $gameState, $coordinationGroup, $coordinationSequence);
+        if ($completedCount + 1 >= $requiredCount) {
+            return $this->completeCoordination(
+                $game,
+                $mode,
+                $gameState,
+                $coordinationGroup,
+                $coordinationSequence,
+                $action,
+                $player
+            );
         }
 
         return CoordinatedActionResult::coordinated(
@@ -123,23 +133,37 @@ class CoordinatedActionProcessor
         mixed $mode,
         object $gameState,
         string $coordinationGroup,
-        int $coordinationSequence
+        int $coordinationSequence,
+        GameActionContract $action,
+        Player $player
     ): CoordinatedActionResult {
-        // Retrieve all coordinated actions
+        // Retrieve all previously coordinated actions
         $coordinatedActions = Action::where('game_id', $game->id)
             ->withCoordinationGroup($coordinationGroup)
             ->pendingCoordination()
             ->with('player')
             ->get();
 
-        // Process the coordinated action through the game mode
+        // Add the current action to the list (as a transient Action model)
+        $currentActionModel = new Action();
+        // Since we can't easily hydrate it completely without saving, we'll set what's needed for coordination
+        $currentActionModel->setRelation('player', $player);
+        $currentActionModel->action_details = $action->toArray();
+        $currentActionModel->action_type = $action->getType();
+        
+        $coordinatedActions->push($currentActionModel);
+
+        // Process the coordinated actions through the game mode
         $updatedGameState = $this->processCoordinatedActions($mode, $gameState, $coordinatedActions);
 
-        // Mark all actions as completed
+        // Mark all existing actions as completed
         Action::where('game_id', $game->id)
             ->withCoordinationGroup($coordinationGroup)
             ->pendingCoordination()
             ->update(['coordination_completed_at' => now()]);
+            
+        // Note: The current action is not yet in the DB, so it won't be updated here.
+        // The calling component is responsible for saving the current action with proper status.
 
         return CoordinatedActionResult::coordinated(
             coordinationGroup: $coordinationGroup,

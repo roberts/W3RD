@@ -42,7 +42,7 @@ describe('Automatic Rematch Cancellation', function () {
             expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
-                return $event->rematchRequest->id === $proposal->id
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'requester_unavailable';
             });
         });
@@ -63,7 +63,7 @@ describe('Automatic Rematch Cancellation', function () {
             expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
-                return $event->rematchRequest->id === $proposal->id
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'opponent_unavailable';
             });
         });
@@ -110,8 +110,8 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($acceptedRematch->fresh()->status)->toBe('accepted')
-                ->and($declinedRematch->fresh()->status)->toBe('declined');
+            expect($acceptedRematch->fresh()->status)->toBe(ProposalStatus::ACCEPTED)
+                ->and($declinedRematch->fresh()->status)->toBe(ProposalStatus::DECLINED);
         });
 
         it('does nothing when user has no pending rematches', function () {

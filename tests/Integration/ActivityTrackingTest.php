@@ -1,7 +1,7 @@
 <?php
 
-use App\Actions\Queue\JoinQueueAction;
-use App\Actions\Queue\LeaveQueueAction;
+use App\Matchmaking\Queue\Actions\JoinQueueAction;
+use App\Matchmaking\Queue\Actions\LeaveQueueAction;
 use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\PlayerActivityState;
@@ -10,6 +10,7 @@ use App\GameEngine\Player\PlayerActivityManager;
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
+use App\Models\Games\Mode;
 use App\Models\Matchmaking\Lobby;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
@@ -47,16 +48,21 @@ describe('Activity Tracking in Game Creation', function () {
         Redis::shouldReceive('zrem')->andReturn(1)->byDefault();
         Redis::shouldReceive('expire')->andReturn(true)->byDefault();
 
-        $this->activityManager = app(PlayerActivityManager::class);
+        $this->activityService = app(PlayerActivityManager::class);
         $this->gameBuilder = app(GameBuilder::class);
+
+        Mode::factory()->create([
+            'title_slug' => GameTitle::CONNECT_FOUR,
+            'slug' => 'standard',
+        ]);
     });
 
     describe('matchmaking queue', function () {
         it('sets IN_QUEUE when joining queue', function () {
             $user = User::factory()->create();
-            $joinAction = new JoinQueueAction;
+            $joinAction = app(JoinQueueAction::class);
 
-            $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
+            $joinAction->execute($user, GameTitle::CONNECT_FOUR, 'standard', 1);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IN_QUEUE);
         });
@@ -65,11 +71,11 @@ describe('Activity Tracking in Game Creation', function () {
             $user = User::factory()->create();
 
             // Join queue first
-            $joinAction = new JoinQueueAction;
-            $joinAction->execute($user, GameTitle::VALIDATE_FOUR, 'standard', 1);
+            $joinAction = app(JoinQueueAction::class);
+            $joinAction->execute($user, GameTitle::CONNECT_FOUR, 'standard', 1);
 
             // Then leave
-            $leaveAction = new LeaveQueueAction;
+            $leaveAction = app(LeaveQueueAction::class);
             $leaveAction->execute($user);
 
             expect($this->activityService->getState($user->id))->toBe(PlayerActivityState::IDLE);
@@ -109,7 +115,7 @@ describe('Activity Tracking in Game Creation', function () {
 
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
-                'game_title' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'status' => 'pending',
             ]);
 
@@ -125,7 +131,7 @@ describe('Activity Tracking in Game Creation', function () {
 
             $lobby = Lobby::factory()->create([
                 'host_id' => $host->id,
-                'game_title' => GameTitle::VALIDATE_FOUR,
+                'title_slug' => GameTitle::CONNECT_FOUR,
                 'status' => 'pending',
             ]);
 
@@ -188,8 +194,8 @@ describe('Activity Tracking in Game Creation', function () {
             $user2 = User::factory()->create();
 
             // Set both in game
-            $this->activityManager->setState($user1->id, PlayerActivityState::IN_GAME);
-            $this->activityManager->setState($user2->id, PlayerActivityState::IN_GAME);
+            $this->activityService->setState($user1->id, PlayerActivityState::IN_GAME);
+            $this->activityService->setState($user2->id, PlayerActivityState::IN_GAME);
 
             // Simulate game completion (done via GameCompleted event listener)
             $this->activityService->setState($user1->id, PlayerActivityState::IDLE);

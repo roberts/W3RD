@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,10 +73,6 @@ expect()->extend('toBeSuccessfulApiResponse', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-use App\Models\Auth\User;
-use Illuminate\Testing\TestResponse;
-use Tests\TestCase;
 
 /**
  * Create and authenticate a user for API requests

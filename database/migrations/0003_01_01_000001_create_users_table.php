@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->foreignId('agent_id')->nullable()->unique()->index()->constrained('agents');
+            $table->foreignId('registration_client_id')->nullable()->constrained('clients');
             $table->text('bio')->nullable();
             $table->json('social_links')->nullable();
             $table->unsignedBigInteger('avatar_id')->nullable()->index();

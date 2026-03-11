@@ -2,6 +2,8 @@
 
 namespace App\Http\Traits;
 
+use App\Exceptions\InvalidActionDataException;
+use App\Exceptions\RematchNotAvailableException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -224,10 +226,10 @@ trait ApiResponses
     ): mixed {
         try {
             return $callback();
-        } catch (\App\Exceptions\RematchNotAvailableException $e) {
+        } catch (RematchNotAvailableException $e) {
             // Re-throw custom exceptions to let the exception handler deal with them
             throw $e;
-        } catch (\App\Exceptions\InvalidActionDataException $e) {
+        } catch (InvalidActionDataException $e) {
             // Re-throw action data validation exceptions
             throw $e;
         } catch (\Exception $e) {

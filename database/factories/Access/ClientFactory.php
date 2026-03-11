@@ -3,10 +3,12 @@
 namespace Database\Factories\Access;
 
 use App\Enums\Platform;
+use App\Models\Access\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Access\Client>
+ * @extends Factory<Client>
  */
 class ClientFactory extends Factory
 {
@@ -19,7 +21,7 @@ class ClientFactory extends Factory
     {
         return [
             'name' => $this->faker->company,
-            'api_key' => \Illuminate\Support\Str::random(32),
+            'api_key' => Str::random(32),
             'website' => $this->faker->domainName,
             'platform' => $this->faker->randomElement(Platform::cases()),
             'is_active' => true,

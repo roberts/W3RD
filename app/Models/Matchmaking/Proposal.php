@@ -7,11 +7,13 @@ use App\Matchmaking\Enums\ProposalType;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
+use Database\Factories\Matchmaking\ProposalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -24,15 +26,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $original_game_id
  * @property int|null $game_id
  * @property array<string, mixed>|null $game_settings
- * @property \Illuminate\Support\Carbon|null $responded_at
+ * @property Carbon|null $responded_at
  * @property ProposalStatus $status
- * @property \Illuminate\Support\Carbon|null $expires_at
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon|null $expires_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Proposal extends Model
 {
-    /** @use HasFactory<\Database\Factories\Matchmaking\ProposalFactory> */
+    /** @use HasFactory<ProposalFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [

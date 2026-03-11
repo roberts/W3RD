@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Account\ProgressionResource;
 use App\Http\Traits\ApiResponses;
 use App\Models\Gamification\UserTitleLevel;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class ProgressionController extends Controller
     {
         $user = $request->user();
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, UserTitleLevel> $levelCollection */
+        /** @var Collection<int, UserTitleLevel> $levelCollection */
         $levelCollection = $user->titleLevels()
             ->orderByDesc('last_played_at')
             ->get();

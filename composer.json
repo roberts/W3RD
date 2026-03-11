@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "roberts/w3rd",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Backend API & real-time game engine protocol for W3RD multi-platform ecosystem.",
     "keywords": [
         "laravel",
         "framework"

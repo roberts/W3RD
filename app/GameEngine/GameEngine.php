@@ -136,7 +136,8 @@ class GameEngine
             $game,
             $action,
             $mode,
-            $gameState
+            $gameState,
+            $player
         );
 
         // Record the successful action
@@ -155,6 +156,10 @@ class GameEngine
             $gameState = $coordinationResult->updatedGameState;
             $game->game_state = $gameState->toArray();
             $game->save();
+
+            // Mark the current action as completed
+            $actionRecord->coordination_completed_at = now();
+            $actionRecord->save();
         }
 
         // ── 5. GAME LIFECYCLE PROGRESSION ───────────────────────────

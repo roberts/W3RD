@@ -4,6 +4,7 @@ namespace App\Models\Matchmaking;
 
 use App\Matchmaking\Enums\QueueSlotStatus;
 use App\Models\Auth\User;
+use Database\Factories\Matchmaking\QueueSlotFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QueueSlot extends Model
 {
-    /** @use HasFactory<\Database\Factories\Matchmaking\QueueSlotFactory> */
+    /** @use HasFactory<QueueSlotFactory> */
     use HasFactory, HasUlids;
 
     protected $table = 'queue_slots';

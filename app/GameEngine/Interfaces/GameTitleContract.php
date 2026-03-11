@@ -15,6 +15,7 @@ use App\Enums\GameAttributes\GameVisibility;
 use App\Exceptions\Game\TurnTimerExpiredException;
 use App\GameEngine\GameOutcome;
 use App\GameEngine\ValidationResult;
+use App\Games\ValidateFour\BaseValidateFourMode;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use Carbon\Carbon;
@@ -55,7 +56,7 @@ use Carbon\Carbon;
  * }
  * ```
  *
- * @see \App\Games\ValidateFour\BaseValidateFourMode For Connect Four implementation
+ * @see BaseValidateFourMode For Connect Four implementation
  */
 interface GameTitleContract
 {

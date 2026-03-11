@@ -4,6 +4,7 @@ namespace App\Http\Requests\Matchmaking;
 
 use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Matchmaking\Lobby;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InitiateReadyCheckRequest extends FormRequest
@@ -35,7 +36,7 @@ class InitiateReadyCheckRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

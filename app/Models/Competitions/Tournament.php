@@ -5,10 +5,12 @@ namespace App\Models\Competitions;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -23,12 +25,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $prize_pool
  * @property array<string, mixed>|null $bracket_data
  * @property array<string, mixed>|null $rules
- * @property \Illuminate\Support\Carbon|null $starts_at
- * @property \Illuminate\Support\Carbon|null $ends_at
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $users
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Game> $games
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, User> $users
+ * @property-read Collection<int, Game> $games
  */
 class Tournament extends Model
 {

@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,9 +16,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 |
 */
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature', 'Unit', 'Integration');
+    ->in('Feature', 'Integration', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -70,9 +73,6 @@ expect()->extend('toBeSuccessfulApiResponse', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-use App\Models\Auth\User;
-use Illuminate\Testing\TestResponse;
 
 /**
  * Create and authenticate a user for API requests

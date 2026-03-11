@@ -12,7 +12,7 @@ use App\Models\Matchmaking\Proposal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matchmaking\Proposal>
+ * @extends Factory<Proposal>
  */
 class ProposalFactory extends Factory
 {

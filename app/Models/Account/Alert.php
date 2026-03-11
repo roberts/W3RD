@@ -3,25 +3,27 @@
 namespace App\Models\Account;
 
 use App\Models\Auth\User;
+use Database\Factories\Account\AlertFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property int $user_id
  * @property string $type
  * @property array<string, mixed> $data
- * @property \Illuminate\Support\Carbon|null $read_at
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon|null $read_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property User $user
  */
 class Alert extends Model
 {
-    /** @use HasFactory<\Database\Factories\Account\AlertFactory> */
+    /** @use HasFactory<AlertFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [

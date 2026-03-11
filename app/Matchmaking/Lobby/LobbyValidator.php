@@ -2,6 +2,7 @@
 
 namespace App\Matchmaking\Lobby;
 
+use App\Enums\GameTitle;
 use App\Exceptions\InvalidGameConfigurationException;
 use App\Exceptions\LobbyStateException;
 use App\Exceptions\PlayerBusyException;
@@ -111,7 +112,7 @@ class LobbyValidator
             throw new InvalidGameConfigurationException(
                 "Game title '{$slug}' is not supported",
                 $slug,
-                ['available_titles' => array_column(\App\Enums\GameTitle::cases(), 'value')]
+                ['available_titles' => array_column(GameTitle::cases(), 'value')]
             );
         }
     }

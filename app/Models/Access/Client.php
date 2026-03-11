@@ -5,6 +5,7 @@ namespace App\Models\Access;
 use App\Enums\Platform;
 use App\Models\Auth\Entry;
 use App\Models\Auth\User;
+use Database\Factories\Access\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ use Roberts\Support\Traits\HasCreator;
 
 class Client extends Model
 {
-    /** @use HasFactory<\Database\Factories\Access\ClientFactory> */
+    /** @use HasFactory<ClientFactory> */
     use HasCreator, HasFactory;
 
     protected $fillable = [

@@ -3,13 +3,14 @@
 namespace App\Models\Economy;
 
 use App\Models\Auth\User;
+use Database\Factories\Economy\QuotaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Quota extends Model
 {
-    /** @use HasFactory<\Database\Factories\Economy\QuotaFactory> */
+    /** @use HasFactory<QuotaFactory> */
     use HasFactory;
 
     protected $fillable = [

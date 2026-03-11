@@ -4,6 +4,7 @@ namespace App\Models\Content;
 
 use App\Enums\AvatarType;
 use App\Models\Auth\User;
+use Database\Factories\Content\AvatarFactory;
 use DrewRoberts\Media\Models\Image;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Roberts\Support\Traits\HasCreator;
 
 class Avatar extends Model
 {
-    /** @use HasFactory<\Database\Factories\Content\AvatarFactory> */
+    /** @use HasFactory<AvatarFactory> */
     use HasCreator, HasFactory;
 
     protected $fillable = [

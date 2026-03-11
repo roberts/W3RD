@@ -3,12 +3,14 @@
 namespace App\Models\Games;
 
 use App\Enums\ActionType;
+use Database\Factories\Games\ActionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -22,12 +24,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property array<string, mixed>|null $resulting_state
  * @property Player $player
  * @property Game $game
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Action extends Model
 {
-    /** @use HasFactory<\Database\Factories\Games\ActionFactory> */
+    /** @use HasFactory<ActionFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [

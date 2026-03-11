@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Agents\Orchestrators\AgentService;
 use App\Agents\Scheduling\AgentSchedulingService;
+use App\Games\Checkers\Actions\ActionHandler;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
@@ -158,7 +159,7 @@ class CalculateAgentAction implements ShouldQueue
 
         $actionHandler = match ($gameTitle) {
             // @phpstan-ignore class.notFound
-            'checkers' => app(\App\Games\Checkers\Actions\ActionHandler::class),
+            'checkers' => app(ActionHandler::class),
             // @phpstan-ignore class.notFound
             'hearts' => app(\App\Games\Hearts\Actions\ActionHandler::class),
             // @phpstan-ignore class.notFound, match.alwaysFalse

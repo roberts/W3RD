@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
-use App\Models\Application;
+use App\Models\Auth\Application;
 
 class ApplicationController extends Controller
 {

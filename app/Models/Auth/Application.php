@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Auth;
 
-use Database\Factories\ApplicationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-    /** @use HasFactory<ApplicationFactory> */
+    /** @use HasFactory<\Database\Factories\Auth\ApplicationFactory> */
     use HasFactory;
 }

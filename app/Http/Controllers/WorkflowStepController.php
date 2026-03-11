@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkflowStepRequest;
 use App\Http\Requests\UpdateWorkflowStepRequest;
-use App\Models\WorkflowStep;
+use App\Models\Auth\WorkflowStep;
 
 class WorkflowStepController extends Controller
 {

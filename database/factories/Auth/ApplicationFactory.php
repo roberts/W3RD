@@ -1,12 +1,12 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Auth;
 
-use App\Models\Application;
+use App\Models\Auth\Application;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @template TModel of \App\Models\Application
+ * @template TModel of \App\Models\Auth\Application
  *
  * @extends Factory<TModel>
  */

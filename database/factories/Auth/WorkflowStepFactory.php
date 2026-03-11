@@ -1,23 +1,23 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Auth;
 
-use App\Models\Workflow;
+use App\Models\Auth\WorkflowStep;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @template TModel of \App\Models\Workflow
+ * @template TModel of \App\Models\Auth\WorkflowStep
  *
  * @extends Factory<TModel>
  */
-class WorkflowFactory extends Factory
+class WorkflowStepFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var class-string<TModel>
      */
-    protected $model = Workflow::class;
+    protected $model = WorkflowStep::class;
 
     /**
      * Define the model's default state.

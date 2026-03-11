@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Application;
+use App\Models\Auth\Application;
 use App\Models\Auth\User;
 
 class ApplicationPolicy

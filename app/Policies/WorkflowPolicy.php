@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Auth\User;
-use App\Models\Workflow;
+use App\Models\Auth\Workflow;
 
 class WorkflowPolicy
 {

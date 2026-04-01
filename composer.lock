@@ -2939,30 +2939,30 @@
         },
         {
             "name": "laravel/cashier",
-            "version": "v16.3.0",
+            "version": "v16.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/cashier-stripe.git",
-                "reference": "a718fbdc399eb73ef35604b42daff5221c4b704b"
+                "reference": "0c4949ec0df50ae0b76e01e3ceb32b7feff12478"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/cashier-stripe/zipball/a718fbdc399eb73ef35604b42daff5221c4b704b",
-                "reference": "a718fbdc399eb73ef35604b42daff5221c4b704b",
+                "url": "https://api.github.com/repos/laravel/cashier-stripe/zipball/0c4949ec0df50ae0b76e01e3ceb32b7feff12478",
+                "reference": "0c4949ec0df50ae0b76e01e3ceb32b7feff12478",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "illuminate/console": "^10.0|^11.0|^12.0",
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "illuminate/database": "^10.0|^11.0|^12.0",
-                "illuminate/http": "^10.0|^11.0|^12.0",
-                "illuminate/log": "^10.0|^11.0|^12.0",
-                "illuminate/notifications": "^10.0|^11.0|^12.0",
-                "illuminate/pagination": "^10.0|^11.0|^12.0",
-                "illuminate/routing": "^10.0|^11.0|^12.0",
-                "illuminate/support": "^10.0|^11.0|^12.0",
-                "illuminate/view": "^10.0|^11.0|^12.0",
+                "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/database": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/http": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/log": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/notifications": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/pagination": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/routing": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/view": "^10.0|^11.0|^12.0|^13.0",
                 "moneyphp/money": "^4.0",
                 "nesbot/carbon": "^2.0|^3.0",
                 "php": "^8.1",
@@ -2974,7 +2974,7 @@
             },
             "require-dev": {
                 "dompdf/dompdf": "^2.0|^3.0",
-                "orchestra/testbench": "^8.36|^9.15|^10.8",
+                "orchestra/testbench": "^8.36|^9.15|^10.8|^11.0",
                 "phpstan/phpstan": "^1.10",
                 "spatie/laravel-ray": "^1.40"
             },
@@ -3024,7 +3024,7 @@
                 "issues": "https://github.com/laravel/cashier/issues",
                 "source": "https://github.com/laravel/cashier"
             },
-            "time": "2026-02-21T15:13:49+00:00"
+            "time": "2026-03-17T14:24:05+00:00"
         },
         {
             "name": "laravel/fortify",

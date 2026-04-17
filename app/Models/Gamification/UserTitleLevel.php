@@ -3,9 +3,11 @@
 namespace App\Models\Gamification;
 
 use App\Models\Auth\User;
+use Database\Factories\Gamification\UserTitleLevelFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * User progress tracking for game titles.
@@ -18,12 +20,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $title_slug
  * @property int $level
  * @property int $xp_current
- * @property \Illuminate\Support\Carbon|null $last_played_at
+ * @property Carbon|null $last_played_at
  * @property User $user
  */
 class UserTitleLevel extends Model
 {
-    /** @use HasFactory<\Database\Factories\Gamification\UserTitleLevelFactory> */
+    /** @use HasFactory<UserTitleLevelFactory> */
     use HasFactory;
 
     protected $fillable = [

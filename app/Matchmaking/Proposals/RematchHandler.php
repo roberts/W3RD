@@ -6,6 +6,7 @@ namespace App\Matchmaking\Proposals;
 
 use App\Enums\GameStatus;
 use App\Exceptions\RematchNotAvailableException;
+use App\GameEngine\Player\PlayerActivityManager;
 use App\Jobs\AgentAutoAcceptRematch;
 use App\Matchmaking\Enums\ProposalStatus;
 use App\Matchmaking\Enums\ProposalType;
@@ -198,7 +199,7 @@ class RematchHandler implements ProposalHandler
             // Schedule delayed auto-accept (1-7 seconds random)
             $delay = rand(1, 7);
 
-            dispatch(new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, app(\App\GameEngine\Player\PlayerActivityManager::class)))
+            dispatch(new AgentAutoAcceptRematch($proposal->ulid, $agentUser->id, app(PlayerActivityManager::class)))
                 ->delay(now()->addSeconds($delay));
 
             Log::info('Scheduled agent auto-accept', [

@@ -6,6 +6,7 @@ use App\Enums\FeedbackType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\System\FeedbackResource;
 use App\Models\System\Feedback;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -13,7 +14,7 @@ use Illuminate\Validation\Rules\Enum;
 class FeedbackController extends Controller
 {
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function __invoke(Request $request)
     {

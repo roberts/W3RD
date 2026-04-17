@@ -6,10 +6,7 @@ use App\Jobs\CalculateAgentAction;
 use App\Models\Auth\Agent;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->service = app(AgentService::class);

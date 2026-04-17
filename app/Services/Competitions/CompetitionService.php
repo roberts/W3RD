@@ -7,6 +7,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Auth\User;
 use App\Models\Competitions\Tournament;
 use App\Services\Economy\EconomyService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CompetitionService
@@ -84,7 +85,7 @@ class CompetitionService
     /**
      * Generate tournament bracket.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, User>  $participants
+     * @param  Collection<int, User>  $participants
      * @return array<string, mixed>
      */
     protected function generateBracket(Tournament $tournament, $participants): array

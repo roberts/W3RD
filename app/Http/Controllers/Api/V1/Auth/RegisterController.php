@@ -32,7 +32,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'message' => 'Registration successful. Please check your email to verify your account.',
-            'registration_id' => $registration->id,
+            'registration_id' => $registration->uuid,
         ], 201);
     }
 }

@@ -12,14 +12,14 @@ use App\Models\Games\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Game>
+ * @extends Factory<Game>
  */
 class GameFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\App\Models\Games\Game>
+     * @var class-string<Game>
      */
     protected $model = Game::class;
 

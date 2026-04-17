@@ -33,6 +33,7 @@ return new class extends Migration
             $table->integer('action_count')->default(0);
             $table->integer('duration_seconds')->nullable();
 
+            $table->timestamp('turn_ends_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('expires_at')->nullable();

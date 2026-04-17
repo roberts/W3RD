@@ -3,6 +3,7 @@
 namespace App\Models\Gamification;
 
 use App\Models\Auth\User;
+use Database\Factories\Gamification\PointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Point extends Model
 {
-    /** @use HasFactory<\Database\Factories\Gamification\PointFactory> */
+    /** @use HasFactory<PointFactory> */
     use HasFactory;
 
     protected $table = 'points';

@@ -2,6 +2,9 @@
 
 namespace App\Agents\Logic;
 
+use App\Games\Checkers\CheckersLogic;
+use App\Games\Hearts\HeartsLogic;
+use App\Games\ValidateFour\ValidateFourLogic;
 use App\Interfaces\AgentContract;
 use App\Models\Games\Game;
 use Illuminate\Support\Facades\Log;
@@ -65,11 +68,11 @@ class RandomLogic implements AgentContract
 
         return match ($gameTitle) {
             // @phpstan-ignore class.notFound
-            'checkers' => app(\App\Games\Checkers\CheckersLogic::class),
+            'checkers' => app(CheckersLogic::class),
             // @phpstan-ignore class.notFound
-            'hearts' => app(\App\Games\Hearts\HeartsLogic::class),
+            'hearts' => app(HeartsLogic::class),
             // @phpstan-ignore class.notFound, match.alwaysFalse
-            'validatefour' => app(\App\Games\ValidateFour\ValidateFourLogic::class),
+            'validatefour' => app(ValidateFourLogic::class),
             default => throw new \Exception("Unsupported game type: {$gameTitle}"),
         };
     }

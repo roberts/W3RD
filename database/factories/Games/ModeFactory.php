@@ -7,7 +7,7 @@ use App\Models\Games\Mode;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Games\Mode>
+ * @extends Factory<Mode>
  */
 class ModeFactory extends Factory
 {

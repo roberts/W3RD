@@ -4,6 +4,7 @@ namespace App\Models\Games;
 
 use App\Models\Access\Client;
 use App\Models\Auth\User;
+use Database\Factories\Games\PlayerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Player extends Model
 {
-    /** @use HasFactory<\Database\Factories\Games\PlayerFactory> */
+    /** @use HasFactory<PlayerFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [

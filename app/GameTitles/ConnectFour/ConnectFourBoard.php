@@ -7,6 +7,7 @@ namespace App\GameTitles\ConnectFour;
 use App\Enums\GamePhase;
 use App\Enums\GameStatus;
 use App\GameTitles\BaseGameState;
+use App\Interfaces\GameTitleContract;
 
 /**
  * Immutable game state for Connect Four (Connect Four variant).
@@ -59,7 +60,7 @@ use App\GameTitles\BaseGameState;
  * $gameState = ConnectFourConnectFourBoard::fromArray($game->game_state);
  * ```
  *
- * @see \App\Interfaces\GameTitleContract For the interface all game modes must implement
+ * @see GameTitleContract For the interface all game modes must implement
  */
 final class ConnectFourBoard extends BaseGameState
 {

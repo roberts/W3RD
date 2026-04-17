@@ -2,6 +2,7 @@
 
 namespace App\Services\System;
 
+use App\Enums\GameTitle;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -113,7 +114,7 @@ class SystemHealthService
     {
         try {
             // Test that game modes are configured
-            $availableGames = collect(\App\Enums\GameTitle::cases())->count();
+            $availableGames = collect(GameTitle::cases())->count();
 
             return [
                 'status' => 'healthy',

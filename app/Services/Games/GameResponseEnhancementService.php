@@ -10,6 +10,7 @@ use App\GameTitles\BaseGameTitle;
 use App\Models\Games\Action;
 use App\Models\Games\Game;
 use App\Models\Games\Player;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Service to enhance game responses with rich context.
@@ -137,7 +138,7 @@ class GameResponseEnhancementService
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Action>  $actions
+     * @param  Collection<int, Action>  $actions
      */
     protected function calculateAverageActionTime($actions): float
     {
@@ -159,7 +160,7 @@ class GameResponseEnhancementService
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Action>  $actions
+     * @param  Collection<int, Action>  $actions
      */
     protected function calculateAverageResponseTime($actions): float
     {

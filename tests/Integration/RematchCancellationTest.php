@@ -8,11 +8,8 @@ use App\Matchmaking\Events\ProposalCancelled;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Matchmaking\Proposal;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Redis;
-
-uses(RefreshDatabase::class);
 
 describe('Automatic Rematch Cancellation', function () {
     beforeEach(function () {
@@ -44,7 +41,7 @@ describe('Automatic Rematch Cancellation', function () {
             expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
-                return $event->rematchRequest->id === $proposal->id
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'requester_unavailable';
             });
         });
@@ -65,7 +62,7 @@ describe('Automatic Rematch Cancellation', function () {
             expect($proposal->status)->toBe(ProposalStatus::CANCELLED);
 
             Event::assertDispatched(ProposalCancelled::class, function ($event) use ($proposal) {
-                return $event->rematchRequest->id === $proposal->id
+                return $event->proposal->id === $proposal->id
                     && $event->reason === 'opponent_unavailable';
             });
         });
@@ -112,8 +109,8 @@ describe('Automatic Rematch Cancellation', function () {
             $job = new CheckAndCancelPendingProposals($user->id);
             $job->handle();
 
-            expect($acceptedRematch->fresh()->status)->toBe('accepted')
-                ->and($declinedRematch->fresh()->status)->toBe('declined');
+            expect($acceptedRematch->fresh()->status)->toBe(ProposalStatus::ACCEPTED)
+                ->and($declinedRematch->fresh()->status)->toBe(ProposalStatus::DECLINED);
         });
 
         it('does nothing when user has no pending rematches', function () {

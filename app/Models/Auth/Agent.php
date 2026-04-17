@@ -2,12 +2,14 @@
 
 namespace App\Models\Auth;
 
+use Database\Factories\Auth\AgentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Agent extends Model
 {
-    /** @use HasFactory<\Database\Factories\Auth\AgentFactory> */
+    /** @use HasFactory<AgentFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -50,7 +52,7 @@ class Agent extends Model
 
     // Relationships
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<User, $this>
+     * @return HasOne<User, $this>
      */
     public function user()
     {

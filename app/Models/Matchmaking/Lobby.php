@@ -8,12 +8,15 @@ use App\Matchmaking\Enums\LobbyStatus;
 use App\Models\Auth\User;
 use App\Models\Games\Game;
 use App\Models\Games\Mode;
+use Database\Factories\Matchmaking\LobbyFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -25,15 +28,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property LobbyStatus $status
  * @property bool $is_public
  * @property int $min_players
- * @property \Illuminate\Support\Carbon|null $scheduled_at
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, LobbyPlayer> $players
+ * @property Carbon|null $scheduled_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, LobbyPlayer> $players
  * @property-read User $host
  */
 class Lobby extends Model
 {
-    /** @use HasFactory<\Database\Factories\Matchmaking\LobbyFactory> */
+    /** @use HasFactory<LobbyFactory> */
     use HasFactory, HasUlids;
 
     protected $fillable = [

@@ -5,10 +5,13 @@ namespace App\Models\Games;
 use App\Enums\GameTitle;
 use App\GameEngine\ModeRegistry;
 use App\GameTitles\BaseGameTitle;
+use Database\Factories\Games\ModeFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -17,12 +20,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property bool $is_active
  * @property int|null $turn_time_limit_seconds
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Mode extends Model
 {
-    /** @use HasFactory<\Database\Factories\Games\ModeFactory> */
+    /** @use HasFactory<ModeFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -98,7 +101,7 @@ class Mode extends Model
      * Get seeded mode by title and slug.
      * Use this in tests after running ModeSeeder.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public static function seeded(string|GameTitle $titleSlug, string $slug = 'standard'): self
     {
@@ -114,7 +117,7 @@ class Mode extends Model
     /**
      * Get seeded Connect Four mode.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public static function connectFour(string $slug = 'standard'): self
     {
@@ -124,7 +127,7 @@ class Mode extends Model
     /**
      * Get seeded Checkers mode.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public static function checkers(string $slug = 'standard'): self
     {
@@ -134,7 +137,7 @@ class Mode extends Model
     /**
      * Get seeded Hearts mode.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public static function hearts(string $slug = 'standard'): self
     {

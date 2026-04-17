@@ -8,7 +8,7 @@ use App\Models\Economy\Strike;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Economy\Strike>
+ * @extends Factory<Strike>
  */
 class StrikeFactory extends Factory
 {

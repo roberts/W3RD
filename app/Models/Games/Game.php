@@ -6,20 +6,23 @@ use App\Enums\GameStatus;
 use App\Enums\GameTitle;
 use App\Enums\OutcomeType;
 use App\Models\Auth\User;
+use Database\Factories\Games\GameFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property string $ulid
  * @property Mode $mode
- * @property \Illuminate\Database\Eloquent\Collection<int, Player> $players
- * @property \Illuminate\Database\Eloquent\Collection<int, Action> $actions
+ * @property Collection<int, Player> $players
+ * @property Collection<int, Action> $actions
  * @property Player|null $winner
  * @property GameStatus $status
  * @property int|null $mode_id
@@ -29,17 +32,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $turn_number
  * @property array<string, mixed>|null $game_state
  * @property array<string, mixed>|null $game_settings
- * @property \Illuminate\Support\Carbon|null $started_at
- * @property \Illuminate\Support\Carbon|null $completed_at
- * @property \Illuminate\Support\Carbon|null $expires_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $started_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property OutcomeType|null $outcome_type
  * @property array<string, mixed>|null $outcome_details
  * @property GameTitle $title_slug
  * @property string $game_title
  * @property int|null $max_players
- * @property \Illuminate\Support\Carbon|null $turn_ends_at
+ * @property Carbon|null $turn_ends_at
  * @property int|null $current_player_id
  * @property array<string, mixed>|null $final_scores
  * @property array<string, mixed>|null $xp_awarded
@@ -47,7 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Game extends Model
 {
-    /** @use HasFactory<\Database\Factories\Games\GameFactory> */
+    /** @use HasFactory<GameFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
@@ -225,7 +228,7 @@ class Game extends Model
         return $this->status === GameStatus::ACTIVE;
     }
 
-    public function getRecentActionTime(): \Illuminate\Support\Carbon
+    public function getRecentActionTime(): Carbon
     {
         /** @var Action|null $lastAction */
         $lastAction = $this->actions()->latest()->first();

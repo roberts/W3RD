@@ -3,13 +3,14 @@
 namespace App\Models\Economy;
 
 use App\Models\Auth\User;
+use Database\Factories\Economy\StrikeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Strike extends Model
 {
-    /** @use HasFactory<\Database\Factories\Economy\StrikeFactory> */
+    /** @use HasFactory<StrikeFactory> */
     use HasFactory;
 
     protected $fillable = [

@@ -6,6 +6,11 @@ namespace App\GameEngine;
 
 use App\Exceptions\GameModeNotFoundException;
 use App\GameTitles\BaseGameTitle;
+use App\GameTitles\Checkers\Modes\StandardMode;
+use App\GameTitles\ConnectFour\Modes\EightBySevenMode;
+use App\GameTitles\ConnectFour\Modes\FiveMode;
+use App\GameTitles\ConnectFour\Modes\NineBySixMode;
+use App\GameTitles\ConnectFour\Modes\PopOutMode;
 use App\Models\Games\Game;
 
 /**
@@ -22,17 +27,17 @@ class ModeRegistry
      */
     private array $modes = [
         'checkers' => [
-            'standard' => \App\GameTitles\Checkers\Modes\StandardMode::class,
+            'standard' => StandardMode::class,
         ],
         'hearts' => [
             'standard' => \App\GameTitles\Hearts\Modes\StandardMode::class,
         ],
         'connect-four' => [
             'standard' => \App\GameTitles\ConnectFour\Modes\StandardMode::class,
-            'pop-out' => \App\GameTitles\ConnectFour\Modes\PopOutMode::class,
-            'five' => \App\GameTitles\ConnectFour\Modes\FiveMode::class,
-            'eight-by-seven' => \App\GameTitles\ConnectFour\Modes\EightBySevenMode::class,
-            'nine-by-six' => \App\GameTitles\ConnectFour\Modes\NineBySixMode::class,
+            'pop-out' => PopOutMode::class,
+            'five' => FiveMode::class,
+            'eight-by-seven' => EightBySevenMode::class,
+            'nine-by-six' => NineBySixMode::class,
         ],
     ];
 

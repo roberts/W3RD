@@ -39,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Global API error handler with correlation IDs
-        $exceptions->render(function (\Throwable $e, $request) {
+        $exceptions->render(function (Throwable $e, $request) {
             // Only format JSON for API requests
             if (! $request->is('api/*')) {
                 return null; // Let Laravel handle non-API exceptions normally
@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $correlationId = (string) Str::uuid();
 
             // Log all API errors with correlation ID
-            \Log::error('API Error', [
+            Log::error('API Error', [
                 'correlation_id' => $correlationId,
                 'exception' => get_class($e),
                 'message' => $e->getMessage(),
